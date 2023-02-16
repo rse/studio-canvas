@@ -338,7 +338,7 @@ import {
     })
 
     /*  provide state API  */
-    const stateFile = path.join(__dirname, "../../res/canvas-state.yaml")
+    const stateFile = path.join(__dirname, "../../var/canvas-state.yaml")
     server.route({
         method: "GET",
         path: "/state",
@@ -405,7 +405,7 @@ import {
     })
 
     /*  provide state presets API  */
-    const presetsFile = path.join(__dirname, "../../res/canvas-preset-%s.yaml")
+    const presetsFile = path.join(__dirname, "../../var/canvas-preset-%s.yaml")
     type PresetType = { [ slot: string ]: StateTypePartial }
     server.route({
         method: "GET",
