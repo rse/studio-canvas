@@ -1,0 +1,124 @@
+/*
+**  Studio-Canvas - Real-Time Virtual Studio Canvas Rendering
+**  Copyright (c) 2023 Dr. Ralf S. Engelschall <rse@engelschall.com>
+**  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
+*/
+
+:root
+    --color-std-bg-1: #000000
+    --color-std-bg-2: #0d0d0d
+    --color-std-bg-3: #1a1a1a
+    --color-std-bg-4: #272727
+    --color-std-bg-5: #343434
+
+    --color-std-fg-0: #606060
+    --color-std-fg-1: #808080
+    --color-std-fg-2: #a0a0a0
+    --color-std-fg-3: #c0c0c0
+    --color-std-fg-4: #e0e0e0
+    --color-std-fg-5: #ffffff
+
+    --color-acc-bg-1: #114477
+    --color-acc-bg-2: #225588
+    --color-acc-bg-3: #336699
+    --color-acc-bg-4: #4477aa
+    --color-acc-bg-5: #5588bb
+
+    --color-acc-fg-0: #6090c0
+    --color-acc-fg-1: #80b0e0
+    --color-acc-fg-2: #88b8e8
+    --color-acc-fg-3: #90c0f0
+    --color-acc-fg-4: #98c8f8
+    --color-acc-fg-5: #a0d0ff
+
+    --color-sig-bg-1: #904800
+    --color-sig-bg-2: #a05810
+    --color-sig-bg-3: #b06820
+    --color-sig-bg-4: #c07830
+    --color-sig-bg-5: #d08840
+
+    --color-sig-fg-0: #c0b090
+    --color-sig-fg-1: #e0d0b0
+    --color-sig-fg-2: #e8d8b8
+    --color-sig-fg-3: #f0e0c0
+    --color-sig-fg-4: #f8e8c8
+    --color-sig-fg-5: #fff0d0
+
+body,
+html
+    margin: 0
+    padding: 0
+    width: 100vw
+    height: 100vh
+    overflow: hidden
+    background-color: var(--color-std-bg-1)
+    color: var(--color-std-fg-3)
+    font-family: "TypoPRO Source Sans Pro", sans-serif
+    font-size: 12pt
+    font-weight: normal
+    user-select: none
+
+.ps .ps__rail-x:hover,
+.ps .ps__rail-y:hover,
+.ps .ps__rail-x:focus,
+.ps .ps__rail-y:focus,
+.ps .ps__rail-x.ps--clicking,
+.ps .ps__rail-y.ps--clicking
+    background-color: var(--color-std-bg-5)
+    opacity: 0.9
+.ps__thumb-x
+    background-color: var(--color-std-fg-3)
+.ps__thumb-y
+    background-color: var(--color-std-fg-3)
+.ps__rail-x:hover > .ps__thumb-x,
+.ps__rail-x:focus > .ps__thumb-x,
+.ps__rail-x.ps--clicking .ps__thumb-x
+    background-color: var(--color-acc-fg-3)
+.ps__rail-y:hover > .ps__thumb-y,
+.ps__rail-y:focus > .ps__thumb-y,
+.ps__rail-y.ps--clicking .ps__thumb-y
+    background-color: var(--color-acc-fg-3)
+
+.tabs-component
+    margin: 0
+    width: 100%
+.tabs-component-tabs
+    align-items: stretch
+    display: flex
+    justify-content: flex-start
+    margin: 0
+    padding: 0
+    padding-left: 20px
+.tabs-component-tab
+    list-style: none
+    border-radius: 4px 4px 0 0
+    border: 0
+    border-top: 4px solid
+    margin-right: 6px
+.tabs-component-tab-a
+    align-items: center
+    color: inherit
+    display: flex
+    padding: 2px 12px 2px 12px
+    text-decoration: none
+    font-size: 12pt
+.tabs-component-panels
+    border-radius: 4px
+    padding: 20px
+    width: calc(100% - 2 * 20px)
+
+.tabs-component.tabs-level-1 .tabs-component-tab
+    border-top-color: var(--color-std-bg-3)
+    background-color: var(--color-std-bg-3)
+    color: var(--color-std-fg-1)
+.tabs-component.tabs-level-1 .tabs-component-tab:hover
+    border-top-color: var(--color-std-bg-4)
+    background-color: var(--color-std-bg-4)
+    color: var(--color-std-fg-5)
+.tabs-component.tabs-level-1 .tabs-component-tab.is-active
+    border-top-color: var(--color-acc-bg-4)
+    background-color: var(--color-std-bg-4)
+    color: var(--color-acc-fg-5)
+.tabs-component.tabs-level-1 .tabs-component-panels
+    background-color: var(--color-std-bg-4)
+    color: var(--color-std-fg-4)

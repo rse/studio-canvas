@@ -1,0 +1,69 @@
+canvas:
+    id: canvas-city-skyline
+    texture1: /res/img/canvas-city-skyline.png
+    texture2: ""
+    fadeTrans: 0
+    fadeWait: 0
+monitor:
+    enable: false
+    device: vMix Video
+    scale: 1.01
+    rotate: 4.8
+    lift: -15
+decal:
+    enable: true
+    device: vMix Video
+    scale: 2.67
+    rotate: -0.64
+    lift: -4.62
+    opacity: 0.74
+lights:
+    intensity1: 0
+    intensity2: 0
+    intensity3: 0
+references:
+    enable: false
+CAM1:
+    position:
+        x: 0
+        "y": 0
+        z: 0
+    rotation:
+        x: 0
+        "y": 0
+        z: 0
+    fov:
+        m: 1
+CAM2:
+    position:
+        x: 0
+        "y": 0
+        z: 0
+    rotation:
+        x: 0
+        "y": 0
+        z: 0
+    fov:
+        m: 1
+CAM3:
+    position:
+        x: 0
+        "y": 0
+        z: 0
+    rotation:
+        x: 0
+        "y": 0
+        z: 0
+    fov:
+        m: 1
+CAM4:
+    position:
+        x: 0
+        "y": 0
+        z: 0
+    rotation:
+        x: 0
+        "y": 0
+        z: 0
+    fov:
+        m: 1
