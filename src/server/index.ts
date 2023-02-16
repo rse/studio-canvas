@@ -113,6 +113,7 @@ import {
                 stream.write(line)
         }
     }
+
     /*  determine IP to name mapping  */
     const freedCams = new Map<string, string>()
     if (!(typeof argv.freedCam === "object" && argv.freedCam instanceof Array))
