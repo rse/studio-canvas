@@ -59,6 +59,14 @@ Usage (Development)
 - Open the client component (renderer mode) in Google Chrome:<br/>
   https://127.0.0.1:12345/#/render/CAM2?ptzFreeD=true
 
+Architecture
+------------
+
+**Studio-Canvas** is based on a Client/Server architecture,
+as illustrated in the following diagram:
+
+![architecture](architecture.png)
+
 Copyright & License
 -------------------
 
