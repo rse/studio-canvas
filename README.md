@@ -11,12 +11,12 @@ About
 TypeScript, for dynamically rendering the virtual canvas of a filmstudio
 through the help of a game engine.
 
-The application consists of a central Node.js based server component
+The application consists of a central [Node.js](https://nodejs.org) based server component
 and a HTML5 Single-Page Application (SPA) as the client component. The
-client component it turn can be run in to distinct modes: a control
-mode for real-time adjusting the scene parameters and a rendering mode
-for real-time rendering the scene with the help of the BabylonJS game
-engine.
+client component it turn can be run in to distinct modes: a [VueJS](https://vuejs.org/)
+based control mode for real-time adjusting the scene parameters and a rendering mode
+for real-time rendering the scene with the help of the
+[BabylonJS](https://www.babylonjs.com/) game engine.
 
 Usage (Production)
 ------------------
