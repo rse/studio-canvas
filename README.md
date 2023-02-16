@@ -65,7 +65,7 @@ Architecture
 **Studio-Canvas** is based on a Client/Server architecture,
 as illustrated in the following diagram:
 
-![architecture](architecture.png)
+![architecture](doc/architecture.png)
 
 Copyright & License
 -------------------
