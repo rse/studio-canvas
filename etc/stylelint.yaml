@@ -1,0 +1,28 @@
+##
+##  Studio-Canvas - Real-Time Virtual Studio Canvas Rendering
+##  Copyright (c) 2023 Dr. Ralf S. Engelschall <rse@engelschall.com>
+##  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
+##
+
+extends:
+    - "stylelint-stylus/standard"
+    - "stylelint-config-standard-vue"
+
+rules:
+    indentation: 4
+    stylus/indentation: 4
+    max-line-length: 200
+    unit-allowed-list: [ "px", "pt", "%", "vh", "vw", "fr", "rem", "ms" ]
+    at-rule-empty-line-before: null
+    rule-empty-line-before: null
+    declaration-colon-space-after: null
+    no-empty-source: null
+    property-no-vendor-prefix: null
+    declaration-block-trailing-semicolon: null
+    no-descending-specificity: null
+    custom-property-empty-line-before: null
+    stylus/declaration-colon: null
+    stylus/media-feature-colon: null
+    stylus/single-line-comment: null
+    stylus/selector-list-comma: "always"
+
