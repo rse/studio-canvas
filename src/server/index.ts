@@ -5,42 +5,46 @@
 */
 
 /*  load external requirements (built-in)  */
-import path          from "node:path"
-import tty           from "node:tty"
-import fs            from "node:fs"
-import dgram         from "node:dgram"
-import http          from "node:http"
-import util          from "node:util"
+import path           from "node:path"
+import tty            from "node:tty"
+import fs             from "node:fs"
+import dgram          from "node:dgram"
+import http           from "node:http"
+import util           from "node:util"
 
 /*  load external requirements (foreign)  */
-import glob          from "glob-promise"
-import yargs         from "yargs"
-import chalk         from "chalk"
-import moment        from "moment"
-import * as HAPI     from "@hapi/hapi"
-import { Request, Server, ResponseToolkit } from "@hapi/hapi"
-import Boom          from "@hapi/boom"
-import Inert         from "@hapi/inert"
-import HAPIWebSocket from "hapi-plugin-websocket"
-import HAPIHeader    from "hapi-plugin-header"
-import HAPITraffic   from "hapi-plugin-traffic"
-import HAPIDucky     from "hapi-plugin-ducky"
-import WebSocket     from "ws"
-import ObjectHash    from "object-hash"
-import ducky         from "ducky"
-import jsYAML        from "js-yaml"
+import glob           from "glob-promise"
+import yargs          from "yargs"
+import chalk          from "chalk"
+import moment         from "moment"
+import * as HAPI      from "@hapi/hapi"
+import {
+    Request,
+    Server,
+    ResponseToolkit
+}                     from "@hapi/hapi"
+import Boom           from "@hapi/boom"
+import Inert          from "@hapi/inert"
+import HAPIWebSocket  from "hapi-plugin-websocket"
+import HAPIHeader     from "hapi-plugin-header"
+import HAPITraffic    from "hapi-plugin-traffic"
+import HAPIDucky      from "hapi-plugin-ducky"
+import WebSocket      from "ws"
+import ObjectHash     from "object-hash"
+import ducky          from "ducky"
+import jsYAML         from "js-yaml"
 
 /*  load internal requirements  */
 // @ts-ignore
-import my            from "../../package.json"
+import my             from "../../package.json"
 import { FreeDState } from "./app-freed-state"
-import * as FreeD    from "./app-freed"
+import * as FreeD     from "./app-freed"
 import {
     StateType, StateTypePartial,
     StateSchema, StateSchemaPartial,
     StateDefault,
     StateUtil
-} from "./app-state"
+}                     from "./app-state"
 
 /*  establish environment  */
 ;(async () => {
