@@ -558,7 +558,7 @@
             warning: status.kind === 'warning',
             info:    status.kind === 'info'
         }">
-            {{ status.kind === '' ? `Version ${app.version} (${app.date})` : status.msg }}
+            {{ status.kind === '' ? `${pkg.name} ${pkg.version} (${pkg["x-date"]})` : status.msg }}
         </div>
     </div>
 </template>
@@ -950,6 +950,7 @@
 </style>
 
 <script setup lang="ts">
+import pkg                 from "../../package.json"
 import { defineComponent } from "vue"
 import RecWebSocket        from "reconnecting-websocket"
 import Ducky               from "ducky"
@@ -1049,10 +1050,7 @@ export default defineComponent({
             kind: "",
             msg: ""
         },
-        app: {
-            version: "0.0.0",
-            date: "2023-01-01"
-        },
+        pkg: pkg,
         stats: {
             peers: {
                 camera:  0,

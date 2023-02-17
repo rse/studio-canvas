@@ -117,6 +117,7 @@ import {
                 stream.write(line)
         }
     }
+    log(2, `starting ${my.name} ${my.version} (${my["x-date"]}) <${my.homepage}>`)
 
     /*  determine IP to name mapping  */
     const freedCams = new Map<string, string>()
