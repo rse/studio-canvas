@@ -1,28 +1,28 @@
 canvas:
-    id: canvas-city-skyline
-    texture1: /res/canvas/canvas-city-skyline.png
-    texture2: ""
-    fadeTrans: 0
-    fadeWait: 0
+    id: canvas-hexagons
+    texture1: /res/canvas/canvas-hexagons-1.png
+    texture2: /res/canvas/canvas-hexagons-2.png
+    fadeTrans: 2000
+    fadeWait: 10000
 monitor:
-    enable: false
+    enable: true
     device: vMix Video
-    scale: 1.01
-    rotate: 4.8
+    scale: 1.18
+    rotate: 7.6
     lift: -15
 decal:
     enable: true
     device: vMix Video
-    scale: 2.67
-    rotate: -0.64
-    lift: -4.62
+    scale: 1
+    rotate: -21.33
+    lift: -4.81
     opacity: 0.74
 lights:
     intensity1: 0
     intensity2: 0
     intensity3: 0
 references:
-    enable: false
+    enable: true
 CAM1:
     position:
         x: 0
