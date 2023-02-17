@@ -29,6 +29,9 @@ Usage (Production)
 - Install all dependencies:<br/>
   `npm install --production`
 
+- Run the production build-process once:<br/>
+  `npm run build`
+
 - Run the bare server component:<br/>
   `npm start`
 
@@ -50,8 +53,11 @@ Usage (Development)
 - Install all dependencies:<br/>
   `npm install`
 
-- Run the build-process server component:<br/>
-  `npm rund dev`
+- Run the development build-process once:<br/>
+  `npm run build:dev`
+
+- Run the development build-process and server component continuously:<br/>
+  `npm run dev`
 
 - Open the client component (control mode) in Google Chrome:<br/>
   https://127.0.0.1:12345/
