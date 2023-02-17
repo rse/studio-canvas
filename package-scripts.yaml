@@ -1,0 +1,44 @@
+##
+##  Studio-Canvas - Real-Time Virtual Studio Canvas Rendering
+##  Copyright (c) 2023 Dr. Ralf S. Engelschall <rse@engelschall.com>
+##  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
+##
+
+scripts:
+    #   multiview-style development dashboard
+    dev: >
+                            stmux -w always -m beep -e "built.in.+ms" --
+                            [ "npm start lint-watch" :
+                            "npm start build-client-dev-watch" :
+                            "npm start build-server-dev-watch" :
+                            "npm start server-dev" ]
+
+    #   static code analysis (linting)
+    lint-watch:             nodemon --exec "npm start lint" --watch src --ext html,styl,js,ts,vue
+    lint:                   nps lint-tsc lint-vue-tsc lint-eslint lint-htmllint
+    lint-tsc:               tsc --project etc/tsc-server.json --noEmit
+    lint-vue-tsc:           vue-tsc --project etc/tsc-client.json --noEmit
+    lint-eslint:            eslint --config etc/eslint.yaml --ext ts,vue src/**/*.vue src/**/*.ts
+    lint-stylelint:         stylelint --config etc/stylelint.yaml src/**/*.styl src/**/*.vue
+    lint-htmllint:          htmllint --rc etc/htmllint.json src/**/*.html
+
+    #  code compilation/transpiling (building)
+    build:                  nps build-client build-server
+    build-dev:              nps build-client-dev build-server-dev
+    build-client:           vite --config etc/vite-client.ts build --logLevel info --mode production
+    build-client-dev:       vite --config etc/vite-client.ts build --logLevel info --mode development
+    build-client-dev-watch: vite --config etc/vite-client.ts build --logLevel info --mode development --watch
+    build-server:           tsc --project etc/tsc-server.json
+    build-server-dev:       tsc --project etc/tsc-server.json --sourceMap
+    build-server-dev-watch: tsc --project etc/tsc-server.json --sourceMap --watch
+
+    #  start server run-time
+    server-dev:             nodemon --exec "npm start server" --watch dst/server --ext js --delay 0.5
+    server: >
+                            node dst/server/index.js -a 0.0.0.0 -p 12345 -A 0.0.0.0 -P 5555
+                            -C 10.0.0.10:CAM1 -C 10.0.0.11:CAM2 -C 10.0.0.12:CAM3 -C 10.0.0.13:CAM4
+
+    #  cleanup filesystem
+    clean:                  rimraf dst
+    clean-dist:             rimraf dst node_modules
+
