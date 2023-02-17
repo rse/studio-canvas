@@ -54,9 +54,12 @@ import {
         .usage(
             "Usage: $0 [-h] [-V] " +
             "[-v <log-level>] [-l|--log-file <log-file>] " +
+            "[-c <canvas-dir>] " +
+            "[-s <state-dir>] " +
             "[-a <http-addr>] [-p <http-port>] " +
-            "[-A <freed-addr>] [-P <freed-port>]"
-         )
+            "[-A <freed-addr>] [-P <freed-port>]" +
+            "[-C <camera-addr>:<camera-name> [...]]"
+        )
         .help("h").alias("h", "help").default("h", false)
             .describe("h", "show usage help")
         .boolean("V").alias("V", "version").default("V", false)
@@ -65,6 +68,10 @@ import {
             .describe("v", "level for verbose logging (0-3)")
         .string("l").nargs("l", 1).alias("l", "log-file").default("l", "-")
             .describe("l", "file for verbose logging")
+        .string("c").nargs("c", 1).alias("c", "canvas-dir").default("c", path.join(__dirname, "../../res/canvas"))
+            .describe("c", "directory of canvas image/config files")
+        .string("s").nargs("s", 1).alias("s", "state-dir").default("s", path.join(__dirname, "../../var"))
+            .describe("s", "directory of state files")
         .string("a").nargs("a", 1).alias("a", "http-addr").default("a", "0.0.0.0")
             .describe("a", "HTTP/Websocket listen IP address")
         .number("p").nargs("p", 1).alias("p", "http-port").default("p", 8080)
@@ -183,7 +190,6 @@ import {
     await server.register({
         plugin: HAPIHeader, options: {
             Server: `${my.name}/${my.version}`
-            // "Permissions-Policy": "camera=(self)"
         }
     })
     await server.register({ plugin: HAPITraffic })
@@ -250,7 +256,7 @@ import {
         }
     })
 
-    /*  serve dedicated image files  */
+    /*  serve dedicated resource files  */
     server.route({
         method: "GET",
         path: "/res/{param*}",
@@ -262,8 +268,10 @@ import {
             }
         }
     })
-    const imgdir = path.join(__dirname, "../../res/canvas")
-    const imgURL = "/res/canvas"
+
+    /*  serve dedicated canvas files  */
+    const canvasDir = argv.canvasDir
+    const canvasURL = "/canvas"
     type ImageEntry = {
         id?:        string
         name:       string
@@ -284,16 +292,16 @@ import {
     }`
     server.route({
         method: "GET",
-        path: "/canvas/",
+        path: canvasURL,
         handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
             const result = { images: [] as Array<ImageEntry> }
             const images = [] as string[]
-            let files = await glob("*.yaml", { cwd: imgdir })
+            let files = await glob("*.yaml", { cwd: canvasDir })
             for (const file of files) {
                 const m = file.match(/^(.+).yaml$/)
                 const id = m![1]
                 const txt: string = await fs.promises.readFile(
-                    path.join(imgdir, file), { encoding: "utf8" })
+                    path.join(canvasDir, file), { encoding: "utf8" })
                 const entry = jsYAML.load(txt) as ImageEntry
                 const errors = [] as Array<string>
                 if (!ducky.validate(entry, ImageSchema, errors)) {
@@ -303,28 +311,28 @@ import {
                 if (!entry.id)
                     entry.id = id
                 images.push(entry.texture1)
-                entry.texture1 = `${imgURL}/${entry.texture1}`
+                entry.texture1 = `${canvasURL}/${entry.texture1}`
                 if (entry.texture2) {
                     images.push(entry.texture2)
-                    entry.texture2 = `${imgURL}/${entry.texture2}`
+                    entry.texture2 = `${canvasURL}/${entry.texture2}`
                 }
                 result.images.push(entry)
             }
             const id2name = (id: string) =>
                 id.replaceAll(/(^|-)(\S)/g, (_, prefix, char) =>
                     (prefix ? " " : "") + char.toUpperCase())
-            files = await glob("*.{png,jpg}", { cwd: imgdir })
+            files = await glob("*.{png,jpg}", { cwd: canvasDir })
             for (const file of files) {
                 if (images.includes(file))
                     continue
                 let m: ReturnType<typeof file.match>
                 if ((m = file.match(/^(.+)-1\.(png|jpg)$/)) !== null
-                    && (await (fs.promises.stat(`${imgdir}/${m[1]}-2.${m[2]}`).then(() => true).catch(() => false)))) {
+                    && (await (fs.promises.stat(`${canvasDir}/${m[1]}-2.${m[2]}`).then(() => true).catch(() => false)))) {
                     result.images.push({
                         id:        m[1],
                         name:      id2name(m[1]),
-                        texture1:  `${imgURL}/${m[1]}-1.${m[2]}`,
-                        texture2:  `${imgURL}/${m[1]}-2.${m[2]}`,
+                        texture1:  `${canvasURL}/${m[1]}-1.${m[2]}`,
+                        texture2:  `${canvasURL}/${m[1]}-2.${m[2]}`,
                         fadeTrans: 20  * 1000,
                         fadeWait:  120 * 1000
                     })
@@ -334,7 +342,7 @@ import {
                     result.images.push({
                         id:       m[1],
                         name:     id2name(m[1]),
-                        texture1: `${imgURL}/${file}`
+                        texture1: `${canvasURL}/${file}`
                     })
                 }
             }
@@ -342,9 +350,20 @@ import {
             return result
         }
     })
+    server.route({
+        method: "GET",
+        path: `${canvasURL}/{param*}`,
+        handler: {
+            directory: {
+                path: canvasDir,
+                redirectToSlash: true,
+                index: true
+            }
+        }
+    })
 
     /*  provide state API  */
-    const stateFile = path.join(__dirname, "../../var/canvas-state.yaml")
+    const stateFile = path.join(argv.stateDir, "canvas-state.yaml")
     server.route({
         method: "GET",
         path: "/state",
@@ -411,7 +430,7 @@ import {
     })
 
     /*  provide state presets API  */
-    const presetsFile = path.join(__dirname, "../../var/canvas-preset-%s.yaml")
+    const presetsFile = path.join(argv.stateDir, "canvas-preset-%s.yaml")
     type PresetType = { [ slot: string ]: StateTypePartial }
     server.route({
         method: "GET",
