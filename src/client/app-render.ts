@@ -665,3 +665,4 @@ export default class CanvasRenderer {
         }
     }
 }
+
