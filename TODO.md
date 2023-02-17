@@ -15,3 +15,5 @@ TODO
 
 - CAN: light mirror effect on TV monitor scales with monitor?
 
+- resize all canvas images to correct size
+
