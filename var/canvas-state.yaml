@@ -1,6 +1,6 @@
 canvas:
     id: canvas-city-skyline
-    texture1: /res/img/canvas-city-skyline.png
+    texture1: /res/canvas/canvas-city-skyline.png
     texture2: ""
     fadeTrans: 0
     fadeWait: 0
