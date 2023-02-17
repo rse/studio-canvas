@@ -30,10 +30,10 @@ Usage (Production)
   `npm install --production`
 
 - Run the production build-process once:<br/>
-  `npm run build`
+  `npm start build`
 
 - Run the bare server component:<br/>
-  `npm start`
+  `npm start server`
 
 - Open the client component (control mode) in Google Chrome:<br/>
   https://127.0.0.1:12345/
@@ -54,10 +54,10 @@ Usage (Development)
   `npm install`
 
 - Run the development build-process once:<br/>
-  `npm run build:dev`
+  `npm start build-dev`
 
 - Run the development build-process and server component continuously:<br/>
-  `npm run dev`
+  `npm start dev`
 
 - Open the client component (control mode) in Google Chrome:<br/>
   https://127.0.0.1:12345/
