@@ -11,8 +11,6 @@ TODO
 
 - SHOULD: game engine incoming requests serialization?
 
-- SHOULD: load version.yaml
-
 - CAN: light mirror effect on TV monitor scales with monitor?
 
 - resize all canvas images to correct size
