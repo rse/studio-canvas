@@ -49,6 +49,7 @@ import {
 /*  establish environment  */
 ;(async () => {
     /*  command-line option parsing  */
+    // @ts-ignore
     const argv = yargs
         /* eslint indent: off */
         .usage(
