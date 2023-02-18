@@ -1160,7 +1160,7 @@ export default defineComponent({
         async imageListFetch (): Promise<ImageEntry[]> {
             return axios({
                 method:       "GET",
-                url:          `${this.serviceUrl}canvas/`,
+                url:          `${this.serviceUrl}canvas`,
                 responseType: "json"
             }).then((result: any) => {
                 return result.data.images
