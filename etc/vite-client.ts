@@ -8,7 +8,7 @@ import * as Vite  from "vite"
 import VuePlugin  from "@vitejs/plugin-vue"
 import YAMLPlugin from "@rollup/plugin-yaml"
 
-export default Vite.defineConfig({
+export default Vite.defineConfig(({ command, mode, ssrBuild }) => ({
     base: "",
     root: "src/client",
     assetsInclude: [ "index.yaml" ],
@@ -20,12 +20,16 @@ export default Vite.defineConfig({
         include: [
         ]
     },
+    css: {
+        devSourcemap: mode === "development"
+    },
     build: {
         outDir:                 "../../dst/client",
         assetsDir:              "",
         emptyOutDir:            true,
         chunkSizeWarningLimit:  6000,
         assetsInlineLimit:      0,
+        sourcemap:              mode === "development",
         rollupOptions: {
             input: "src/client/index.html",
             output: {
@@ -40,5 +44,5 @@ export default Vite.defineConfig({
             }
         }
     }
-})
+}))
 
