@@ -950,6 +950,7 @@
 </style>
 
 <script setup lang="ts">
+// @ts-ignore
 import pkg                 from "../../package.json"
 import { defineComponent } from "vue"
 import RecWebSocket        from "reconnecting-websocket"
@@ -1050,7 +1051,7 @@ export default defineComponent({
             kind: "",
             msg: ""
         },
-        pkg: pkg,
+        pkg,
         stats: {
             peers: {
                 camera:  0,
