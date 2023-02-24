@@ -73,6 +73,17 @@ as illustrated in the following diagram:
 
 ![architecture](doc/architecture.png)
 
+See Also
+--------
+
+- [Blender](https://blender.org)
+- [BabylonJS](https://babylonjs.com):
+    - [BabylonJS Documentation](https://doc.babylonjs.com/)
+    - [BabylonJS Playground](https://playground.babylonjs.com/)
+    - [BabylonJS Sandbox](https://sandbox.babylonjs.com/)
+    - [BabylonJS Node Material Editor (NME)](https://nme.babylonjs.com/)
+    - [BabylonJS Editor](https://editor.babylonjs.com/)
+
 Copyright & License
 -------------------
 
