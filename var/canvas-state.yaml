@@ -1,7 +1,7 @@
 canvas:
     id: canvas-hexagons
-    texture1: /res/canvas/canvas-hexagons-1.png
-    texture2: /res/canvas/canvas-hexagons-2.png
+    texture1: /canvas/canvas-hexagons-1.png
+    texture2: /canvas/canvas-hexagons-2.png
     fadeTrans: 2000
     fadeWait: 10000
 monitor:
