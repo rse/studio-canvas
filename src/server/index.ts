@@ -33,6 +33,7 @@ import WebSocket      from "ws"
 import ObjectHash     from "object-hash"
 import ducky          from "ducky"
 import jsYAML         from "js-yaml"
+import locks          from "locks"
 
 /*  load internal requirements  */
 // @ts-ignore
@@ -181,6 +182,33 @@ import {
             notifyStats()
         }
     }, 600)
+
+    /*  establish database read/write locked access  */
+    const lock = locks.createReadWriteLock()
+    enum Transaction { READ, WRITE }
+    const transaction = (type = Transaction.READ, timeout = 4000, transaction: () => any) => {
+        return new Promise((resolve, reject) => {
+            const cb = async (error: Error) => {
+                if (error)
+                    reject(new Error(`transaction locking failed: ${error}`))
+                else
+                    try {
+                        const result = await transaction()
+                        lock.unlock()
+                        resolve(result)
+                    }
+                    catch (err) {
+                        reject(err)
+                    }
+            }
+            if (type === Transaction.READ)
+                lock.timedReadLock(timeout, cb)
+            else if (type === Transaction.WRITE)
+                lock.timedWriteLock(timeout, cb)
+            else
+                reject(new Error("transaction call failed: invalid transaction type"))
+        })
+    }
 
     /*  establish network service  */
     const server = new Server({
@@ -369,14 +397,16 @@ import {
         method: "GET",
         path: "/state",
         handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
-            const state = StateDefault
-            if (await (fs.promises.stat(stateFile).then(() => true).catch(() => false))) {
-                const txt = await fs.promises.readFile(stateFile, { encoding: "utf8" })
-                const obj = jsYAML.load(txt) as StateType
-                if (ducky.validate(obj, StateSchema))
-                    StateUtil.copy(state, obj)
-            }
-            return h.response(state).code(200)
+            return transaction(Transaction.READ, 4000, async () => {
+                const state = StateDefault
+                if (await (fs.promises.stat(stateFile).then(() => true).catch(() => false))) {
+                    const txt = await fs.promises.readFile(stateFile, { encoding: "utf8" })
+                    const obj = jsYAML.load(txt) as StateType
+                    if (ducky.validate(obj, StateSchema))
+                        StateUtil.copy(state, obj)
+                }
+                return h.response(state).code(200)
+            })
         }
     })
     server.route({
@@ -393,11 +423,13 @@ import {
             }
         },
         handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
-            const state = req.payload as StateType
-            const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
-            await fs.promises.writeFile(stateFile, txt, { encoding: "utf8" })
-            notifySceneState(state)
-            return h.response().code(204)
+            return transaction(Transaction.WRITE, 4000, async () => {
+                const state = req.payload as StateType
+                const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
+                await fs.promises.writeFile(stateFile, txt, { encoding: "utf8" })
+                notifySceneState(state)
+                return h.response().code(204)
+            })
         }
     })
     server.route({
@@ -414,19 +446,21 @@ import {
             }
         },
         handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
-            const state = StateDefault
-            if (await (fs.promises.stat(stateFile).then(() => true).catch(() => false))) {
-                const txt = await fs.promises.readFile(stateFile, { encoding: "utf8" })
-                const obj = jsYAML.load(txt) as StateType
-                if (ducky.validate(obj, StateSchema))
-                    StateUtil.copy(state, obj)
-            }
-            const statePatch = req.payload as StateTypePartial
-            StateUtil.copy(state, statePatch)
-            const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
-            await fs.promises.writeFile(stateFile, txt, { encoding: "utf8" })
-            notifySceneState(statePatch)
-            return h.response().code(204)
+            return transaction(Transaction.WRITE, 4000, async () => {
+                const state = StateDefault
+                if (await (fs.promises.stat(stateFile).then(() => true).catch(() => false))) {
+                    const txt = await fs.promises.readFile(stateFile, { encoding: "utf8" })
+                    const obj = jsYAML.load(txt) as StateType
+                    if (ducky.validate(obj, StateSchema))
+                        StateUtil.copy(state, obj)
+                }
+                const statePatch = req.payload as StateTypePartial
+                StateUtil.copy(state, statePatch)
+                const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
+                await fs.promises.writeFile(stateFile, txt, { encoding: "utf8" })
+                notifySceneState(statePatch)
+                return h.response().code(204)
+            })
         }
     })
 
@@ -437,62 +471,68 @@ import {
         method: "GET",
         path: "/state/preset",
         handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
-            const presets = [] as number[]
-            for (let i = 1; i <= 9; i++) {
-                let n = 0
-                const state = {} as StateTypePartial
-                const filename = util.format(presetsFile, i.toString())
-                if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
-                    const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
-                    const obj = jsYAML.load(txt) as StateTypePartial
-                    if (ducky.validate(obj, StateSchemaPartial))
-                        StateUtil.copy(state, obj)
+            return transaction(Transaction.READ, 4000, async () => {
+                const presets = [] as number[]
+                for (let i = 1; i <= 9; i++) {
+                    let n = 0
+                    const state = {} as StateTypePartial
+                    const filename = util.format(presetsFile, i.toString())
+                    if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
+                        const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
+                        const obj = jsYAML.load(txt) as StateTypePartial
+                        if (ducky.validate(obj, StateSchemaPartial))
+                            StateUtil.copy(state, obj)
+                    }
+                    if (state.canvas     !== undefined) n++
+                    if (state.monitor    !== undefined) n++
+                    if (state.decal      !== undefined) n++
+                    if (state.lights     !== undefined) n++
+                    if (state.references !== undefined) n++
+                    if (state.CAM1       !== undefined) n++
+                    if (state.CAM2       !== undefined) n++
+                    if (state.CAM3       !== undefined) n++
+                    if (state.CAM4       !== undefined) n++
+                    presets.push(n)
                 }
-                if (state.canvas     !== undefined) n++
-                if (state.monitor    !== undefined) n++
-                if (state.decal      !== undefined) n++
-                if (state.lights     !== undefined) n++
-                if (state.references !== undefined) n++
-                if (state.CAM1       !== undefined) n++
-                if (state.CAM2       !== undefined) n++
-                if (state.CAM3       !== undefined) n++
-                if (state.CAM4       !== undefined) n++
-                presets.push(n)
-            }
-            return h.response(presets).code(200)
+                return h.response(presets).code(200)
+            })
         }
     })
     server.route({
         method: "GET",
         path: "/state/preset/{slot}/select",
         handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
-            const slot = req.params.slot
-            const filename = util.format(presetsFile, slot)
-            const state = {}
-            if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
-                const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
-                const obj = jsYAML.load(txt) as StateType
-                if (ducky.validate(obj, StateSchemaPartial))
-                    StateUtil.copy(state, obj)
-            }
-            notifySceneState(state)
-            return h.response(state).code(200)
+            return transaction(Transaction.READ, 4000, async () => {
+                const slot = req.params.slot
+                const filename = util.format(presetsFile, slot)
+                const state = {}
+                if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
+                    const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
+                    const obj = jsYAML.load(txt) as StateType
+                    if (ducky.validate(obj, StateSchemaPartial))
+                        StateUtil.copy(state, obj)
+                }
+                notifySceneState(state)
+                return h.response(state).code(200)
+            })
         }
     })
     server.route({
         method: "GET",
         path: "/state/preset/{slot}",
         handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
-            const slot = req.params.slot
-            const filename = util.format(presetsFile, slot)
-            const state = {}
-            if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
-                const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
-                const obj = jsYAML.load(txt) as StateType
-                if (ducky.validate(obj, StateSchemaPartial))
-                    StateUtil.copy(state, obj)
-            }
-            return h.response(state).code(200)
+            return transaction(Transaction.READ, 4000, async () => {
+                const slot = req.params.slot
+                const filename = util.format(presetsFile, slot)
+                const state = {}
+                if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
+                    const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
+                    const obj = jsYAML.load(txt) as StateType
+                    if (ducky.validate(obj, StateSchemaPartial))
+                        StateUtil.copy(state, obj)
+                }
+                return h.response(state).code(200)
+            })
         }
     })
     server.route({
@@ -509,23 +549,27 @@ import {
             }
         },
         handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
-            const slot = req.params.slot
-            const filename = util.format(presetsFile, slot)
-            const state = req.payload as StateTypePartial
-            const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
-            await fs.promises.writeFile(filename, txt, { encoding: "utf8" })
-            return h.response().code(204)
+            return transaction(Transaction.WRITE, 4000, async () => {
+                const slot = req.params.slot
+                const filename = util.format(presetsFile, slot)
+                const state = req.payload as StateTypePartial
+                const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
+                await fs.promises.writeFile(filename, txt, { encoding: "utf8" })
+                return h.response().code(204)
+            })
         }
     })
     server.route({
         method: "DELETE",
         path: "/state/preset/{slot}",
         handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
-            const slot = req.params.slot
-            const filename = util.format(presetsFile, slot)
-            if (await (fs.promises.stat(filename).then(() => true).catch(() => false)))
-                await fs.promises.unlink(filename)
-            return h.response().code(204)
+            return transaction(Transaction.WRITE, 4000, async () => {
+                const slot = req.params.slot
+                const filename = util.format(presetsFile, slot)
+                if (await (fs.promises.stat(filename).then(() => true).catch(() => false)))
+                    await fs.promises.unlink(filename)
+                return h.response().code(204)
+            })
         }
     })
 
