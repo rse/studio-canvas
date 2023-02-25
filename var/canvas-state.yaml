@@ -18,9 +18,9 @@ decal:
     lift: -4.81
     opacity: 0.74
 lights:
-    intensity1: 0
-    intensity2: 0
-    intensity3: 0
+    intensity1: 100
+    intensity2: 100
+    intensity3: 100
 references:
     enable: true
 CAM1:
