@@ -1217,7 +1217,6 @@ export default defineComponent({
             return StateUtil.copy(this.state, state, paths)
         },
         importState (state: Readonly<StateTypePartial>, paths?: Readonly<string[]>) {
-            console.log("importState", state)
             this.watchState = false
             const changed = this.mergeState(state, paths)
             if (changed)
@@ -1251,7 +1250,6 @@ export default defineComponent({
         },
         async patchState (paths: Readonly<string[]>) {
             const state = {}
-            console.log("patchState", this.state, paths)
             StateUtil.copy(state, this.state, paths)
             await axios({
                 method: "PATCH",
