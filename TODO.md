@@ -7,8 +7,6 @@ TODO
   y-rotate -9.06 (CAM2) +1.13 (CAM3)
   fov 2.4?
 
-- SHOULD: lock on YAML file access or serialization?
-
 - SHOULD: game engine incoming requests serialization?
 
 - CAN: light mirror effect on TV monitor scales with monitor?
