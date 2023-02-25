@@ -146,10 +146,9 @@ export default class CanvasRenderer {
         this.scene.autoClearDepthAndStencil = false
 
         /*  automatically optimize scene  */
-        const options = new BABYLON.SceneOptimizerOptions()
+        const options = new BABYLON.SceneOptimizerOptions(30, 2000)
         options.addOptimization(new BABYLON.HardwareScalingOptimization(0, 1))
         this.optimizer = new BABYLON.SceneOptimizer(this.scene, options)
-        this.optimizer.targetFrameRate = 30
 
         /*  gather reference to reference points  */
         this.references = this.scene.getNodeById("Reference") as BABYLON.Nullable<BABYLON.Mesh>
@@ -245,6 +244,9 @@ export default class CanvasRenderer {
 
         /*  ensure video devices can be enumerated later  */
         const stream  = await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+
+        /*  further optimizations  */
+        this.scene.freezeActiveMeshes()
     }
 
     /*  start/stop renderer  */
