@@ -1214,7 +1214,6 @@ export default defineComponent({
             return txt
         },
         mergeState (state: Readonly<StateTypePartial>, paths?: Readonly<string[]>) {
-            console.log("mergeState", state)
             return StateUtil.copy(this.state, state, paths)
         },
         importState (state: Readonly<StateTypePartial>, paths?: Readonly<string[]>) {
