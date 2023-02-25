@@ -276,65 +276,64 @@ export default class CanvasRenderer {
             wall.albedoTexture = texture1
         else {
             /*  two image cross-fade texture  */
-            const material = new BABYLON.NodeMaterial("material", this.scene!)
-            material.loadAsync("/res/canvas-material.json").then(() => {
-                /*  apply texture #1  */
-                const textureBlock1 = material.getBlockByPredicate((input) =>
-                    input.name === "Texture1") as BABYLON.Nullable<BABYLON.TextureBlock>
-                if (textureBlock1 === null)
-                    throw new Error("no such texture block named 'Texture1' found")
-                textureBlock1.texture = texture1
+            const material = await BABYLON.NodeMaterial.ParseFromFileAsync("material", "/res/canvas-material.json", this.scene)
 
-                /*  apply texture #2  */
-                const textureBlock2 = material.getBlockByPredicate((input) =>
-                    input.name === "Texture2") as BABYLON.Nullable<BABYLON.TextureBlock>
-                if (textureBlock2 === null)
-                    throw new Error("no such texture block named 'Texture2' found")
-                textureBlock2.texture = texture2
+            /*  apply texture #1  */
+            const textureBlock1 = material.getBlockByPredicate((input) =>
+                input.name === "Texture1") as BABYLON.Nullable<BABYLON.TextureBlock>
+            if (textureBlock1 === null)
+                throw new Error("no such texture block named 'Texture1' found")
+            textureBlock1.texture = texture1
 
-                /*  build material from textures  */
-                material.build(false)
+            /*  apply texture #2  */
+            const textureBlock2 = material.getBlockByPredicate((input) =>
+                input.name === "Texture2") as BABYLON.Nullable<BABYLON.TextureBlock>
+            if (textureBlock2 === null)
+                throw new Error("no such texture block named 'Texture2' found")
+            textureBlock2.texture = texture2
 
-                /*  freeze material to optimize internal shader overhead  */
-                material.freeze()
+            /*  build material from textures  */
+            material.build(false)
 
-                /*  create and apply composed texture  */
-                const texture = material.createProceduralTexture(
-                    { width: 11900, height: 3570 }, this.scene!)
-                wall.albedoTexture = texture
+            /*  freeze material to optimize internal shader overhead  */
+            material.freeze()
 
-                /*  perform cross-fadings between textures  */
-                const texFade = material.getBlockByName("TextureFade") as
-                    BABYLON.Nullable<BABYLON.InputBlock>
-                if (texFade === null)
-                    throw new Error("no such input block named 'TextureFade' found")
-                const fadeInterval = (1000 / 30)
-                let fade        = 0
-                let fadeSign    = +1
-                texFade.value = 1.0
-                const fader = () => {
-                    this.fadeTimer = null
-                    const fadeStep = 1.0 / (this.fadeTrans / fadeInterval)
-                    fade = fade + (fadeSign * fadeStep)
-                    let wait = fadeInterval
-                    if (fade > 1.0) {
-                        fade = 1.0
-                        fadeSign = -1
-                        wait = this.fadeWait
-                    }
-                    else if (fade < 0.0) {
-                        fade = 0.0
-                        fadeSign = +1
-                        wait = this.fadeWait
-                    }
-                    texFade.value = fade
-                    if (this.texture2URL !== "")
-                        this.fadeTimer = setTimeout(fader, wait)
+            /*  create and apply composed texture  */
+            const texture = material.createProceduralTexture(
+                { width: 11900, height: 3570 }, this.scene!)
+            wall.albedoTexture = texture
+
+            /*  perform cross-fadings between textures  */
+            const texFade = material.getBlockByName("TextureFade") as
+                BABYLON.Nullable<BABYLON.InputBlock>
+            if (texFade === null)
+                throw new Error("no such input block named 'TextureFade' found")
+            const fadeInterval = (1000 / 30)
+            let fade        = 0
+            let fadeSign    = +1
+            texFade.value = 1.0
+            const fader = () => {
+                this.fadeTimer = null
+                const fadeStep = 1.0 / (this.fadeTrans / fadeInterval)
+                fade = fade + (fadeSign * fadeStep)
+                let wait = fadeInterval
+                if (fade > 1.0) {
+                    fade = 1.0
+                    fadeSign = -1
+                    wait = this.fadeWait
                 }
-                if (this.fadeTimer !== null)
-                    clearTimeout(this.fadeTimer)
-                this.fadeTimer = setTimeout(fader, 0)
-            })
+                else if (fade < 0.0) {
+                    fade = 0.0
+                    fadeSign = +1
+                    wait = this.fadeWait
+                }
+                texFade.value = fade
+                if (this.texture2URL !== "")
+                    this.fadeTimer = setTimeout(fader, wait)
+            }
+            if (this.fadeTimer !== null)
+                clearTimeout(this.fadeTimer)
+            this.fadeTimer = setTimeout(fader, 0)
         }
     }
 
