@@ -275,8 +275,11 @@ export default class CanvasRenderer {
             /*  single image texture  */
             wall.albedoTexture = texture1
         else {
-            /*  two image cross-fade texture  */
-            const material = await BABYLON.NodeMaterial.ParseFromFileAsync("material", "/res/canvas-material.json", this.scene)
+            /*  ==== two image cross-fade texture ====  */
+
+            /*  load externally defined node material  */
+            const material = await BABYLON.NodeMaterial.ParseFromFileAsync("material",
+                "/res/canvas-material.json", this.scene!)
 
             /*  apply texture #1  */
             const textureBlock1 = material.getBlockByPredicate((input) =>
