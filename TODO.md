@@ -7,5 +7,3 @@ TODO
   y-rotate -9.06 (CAM2) +1.13 (CAM3)
   fov 2.4?
 
-- CAN: light mirror effect on TV monitor scales with monitor?
-
