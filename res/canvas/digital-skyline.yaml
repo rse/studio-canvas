@@ -1,0 +1,9 @@
+
+id:        digital-skyline
+name:      Digital Skyline
+texture1:  digital-skyline.jpg
+texture2:  ""
+fadeTrans: 0
+fadeWait:  0
+exclusive: false
+
