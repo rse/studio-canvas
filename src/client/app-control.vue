@@ -556,12 +556,28 @@
                 </tab>
             </tabs>
         </div>
-        <div class="foot" v-bind:class="{
-            error:   status.kind === 'error',
-            warning: status.kind === 'warning',
-            info:    status.kind === 'info'
-        }">
-            {{ status.kind === '' ? `${pkg.name} ${pkg.version} (${pkg["x-date"]})` : status.msg }}
+        <div class="foot">
+            <div class="status" v-bind:class="{
+                error:   status.kind === 'error',
+                warning: status.kind === 'warning',
+                info:    status.kind === 'info'
+            }">
+                {{ status.kind === '' ? `${pkg.name} ${pkg.version} (${pkg["x-date"]})` : status.msg }}
+            </div>
+            <div class="connection">
+                <div class="online yes" v-show="connection.online">
+                    <i class="fa-solid fa-plug-circle-check"></i>
+                </div>
+                <div class="online no" v-show="!connection.online">
+                    <i class="fa-solid fa-plug-circle-xmark"></i>
+                </div>
+                <div class="traffic send" v-bind:class="{ active: connection.send }">
+                    <i class="fa-solid fa-circle"></i>
+                </div>
+                <div class="traffic recv" v-bind:class="{ active: connection.recv }">
+                    <i class="fa-solid fa-circle"></i>
+                </div>
+            </div>
         </div>
     </div>
 </template>
@@ -619,18 +635,45 @@
         font-weight: 200
         font-size: 14px
         line-height: 14px
-        &.info
-            font-weight: normal
-            background-color: var(--color-std-bg-5)
-            color: var(--color-std-fg-5)
-        &.warning
-            font-weight: bold
-            background-color: var(--color-acc-bg-3)
-            color: var(--color-acc-fg-5)
-        &.error
-            font-weight: bold
-            background-color: var(--color-sig-bg-3)
-            color: var(--color-sig-fg-5)
+        display: flex
+        flex-direction: row
+        justify-items: center
+        align-items: center
+        .status
+            flex-grow: 1
+            &.info
+                font-weight: normal
+                background-color: var(--color-std-bg-5)
+                color: var(--color-std-fg-5)
+            &.warning
+                font-weight: bold
+                background-color: var(--color-acc-bg-3)
+                color: var(--color-acc-fg-5)
+            &.error
+                font-weight: bold
+                background-color: var(--color-sig-bg-3)
+                color: var(--color-sig-fg-5)
+        .connection
+            display: flex
+            flex-direction: row
+            justify-items: center
+            align-items: center
+            .online
+                margin-right: 8px
+                &.yes
+                    color: var(--color-std-fg-1)
+                &.no
+                    color: var(--color-sig-fg-1)
+            .traffic
+                &.send
+                    margin-right: 4px
+                    color: var(--color-std-fg-1)
+                    &.active
+                        color: var(--color-sig-fg-1)
+                &.recv
+                    color: var(--color-std-fg-1)
+                    &.active
+                        color: var(--color-acc-fg-1)
     .tabs-component
         height: 100%
         display: flex
@@ -1054,6 +1097,11 @@ export default defineComponent({
             kind: "",
             msg: ""
         },
+        connection: {
+            online: false,
+            send:   false,
+            recv:   false
+        },
         pkg,
         stats: {
             peers: {
@@ -1075,8 +1123,16 @@ export default defineComponent({
             minUptime:                   5000
         })
         ws.addEventListener("open", (ev) => {
+            this.connection.online = true
+        })
+        ws.addEventListener("close", (ev) => {
+            this.connection.online = false
         })
         ws.addEventListener("message", (ev: MessageEvent) => {
+            this.connection.recv = true
+            setTimeout(() => {
+                this.connection.recv = false
+            }, 250)
             if (typeof ev.data !== "string") {
                 this.raiseStatus("warning", "invalid WebSocket message received", 1000)
                 return
@@ -1162,12 +1218,15 @@ export default defineComponent({
             return map
         },
         async imageListFetch (): Promise<ImageEntry[]> {
+            this.connection.recv = true
             return axios({
                 method:       "GET",
                 url:          `${this.serviceUrl}canvas`,
                 responseType: "json"
             }).then((result: any) => {
                 return result.data.images
+            }).finally(() => {
+                this.connection.recv = false
             }) as Promise<ImageEntry[]>
         },
         async selectImage (id: string) {
@@ -1233,10 +1292,13 @@ export default defineComponent({
             return dst
         },
         async loadState () {
+            this.connection.recv = true
             const state = await axios({
                 method: "GET",
                 url:    `${this.serviceUrl}state`
-            }).then((response) => response.data).catch(() => null)
+            }).then((response) => response.data).catch(() => null).finally(() => {
+                this.connection.recv = false
+            })
             if (state === null)
                 throw new Error("failed to load state")
             const errors = [] as Array<string>
@@ -1245,26 +1307,35 @@ export default defineComponent({
             this.mergeState(state as StateType)
         },
         async saveState () {
+            this.connection.send = true
             await axios({
                 method: "POST",
                 url:    `${this.serviceUrl}state`,
                 data:   this.state
+            }).finally(() => {
+                this.connection.send = false
             })
         },
         async patchState (paths: Readonly<string[]>) {
             const state = {}
             StateUtil.copy(state, this.state, paths)
+            this.connection.send = true
             await axios({
                 method: "PATCH",
                 url:    `${this.serviceUrl}state`,
                 data:   state
+            }).finally(() => {
+                this.connection.send = false
             })
         },
         async presetStatus () {
+            this.connection.recv = true
             const status = await axios({
                 method: "GET",
                 url:    `${this.serviceUrl}state/preset`
-            }).then((response) => response.data).catch(() => null)
+            }).then((response) => response.data).catch(() => null).finally(() => {
+                this.connection.recv = false
+            })
             if (status === null)
                 throw new Error("failed to load preset status")
             this.preset.status = status
@@ -1285,10 +1356,13 @@ export default defineComponent({
         },
         async presetLoad () {
             this.raiseStatus("info", `Loading state from preset slot #${this.preset.slot}...`, 1000)
+            this.connection.recv = true
             const state = await axios({
                 method: "GET",
                 url:    `${this.serviceUrl}state/preset/${this.preset.slot}`
-            }).then((response) => response.data).catch(() => null)
+            }).then((response) => response.data).catch(() => null).finally(() => {
+                this.connection.recv = false
+            })
             if (state === null) {
                 this.raiseStatus("error", "failed to load preset")
                 return
@@ -1309,19 +1383,25 @@ export default defineComponent({
                 .filter((key) => (this.preset.filters as any)[key])
                 .map((key) => `${key}.**`)
             const state = this.exportState(filters)
+            this.connection.send = true
             await axios({
                 method: "POST",
                 url:    `${this.serviceUrl}state/preset/${this.preset.slot}`,
                 data:   state
+            }).finally(() => {
+                this.connection.send = false
             })
             await this.presetStatus()
         },
         async presetClear () {
             this.raiseStatus("info", `Clearing preset slot #${this.preset.slot}...`, 1000)
+            this.connection.send = true
             await axios({
                 method: "DELETE",
                 url:    `${this.serviceUrl}state/preset/${this.preset.slot}`
-            }).then((response) => response.data).catch(() => null)
+            }).then((response) => response.data).catch(() => null).finally(() => {
+                this.connection.send = false
+            })
             await this.presetStatus()
         }
     }
