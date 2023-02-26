@@ -73,6 +73,8 @@ export default defineComponent({
         ws.addEventListener("open", (ev) => {
             ws.send(JSON.stringify({ cmd: "SUBSCRIBE", arg: this.cam }))
         })
+        const queueSceneState = [] as Array<StateTypePartial>
+        let queueSceneStateProcessed = false
         ws.addEventListener("message", (ev: MessageEvent) => {
             if (typeof ev.data !== "string") {
                 console.log("WARNING: invalid WebSocket message received")
@@ -93,7 +95,18 @@ export default defineComponent({
                 const errors = [] as Array<string>
                 if (!Ducky.validate(state, StateSchemaPartial, errors))
                     throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
-                renderer!.reflectSceneState(state)
+                queueSceneState.push(state)
+                if (!queueSceneStateProcessed) {
+                    setTimeout(async () => {
+                        queueSceneStateProcessed = true
+                        while (queueSceneState.length > 0) {
+                            console.log(queueSceneState.length)
+                            const state = queueSceneState.shift()!
+                            await renderer!.reflectSceneState(state)
+                        }
+                        queueSceneStateProcessed = false
+                    }, 0)
+                }
             }
         })
 
