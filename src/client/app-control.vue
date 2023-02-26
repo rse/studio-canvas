@@ -860,7 +860,6 @@
             height: auto
     .list
         flex-grow: 1
-        grid-area: list
         width: 100%
         overflow-y: scroll
         overflow-x: hidden
@@ -869,6 +868,7 @@
         border-radius: 4px
         background-color: var(--color-std-bg-3)
         .list-entry
+            cursor: pointer;
             color: var(--color-std-fg-5)
             background-color: var(--color-std-bg-4)
             &.alt
