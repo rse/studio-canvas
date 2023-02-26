@@ -288,7 +288,7 @@ export default class CanvasRenderer {
         if (this.texture2 === null) {
             /*  single image texture  */
             await new Promise((resolve) => {
-                BABYLON.Texture.WhenAllReady([ this.texture1 ], () => { resolve(true) })
+                BABYLON.Texture.WhenAllReady([ this.texture1! ], () => { resolve(true) })
             })
             wall.albedoTexture = this.texture1
         }
@@ -297,7 +297,7 @@ export default class CanvasRenderer {
 
             /*  await textures  */
             await new Promise((resolve) => {
-                BABYLON.Texture.WhenAllReady([ this.texture1, this.texture2 ], () => { resolve(true) })
+                BABYLON.Texture.WhenAllReady([ this.texture1!, this.texture2! ], () => { resolve(true) })
             })
 
             /*  load externally defined node material  */
