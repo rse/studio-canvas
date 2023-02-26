@@ -53,7 +53,7 @@
         "@types/locks":                     "0.2.1",
 
         "chalk":                            "4.1.2",
-        "minimatch":                        "7.1.4",
+        "minimatch":                        "7.2.0",
         "glob-promise":                     "6.0.2",
         "js-yaml":                          "4.1.0",
         "moment":                           "2.29.4",
@@ -75,7 +75,7 @@
         "@vitejs/plugin-vue":               "4.0.0",
 
         "@vue/eslint-config-typescript":    "11.0.2",
-        "eslint":                           "8.34.0",
+        "eslint":                           "8.35.0",
         "eslint-config-standard":           "17.0.0",
         "eslint-plugin-import":             "2.27.5",
         "eslint-plugin-vue":                "9.9.0",
