@@ -100,7 +100,6 @@ export default defineComponent({
                     setTimeout(async () => {
                         queueSceneStateProcessed = true
                         while (queueSceneState.length > 0) {
-                            console.log(queueSceneState.length)
                             const state = queueSceneState.shift()!
                             await renderer!.reflectSceneState(state)
                         }
