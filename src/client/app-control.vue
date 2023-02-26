@@ -586,6 +586,8 @@
 .app-control
     width:  100vw
     height: 100vh
+    min-width: 900px
+    min-height: 600px
     overflow: hidden
     margin: 0
     padding: 0
@@ -867,6 +869,9 @@
         padding: 4px 4px 4px 4px
         border-radius: 4px
         background-color: var(--color-std-bg-3)
+        height: 300px
+        min-height: 300px
+        max-height: 300px
         .list-entry
             cursor: pointer;
             color: var(--color-std-fg-5)
