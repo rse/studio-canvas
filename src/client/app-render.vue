@@ -48,8 +48,6 @@ export default defineComponent({
         serviceUrl: { type: String, default: "" },
         wsUrl:      { type: String, default: "" }
     },
-    data: () => ({
-    }),
     async mounted () {
         /*  establish renderer  */
         renderer = new CanvasRenderer()
@@ -121,8 +119,6 @@ export default defineComponent({
             throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
         if (renderer !== null)
             await renderer.reflectSceneState(state as StateType)
-    },
-    methods: {
     }
 })
 </script>
