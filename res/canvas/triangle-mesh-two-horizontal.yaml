@@ -1,0 +1,9 @@
+
+id:        triangle-mesh-two-horizontal
+name:      Triangle Mesh Two Horizontal
+texture1:  triangle-mesh-two-horizontal-1.jpg
+texture2:  triangle-mesh-two-horizontal-2.jpg
+fadeTrans: 1500
+fadeWait:  10000
+exclusive: false
+
