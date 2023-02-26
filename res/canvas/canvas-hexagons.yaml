@@ -1,8 +1,9 @@
 
 id:        canvas-hexagons
-name:      Hexagons
-texture1:  canvas-hexagons-1.png
-texture2:  canvas-hexagons-2.png
+name:      Canvas Hexagons
+texture1:  canvas-hexagons-1.jpg
+texture2:  canvas-hexagons-2.jpg
 fadeTrans: 2000
 fadeWait:  10000
 exclusive: true
+
