@@ -43,6 +43,11 @@ export default class CanvasRenderer {
     private light1:         BABYLON.Nullable<BABYLON.PointLight>     = null
     private light2:         BABYLON.Nullable<BABYLON.PointLight>     = null
     private light3:         BABYLON.Nullable<BABYLON.PointLight>     = null
+    private material:       BABYLON.Nullable<BABYLON.NodeMaterial>   = null
+    private texture1:       BABYLON.Nullable<BABYLON.Texture>        = null
+    private texture2:       BABYLON.Nullable<BABYLON.Texture>        = null
+    private texture3:       BABYLON.Nullable<BABYLON.Texture>        = null
+    private fps                                                      = 30
     private monitorBase = {
         scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
@@ -146,7 +151,7 @@ export default class CanvasRenderer {
         this.scene.autoClearDepthAndStencil = false
 
         /*  automatically optimize scene  */
-        const options = new BABYLON.SceneOptimizerOptions(30, 2000)
+        const options = new BABYLON.SceneOptimizerOptions(this.fps, 2000)
         options.addOptimization(new BABYLON.HardwareScalingOptimization(0, 1))
         this.optimizer = new BABYLON.SceneOptimizer(this.scene, options)
 
@@ -246,21 +251,28 @@ export default class CanvasRenderer {
         const stream  = await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
 
         /*  further optimizations  */
-        this.scene.freezeActiveMeshes()
+        // this.scene.freezeActiveMeshes()
     }
 
     /*  start/stop renderer  */
-    start () {
+    async start () {
+        /*  start render loop and scene optimizer  */
         if (this.engine !== null)
             this.engine.runRenderLoop(this.renderOnce)
         if (this.optimizer !== null)
             this.optimizer.start()
     }
-    stop () {
+    async stop () {
+        /*  stop scene optimizer and render loop  */
         if (this.optimizer !== null)
             this.optimizer.stop()
         if (this.engine !== null)
             this.engine.stopRenderLoop(this.renderOnce)
+
+        /*  give still active render loop iteration time to complete  */
+        await new Promise((resolve, reject) => {
+            setTimeout(() => resolve(true), 2 * (1000 / this.fps))
+        })
     }
 
     /*  load canvas/wall texture(s)  */
@@ -268,52 +280,61 @@ export default class CanvasRenderer {
         if (this.texture1URL === "")
             return
         /*  apply static (one image) or dynamic (two images) texture to wall  */
-        const texture1 = new BABYLON.Texture(this.texture1URL, this.scene, false, false)
-        const texture2 = this.texture2URL !== "" ? new BABYLON.Texture(this.texture2URL, this.scene, false, false) : null
+        this.texture1 = new BABYLON.Texture(this.texture1URL, this.scene, false, false)
+        this.texture2 = this.texture2URL !== "" ? new BABYLON.Texture(this.texture2URL, this.scene, false, false) : null
         const wall = this.scene!.getMaterialByName("Wall") as BABYLON.Nullable<BABYLON.PBRMaterial>
         if (wall === null)
             throw new Error("cannot find Wall object")
-        if (texture2 === null)
+        if (this.texture2 === null) {
             /*  single image texture  */
-            wall.albedoTexture = texture1
+            await new Promise((resolve) => {
+                BABYLON.Texture.WhenAllReady([ this.texture1 ], () => { resolve(true) })
+            })
+            wall.albedoTexture = this.texture1
+        }
         else {
             /*  ==== two image cross-fade texture ====  */
 
+            /*  await textures  */
+            await new Promise((resolve) => {
+                BABYLON.Texture.WhenAllReady([ this.texture1, this.texture2 ], () => { resolve(true) })
+            })
+
             /*  load externally defined node material  */
-            const material = await BABYLON.NodeMaterial.ParseFromFileAsync("material",
+            this.material = await BABYLON.NodeMaterial.ParseFromFileAsync("material",
                 "/res/canvas-material.json", this.scene!)
 
             /*  apply texture #1  */
-            const textureBlock1 = material.getBlockByPredicate((input) =>
+            const textureBlock1 = this.material.getBlockByPredicate((input) =>
                 input.name === "Texture1") as BABYLON.Nullable<BABYLON.TextureBlock>
             if (textureBlock1 === null)
                 throw new Error("no such texture block named 'Texture1' found")
-            textureBlock1.texture = texture1
+            textureBlock1.texture = this.texture1
 
             /*  apply texture #2  */
-            const textureBlock2 = material.getBlockByPredicate((input) =>
+            const textureBlock2 = this.material.getBlockByPredicate((input) =>
                 input.name === "Texture2") as BABYLON.Nullable<BABYLON.TextureBlock>
             if (textureBlock2 === null)
                 throw new Error("no such texture block named 'Texture2' found")
-            textureBlock2.texture = texture2
+            textureBlock2.texture = this.texture2
 
             /*  build material from textures  */
-            material.build(false)
+            this.material.build(false)
 
             /*  freeze material to optimize internal shader overhead  */
-            material.freeze()
+            this.material.freeze()
 
             /*  create and apply composed texture  */
-            const texture = material.createProceduralTexture(
+            this.texture3 = this.material.createProceduralTexture(
                 { width: 11900, height: 3570 }, this.scene!)
-            wall.albedoTexture = texture
+            wall.albedoTexture = this.texture3
 
             /*  perform cross-fadings between textures  */
-            const texFade = material.getBlockByName("TextureFade") as
+            const texFade = this.material.getBlockByName("TextureFade") as
                 BABYLON.Nullable<BABYLON.InputBlock>
             if (texFade === null)
                 throw new Error("no such input block named 'TextureFade' found")
-            const fadeInterval = (1000 / 30)
+            const fadeInterval = (1000 / this.fps)
             let fade        = 0
             let fadeSign    = +1
             texFade.value = 1.0
@@ -344,9 +365,32 @@ export default class CanvasRenderer {
 
     /*  unload canvas/wall texture(s)  */
     async unloadWall () {
+        const wall = this.scene!.getMaterialByName("Wall") as BABYLON.Nullable<BABYLON.PBRMaterial>
+        if (wall === null)
+            throw new Error("cannot find Wall object")
+        wall.albedoTexture = null
         if (this.fadeTimer !== null) {
             clearTimeout(this.fadeTimer)
+            await new Promise((resolve, reject) => {
+                setTimeout(() => resolve(true), 2 * (1000 / this.fps))
+            })
             this.fadeTimer = null
+        }
+        if (this.material !== null) {
+            const textureBlock1 = this.material.getBlockByPredicate((input) =>
+                input.name === "Texture1") as BABYLON.Nullable<BABYLON.TextureBlock>
+            textureBlock1!.texture = null
+            this.texture1?.dispose()
+            this.texture1 = null
+            const textureBlock2 = this.material.getBlockByPredicate((input) =>
+                input.name === "Texture2") as BABYLON.Nullable<BABYLON.TextureBlock>
+            textureBlock2!.texture = null
+            this.texture2?.dispose()
+            this.texture2 = null
+            this.texture3?.dispose()
+            this.texture3 = null
+            this.material.dispose(true, true)
+            this.material = null
         }
     }
 
@@ -359,7 +403,7 @@ export default class CanvasRenderer {
             device.kind === "videoinput" && device.label === this.monitorDevice)
         if (device === undefined)
             return
-        BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!,
+        return BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!,
             { deviceId: device.deviceId } as any, false, false).then((vt) => {
             const material = this.monitorDisplay!.material as BABYLON.PBRMaterial
             material.albedoTexture = vt
@@ -376,7 +420,7 @@ export default class CanvasRenderer {
             device.kind === "videoinput" && device.label === this.decalDevice)
         if (device === undefined)
             return
-        BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!,
+        return BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!,
             { deviceId: device.deviceId } as any, false, false).then((vt) => {
             const material = this.decal!.material as BABYLON.PBRMaterial
             material.albedoTexture = vt
@@ -385,7 +429,7 @@ export default class CanvasRenderer {
     }
 
     /*  (re-)generate the decal  */
-    decalGenerate () {
+    async decalGenerate () {
         /*  remember potentially old decal  */
         const oldDecal = this.decal
 
@@ -464,10 +508,10 @@ export default class CanvasRenderer {
                 this.fadeTrans = state.canvas.fadeTrans
             if (state.canvas.fadeWait !== undefined)
                 this.fadeWait = state.canvas.fadeWait
-            this.stop()
+            await this.stop()
             await this.unloadWall()
             await this.loadWall()
-            this.start()
+            await this.start()
         }
 
         /*  adust monitor  */
@@ -475,10 +519,10 @@ export default class CanvasRenderer {
             if (state.monitor.enable !== undefined)
                 this.monitor.setEnabled(state.monitor.enable)
             if (state.monitor.device !== undefined) {
-                this.stop()
+                await this.stop()
                 this.monitorDevice = state.monitor.device
-                this.loadMonitor()
-                this.start()
+                await this.loadMonitor()
+                await this.start()
             }
             if (state.monitor.scale !== undefined) {
                 this.monitorCase.scaling.x    = this.monitorBase.scaleCaseX    * state.monitor.scale
@@ -502,10 +546,10 @@ export default class CanvasRenderer {
             if (state.decal.enable !== undefined)
                 this.decal.setEnabled(state.decal.enable)
             if (state.decal.device !== undefined) {
-                this.stop()
+                await this.stop()
                 this.decalDevice = state.decal.device
-                this.loadDecal()
-                this.start()
+                await this.loadDecal()
+                await this.start()
             }
             if (state.decal.rotate !== undefined || state.decal.lift !== undefined || state.decal.scale !== undefined) {
                 if (state.decal.rotate !== undefined)
@@ -514,9 +558,9 @@ export default class CanvasRenderer {
                     this.decalLift = state.decal.lift
                 if (state.decal.scale !== undefined)
                     this.decalScale = state.decal.scale
-                this.stop()
-                this.decalGenerate()
-                this.start()
+                await this.stop()
+                await this.decalGenerate()
+                await this.start()
             }
             if (state.decal.opacity !== undefined) {
                 const material = this.decal.material as BABYLON.PBRMaterial
