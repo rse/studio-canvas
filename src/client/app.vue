@@ -8,6 +8,7 @@
 
 <template>
     <div class="app">
+        <!--  Control UI  -->
         <app-control
             ref="control"
             v-if="mode === 'control'"
@@ -15,6 +16,8 @@
             v-bind:ws-url="wsURL"
             v-bind:service-url="serviceURL"
         ></app-control>
+
+        <!--  Render UI  -->
         <app-render
             ref="render"
             v-if="mode === 'render'"
@@ -31,9 +34,9 @@
 
 <script setup lang="ts">
 import { defineComponent } from "vue"
-import URI          from "urijs"
-import AppControl   from "./app-control.vue"
-import AppRender    from "./app-render.vue"
+import URI                 from "urijs"
+import AppControl          from "./app-control.vue"
+import AppRender           from "./app-render.vue"
 </script>
 
 <script lang="ts">
@@ -44,12 +47,12 @@ export default defineComponent({
         "app-render":  AppRender
     },
     data: () => ({
-        mode: "control",
-        tab: "presets",
-        cam: "",
-        options: new Map<string, string | boolean>(),
+        mode:       "control",
+        tab:        "presets",
+        cam:        "",
+        options:    new Map<string, string | boolean>(),
         serviceURL: "",
-        wsURL: ""
+        wsURL:      ""
     }),
     created () {
         /*  determine mode  */
