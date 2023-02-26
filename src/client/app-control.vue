@@ -8,6 +8,7 @@
 
 <template>
     <div class="app-control">
+        <!--  HEADER  -->
         <div class="head">
             CANVAS SCENE CONTROL
             <div class="stats">
@@ -19,8 +20,11 @@
                 <span class="figure">{{ stats.peers.control }}</span>
             </div>
         </div>
+
+        <!--  BODY  -->
         <div class="body">
             <tabs ref="tabs" v-bind:options="{ useUrlFragment: false, defaultTabHash: tab }" v-bind:cache-lifetime="0" class="tabs-level-1" v-on:changed="tabChanged">
+                <!--  ==== PRESETS ====  -->
                 <tab id="presets" name="Presets">
                     <div class="desc">
                         The <b>Presets</b> can be used to load and save the entire &mdash; or just the partial &mdash;
@@ -127,6 +131,8 @@
                         </div>
                     </div>
                 </tab>
+
+                <!--  ==== CANVAS ====  -->
                 <tab id="canvas" name="Canvas">
                     <div class="desc">
                         The <b>Canvas</b> is the background image projected onto the chroma-keyed
@@ -154,6 +160,8 @@
                         </div>
                     </div>
                 </tab>
+
+                <!--  ==== MONITOR ====  -->
                 <tab id="monitor" name="Monitor">
                     <div class="desc">
                         The <b>Monitor</b> is the optional TV-style monitor which can be shown
@@ -229,6 +237,8 @@
                         </div>
                     </div>
                 </tab>
+
+                <!--  ==== DECAL ====  -->
                 <tab id="decal" name="Decal">
                     <div class="desc">
                         The <b>Decal</b> is the optional poster-style display which can be projected
@@ -319,6 +329,8 @@
                         </div>
                     </div>
                 </tab>
+
+                <!--  ==== LIGHTS ====  -->
                 <tab id="lights" name="Lights">
                     <div class="desc">
                         The <b>Lights</b> are the three optional additional point lights in the scene,
@@ -372,6 +384,8 @@
                         </div>
                     </div>
                 </tab>
+
+                <!--  ==== REFERENCES ====  -->
                 <tab name="References">
                     <div class="desc">
                         The <b>References</b> are the optional red balls in the scence
@@ -392,6 +406,8 @@
                         </div>
                     </div>
                 </tab>
+
+                <!--  ==== CAM1/2/3/4 ====  -->
                 <tab v-for="cam in [ 'CAM1', 'CAM2', 'CAM3', 'CAM4' ]" v-bind:key="cam" v-bind:id="cam.toLowerCase()" v-bind:name="cam">
                     <div class="desc">
                         The <b>{{ cam }}</b> is the digital twin of the physical
@@ -507,6 +523,8 @@
                         </div>
                     </div>
                 </tab>
+
+                <!--  ==== PREVIEW ====  -->
                 <tab id="preview" name="Preview" class="preview">
                     <div class="desc">
                         The <b>Preview</b> is a sneak preview of the rendered camera view
@@ -556,24 +574,34 @@
                 </tab>
             </tabs>
         </div>
+
+        <!--  FOOTER  -->
         <div class="foot" v-bind:class="{
-                error:   status.kind === 'error',
-                warning: status.kind === 'warning',
-                info:    status.kind === 'info'
+            error:   status.kind === 'error',
+            warning: status.kind === 'warning',
+            info:    status.kind === 'info'
         }">
+            <!--  Application Status Information  -->
             <div class="status">
                 {{ status.kind === '' ? `${pkg.name} ${pkg.version} (${pkg["x-date"]})` : status.msg }}
             </div>
+
+            <!--  Server Connection Information  -->
             <div class="connection">
+                <!--  Online  -->
                 <div class="online yes" v-show="connection.online">
                     <i class="fa-solid fa-plug-circle-check"></i>
                 </div>
                 <div class="online no" v-show="!connection.online">
                     <i class="fa-solid fa-plug-circle-xmark"></i>
                 </div>
+
+                <!--  Traffic Send  -->
                 <div class="traffic send" v-bind:class="{ active: connection.send }">
                     <i class="fa-solid fa-circle"></i>
                 </div>
+
+                <!--  Traffic Recv  -->
                 <div class="traffic recv" v-bind:class="{ active: connection.recv }">
                     <i class="fa-solid fa-circle"></i>
                 </div>
@@ -1124,6 +1152,7 @@ export default defineComponent({
         this.tab = this.selectTab
     },
     async mounted () {
+        /*  establish server connection  */
         const ws = new RecWebSocket(this.wsUrl + "/control", [], {
             reconnectionDelayGrowFactor: 1.3,
             maxReconnectionDelay:        4000,
@@ -1138,6 +1167,8 @@ export default defineComponent({
             this.connection.online = false
             this.raiseStatus("error", "WebSocket connection failed/closed", 2000)
         })
+
+        /*  receive server messages  */
         ws.addEventListener("message", (ev: MessageEvent) => {
             this.connection.recv = true
             setTimeout(() => {
@@ -1166,13 +1197,16 @@ export default defineComponent({
             }
         })
 
+        /*  initialize and enrich canvas list  */
         this.imageList = await this.imageListFetch()
         this.state.canvas.id = this.imageList[0]?.id ?? ""
         this.ps = new PerfectScrollbar(this.$refs.list as HTMLElement)
 
+        /*  initially load state and presets once  */
         await this.loadState()
         await this.presetStatus()
 
+        /*  react on all subsequent state changes  */
         let timer: ReturnType<typeof setTimeout> | null = null
         let queue = [] as string[]
         for (const path of StatePaths) {
@@ -1191,6 +1225,7 @@ export default defineComponent({
             })
         }
 
+        /*  handle mutual exclusive toggles  */
         this.$watch("preview.opts.freed", (val: boolean) => {
             if (val && this.preview.opts.keys)
                 this.preview.opts.keys = false
@@ -1199,6 +1234,8 @@ export default defineComponent({
             if (val && this.preview.opts.freed)
                 this.preview.opts.freed = false
         })
+
+        /*  re-generate the preview URL  */
         this.$watch("preview.opts", () => {
             let url = `${this.serviceUrl}#/render/${this.preview.opts.cam}`
             const opts = []
@@ -1210,6 +1247,7 @@ export default defineComponent({
         }, { immediate: true, deep: true })
     },
     methods: {
+        /*  raise a temporaily visible status message in the footer  */
         raiseStatus (kind: string, msg: string, duration = 4000) {
             this.status.kind = kind
             this.status.msg  = msg
@@ -1221,12 +1259,8 @@ export default defineComponent({
                 statusTimer = null
             }, duration)
         },
-        lit2map (obj: { [ key: string ]: string | boolean }) {
-            const map = new Map<string, string | boolean>()
-            for (const key of Object.keys(obj))
-                map.set(key, obj[key])
-            return map
-        },
+
+        /*  fetch list of canvas images  */
         async imageListFetch (): Promise<ImageEntry[]> {
             this.connection.recv = true
             return axios({
@@ -1239,6 +1273,8 @@ export default defineComponent({
                 this.connection.recv = false
             }) as Promise<ImageEntry[]>
         },
+
+        /*  select canvas image  */
         async selectImage (id: string) {
             const entry = this.imageList.find((entry) => entry.id === id)
             if (entry === undefined)
@@ -1261,16 +1297,24 @@ export default defineComponent({
             await this.patchState([ "canvas.*" ])
             this.watchState = true
         },
+
+        /*  open preview URL in own window  */
         previewOpen () {
             window.open(this.preview.url, "_blank")
         },
+
+        /*  copy preview URL to clipboard  */
         previewCopy () {
             navigator.clipboard.writeText(this.preview.url)
         },
+
+        /*  update URL on tab changes  */
         tabChanged (tab: any) {
             this.tab = tab.tab.name
             window.location.hash = `#/control/${tab.tab.computedId}`
         },
+
+        /*  import a field  */
         fieldImport (txt: string, min: number, max: number) {
             txt = txt.replace(/^s+/, "").replace(/\s+$/, "")
             let n = parseFloat(txt)
@@ -1279,15 +1323,21 @@ export default defineComponent({
             n = Math.max(Math.min(n, max), min)
             return n
         },
+
+        /*  export a field  */
         fieldExport (n: number, digits = 2) {
             let txt = n.toFixed(digits)
             if (!txt.match(/^-/))
                 txt = `+${txt}`
             return txt
         },
+
+        /*  merge partial state into current state  */
         mergeState (state: Readonly<StateTypePartial>, paths?: Readonly<string[]>) {
             return StateUtil.copy(this.state, state, paths)
         },
+
+        /*  import partial state into current state  */
         importState (state: Readonly<StateTypePartial>, paths?: Readonly<string[]>) {
             this.watchState = false
             const changed = this.mergeState(state, paths)
@@ -1296,11 +1346,15 @@ export default defineComponent({
             else
                 this.watchState = true
         },
+
+        /*  export partial state from current state  */
         exportState (paths?: Readonly<string[]>): StateTypePartial {
             const dst = {}
             StateUtil.copy(dst, this.state, paths)
             return dst
         },
+
+        /*  load current state  */
         async loadState () {
             this.connection.recv = true
             const state = await axios({
@@ -1316,6 +1370,8 @@ export default defineComponent({
                 throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
             this.mergeState(state as StateType)
         },
+
+        /*  save current state  */
         async saveState () {
             this.connection.send = true
             await axios({
@@ -1326,6 +1382,8 @@ export default defineComponent({
                 this.connection.send = false
             })
         },
+
+        /*  patch current state  */
         async patchState (paths: Readonly<string[]>) {
             const state = {}
             StateUtil.copy(state, this.state, paths)
@@ -1338,6 +1396,8 @@ export default defineComponent({
                 this.connection.send = false
             })
         },
+
+        /*  load preset status  */
         async presetStatus () {
             this.connection.recv = true
             const status = await axios({
@@ -1350,6 +1410,8 @@ export default defineComponent({
                 throw new Error("failed to load preset status")
             this.preset.status = status
         },
+
+        /*  map preset status to CSS class name  */
         presetStatus2Class (slot: number) {
             const clazz = {} as any
             if (this.preset.status[slot] === 0)
@@ -1360,10 +1422,14 @@ export default defineComponent({
                 clazz.complete = true
             return clazz
         },
+
+        /*  enable/disable all preset filters  */
         presetFiltersSelect (enable: boolean) {
             for (const key of Object.keys(this.preset.filters))
                 (this.preset.filters as any)[key] = enable
         },
+
+        /*  load preset slot  */
         async presetLoad () {
             this.raiseStatus("info", `Loading state from preset slot #${this.preset.slot}...`, 1000)
             this.connection.recv = true
@@ -1387,6 +1453,8 @@ export default defineComponent({
                 .map((key) => `${key}.**`)
             this.mergeState(state as StateType, filters)
         },
+
+        /*  save preset slot  */
         async presetSave () {
             this.raiseStatus("info", `Saving state to preset slot #${this.preset.slot}...`, 1000)
             const filters = Object.keys(this.preset.filters)
@@ -1403,6 +1471,8 @@ export default defineComponent({
             })
             await this.presetStatus()
         },
+
+        /*  clear preset slot  */
         async presetClear () {
             this.raiseStatus("info", `Clearing preset slot #${this.preset.slot}...`, 1000)
             this.connection.send = true
