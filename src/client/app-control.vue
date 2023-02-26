@@ -1128,7 +1128,6 @@ export default defineComponent({
         })
         ws.addEventListener("open", (ev) => {
             this.connection.online = true
-            this.raiseStatus("info", "WebSocket connection established/opened", 1000)
         })
         ws.addEventListener("close", (ev) => {
             this.connection.online = false
