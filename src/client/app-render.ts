@@ -334,7 +334,7 @@ export default class CanvasRenderer {
                 BABYLON.Nullable<BABYLON.InputBlock>
             if (texFade === null)
                 throw new Error("no such input block named 'TextureFade' found")
-            const fadeInterval = (1000 / this.fps)
+            const fadeInterval = 1000 / this.fps
             let fade        = 0
             let fadeSign    = +1
             texFade.value = 1.0
