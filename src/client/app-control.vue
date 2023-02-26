@@ -556,12 +556,12 @@
                 </tab>
             </tabs>
         </div>
-        <div class="foot">
-            <div class="status" v-bind:class="{
+        <div class="foot" v-bind:class="{
                 error:   status.kind === 'error',
                 warning: status.kind === 'warning',
                 info:    status.kind === 'info'
-            }">
+        }">
+            <div class="status">
                 {{ status.kind === '' ? `${pkg.name} ${pkg.version} (${pkg["x-date"]})` : status.msg }}
             </div>
             <div class="connection">
@@ -639,21 +639,25 @@
         flex-direction: row
         justify-items: center
         align-items: center
+        &.info
+            font-weight: normal
+            background-color: var(--color-std-bg-5)
+            color: var(--color-std-fg-5)
+        &.warning
+            font-weight: bold
+            background-color: var(--color-acc-bg-3)
+            color: var(--color-acc-fg-5)
+        &.error
+            font-weight: bold
+            background-color: var(--color-sig-bg-3)
+            color: var(--color-sig-fg-5)
         .status
             flex-grow: 1
-            &.info
-                font-weight: normal
-                background-color: var(--color-std-bg-5)
-                color: var(--color-std-fg-5)
-            &.warning
-                font-weight: bold
-                background-color: var(--color-acc-bg-3)
-                color: var(--color-acc-fg-5)
-            &.error
-                font-weight: bold
-                background-color: var(--color-sig-bg-3)
-                color: var(--color-sig-fg-5)
         .connection
+            background-color: var(--color-std-bg-3)
+            border: 1px solid var(--color-std-bg-2)
+            border-radius: 4px
+            padding: 4px 8px 4px 8px
             display: flex
             flex-direction: row
             justify-items: center
@@ -1124,9 +1128,11 @@ export default defineComponent({
         })
         ws.addEventListener("open", (ev) => {
             this.connection.online = true
+            this.raiseStatus("info", "WebSocket connection established/opened", 1000)
         })
         ws.addEventListener("close", (ev) => {
             this.connection.online = false
+            this.raiseStatus("error", "WebSocket connection failed/closed", 2000)
         })
         ws.addEventListener("message", (ev: MessageEvent) => {
             this.connection.recv = true
