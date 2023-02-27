@@ -4,7 +4,19 @@
 **  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
 */
 
+import dgram          from "node:dgram"
+import ObjectHash     from "object-hash"
+
+import Argv           from "./app-argv"
+import Log            from "./app-log"
+import RESTWS         from "./app-rest-ws"
+
 import { FreeDState } from "./app-freed-state"
+
+export type FreeDEntry = {
+    hash:  string
+    state: FreeDState | null
+}
 
 const parseSignedInt = (ab: Uint8Array, offset: number) => {
     const val = (ab[offset] << 16) | (ab[offset + 1] << 8) | ab[offset + 2]
@@ -13,8 +25,71 @@ const parseSignedInt = (ab: Uint8Array, offset: number) => {
     return (val & sign) === 0 ? val : -((~(val - 1) & mask) >>> 0)
 }
 
-export class FreeD {
-    static parsePacket (packet: Buffer): FreeDState {
+export default class FreeD {
+    public freedState = new Map<string, FreeDEntry>()
+    public freedPeers = new Map<string, number>()
+    constructor (
+        private argv:   Argv,
+        private log:    Log,
+        private restWS: RESTWS
+    ) {}
+    async init () {
+        /*  determine IP to name mapping  */
+        const freedCams = new Map<string, string>()
+        if (!(typeof this.argv.freedCam === "object" && this.argv.freedCam instanceof Array))
+            this.argv.freedCam = [ this.argv.freedCam ]
+        for (const arg of this.argv.freedCam) {
+            const m = arg.match(/^(.+?):(.+)$/)
+            if (m === null)
+                throw new Error("invalid FreeD camera mapping")
+            freedCams.set(m[1], m[2])
+        }
+
+        /*  establish FreeD receiver  */
+        const freedServer = dgram.createSocket("udp4")
+        freedServer.bind(this.argv.freedPort, this.argv.freedAddr)
+        await new Promise((resolve, reject) => {
+            freedServer.on("listening", () => { resolve(true) })
+        })
+        this.log.log(2, `started FreeD network service: udp://${this.argv.freedAddr}:${this.argv.freedPort}`)
+
+        /*  deliver our state into REST WebSocket  */
+        this.restWS.at("freed-state", (arg: string) => {
+            return (this.freedState.get(arg) as FreeDEntry | undefined)
+        })
+
+        /*  receive FreeD messages  */
+        const objHash = (obj: object | null) => ObjectHash.sha1(obj)
+        for (const cam of freedCams.values())
+            this.freedState.set(cam, { hash: objHash(null), state: null })
+        freedServer.on("message", (packet: Buffer, remote: dgram.RemoteInfo) => {
+            const cam = freedCams.get(remote.address)
+            if (cam !== undefined) {
+                const { pan, tilt, roll, x, y, z, zoom, focus } = this.parsePacket(packet)
+                const state = { pan, tilt, roll, x, y, z, zoom, focus } satisfies FreeDState
+                const hash = objHash(state)
+                if (this.freedState.get(cam)!.hash !== hash) {
+                    this.freedState.set(cam, { hash, state })
+                    this.restWS.notifyCamState(cam, state)
+                }
+                this.freedPeers.set(cam, Date.now())
+            }
+        })
+        setInterval(() => {
+            const now = Date.now()
+            this.freedPeers.forEach((date: number, cam: string) => {
+                if (now > date + 600)
+                    this.freedPeers.delete(cam)
+            })
+            const freedPeersN = this.freedPeers.size
+            if (this.restWS.stats.peers.camera !== freedPeersN) {
+                this.restWS.stats.peers.camera = freedPeersN
+                this.restWS.notifyStats()
+            }
+        }, 600)
+    }
+
+    parsePacket (packet: Buffer): FreeDState {
         const ab = Uint8Array.from(packet)
         if (ab.length !== 29)
             throw new Error("invalid packet length")
@@ -107,4 +182,3 @@ export class FreeD {
         return { id, pan, tilt, roll, x, y, z, zoom, focus, spare1, spare2, checksum } as FreeDState
     }
 }
-
