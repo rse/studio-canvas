@@ -15,7 +15,7 @@ import Argv                from "./app-argv"
 import DB, { Transaction } from "./app-db"
 import REST                from "./app-rest"
 import RESTWS              from "./app-rest-ws"
-import { StateType, StateTypePartial, StateSchemaPartial, StateUtil } from "./app-state"
+import { StateType, StateTypePartial, StateSchemaPartial, StateUtil } from "../common/app-state"
 
 export default class RESTPreset {
     constructor (

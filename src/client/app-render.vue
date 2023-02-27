@@ -30,11 +30,11 @@ import RecWebSocket               from "reconnecting-websocket"
 import Ducky                      from "ducky"
 import axios                      from "axios"
 import CanvasRenderer             from "./app-render"
-import { FreeDState }             from "../server/app-freed-state"
+import { FreeDState }             from "../common/app-freed"
 import {
     StateType, StateTypePartial,
     StateSchema, StateSchemaPartial
-} from "../server/app-state"
+} from "../common/app-state"
 </script>
 
 <script lang="ts">

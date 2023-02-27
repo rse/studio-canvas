@@ -19,7 +19,7 @@ import {
     StateSchema, StateSchemaPartial,
     StateDefault,
     StateUtil
-} from "./app-state"
+} from "../common/app-state"
 
 export default class RESTState {
     constructor (
