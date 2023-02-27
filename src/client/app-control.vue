@@ -1049,7 +1049,7 @@ import {
     StateDefault,
     StatePaths,
     StateUtil
-} from "../server/app-state"
+} from "../common/app-state"
 </script>
 
 <script lang="ts">

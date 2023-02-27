@@ -11,7 +11,7 @@ import Argv           from "./app-argv"
 import Log            from "./app-log"
 import RESTWS         from "./app-rest-ws"
 
-import { FreeDState } from "./app-freed-state"
+import { FreeDState } from "../common/app-freed"
 
 export type FreeDEntry = {
     hash:  string

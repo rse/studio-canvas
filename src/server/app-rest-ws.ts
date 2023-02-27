@@ -13,8 +13,8 @@ import Latching             from "latching"
 
 import { FreeDEntry }       from "./app-freed"
 import REST                 from "./app-rest"
-import { FreeDState }       from "./app-freed-state"
-import { StateTypePartial } from "./app-state"
+import { FreeDState }       from "../common/app-freed"
+import { StateTypePartial } from "../common/app-state"
 
 type wsPeerCtx = { id: string }
 

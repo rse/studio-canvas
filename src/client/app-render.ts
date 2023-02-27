@@ -10,10 +10,8 @@ import                     "@babylonjs/loaders/glTF"
 
 /*  import internal dependencies  */
 import PTZ            from "./app-ptz"
-import { FreeDState } from "../server/app-freed-state"
-import {
-    StateType, StateTypePartial
-} from "../server/app-state"
+import { FreeDState } from "../common/app-freed"
+import { StateType, StateTypePartial } from "../common/app-state"
 
 /*  the canvas rendering class  */
 export default class CanvasRenderer {
