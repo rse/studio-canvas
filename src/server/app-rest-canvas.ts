@@ -14,6 +14,7 @@ import * as HAPI      from "@hapi/hapi"
 import Argv           from "./app-argv"
 import Log            from "./app-log"
 import REST           from "./app-rest"
+import { ImageEntry, ImageSchema } from "../common/app-canvas"
 
 export default class RESTCanvas {
     constructor (
@@ -25,24 +26,6 @@ export default class RESTCanvas {
         /*  serve dedicated canvas files  */
         const canvasDir = this.argv.canvasDir
         const canvasURL = "/canvas"
-        type ImageEntry = {
-            id?:        string
-            name:       string
-            texture1:   string
-            texture2?:  string
-            fadeTrans?: number
-            fadeWait?:  number
-            exclusive?: boolean
-        }
-        const ImageSchema = `{
-            id?:        string,
-            name:       string,
-            texture1:   string,
-            texture2?:  string,
-            fadeTrans?: number,
-            fadeWait?:  number,
-            exclusive?: boolean
-        }`
         this.rest.server!.route({
             method: "GET",
             path: canvasURL,

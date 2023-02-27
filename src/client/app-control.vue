@@ -1043,6 +1043,7 @@ import Toggle              from "@vueform/toggle"
 import axios               from "axios"
 import PerfectScrollbar    from "perfect-scrollbar"
 import { Tabs, Tab }       from "vue3-tabs-component"
+import { ImageEntry }      from "../common/app-canvas"
 import {
     StateType, StateTypePartial,
     StateSchema, StateSchemaPartial,
@@ -1053,15 +1054,6 @@ import {
 </script>
 
 <script lang="ts">
-type ImageEntry = {
-    id?:        string
-    name:       string
-    texture1:   string
-    texture2?:  string
-    fadeTrans?: number
-    fadeWait?:  number
-    exclusive?: boolean
-}
 export const StateFilterKeys = [
     "canvas",
     "monitor",
