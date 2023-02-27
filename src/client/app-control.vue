@@ -1050,7 +1050,6 @@ import {
     StatePaths,
     StateUtil
 } from "../server/app-state"
-import { WindowsMotionController } from "@babylonjs/core"
 </script>
 
 <script lang="ts">
