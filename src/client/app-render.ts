@@ -247,8 +247,9 @@ export default class CanvasRenderer {
         glass.albedoColor          = new BABYLON.Color3(1.0, 1.0, 1.0)
         this.monitorCase.material = glass
 
-        /*  ensure video devices can be enumerated later  */
-        const stream  = await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+        /*  ensure video devices can be enumerated later
+            (we just ignore resulting stream for now)  */
+        await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
 
         /*  further optimizations  */
         // this.scene.freezeActiveMeshes()
@@ -398,7 +399,7 @@ export default class CanvasRenderer {
     async loadMonitor () {
         if (this.monitorDevice === "")
             return
-        const devices = await navigator.mediaDevices.enumerateDevices()
+        const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
         const device = devices.find((device) =>
             device.kind === "videoinput" && device.label === this.monitorDevice)
         if (device === undefined)
@@ -415,7 +416,7 @@ export default class CanvasRenderer {
     async loadDecal () {
         if (this.decalDevice === "")
             return
-        const devices = await navigator.mediaDevices.enumerateDevices()
+        const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
         const device = devices.find((device) =>
             device.kind === "videoinput" && device.label === this.decalDevice)
         if (device === undefined)
