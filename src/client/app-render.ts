@@ -27,11 +27,11 @@ export default class CanvasRenderer {
     private scene:          BABYLON.Nullable<BABYLON.Scene>          = null
     private optimizer:      BABYLON.Nullable<BABYLON.SceneOptimizer> = null
     private camera:         BABYLON.Nullable<BABYLON.FreeCamera>     = null
-    private monitor:        BABYLON.Nullable<BABYLON.Mesh>           = null
+    private monitor:        BABYLON.Nullable<BABYLON.TransformNode>  = null
     private monitorDevice                                            = ""
     private monitorCase:    BABYLON.Nullable<BABYLON.Mesh>           = null
     private monitorDisplay: BABYLON.Nullable<BABYLON.Mesh>           = null
-    private references:     BABYLON.Nullable<BABYLON.Mesh>           = null
+    private references:     BABYLON.Nullable<BABYLON.TransformNode>  = null
     private wall:           BABYLON.Nullable<BABYLON.Mesh>           = null
     private decal:          BABYLON.Nullable<BABYLON.Mesh>           = null
     private decalDevice                                              = ""
@@ -154,18 +154,18 @@ export default class CanvasRenderer {
         this.optimizer = new BABYLON.SceneOptimizer(this.scene, options)
 
         /*  gather reference to reference points  */
-        this.references = this.scene.getNodeById("Reference") as BABYLON.Nullable<BABYLON.Mesh>
+        this.references = this.scene.getNodeByName("Reference") as BABYLON.Nullable<BABYLON.TransformNode>
         if (this.references === null)
             throw new Error("cannot find node 'References'")
         this.references.setEnabled(true)
 
         /*  gather references to spotlight  */
-        this.light1 = this.scene.getLightById("Light-1") as BABYLON.Nullable<BABYLON.PointLight>
-        this.light2 = this.scene.getLightById("Light-2") as BABYLON.Nullable<BABYLON.PointLight>
-        this.light3 = this.scene.getLightById("Light-3") as BABYLON.Nullable<BABYLON.PointLight>
+        this.light1 = this.scene.getLightByName("Light-1") as BABYLON.Nullable<BABYLON.PointLight>
+        this.light2 = this.scene.getLightByName("Light-2") as BABYLON.Nullable<BABYLON.PointLight>
+        this.light3 = this.scene.getLightByName("Light-3") as BABYLON.Nullable<BABYLON.PointLight>
         if (this.light1 === null || this.light2 === null || this.light3 === null)
             throw new Error("cannot find lights nodes")
-        this.wall = this.scene.getNodeById("Wall") as BABYLON.Nullable<BABYLON.Mesh>
+        this.wall = this.scene.getMeshByName("Wall") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.wall === null)
             throw new Error("cannot find wall node")
 
@@ -173,9 +173,9 @@ export default class CanvasRenderer {
         this.decalGenerate()
 
         /*  gather references to monitor mesh nodes  */
-        this.monitor        = this.scene.getNodeById("Monitor")        as BABYLON.Nullable<BABYLON.Mesh>
-        this.monitorCase    = this.scene.getNodeById("Monitor-Case")   as BABYLON.Nullable<BABYLON.Mesh>
-        this.monitorDisplay = this.scene.getNodeById("Monitor-Screen") as BABYLON.Nullable<BABYLON.Mesh>
+        this.monitor        = this.scene.getNodeByName("Monitor")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.monitorCase    = this.scene.getMeshByName("Monitor-Case")   as BABYLON.Nullable<BABYLON.Mesh>
+        this.monitorDisplay = this.scene.getMeshByName("Monitor-Screen") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.monitor === null || this.monitorCase === null || this.monitorDisplay === null)
             throw new Error("cannot find monitor mesh nodes")
 
@@ -432,8 +432,8 @@ export default class CanvasRenderer {
         const oldDecal = this.decal
 
         /*  determine position, normal vector and size  */
-        const rayBegin = this.scene!.getMeshById("DecalRay-Begin") as BABYLON.Nullable<BABYLON.Mesh>
-        const rayEnd   = this.scene!.getMeshById("DecalRay-End")   as BABYLON.Nullable<BABYLON.Mesh>
+        const rayBegin = this.scene!.getMeshByName("DecalRay-Begin") as BABYLON.Nullable<BABYLON.Mesh>
+        const rayEnd   = this.scene!.getMeshByName("DecalRay-End")   as BABYLON.Nullable<BABYLON.Mesh>
         if (rayBegin === null || rayEnd === null)
             throw new Error("cannot find 'DecalRay-Begin' and 'DecalRay-End' nodes")
         if (rayBegin.isEnabled())
