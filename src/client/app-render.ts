@@ -438,7 +438,7 @@ export default class CanvasRenderer {
         let rayDirection = rayEndPos.subtract(rayBeginPos).normalize()
         rayDirection = rotateVector(rayDirection, this.ptz.deg2rad(-this.decalLift),
             this.ptz.deg2rad(this.decalRotate), this.ptz.deg2rad(-this.decalLift))
-        const ray = new BABYLON.Ray(rayBeginPos, rayDirection, 10)
+        const ray = new BABYLON.Ray(rayBeginPos, rayDirection, 10 /* meters, enough to be behind wall */)
         const decalBase = this.scene!.pickWithRay(ray, (mesh) => (mesh === this.wall!))
         if (decalBase === null)
             throw new Error("cannot find decal base position on wall")
