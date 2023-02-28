@@ -63,6 +63,8 @@ export default class CanvasRenderer {
     private ptzKeys      = false
     private state: FreeDState | null = null
     private fadeTimer: ReturnType<typeof setTimeout> | null = null
+    private wallWidth  = 10540
+    private wallHeight =  3570
 
     /*  (re-)configure camera (by name) and options (by URL)  */
     configure (params: {
@@ -324,7 +326,7 @@ export default class CanvasRenderer {
 
             /*  create and apply composed texture  */
             this.texture3 = this.material.createProceduralTexture(
-                { width: 11900, height: 3570 }, this.scene!)
+                { width: this.wallWidth, height: this.wallHeight }, this.scene!)
             wall.albedoTexture = this.texture3
 
             /*  perform cross-fadings between textures  */
