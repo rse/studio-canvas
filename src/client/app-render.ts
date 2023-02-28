@@ -16,28 +16,38 @@ import { StateType, StateTypePartial } from "../common/app-state"
 /*  the canvas rendering class  */
 export default class CanvasRenderer {
     /*  internal parameter state  */
+    private ptzFreeD    = false
+    private ptzKeys     = false
     private cameraName  = ""
     private texture1URL = ""
     private texture2URL = ""
     private fadeTrans   = 2  * 1000
     private fadeWait    = 10 * 1000
+    private decalRotate = 0.0
+    private decalLift   = 0.0
+    private decalScale  = 1.0
+    private monitorBase = {
+        scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
+        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
+        rotationY:     0, positionY:     0
+    }
 
-    /*  internal rendering state  */
+    /*  effectively constant values  */
+    private fps         = 30
+    private wallWidth   = 10540
+    private wallHeight  = 3570
+
+    /*  rendering object references  */
     private engine:         BABYLON.Nullable<BABYLON.Engine>         = null
     private scene:          BABYLON.Nullable<BABYLON.Scene>          = null
     private optimizer:      BABYLON.Nullable<BABYLON.SceneOptimizer> = null
     private camera:         BABYLON.Nullable<BABYLON.FreeCamera>     = null
     private monitor:        BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private monitorDevice                                            = ""
     private monitorCase:    BABYLON.Nullable<BABYLON.Mesh>           = null
     private monitorDisplay: BABYLON.Nullable<BABYLON.Mesh>           = null
     private references:     BABYLON.Nullable<BABYLON.TransformNode>  = null
     private wall:           BABYLON.Nullable<BABYLON.Mesh>           = null
     private decal:          BABYLON.Nullable<BABYLON.Mesh>           = null
-    private decalDevice                                              = ""
-    private decalRotate                                              = 0.0
-    private decalLift                                                = 0.0
-    private decalScale                                               = 1.0
     private light1:         BABYLON.Nullable<BABYLON.PointLight>     = null
     private light2:         BABYLON.Nullable<BABYLON.PointLight>     = null
     private light3:         BABYLON.Nullable<BABYLON.PointLight>     = null
@@ -45,36 +55,21 @@ export default class CanvasRenderer {
     private texture1:       BABYLON.Nullable<BABYLON.Texture>        = null
     private texture2:       BABYLON.Nullable<BABYLON.Texture>        = null
     private texture3:       BABYLON.Nullable<BABYLON.Texture>        = null
-    private fps                                                      = 30
-    private monitorBase = {
-        scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
-        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationY:     0, positionY:     0
-    }
-    private decalBase = {
-        scaleX: 0, scaleY: 0, scaleZ: 0, positionY: 0
-    }
-    private renderOnce = () => {
-        if (this.scene !== null)
-            this.scene.render()
-    }
+
+    /*  PTZ sub-module  */
     private ptz = new PTZ()
-    private ptzFreeD     = false
-    private ptzKeys      = false
+
+    /*  FreeD state  */
     private state: FreeDState | null = null
+
+    /*  cross-fade timer  */
     private fadeTimer: ReturnType<typeof setTimeout> | null = null
-    private wallWidth  = 10540
-    private wallHeight =  3570
 
     /*  (re-)configure camera (by name) and options (by URL)  */
-    configure (params: {
-        camera?:    string,
-        ptzFreeD?:  boolean,
-        ptzKeys?:   boolean
-    } = {}) {
-        this.cameraName   = params.camera   ?? this.cameraName
-        this.ptzFreeD     = params.ptzFreeD ?? this.ptzFreeD
-        this.ptzKeys      = params.ptzKeys  ?? this.ptzKeys
+    configure (params: { camera?: string, ptzFreeD?: boolean, ptzKeys?: boolean } = {}) {
+        this.cameraName = params.camera   ?? this.cameraName
+        this.ptzFreeD   = params.ptzFreeD ?? this.ptzFreeD
+        this.ptzKeys    = params.ptzKeys  ?? this.ptzKeys
     }
 
     /*  initially establish rendering engine and scene  */
@@ -255,6 +250,12 @@ export default class CanvasRenderer {
         // this.scene.freezeActiveMeshes()
     }
 
+    /*  render the scene once  */
+    private renderOnce = () => {
+        if (this.scene !== null)
+            this.scene.render()
+    }
+
     /*  start/stop renderer  */
     async start () {
         /*  start render loop and scene optimizer  */
@@ -412,6 +413,13 @@ export default class CanvasRenderer {
         })
     }
 
+    /*  unload video stream  */
+    async unloadVideoStream (mesh: BABYLON.Mesh) {
+        const material = mesh.material as BABYLON.PBRMaterial
+        material.albedoTexture?.dispose()
+        material.albedoTexture = null
+    }
+
     /*  (re-)generate the decal  */
     async decalGenerate () {
         /*  remember potentially old decal  */
@@ -502,8 +510,8 @@ export default class CanvasRenderer {
                 this.monitor.setEnabled(state.monitor.enable)
             if (state.monitor.device !== undefined) {
                 await this.stop()
-                this.monitorDevice = state.monitor.device
-                await this.loadVideoStream(this.monitorDisplay!, this.monitorDevice)
+                await this.unloadVideoStream(this.monitorDisplay!)
+                await this.loadVideoStream(this.monitorDisplay!, state.monitor.device)
                 await this.start()
             }
             if (state.monitor.scale !== undefined) {
@@ -529,8 +537,8 @@ export default class CanvasRenderer {
                 this.decal.setEnabled(state.decal.enable)
             if (state.decal.device !== undefined) {
                 await this.stop()
-                this.decalDevice = state.decal.device
-                await this.loadVideoStream(this.decal!, this.decalDevice)
+                await this.unloadVideoStream(this.decal!)
+                await this.loadVideoStream(this.decal!, state.decal.device)
                 await this.start()
             }
             if (state.decal.rotate !== undefined || state.decal.lift !== undefined || state.decal.scale !== undefined) {
