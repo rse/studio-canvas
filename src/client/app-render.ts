@@ -253,8 +253,10 @@ export default class CanvasRenderer {
 
     /*  load canvas/wall texture(s)  */
     async loadWall () {
+        /*  sanity check situation  */
         if (this.texture1URL === "")
             return
+
         /*  apply static (one image) or dynamic (two images) texture to wall  */
         this.texture1 = new BABYLON.Texture(this.texture1URL, this.scene, false, false)
         this.texture2 = this.texture2URL !== "" ? new BABYLON.Texture(this.texture2URL, this.scene, false, false) : null
