@@ -177,48 +177,25 @@ export default class CanvasRenderer {
             throw new Error("cannot find monitor mesh nodes")
 
         /*  setup light shadow casting the display onto the wall  */
-        this.light1.intensityMode = BABYLON.PointLight.INTENSITYMODE_LUMINOUSPOWER
-        this.light1.intensity = 0
-        this.light1.shadowMinZ = 1.0
-        this.light1.shadowMaxZ = 5.0
-        this.light1.radius = 0.25
-        this.light2.intensityMode = BABYLON.PointLight.INTENSITYMODE_LUMINOUSPOWER
-        this.light2.intensity = 0
-        this.light2.shadowMinZ = 1.0
-        this.light2.shadowMaxZ = 5.0
-        this.light2.radius = 0.50
-        this.light3.intensityMode = BABYLON.PointLight.INTENSITYMODE_LUMINOUSPOWER
-        this.light3.intensity = 0
-        this.light3.shadowMinZ = 1.0
-        this.light3.shadowMaxZ = 5.0
-        this.light3.radius = 0.25
-        const sg1 = new BABYLON.ShadowGenerator(512, this.light1)
-        sg1.usePoissonSampling               = false
-        sg1.useExponentialShadowMap          = false
-        sg1.useBlurExponentialShadowMap      = false
-        sg1.useCloseExponentialShadowMap     = false
-        sg1.useBlurCloseExponentialShadowMap = false
-        sg1.usePercentageCloserFiltering     = true
-        sg1.addShadowCaster(this.monitorDisplay)
-        sg1.addShadowCaster(this.monitorCase)
-        const sg2 = new BABYLON.ShadowGenerator(512, this.light2)
-        sg2.usePoissonSampling               = false
-        sg2.useExponentialShadowMap          = false
-        sg2.useBlurExponentialShadowMap      = false
-        sg2.useCloseExponentialShadowMap     = false
-        sg2.useBlurCloseExponentialShadowMap = false
-        sg2.usePercentageCloserFiltering     = true
-        sg2.addShadowCaster(this.monitorDisplay)
-        sg2.addShadowCaster(this.monitorCase)
-        const sg3 = new BABYLON.ShadowGenerator(512, this.light3)
-        sg3.usePoissonSampling               = false
-        sg3.useExponentialShadowMap          = false
-        sg3.useBlurExponentialShadowMap      = false
-        sg3.useCloseExponentialShadowMap     = false
-        sg3.useBlurCloseExponentialShadowMap = false
-        sg3.usePercentageCloserFiltering     = true
-        sg3.addShadowCaster(this.monitorDisplay)
-        sg3.addShadowCaster(this.monitorCase)
+        const setupLight = (light: BABYLON.PointLight) => {
+            light.intensityMode = BABYLON.PointLight.INTENSITYMODE_LUMINOUSPOWER
+            light.intensity  = 0
+            light.shadowMinZ = 1.0
+            light.shadowMaxZ = 5.0
+            light.radius     = 0.25
+            const sg = new BABYLON.ShadowGenerator(512, light)
+            sg.usePoissonSampling               = false
+            sg.useExponentialShadowMap          = false
+            sg.useBlurExponentialShadowMap      = false
+            sg.useCloseExponentialShadowMap     = false
+            sg.useBlurCloseExponentialShadowMap = false
+            sg.usePercentageCloserFiltering     = true
+            sg.addShadowCaster(this.monitorDisplay!)
+            sg.addShadowCaster(this.monitorCase!)
+        }
+        setupLight(this.light1)
+        setupLight(this.light2)
+        setupLight(this.light3)
         this.wall.receiveShadows = true
 
         /*  initialize monitor base values  */
