@@ -395,35 +395,18 @@ export default class CanvasRenderer {
         }
     }
 
-    /*  load monitor video stream  */
-    async loadMonitor () {
-        if (this.monitorDevice === "")
+    /*  load video stream (and apply onto monitor/decal mesh)  */
+    async loadVideoStream (mesh: BABYLON.Mesh, label: string) {
+        if (label === "")
             return
         const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
         const device = devices.find((device) =>
-            device.kind === "videoinput" && device.label === this.monitorDevice)
+            device.kind === "videoinput" && device.label === label)
         if (device === undefined)
             return
         return BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!,
             { deviceId: device.deviceId } as any, false, false).then((vt) => {
-            const material = this.monitorDisplay!.material as BABYLON.PBRMaterial
-            material.albedoTexture = vt
-            material.unlit = true
-        })
-    }
-
-    /*  load decal video stream  */
-    async loadDecal () {
-        if (this.decalDevice === "")
-            return
-        const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
-        const device = devices.find((device) =>
-            device.kind === "videoinput" && device.label === this.decalDevice)
-        if (device === undefined)
-            return
-        return BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!,
-            { deviceId: device.deviceId } as any, false, false).then((vt) => {
-            const material = this.decal!.material as BABYLON.PBRMaterial
+            const material = mesh.material as BABYLON.PBRMaterial
             material.albedoTexture = vt
             material.unlit = true
         })
@@ -522,7 +505,7 @@ export default class CanvasRenderer {
             if (state.monitor.device !== undefined) {
                 await this.stop()
                 this.monitorDevice = state.monitor.device
-                await this.loadMonitor()
+                await this.loadVideoStream(this.monitorDisplay!, this.monitorDevice)
                 await this.start()
             }
             if (state.monitor.scale !== undefined) {
@@ -549,7 +532,7 @@ export default class CanvasRenderer {
             if (state.decal.device !== undefined) {
                 await this.stop()
                 this.decalDevice = state.decal.device
-                await this.loadDecal()
+                await this.loadVideoStream(this.decal!, this.decalDevice)
                 await this.start()
             }
             if (state.decal.rotate !== undefined || state.decal.lift !== undefined || state.decal.scale !== undefined) {
