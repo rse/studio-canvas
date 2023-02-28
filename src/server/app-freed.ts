@@ -174,7 +174,7 @@ export default class FreeD {
 
         /*  checksum  */
         const checksum = ab[28]
-        let cs = 40
+        let cs = 0x40
         for (let i = 0; i < ab.length - 1; i++)
             cs = (cs - ab[i]) % 256
         // FIXME: compare checksum with cs
