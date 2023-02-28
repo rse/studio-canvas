@@ -421,7 +421,7 @@ export default class CanvasRenderer {
         const rayBegin = this.scene!.getMeshByName("DecalRay-Begin") as BABYLON.Nullable<BABYLON.Mesh>
         const rayEnd   = this.scene!.getMeshByName("DecalRay-End")   as BABYLON.Nullable<BABYLON.Mesh>
         if (rayBegin === null || rayEnd === null)
-            throw new Error("cannot find 'DecalRay-Begin' and 'DecalRay-End' nodes")
+            throw new Error("cannot find 'DecalRay-Begin' or 'DecalRay-End' nodes")
         if (rayBegin.isEnabled())
             rayBegin.setEnabled(false)
         if (rayEnd.isEnabled())
