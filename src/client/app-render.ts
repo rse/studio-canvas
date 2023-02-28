@@ -636,52 +636,37 @@ export default class CanvasRenderer {
             return
 
         /*  pan  */
-        if (key === "ArrowLeft") {
-            this.camera!.rotation.y += this.ptz.panStep
+        if (key === "ArrowLeft")
             this.camera!.rotation.y =
-                Math.min(this.camera!.rotation.y, this.ptz.panP2V(this.ptz.panMinDeg))
-        }
-        else if (key === "ArrowRight") {
-            this.camera!.rotation.y -= this.ptz.panStep
+                Math.min(this.camera!.rotation.y + this.ptz.panStep, this.ptz.panP2V(this.ptz.panMinDeg))
+        else if (key === "ArrowRight")
             this.camera!.rotation.y =
-                Math.max(this.camera!.rotation.y, this.ptz.panP2V(this.ptz.panMaxDeg))
-        }
+                Math.max(this.camera!.rotation.y - this.ptz.panStep, this.ptz.panP2V(this.ptz.panMaxDeg))
 
         /*  tilt  */
-        else if (key === "ArrowDown") {
-            this.camera!.rotation.x += this.ptz.tiltStep
+        else if (key === "ArrowDown")
             this.camera!.rotation.x =
-                Math.min(this.camera!.rotation.x, this.ptz.tiltP2V(this.ptz.tiltMinDeg))
-        }
-        else if (key === "ArrowUp") {
-            this.camera!.rotation.x -= this.ptz.tiltStep
+                Math.min(this.camera!.rotation.x + this.ptz.tiltStep, this.ptz.tiltP2V(this.ptz.tiltMinDeg))
+        else if (key === "ArrowUp")
             this.camera!.rotation.x =
-                Math.max(this.camera!.rotation.x, this.ptz.tiltP2V(this.ptz.tiltMaxDeg))
-        }
+                Math.max(this.camera!.rotation.x - this.ptz.tiltStep, this.ptz.tiltP2V(this.ptz.tiltMaxDeg))
 
         /*  rotate  */
-        else if (key === "+") {
-            this.camera!.rotation.z += this.ptz.rotateStep
+        else if (key === "+")
             this.camera!.rotation.z =
-                Math.min(this.camera!.rotation.z, this.ptz.rotateP2V(this.ptz.rotateMinDeg))
-        }
-        else if (key === "-") {
-            this.camera!.rotation.z -= this.ptz.rotateStep
+                Math.min(this.camera!.rotation.z + this.ptz.rotateStep, this.ptz.rotateP2V(this.ptz.rotateMinDeg))
+        else if (key === "-")
             this.camera!.rotation.z =
-                Math.max(this.camera!.rotation.z, this.ptz.rotateP2V(this.ptz.rotateMaxDeg))
-        }
+                Math.max(this.camera!.rotation.z - this.ptz.rotateStep, this.ptz.rotateP2V(this.ptz.rotateMaxDeg))
 
         /*  zoom  */
         else if (key === "PageUp") {
-            this.camera!.fov -= this.ptz.zoomStep
             this.camera!.fov =
-                Math.max(this.camera!.fov, this.ptz.zoomP2V(this.ptz.zoomMax))
+                Math.max(this.camera!.fov - this.ptz.zoomStep, this.ptz.zoomP2V(this.ptz.zoomMax))
         }
-        else if (key === "PageDown") {
-            this.camera!.fov += this.ptz.zoomStep
+        else if (key === "PageDown")
             this.camera!.fov =
-                Math.min(this.camera!.fov, this.ptz.zoomP2V(this.ptz.zoomMin))
-        }
+                Math.min(this.camera!.fov + this.ptz.zoomStep, this.ptz.zoomP2V(this.ptz.zoomMin))
 
         /*  reset  */
         else if (key === "Home") {
