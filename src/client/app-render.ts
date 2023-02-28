@@ -668,10 +668,9 @@ export default class CanvasRenderer {
                 Math.max(this.camera!.rotation.z - this.ptz.rotateStep, this.ptz.rotateP2V(this.ptz.rotateMaxDeg))
 
         /*  zoom  */
-        else if (key === "PageUp") {
+        else if (key === "PageUp")
             this.camera!.fov =
                 Math.max(this.camera!.fov - this.ptz.zoomStep, this.ptz.zoomP2V(this.ptz.zoomMax))
-        }
         else if (key === "PageDown")
             this.camera!.fov =
                 Math.min(this.camera!.fov + this.ptz.zoomStep, this.ptz.zoomP2V(this.ptz.zoomMin))
