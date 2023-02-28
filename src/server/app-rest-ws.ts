@@ -16,8 +16,9 @@ import REST                 from "./app-rest"
 import { FreeDState }       from "../common/app-freed"
 import { StateTypePartial } from "../common/app-state"
 
-type wsPeerCtx = { id: string }
-
+type wsPeerCtx = {
+    id: string
+}
 type wsPeerInfo = {
     ctx:        wsPeerCtx
     ws:         WebSocket
@@ -27,8 +28,10 @@ type wsPeerInfo = {
 }
 
 export default class RESTWS extends Latching {
-    /*  statistics gathering  */
+    /*  peer tracking  */
     private wsPeers = new Map<string, wsPeerInfo>()
+
+    /*  statistics gathering  */
     public stats = {
         peers: {
             camera:  0,
@@ -36,12 +39,15 @@ export default class RESTWS extends Latching {
             control: 0
         }
     }
+
+    /*  creation  */
     constructor (
         private rest: REST
     ) {
         super()
     }
 
+    /*  initialization  */
     async init () {
         /*  serve WebSocket connections  */
         this.rest.server!.route({
@@ -106,17 +112,22 @@ export default class RESTWS extends Latching {
         })
     }
 
+    /*  notify clients about camera state change  */
     notifyCamState (cam: string, state: FreeDState | null) {
         const msg = JSON.stringify({ cmd: "PTZ", arg: { cam, state } })
         for (const info of this.wsPeers.values())
             if (info.subscribed.get(cam))
                 info.ws.send(msg)
     }
+
+    /*  notify clients about scene state change  */
     notifySceneState (state: StateTypePartial) {
         const msg = JSON.stringify({ cmd: "STATE", arg: { state } })
         for (const info of this.wsPeers.values())
             info.ws.send(msg)
     }
+
+    /*  notify clients about statistics change  */
     notifyStats () {
         const msg = JSON.stringify({ cmd: "STATS", arg: { stats: this.stats } })
         for (const info of this.wsPeers.values())
