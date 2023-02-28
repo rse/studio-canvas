@@ -222,9 +222,6 @@ export default class CanvasRenderer {
         /*  ensure video devices can be enumerated later
             (we just ignore resulting stream for now)  */
         await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
-
-        /*  further optimizations  */
-        // this.scene.freezeActiveMeshes()
     }
 
     /*  render the scene once  */
