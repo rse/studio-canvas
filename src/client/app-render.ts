@@ -422,10 +422,8 @@ export default class CanvasRenderer {
         const rayEnd   = this.scene!.getMeshByName("DecalRay-End")   as BABYLON.Nullable<BABYLON.Mesh>
         if (rayBegin === null || rayEnd === null)
             throw new Error("cannot find 'DecalRay-Begin' or 'DecalRay-End' nodes")
-        if (rayBegin.isEnabled())
-            rayBegin.setEnabled(false)
-        if (rayEnd.isEnabled())
-            rayEnd.setEnabled(false)
+        rayBegin.setEnabled(false)
+        rayEnd.setEnabled(false)
 
         /*  helper function for rotating a Vector3 by Euler angles  */
         const rotateVector = (vec: BABYLON.Vector3, x: number, y: number, z: number) => {
