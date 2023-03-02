@@ -25,9 +25,9 @@ scripts:
     #  code compilation/transpiling (building)
     build:                  nps -c etc/nps.yaml build-client build-server
     build-dev:              nps -c etc/nps.yaml build-client-dev build-server-dev
-    build-client:           NODE_OPTIONS=--max-old-space-size=8192 vite --config etc/vite-client.ts build --logLevel info --mode production
-    build-client-dev:       NODE_OPTIONS=--max-old-space-size=8192 vite --config etc/vite-client.ts build --logLevel info --mode development
-    build-client-dev-watch: NODE_OPTIONS=--max-old-space-size=8192 vite --config etc/vite-client.ts build --logLevel info --mode development --watch
+    build-client:           cross-env NODE_OPTIONS=--max-old-space-size=8192 vite --config etc/vite-client.ts build --logLevel info --mode production
+    build-client-dev:       cross-env NODE_OPTIONS=--max-old-space-size=8192 vite --config etc/vite-client.ts build --logLevel info --mode development
+    build-client-dev-watch: cross-env NODE_OPTIONS=--max-old-space-size=8192 vite --config etc/vite-client.ts build --logLevel info --mode development --watch
     build-server:           tsc --project etc/tsc-server.json
     build-server-dev:       tsc --project etc/tsc-server.json --sourceMap
     build-server-dev-watch: tsc --project etc/tsc-server.json --sourceMap --watch
