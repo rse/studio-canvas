@@ -10,7 +10,7 @@
     <div class="app-control">
         <!--  HEADER  -->
         <div class="head">
-            CANVAS SCENE CONTROL
+            STUDIO CANVAS CONTROL
             <div class="stats">
                 <span class="icon"><i class="fa fa-video"></i></span>
                 <span class="figure">{{ stats.peers.camera }}</span>
