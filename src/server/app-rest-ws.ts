@@ -13,6 +13,7 @@ import Latching             from "latching"
 
 import { FreeDEntry }       from "./app-freed"
 import REST                 from "./app-rest"
+import { MixerState }       from "../common/app-mixer"
 import { FreeDState }       from "../common/app-freed"
 import { StateTypePartial } from "../common/app-state"
 
@@ -123,6 +124,13 @@ export default class RESTWS extends Latching {
     /*  notify clients about scene state change  */
     notifySceneState (state: StateTypePartial) {
         const msg = JSON.stringify({ cmd: "STATE", arg: { state } })
+        for (const info of this.wsPeers.values())
+            info.ws.send(msg)
+    }
+
+    /*  notify clients about mixer change  */
+    notifyMixerState (mixer: MixerState) {
+        const msg = JSON.stringify({ cmd: "MIXER", arg: { mixer } })
         for (const info of this.wsPeers.values())
             info.ws.send(msg)
     }

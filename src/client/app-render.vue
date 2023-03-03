@@ -30,6 +30,7 @@ import RecWebSocket               from "reconnecting-websocket"
 import Ducky                      from "ducky"
 import axios                      from "axios"
 import CanvasRenderer             from "./app-render"
+import { MixerState }             from "../common/app-mixer"
 import { FreeDState }             from "../common/app-freed"
 import {
     StateType, StateTypePartial,
@@ -105,6 +106,10 @@ export default defineComponent({
                     }, 0)
                 }
             }
+            else if (data.cmd === "MIXER") {
+                const mixer = data.arg.mixer as MixerState
+                renderer!.reflectMixerState(mixer)
+            }
         })
 
         /*  load scene state once  */
@@ -117,8 +122,16 @@ export default defineComponent({
         const errors = [] as Array<string>
         if (!Ducky.validate(state, StateSchema, errors))
             throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
-        if (renderer !== null)
-            await renderer.reflectSceneState(state as StateType)
+        await renderer.reflectSceneState(state as StateType)
+
+        /*  load mixer state once  */
+        const mixer = await axios({
+            method: "GET",
+            url:    `${this.serviceUrl}mixer/state`
+        }).then((response) => response.data).catch(() => null)
+        if (mixer === null)
+            throw new Error("failed to load mixer state")
+        await renderer.reflectMixerState(mixer as MixerState)
     }
 })
 </script>

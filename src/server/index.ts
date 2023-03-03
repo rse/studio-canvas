@@ -16,6 +16,7 @@ import REST           from "./app-rest"
 import RESTCanvas     from "./app-rest-canvas"
 import RESTState      from "./app-rest-state"
 import RESTPreset     from "./app-rest-preset"
+import RESTMixer      from "./app-rest-mixer"
 import RESTWS         from "./app-rest-ws"
 import DB             from "./app-db"
 
@@ -39,6 +40,7 @@ import DB             from "./app-db"
         restCanvas: awilix.asClass(RESTCanvas ).setLifetime(awilix.Lifetime.SINGLETON),
         restState:  awilix.asClass(RESTState  ).setLifetime(awilix.Lifetime.SINGLETON),
         restPreset: awilix.asClass(RESTPreset ).setLifetime(awilix.Lifetime.SINGLETON),
+        restMixer:  awilix.asClass(RESTMixer  ).setLifetime(awilix.Lifetime.SINGLETON),
         restWS:     awilix.asClass(RESTWS     ).setLifetime(awilix.Lifetime.SINGLETON)
     })
 
@@ -52,6 +54,7 @@ import DB             from "./app-db"
     await container.cradle.restCanvas.init()
     await container.cradle.restState.init()
     await container.cradle.restPreset.init()
+    await container.cradle.restMixer.init()
     await container.cradle.restWS.init()
 
     /*  start classes  */
