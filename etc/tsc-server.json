@@ -19,6 +19,7 @@
 	"include": [
         "../src/server/**/*.d.ts",
 		"../src/server/**/*.ts",
+		"../src/common/**/*.ts",
 		"../package.json"
     ]
 }
