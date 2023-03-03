@@ -5,13 +5,13 @@ canvas:
     fadeTrans: 1500
     fadeWait: 10000
 monitor:
-    enable: true
+    enable: false
     device: ""
     scale: 1
     rotate: 6.2
     lift: 0
 decal:
-    enable: true
+    enable: false
     device: ""
     scale: 1
     rotate: -24.96
@@ -69,5 +69,5 @@ CAM4:
         m: 1
 renderer:
     program: 30
-    preview: 15
+    preview: 5
     other: 0
