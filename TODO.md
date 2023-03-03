@@ -11,3 +11,5 @@ TODO
 
 - allow rendering to be suspended/resumes at all
 
+- sync cross-fade
+
