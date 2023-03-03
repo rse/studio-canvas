@@ -7,9 +7,7 @@ TODO
   y-rotate -9.06 (CAM2) +1.13 (CAM3)
   fov 2.4?
 
-- allow fps to be reduced
-
-- allow rendering to be suspended/resumes at all
-
 - sync cross-fade
+
+- vMix sometimes does not load the scene
 
