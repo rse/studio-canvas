@@ -398,7 +398,7 @@ export default class CanvasRenderer {
         const device = devices.find((device) =>
             device.kind === "videoinput" && device.label === label)
         if (device === undefined) {
-            material.albedoColor = new BABYLON.Color3(0.05, 0.05, 0.05)
+            material.albedoColor = new BABYLON.Color3(1.00, 1.00, 1.00)
             material.albedoTexture = null
             material.unlit = true
         }
