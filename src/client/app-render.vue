@@ -59,7 +59,7 @@ export default defineComponent({
         })
         const canvas = this.$refs.canvas as HTMLCanvasElement
         await renderer.establish(canvas)
-        renderer.start()
+        await renderer.start()
 
         /*  connect to server for PTZ and state updates  */
         const ws = new RecWebSocket(this.wsUrl + "/render", [], {
@@ -123,6 +123,10 @@ export default defineComponent({
         if (!Ducky.validate(state, StateSchema, errors))
             throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
         await renderer.reflectSceneState(state as StateType)
+
+        /*  give renderer time to initially render the scence
+            (before we potentially cause 0 FPS in the next step)  */
+        await new Promise((resolve) => setTimeout(resolve, 2000))
 
         /*  load mixer state once  */
         const mixer = await axios({
