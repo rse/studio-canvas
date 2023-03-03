@@ -234,7 +234,7 @@ export default class CanvasRenderer {
 
         /*  ensure video devices can be enumerated later
             (we just ignore resulting stream for now)  */
-        await navigator.mediaDevices.getUserMedia({ audio: true, video: true })
+        await navigator.mediaDevices.getUserMedia({ audio: true, video: true }).catch(() => {})
     }
 
     /*  render the scene once  */
@@ -393,19 +393,22 @@ export default class CanvasRenderer {
 
     /*  load video stream (and apply onto monitor/decal mesh)  */
     async loadVideoStream (mesh: BABYLON.Mesh, label: string) {
-        if (label === "")
-            return
+        const material = mesh.material as BABYLON.PBRMaterial
         const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
         const device = devices.find((device) =>
             device.kind === "videoinput" && device.label === label)
-        if (device === undefined)
-            return
-        return BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!,
-            { deviceId: device.deviceId } as any, false, false).then((vt) => {
-            const material = mesh.material as BABYLON.PBRMaterial
-            material.albedoTexture = vt
+        if (device === undefined) {
+            material.albedoColor = new BABYLON.Color3(0.05, 0.05, 0.05)
+            material.albedoTexture = null
             material.unlit = true
-        })
+        }
+        else {
+            await BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!,
+                { deviceId: device.deviceId } as any, false, false).then((vt) => {
+                material.albedoTexture = vt
+                material.unlit = true
+            })
+        }
     }
 
     /*  unload video stream  */

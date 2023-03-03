@@ -11,5 +11,3 @@ TODO
 
 - vMix sometimes does not load the scene
 
-- do not break if video texture fails
-
