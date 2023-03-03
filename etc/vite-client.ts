@@ -26,10 +26,10 @@ export default Vite.defineConfig(({ command, mode, ssrBuild }) => ({
     build: {
         outDir:                 "../../dst/client",
         assetsDir:              "",
-        emptyOutDir:            true,
+        emptyOutDir:            (mode === "production"),
         chunkSizeWarningLimit:  6000,
         assetsInlineLimit:      0,
-        sourcemap:              mode === "development",
+        sourcemap:              (mode === "development"),
         rollupOptions: {
             input: "src/client/index.html",
             output: {
