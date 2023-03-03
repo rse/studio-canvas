@@ -19,7 +19,8 @@
     "include": [
         "../src/client/**/*.d.ts",
 		"../src/client/**/*.ts",
-		"../src/client/**/*.vue"
+		"../src/client/**/*.vue",
+		"../src/common/**/*.ts"
     ],
     "references": [
         { "path": "./tsc.node.json" }
