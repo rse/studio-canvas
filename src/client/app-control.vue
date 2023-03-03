@@ -1284,7 +1284,7 @@ export default defineComponent({
                 CAM4:       true,
                 renderer:   true
             } as StateFilterType,
-            slot: 0,
+            slot: 1,
             status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         state: StateDefault as StateType,
