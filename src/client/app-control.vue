@@ -35,58 +35,68 @@
                     </div>
                     <div class="presets">
                         <div class="slots">
-                            <div class="button" v-bind:class="{ selected: preset.slot === 1 }"
-                                v-on:click="preset.slot = 1">
+                            <div class="button" v-bind:class="{ selected: preset.slot === 0 }"
+                                v-on:click="preset.slot = 0">
                                 1
                                 <div class="badge" v-bind:class="presetStatus2Class(0)">{{ preset.status[0] }}</div>
                             </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 2 }"
-                                v-on:click="preset.slot = 2">
+                            <div class="button" v-bind:class="{ selected: preset.slot === 1 }"
+                                v-on:click="preset.slot = 1">
                                 2
                                 <div class="badge" v-bind:class="presetStatus2Class(1)">{{ preset.status[1] }}</div>
                             </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 3 }"
-                                v-on:click="preset.slot = 3">
+                            <div class="button" v-bind:class="{ selected: preset.slot === 2 }"
+                                v-on:click="preset.slot = 2">
                                 3
                                 <div class="badge" v-bind:class="presetStatus2Class(2)">{{ preset.status[2] }}</div>
                             </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 4 }"
-                                v-on:click="preset.slot = 4">
+                            <div class="button" v-bind:class="{ selected: preset.slot === 3 }"
+                                v-on:click="preset.slot = 3">
                                 4
                                 <div class="badge" v-bind:class="presetStatus2Class(3)">{{ preset.status[3] }}</div>
                             </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 5 }"
-                                v-on:click="preset.slot = 5">
+                            <div class="button" v-bind:class="{ selected: preset.slot === 4 }"
+                                v-on:click="preset.slot = 4">
                                 5
                                 <div class="badge" v-bind:class="presetStatus2Class(4)">{{ preset.status[4] }}</div>
                             </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 6 }"
-                                v-on:click="preset.slot = 6">
+                            <div class="button" v-bind:class="{ selected: preset.slot === 5 }"
+                                v-on:click="preset.slot = 5">
                                 6
                                 <div class="badge" v-bind:class="presetStatus2Class(5)">{{ preset.status[5] }}</div>
                             </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 7 }"
-                                v-on:click="preset.slot = 7">
+                            <div class="button" v-bind:class="{ selected: preset.slot === 6 }"
+                                v-on:click="preset.slot = 6">
                                 7
                                 <div class="badge" v-bind:class="presetStatus2Class(6)">{{ preset.status[6] }}</div>
                             </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 8 }"
-                                v-on:click="preset.slot = 8">
+                            <div class="button" v-bind:class="{ selected: preset.slot === 7 }"
+                                v-on:click="preset.slot = 7">
                                 8
                                 <div class="badge" v-bind:class="presetStatus2Class(7)">{{ preset.status[7] }}</div>
                             </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 9 }"
-                                v-on:click="preset.slot = 9">
+                            <div class="button" v-bind:class="{ selected: preset.slot === 8 }"
+                                v-on:click="preset.slot = 8">
                                 9
                                 <div class="badge" v-bind:class="presetStatus2Class(8)">{{ preset.status[8] }}</div>
                             </div>
                         </div>
                         <div class="actions1">
-                            <div class="button destructive" v-on:click="presetLoad">LOAD</div>
-                            <div class="button destructive" v-on:click="presetClear">CLEAR</div>
+                            <div class="button destructive"
+                                v-bind:class="{ unselectable: preset.status[preset.slot] === 0 }"
+                                v-on:click="presetLoad">
+                                LOAD
+                            </div>
+                            <div class="button destructive"
+                                v-bind:class="{ unselectable: preset.status[preset.slot] === 0 }"
+                                v-on:click="presetClear">
+                                CLEAR
+                            </div>
                         </div>
                         <div class="actions2">
-                            <div class="button destructive" v-on:click="presetSave">SAVE</div>
+                            <div class="button destructive" v-on:click="presetSave">
+                                SAVE
+                            </div>
                         </div>
                         <div class="filter">
                             <div class="button" v-bind:class="{ selected: preset.filters.canvas }"
@@ -901,6 +911,7 @@
             width: calc(100% - 2 * 8px)
             height: calc(100% - 2 * 2px)
             position: relative
+            cursor: pointer
             &.selected
                 background-color: var(--color-acc-bg-3)
                 color: var(--color-acc-fg-5)
@@ -938,6 +949,10 @@
             font-size: 120%
             font-weight: bold
             line-height: 80px
+            &.unselectable:hover
+                background-color: var(--color-std-bg-3)
+                color: var(--color-std-fg-5)
+                cursor: default
         .actions2 .button
             font-size: 120%
             font-weight: bold
@@ -959,6 +974,7 @@
                 align-items: center
                 gap: 10px 10px
                 margin-right: 20px
+                cursor: pointer
             .flags
                 display: grid
                 grid-template-columns: 210px
@@ -995,6 +1011,7 @@
                 line-height: 50px
                 width: calc(100% - 2 * 8px)
                 height: calc(100% - 2 * 2px)
+                cursor: pointer
                 &.selected
                     background-color: var(--color-acc-bg-3)
                     color: var(--color-acc-fg-5)
@@ -1108,6 +1125,7 @@
             text-align: center
             font-size: 10pt
             font-weight: 200
+            cursor: pointer
             &:hover
                 background-color: var(--color-std-fg-5)
                 color: var(--color-std-bg-1)
@@ -1147,6 +1165,7 @@
                 width: calc(100% - 2 * 8px)
                 height: calc(100% - 2 * 2px)
                 position: relative
+                cursor: pointer
                 &.selected
                     background-color: var(--color-acc-bg-3)
                     color: var(--color-acc-fg-5)
@@ -1156,6 +1175,7 @@
                 &.unselectable:hover
                     background-color: var(--color-std-bg-3)
                     color: var(--color-std-fg-5)
+                    cursor: default
                 &.cut
                     grid-row: span 2
                     line-height: 180px
@@ -1284,8 +1304,8 @@ export default defineComponent({
                 CAM4:       true,
                 renderer:   true
             } as StateFilterType,
-            slot: 1,
-            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+            slot: 0,
+            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         state: StateDefault as StateType,
         watchState: true,
@@ -1610,11 +1630,13 @@ export default defineComponent({
 
         /*  load preset slot  */
         async presetLoad () {
-            this.raiseStatus("info", `Loading state from preset slot #${this.preset.slot}...`, 1000)
+            if (this.preset.status[this.preset.slot] === 0)
+                return
+            this.raiseStatus("info", `Loading state from preset slot #${this.preset.slot + 1}...`, 1000)
             this.connection.recv = true
             const state = await axios({
                 method: "GET",
-                url:    `${this.serviceUrl}state/preset/${this.preset.slot}`
+                url:    `${this.serviceUrl}state/preset/${this.preset.slot + 1}`
             }).then((response) => response.data).catch(() => null).finally(() => {
                 this.connection.recv = false
             })
@@ -1635,7 +1657,7 @@ export default defineComponent({
 
         /*  save preset slot  */
         async presetSave () {
-            this.raiseStatus("info", `Saving state to preset slot #${this.preset.slot}...`, 1000)
+            this.raiseStatus("info", `Saving state to preset slot #${this.preset.slot + 1}...`, 1000)
             const filters = Object.keys(this.preset.filters)
                 .filter((key) => (this.preset.filters as any)[key])
                 .map((key) => `${key}.**`)
@@ -1643,7 +1665,7 @@ export default defineComponent({
             this.connection.send = true
             await axios({
                 method: "POST",
-                url:    `${this.serviceUrl}state/preset/${this.preset.slot}`,
+                url:    `${this.serviceUrl}state/preset/${this.preset.slot + 1}`,
                 data:   state
             }).finally(() => {
                 this.connection.send = false
@@ -1653,11 +1675,13 @@ export default defineComponent({
 
         /*  clear preset slot  */
         async presetClear () {
-            this.raiseStatus("info", `Clearing preset slot #${this.preset.slot}...`, 1000)
+            if (this.preset.status[this.preset.slot] === 0)
+                return
+            this.raiseStatus("info", `Clearing preset slot #${this.preset.slot + 1}...`, 1000)
             this.connection.send = true
             await axios({
                 method: "DELETE",
-                url:    `${this.serviceUrl}state/preset/${this.preset.slot}`
+                url:    `${this.serviceUrl}state/preset/${this.preset.slot + 1}`
             }).then((response) => response.data).catch(() => null).finally(() => {
                 this.connection.send = false
             })
