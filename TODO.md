@@ -11,3 +11,7 @@ TODO
 
 - vMix sometimes does not load the scene
 
+- preset 0 is created
+
+- do not break if video texture fails
+
