@@ -6,17 +6,17 @@ canvas:
     fadeWait: 10000
 monitor:
     enable: true
-    device: vMix Video
-    scale: 1.18
-    rotate: 7.6
-    lift: -15
+    device: ""
+    scale: 1
+    rotate: 6.2
+    lift: 0
 decal:
     enable: true
-    device: vMix Video
+    device: ""
     scale: 1
-    rotate: -21.33
-    lift: -4.81
-    opacity: 0.74
+    rotate: -24.96
+    lift: -2.12
+    opacity: 0.5
 lights:
     intensity1: 100
     intensity2: 100
@@ -67,3 +67,7 @@ CAM4:
         z: 0
     fov:
         m: 1
+renderer:
+    program: 30
+    preview: 15
+    other: 0

@@ -10,6 +10,7 @@ import                     "@babylonjs/loaders/glTF"
 
 /*  import internal dependencies  */
 import PTZ            from "./app-ptz"
+import { MixerState } from "../common/app-mixer"
 import { FreeDState } from "../common/app-freed"
 import { StateType, StateTypePartial } from "../common/app-state"
 
@@ -32,8 +33,20 @@ export default class CanvasRenderer {
         rotationY:     0, positionY:     0
     }
 
+    /*  frames per second (FPS) control  */
+    private fps = 30
+    private fpsFactor = {
+        1: 60, 2: 30, 3: 20, 4: 15, 5: 12, 6: 10, 10: 6, 12: 5, 15: 4, 20: 3, 30: 2, 60: 1
+    } as { [ fps: number ]: number }
+    private fpsProgram = 30
+    private fpsPreview = 30
+    private fpsOther   = 30
+
+    /*  current camera mixer state  */
+    private mixerProgram = ""
+    private mixerPreview = ""
+
     /*  effectively constant values  */
-    private fps         = 30
     private wallWidth   = 10540
     private wallHeight  = 3570
 
@@ -225,9 +238,15 @@ export default class CanvasRenderer {
     }
 
     /*  render the scene once  */
+    private renderCount = 0
     private renderOnce = () => {
-        if (this.scene !== null)
-            this.scene.render()
+        if (this.fps === 0)
+            return
+        if ((this.renderCount++ % this.fpsFactor[this.fps]) !== 0)
+            return
+        if (this.scene === null)
+            return
+        this.scene.render()
     }
 
     /*  start/stop renderer  */
@@ -312,12 +331,12 @@ export default class CanvasRenderer {
                 BABYLON.Nullable<BABYLON.InputBlock>
             if (texFade === null)
                 throw new Error("no such input block named 'TextureFade' found")
-            const fadeInterval = 1000 / this.fps
             let fade        = 0
             let fadeSign    = +1
             texFade.value = 1.0
             const fader = () => {
                 this.fadeTimer = null
+                const fadeInterval = 1000 / this.fps
                 const fadeStep = 1.0 / (this.fadeTrans / fadeInterval)
                 fade = fade + (fadeSign * fadeStep)
                 let wait = fadeInterval
@@ -600,6 +619,36 @@ export default class CanvasRenderer {
                 this.ptz.fovMult = (state as any)[this.cameraName].fov.m
                 this.camera.fov = this.ptz.zoomP2V(zoom)
             }
+        }
+
+        /*  control renderer  */
+        if (state.renderer !== undefined) {
+            if (state.renderer.program !== undefined)
+                this.fpsProgram = state.renderer.program
+            if (state.renderer.preview !== undefined)
+                this.fpsPreview = state.renderer.preview
+            if (state.renderer.other !== undefined)
+                this.fpsOther = state.renderer.other
+        }
+    }
+
+    /*  react on a received mixer record by reflecting the camera mixer state  */
+    reflectMixerState (mixer: MixerState) {
+        let fps = this.fpsOther
+        if (mixer.preview !== undefined) {
+            this.mixerPreview = mixer.preview
+            if (this.mixerPreview === this.cameraName)
+                fps = this.fpsPreview
+        }
+        if (mixer.program !== undefined) {
+            this.mixerProgram = mixer.program
+            if (this.mixerProgram === this.cameraName)
+                fps = this.fpsProgram
+        }
+        if (this.fps !== fps) {
+            this.fps = fps
+            if (this.optimizer !== null)
+                this.optimizer.targetFrameRate = fps
         }
     }
 

@@ -59,6 +59,11 @@ export type StateType = {
         position: { x: number, y: number, z: number },
         rotation: { x: number, y: number, z: number },
         fov:      { m: number }
+    },
+    renderer: {
+        program: number
+        preview: number
+        other: number
     }
 }
 
@@ -116,6 +121,11 @@ export const StateSchema = `{
         position: { x: number, y: number, z: number },
         rotation: { x: number, y: number, z: number },
         fov:      { m: number }
+    },
+    renderer: {
+        program: number,
+        preview: number,
+        other:   number
     }
 }`
 
@@ -173,6 +183,11 @@ export const StateDefault: StateType = {
         position: { x: 0, y: 0, z: 0 },
         rotation: { x: 0, y: 0, z: 0 },
         fov:      { m: 1 }
+    },
+    renderer: {
+        program: 30,
+        preview: 15,
+        other:    0
     }
 } satisfies StateType
 

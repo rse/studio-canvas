@@ -124,6 +124,10 @@
                                 v-on:click="preset.filters.CAM4 = !preset.filters.CAM4">
                                 CAM4
                             </div>
+                            <div class="button" v-bind:class="{ selected: preset.filters.renderer }"
+                                v-on:click="preset.filters.renderer = !preset.filters.renderer">
+                                Renderer
+                            </div>
                         </div>
                         <div class="actions3">
                             <div class="button destructive" v-on:click="presetFiltersSelect(false)">NONE</div>
@@ -524,6 +528,116 @@
                     </div>
                 </tab>
 
+                <!--  ==== Renderer ====  -->
+                <tab id="renderer" name="Renderer">
+                    <div class="desc">
+                        The <b>Renderer</b> allows you to configure the Frames per Second (FPS)
+                        of a camera renderer when in program, preview or neither of them (other).
+                        This in total allows you to reduce the overall load all renderers cause on a system.
+                    </div>
+                    <div class="control">
+                        <div class="label1">Program</div>
+                        <div class="label2">(performance)</div>
+                        <div class="label3">[fps]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.renderer.program)"
+                                v-on:change="(ev) => state.renderer.program = saneFPS(state.renderer.program, fieldImport((ev.target! as HTMLInputElement).value, 0, 60))"/>
+                        </div>
+                        <div class="button" v-on:click="state.renderer.program = 30">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-bind:value="state.renderer.program"
+                                v-on:change="(val: number) => state.renderer.program = saneFPS(state.renderer.program, val)"
+                                v-bind:min="0" v-bind:max="60" v-bind:step="1"
+                                show-tooltip="drag"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">Preview</div>
+                        <div class="label2">(performance)</div>
+                        <div class="label3">[fps]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.renderer.preview)"
+                                v-on:change="(ev) => state.renderer.preview = saneFPS(state.renderer.preview, fieldImport((ev.target! as HTMLInputElement).value, 0, 60))"/>
+                        </div>
+                        <div class="button" v-on:click="state.renderer.preview = 15">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-bind:value="state.renderer.preview"
+                                v-on:change="(val: number) => state.renderer.preview = saneFPS(state.renderer.preview, val)"
+                                v-bind:min="0" v-bind:max="60" v-bind:step="1"
+                                show-tooltip="drag"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">Other</div>
+                        <div class="label2">(performance)</div>
+                        <div class="label3">[fps]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.renderer.other)"
+                                v-on:change="(ev) => state.renderer.other = saneFPS(state.renderer.other, fieldImport((ev.target! as HTMLInputElement).value, 0, 60))"/>
+                        </div>
+                        <div class="button" v-on:click="state.renderer.other = 0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-bind:value="state.renderer.other"
+                                v-on:change="(val: number) => state.renderer.other = saneFPS(state.renderer.other, val)"
+                                v-bind:min="0" v-bind:max="60" v-bind:step="1"
+                                show-tooltip="drag"
+                            ></slider>
+                        </div>
+                    </div>
+                </tab>
+
+                <!--  ==== Mixer ====  -->
+                <tab id="mixer" name="Mixer" class="mixer">
+                    <div class="desc">
+                        The <b>Mixer</b> allows you to select a camera to be logically
+                        in preview and to logically cut a camera from preview to program.
+                        This in allows you to ad-hoc apply the configured Renderer FPS.
+                    </div>
+                    <div class="control">
+                        <div class="cams">
+                            <div class="button cam" v-on:click="changePreview('CAM1')"
+                                v-bind:class="{
+                                    unselectable: mixer.preview === 'CAM1' || mixer.program === 'CAM1',
+                                    preview: mixer.program === 'CAM1',
+                                    program: mixer.program === 'CAM1'
+                                }">
+                                CAM1
+                                <div class="badge" v-bind:class="mixerStatus2Class('CAM1')"></div>
+                            </div>
+                            <div class="button cam" v-on:click="changePreview('CAM4')"
+                                v-bind:class="{
+                                    unselectable: mixer.preview === 'CAM4' || mixer.program === 'CAM4',
+                                    preview: mixer.program === 'CAM4',
+                                    program: mixer.program === 'CAM4'
+                                }">
+                                CAM4
+                                <div class="badge" v-bind:class="mixerStatus2Class('CAM4')"></div>
+                            </div>
+                            <div class="button cut" v-on:click="cutPreviewToProgram()">
+                                CUT
+                            </div>
+                            <div class="button cam" v-on:click="changePreview('CAM2')"
+                                v-bind:class="{
+                                    unselectable: mixer.preview === 'CAM2' || mixer.program === 'CAM2',
+                                    preview: mixer.program === 'CAM2',
+                                    program: mixer.program === 'CAM2'
+                                }">
+                                CAM2
+                                <div class="badge" v-bind:class="mixerStatus2Class('CAM2')"></div>
+                            </div>
+                            <div class="button cam" v-on:click="changePreview('CAM3')"
+                                v-bind:class="{
+                                    unselectable: mixer.preview === 'CAM3' || mixer.program === 'CAM3',
+                                    preview: mixer.program === 'CAM3',
+                                    program: mixer.program === 'CAM3'
+                                }">
+                                CAM3
+                                <div class="badge" v-bind:class="mixerStatus2Class('CAM3')"></div>
+                            </div>
+                        </div>
+                    </div>
+                </tab>
+
                 <!--  ==== PREVIEW ====  -->
                 <tab id="preview" name="Preview" class="preview">
                     <div class="desc">
@@ -758,8 +872,8 @@
         .filter
             margin-right: 10px
             display: grid
-            grid-template-columns: 100px 100px 100px
-            grid-template-rows: 50px 50px 50px
+            grid-template-columns: 100px 100px
+            grid-template-rows: 25px 25px 25px 25px 25px
             justify-items: center
             align-items: center
             gap: 10px 10px
@@ -794,10 +908,10 @@
                 position: absolute
                 right: -2px
                 top: -2px
-                line-height: 20px
-                width: 20px
-                height: 20px
-                border-radius: 10px
+                line-height: 24px
+                width: 24px
+                height: 24px
+                border-radius: 12px
                 font-size: 14px
                 font-weight: normal
                 &.clear
@@ -810,6 +924,7 @@
                     color: var(--color-acc-fg-5)
         .filter .button
             font-weight: 200
+            line-height: 22px
         .slots .button
             font-size: 150%
             font-weight: bold
@@ -1006,6 +1121,59 @@
             &:hover
                 background-color: var(--color-acc-bg-5)
                 color: var(--color-acc-fg-5)
+    .mixer
+        .cams
+            margin-right: 20px
+            display: grid
+            grid-template-columns: 100px 100px 100px
+            grid-template-rows: 90px 90px
+            justify-items: center
+            align-items: center
+            gap: 10px 10px
+            .button
+                background-color: var(--color-std-bg-3)
+                color: var(--color-std-fg-5)
+                border-radius: 4px
+                padding: 2px 8px 2px 8px
+                text-align: center
+                font-size: 12pt
+                line-height: 50px
+                width: calc(100% - 2 * 8px)
+                height: calc(100% - 2 * 2px)
+                position: relative
+                &.selected
+                    background-color: var(--color-acc-bg-3)
+                    color: var(--color-acc-fg-5)
+                &:hover
+                    background-color: var(--color-acc-bg-5)
+                    color: var(--color-acc-fg-5)
+                &.unselectable:hover
+                    background-color: var(--color-std-bg-3)
+                    color: var(--color-std-fg-5)
+                &.cut
+                    grid-row: span 2
+                    line-height: 180px
+                    font-weight: bold
+                &.cut:hover
+                    background-color: var(--color-sig-bg-3)
+                    color: var(--color-sig-fg-5)
+                .badge
+                    position: absolute
+                    top: 40px
+                    left: 35px
+                    width: 30px
+                    height: 30px
+                    border-radius: 4px
+                    font-size: 14px
+                    font-weight: normal
+                    &.other
+                        display: none
+                    &.preview
+                        background-color: var(--color-acc-bg-2)
+                        color: var(--color-sig-fg-5)
+                    &.program
+                        background-color: var(--color-sig-bg-2)
+                        color: var(--color-acc-fg-5)
     .slider
         width: 400px
         --slider-bg: var(--color-std-bg-1)
@@ -1051,6 +1219,7 @@ import {
     StatePaths,
     StateUtil
 } from "../common/app-state"
+import { MixerState, MixerFPS } from "../common/app-mixer"
 </script>
 
 <script lang="ts">
@@ -1063,7 +1232,8 @@ export const StateFilterKeys = [
     "CAM1",
     "CAM2",
     "CAM3",
-    "CAM4"
+    "CAM4",
+    "renderer"
 ]
 export type StateFilterType = {
     canvas:     boolean,
@@ -1074,7 +1244,8 @@ export type StateFilterType = {
     CAM1:       boolean,
     CAM2:       boolean,
     CAM3:       boolean,
-    CAM4:       boolean
+    CAM4:       boolean,
+    renderer:   boolean
 }
 let statusTimer: ReturnType<typeof setTimeout> | null = null
 export default defineComponent({
@@ -1104,10 +1275,11 @@ export default defineComponent({
                 CAM1:       true,
                 CAM2:       true,
                 CAM3:       true,
-                CAM4:       true
+                CAM4:       true,
+                renderer:   true
             } as StateFilterType,
             slot: 0,
-            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         state: StateDefault as StateType,
         watchState: true,
@@ -1122,7 +1294,7 @@ export default defineComponent({
         },
         status: {
             kind: "",
-            msg: ""
+            msg:  ""
         },
         connection: {
             online: false,
@@ -1136,7 +1308,11 @@ export default defineComponent({
                 render:  0,
                 control: 0
             }
-        }
+        },
+        mixer: {
+            preview: "",
+            program: ""
+        } as MixerState
     }),
     async created () {
         this.tab = this.selectTab
@@ -1180,10 +1356,16 @@ export default defineComponent({
                     throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
                 this.importState(state)
             }
-            if (data.cmd === "STATS") {
+            else if (data.cmd === "STATS") {
                 this.stats.peers.camera  = data.arg.stats?.peers?.camera  ?? 0
                 this.stats.peers.render  = data.arg.stats?.peers?.render  ?? 0
                 this.stats.peers.control = data.arg.stats?.peers?.control ?? 0
+            }
+            else if (data.cmd === "MIXER") {
+                if (this.mixer.preview !== data.arg.mixer?.preview)
+                    this.mixer.preview = data.arg.mixer?.preview
+                if (this.mixer.program !== data.arg.mixer?.program)
+                    this.mixer.program = data.arg.mixer?.program
             }
         })
 
@@ -1195,6 +1377,7 @@ export default defineComponent({
         /*  initially load state and presets once  */
         await this.loadState()
         await this.presetStatus()
+        await this.loadMixerState()
 
         /*  react on all subsequent state changes  */
         let timer: ReturnType<typeof setTimeout> | null = null
@@ -1406,9 +1589,9 @@ export default defineComponent({
             const clazz = {} as any
             if (this.preset.status[slot] === 0)
                 clazz.clear = true
-            else if (this.preset.status[slot] > 0 && this.preset.status[slot] < 9)
+            else if (this.preset.status[slot] > 0 && this.preset.status[slot] < 10)
                 clazz.partial = true
-            else if (this.preset.status[slot] === 9)
+            else if (this.preset.status[slot] === 10)
                 clazz.complete = true
             return clazz
         },
@@ -1473,7 +1656,89 @@ export default defineComponent({
                 this.connection.send = false
             })
             await this.presetStatus()
-        }
+        },
+
+        /*  map mixer status to CSS class name  */
+        mixerStatus2Class (cam: string) {
+            const clazz = {} as any
+            if (this.mixer.program === cam)
+                clazz.program = true
+            else if (this.mixer.preview === cam)
+                clazz.preview = true
+            else
+                clazz.other = true
+            return clazz
+        },
+
+        /*  change preview  */
+        async changePreview (cam: string) {
+            /*  do not select unselectables  */
+            if (this.mixer.preview === cam || this.mixer.program === cam)
+                return
+
+            /*  change preview state  */
+            this.mixer.preview = cam
+
+            /*  tell server about state change  */
+            this.connection.send = true
+            await axios({
+                method: "GET",
+                url:    `${this.serviceUrl}mixer/preview/${this.mixer.preview}`
+            }).then((response) => response.data).catch(() => null).finally(() => {
+                this.connection.send = false
+            })
+        },
+
+        /*  cut preview to program (aka exchange preview with program)  */
+        async cutPreviewToProgram () {
+            /*  ensure we have a preview  */
+            if (this.mixer.preview === "")
+                return
+
+            /*  exchange preview with program state  */
+            const program = this.mixer.program
+            this.mixer.program = this.mixer.preview
+            this.mixer.preview = program
+
+            /*  tell server about state change  */
+            this.connection.send = true
+            await axios({
+                method: "GET",
+                url:    `${this.serviceUrl}mixer/cut`
+            }).then((response) => response.data).catch(() => null).finally(() => {
+                this.connection.send = false
+            })
+        },
+
+        /*  adjust to the nearest sane FPS value only  */
+        saneFPS (valOld: number, valNew: number) {
+            if (!MixerFPS.includes(valNew)) {
+                if (valNew < valOld) {
+                    const fps = MixerFPS.filter((v) => v <= valNew)
+                    valNew = fps[fps.length - 1]
+                }
+                else {
+                    const fps = MixerFPS.filter((v) => v >= valNew)
+                    valNew = fps[0]
+                }
+            }
+            return valNew
+        },
+
+        /*  load mixer state  */
+        async loadMixerState () {
+            this.connection.recv = true
+            const state = await axios({
+                method: "GET",
+                url:    `${this.serviceUrl}mixer/state`
+            }).then((response) => response.data).catch(() => null).finally(() => {
+                this.connection.recv = false
+            }) as MixerState
+            if (state === null)
+                throw new Error("failed to load mixer state")
+            this.mixer.program = state.program
+            this.mixer.preview = state.preview
+        },
     }
 })
 </script>
