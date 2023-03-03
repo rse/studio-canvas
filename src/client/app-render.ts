@@ -623,12 +623,27 @@ export default class CanvasRenderer {
 
         /*  control renderer  */
         if (state.renderer !== undefined) {
-            if (state.renderer.program !== undefined)
-                this.fpsProgram = state.renderer.program
-            if (state.renderer.preview !== undefined)
-                this.fpsPreview = state.renderer.preview
-            if (state.renderer.other !== undefined)
+            let fps = this.fps
+            if (state.renderer.other !== undefined) {
                 this.fpsOther = state.renderer.other
+                if (!(this.mixerPreview === this.cameraName || this.mixerProgram === this.cameraName))
+                    fps = this.fpsOther
+            }
+            if (state.renderer.preview !== undefined) {
+                this.fpsPreview = state.renderer.preview
+                if (this.mixerPreview === this.cameraName)
+                    fps = this.fpsPreview
+            }
+            if (state.renderer.program !== undefined) {
+                this.fpsProgram = state.renderer.program
+                if (this.mixerProgram === this.cameraName)
+                    fps = this.fpsProgram
+            }
+            if (this.fps !== fps) {
+                this.fps = fps
+                if (this.optimizer !== null)
+                    this.optimizer.targetFrameRate = fps
+            }
         }
     }
 
