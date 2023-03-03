@@ -1738,7 +1738,7 @@ export default defineComponent({
                 throw new Error("failed to load mixer state")
             this.mixer.program = state.program
             this.mixer.preview = state.preview
-        },
+        }
     }
 })
 </script>
