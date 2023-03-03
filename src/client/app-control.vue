@@ -10,6 +10,7 @@
     <div class="app-control">
         <!--  HEADER  -->
         <div class="head">
+            <img class="logo" src="../../res/app-icon.svg" alt="" />
             STUDIO CANVAS CONTROL
             <div class="stats">
                 <span class="icon"><i class="fa fa-video"></i></span>
@@ -747,6 +748,11 @@
         font-size: 20px
         line-height: 20px
         position: relative
+        .logo
+            position: relative
+            top: 2px
+            height: 20px
+            margin-right: 10px
         .stats
             border: 1px solid var(--color-std-bg-2)
             position: absolute
