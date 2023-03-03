@@ -22,7 +22,7 @@ export default Vite.defineConfig(({ command, mode }) => ({
     build: {
 	    sourcemap:              (mode === "development"),
         outDir:                 "../../dst/server",
-        emptyOutDir:            true,
+        emptyOutDir:            (mode === "production"),
         chunkSizeWarningLimit:  5000,
         assetsInlineLimit:      0,
         rollupOptions: {
