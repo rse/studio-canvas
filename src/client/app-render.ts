@@ -266,7 +266,7 @@ export default class CanvasRenderer {
 
         /*  give still active render loop iteration time to complete  */
         await new Promise((resolve, reject) => {
-            setTimeout(() => resolve(true), 2 * (1000 / this.fps))
+            setTimeout(() => resolve(true), 2 * (1000 / (this.fps === 0 ? 1 : this.fps)))
         })
     }
 
@@ -336,7 +336,7 @@ export default class CanvasRenderer {
             texFade.value = 1.0
             const fader = () => {
                 this.fadeTimer = null
-                const fadeInterval = 1000 / this.fps
+                const fadeInterval = 1000 / (this.fps === 0 ? 1 : this.fps)
                 const fadeStep = 1.0 / (this.fadeTrans / fadeInterval)
                 fade = fade + (fadeSign * fadeStep)
                 let wait = fadeInterval
@@ -369,7 +369,7 @@ export default class CanvasRenderer {
         if (this.fadeTimer !== null) {
             clearTimeout(this.fadeTimer)
             await new Promise((resolve, reject) => {
-                setTimeout(() => resolve(true), 2 * (1000 / this.fps))
+                setTimeout(() => resolve(true), 2 * (1000 / (this.fps === 0 ? 1 : this.fps)))
             })
             this.fadeTimer = null
         }
