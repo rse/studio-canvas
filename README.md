@@ -1,4 +1,6 @@
 
+<img src="https://raw.githubusercontent.com/rse/studio-canvas/master/res/app-icon.svg" width="200" align="right" alt=""/>
+
 Studio-Canvas
 =============
 
