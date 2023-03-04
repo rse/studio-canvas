@@ -22,6 +22,7 @@ import {
 } from "../common/app-state"
 
 export default class RESTState {
+    public stateFile = ""
     constructor (
         private argv:   Argv,
         private db:     DB,
@@ -29,16 +30,18 @@ export default class RESTState {
         private restWS: RESTWS
     ) {}
     async init () {
-        /*  provide state API  */
-        const stateFile = path.join(this.argv.stateDir, "canvas-state.yaml")
+        /*  determine state file  */
+        this.stateFile = path.join(this.argv.stateDir, "canvas-state.yaml")
+
+        /*  load current state  */
         this.rest.server!.route({
             method: "GET",
             path: "/state",
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 return this.db.transaction(Transaction.READ, 4000, async () => {
                     const state = StateDefault
-                    if (await (fs.promises.stat(stateFile).then(() => true).catch(() => false))) {
-                        const txt = await fs.promises.readFile(stateFile, { encoding: "utf8" })
+                    if (await (fs.promises.stat(this.stateFile).then(() => true).catch(() => false))) {
+                        const txt = await fs.promises.readFile(this.stateFile, { encoding: "utf8" })
                         const obj = jsYAML.load(txt) as StateType
                         if (ducky.validate(obj, StateSchema))
                             StateUtil.copy(state, obj)
@@ -47,6 +50,8 @@ export default class RESTState {
                 })
             }
         })
+
+        /*  save current state  */
         this.rest.server!.route({
             method: "POST",
             path: "/state",
@@ -64,12 +69,14 @@ export default class RESTState {
                 return this.db.transaction(Transaction.WRITE, 4000, async () => {
                     const state = req.payload as StateType
                     const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
-                    await fs.promises.writeFile(stateFile, txt, { encoding: "utf8" })
+                    await fs.promises.writeFile(this.stateFile, txt, { encoding: "utf8" })
                     this.restWS.notifySceneState(state)
                     return h.response().code(204)
                 })
             }
         })
+
+        /*  change current state  */
         this.rest.server!.route({
             method: "PATCH",
             path: "/state",
@@ -86,8 +93,8 @@ export default class RESTState {
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 return this.db.transaction(Transaction.WRITE, 4000, async () => {
                     const state = StateDefault
-                    if (await (fs.promises.stat(stateFile).then(() => true).catch(() => false))) {
-                        const txt = await fs.promises.readFile(stateFile, { encoding: "utf8" })
+                    if (await (fs.promises.stat(this.stateFile).then(() => true).catch(() => false))) {
+                        const txt = await fs.promises.readFile(this.stateFile, { encoding: "utf8" })
                         const obj = jsYAML.load(txt) as StateType
                         if (ducky.validate(obj, StateSchema))
                             StateUtil.copy(state, obj)
@@ -95,7 +102,7 @@ export default class RESTState {
                     const statePatch = req.payload as StateTypePartial
                     StateUtil.copy(state, statePatch)
                     const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
-                    await fs.promises.writeFile(stateFile, txt, { encoding: "utf8" })
+                    await fs.promises.writeFile(this.stateFile, txt, { encoding: "utf8" })
                     this.restWS.notifySceneState(statePatch)
                     return h.response().code(204)
                 })

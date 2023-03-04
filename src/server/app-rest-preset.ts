@@ -14,30 +14,39 @@ import * as HAPI           from "@hapi/hapi"
 import Argv                from "./app-argv"
 import DB, { Transaction } from "./app-db"
 import REST                from "./app-rest"
+import RESTState           from "./app-rest-state"
 import RESTWS              from "./app-rest-ws"
-import { StateType, StateTypePartial, StateSchemaPartial, StateUtil } from "../common/app-state"
+import {
+    StateType, StateTypePartial,
+    StateSchema, StateSchemaPartial,
+    StateDefault, StateUtil
+} from "../common/app-state"
 
 export default class RESTPreset {
+    public presetsFile = ""
     constructor (
-        private argv:   Argv,
-        private rest:   REST,
-        private restWS: RESTWS,
-        private db:     DB
+        private argv:      Argv,
+        private rest:      REST,
+        private restState: RESTState,
+        private restWS:    RESTWS,
+        private db:        DB
     ) {}
     async init () {
-        /*  provide state presets API  */
-        const presetsFile = path.join(this.argv.stateDir, "canvas-preset-%s.yaml")
-        type PresetType = { [ slot: string ]: StateTypePartial }
+        /*  determine presets file  */
+        this.presetsFile = path.join(this.argv.stateDir, "canvas-preset-%s.yaml")
+
+        /*  load presets overview information  */
         this.rest.server!.route({
             method: "GET",
             path: "/state/preset",
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 return this.db.transaction(Transaction.READ, 4000, async () => {
+                    /*  determine number of stored top-level entries  */
                     const presets = [] as number[]
                     for (let i = 1; i <= 9; i++) {
                         let n = 0
                         const state = {} as StateTypePartial
-                        const filename = util.format(presetsFile, i.toString())
+                        const filename = util.format(this.presetsFile, i.toString())
                         if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
                             const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
                             const obj = jsYAML.load(txt) as StateTypePartial
@@ -61,22 +70,48 @@ export default class RESTPreset {
             }
         })
 
-        /*  bare selection of preset  */
+        /*  merge selected preset into current state  */
         this.rest.server!.route({
             method: "GET",
             path: "/state/preset/{slot}/select",
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
-                return this.db.transaction(Transaction.READ, 4000, async () => {
+                return this.db.transaction(Transaction.WRITE, 4000, async () => {
                     const slot = req.params.slot
-                    const filename = util.format(presetsFile, slot)
-                    const state = {}
-                    if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
-                        const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
+
+                    /*  load original state  */
+                    const state = StateDefault
+                    if (await (fs.promises.stat(this.restState.stateFile).then(() => true).catch(() => false))) {
+                        const txt = await fs.promises.readFile(this.restState.stateFile, { encoding: "utf8" })
                         const obj = jsYAML.load(txt) as StateType
-                        if (ducky.validate(obj, StateSchemaPartial))
+                        if (ducky.validate(obj, StateSchema))
                             StateUtil.copy(state, obj)
                     }
-                    this.restWS.notifySceneState(state)
+
+                    /*  remember original state  */
+                    const stateOrig = {}
+                    StateUtil.copy(stateOrig, state)
+
+                    /*  load preset  */
+                    let preset = {}
+                    const filename = util.format(this.presetsFile, slot)
+                    if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
+                        const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
+                        const obj = jsYAML.load(txt) as StateTypePartial
+                        if (ducky.validate(obj, StateSchemaPartial))
+                            StateUtil.copy(preset, obj)
+                    }
+
+                    /*  merge preset onto original state  */
+                    StateUtil.copy(state, preset)
+
+                    /*  save new state  */
+                    const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
+                    await fs.promises.writeFile(this.restState.stateFile, txt, { encoding: "utf8" })
+
+                    /*  notify clients about reduced preset  */
+                    preset = StateUtil.reduce(stateOrig, preset)
+                    this.restWS.notifySceneState(preset)
+
                     return h.response().code(204)
                 })
             }
@@ -89,11 +124,11 @@ export default class RESTPreset {
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 return this.db.transaction(Transaction.READ, 4000, async () => {
                     const slot = req.params.slot
-                    const filename = util.format(presetsFile, slot)
+                    const filename = util.format(this.presetsFile, slot)
                     const state = {}
                     if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
                         const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
-                        const obj = jsYAML.load(txt) as StateType
+                        const obj = jsYAML.load(txt) as StateTypePartial
                         if (ducky.validate(obj, StateSchemaPartial))
                             StateUtil.copy(state, obj)
                     }
@@ -119,7 +154,7 @@ export default class RESTPreset {
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 return this.db.transaction(Transaction.WRITE, 4000, async () => {
                     const slot = req.params.slot
-                    const filename = util.format(presetsFile, slot)
+                    const filename = util.format(this.presetsFile, slot)
                     const state = req.payload as StateTypePartial
                     const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
                     await fs.promises.writeFile(filename, txt, { encoding: "utf8" })
@@ -135,7 +170,7 @@ export default class RESTPreset {
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 return this.db.transaction(Transaction.WRITE, 4000, async () => {
                     const slot = req.params.slot
-                    const filename = util.format(presetsFile, slot)
+                    const filename = util.format(this.presetsFile, slot)
                     if (await (fs.promises.stat(filename).then(() => true).catch(() => false)))
                         await fs.promises.unlink(filename)
                     return h.response().code(204)
