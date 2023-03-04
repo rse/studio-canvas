@@ -53,6 +53,9 @@ export default defineComponent({
     async mounted () {
         /*  establish renderer  */
         renderer = new CanvasRenderer()
+        renderer.on("log", (level: string, msg: string) => {
+            this.log(level, msg)
+        })
         renderer.configure({
             camera:   this.cam,
             ptzFreeD: this.options.get("ptzFreeD"),
