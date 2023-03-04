@@ -101,6 +101,8 @@ export default class RESTPreset {
                 })
             }
         })
+
+        /*  store preset  */
         this.rest.server!.route({
             method: "POST",
             path: "/state/preset/{slot}",
@@ -125,6 +127,8 @@ export default class RESTPreset {
                 })
             }
         })
+
+        /*  clear preset  */
         this.rest.server!.route({
             method: "DELETE",
             path: "/state/preset/{slot}",
