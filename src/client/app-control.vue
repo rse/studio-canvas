@@ -148,7 +148,7 @@
                 </tab>
 
                 <!--  ==== CANVAS ====  -->
-                <tab id="canvas" name="Canvas">
+                <tab id="canvas" name="Canvas" class="canvas">
                     <div class="desc">
                         The <b>Canvas</b> is the background image projected onto the chroma-keyed
                          greenscreen of the scene.
@@ -172,6 +172,13 @@
                                 <div v-show="entry.texture2" class="tag tag-fade">FADE</div>
                                 <div v-show="entry.exclusive" class="tag tag-exclusive">EXCL</div>
                             </div>
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <div class="button"
+                            v-bind:class="{ unselectable: state.canvas.texture2 === '' }"
+                            v-on:click="syncCanvas()">
+                            SYNC
                         </div>
                     </div>
                 </tab>
@@ -1035,9 +1042,9 @@
         padding: 4px 4px 4px 4px
         border-radius: 4px
         background-color: var(--color-std-bg-3)
-        height: 300px
-        min-height: 300px
-        max-height: 300px
+        height: 280px
+        min-height: 280px
+        max-height: 280px
         .list-entry
             cursor: pointer;
             color: var(--color-std-fg-5)
@@ -1070,6 +1077,27 @@
                     &.tag-exclusive
                         background-color: var(--color-sig-bg-1)
                         color: var(--color-sig-fg-5)
+    .canvas
+        .actions
+            margin-top: 10px
+            .button
+                background-color: var(--color-std-bg-1)
+                color: var(--color-std-fg-1)
+                border-radius: 4px
+                padding: 2px 8px 2px 8px
+                text-align: center
+                font-size: 12pt
+                line-height: 24px
+                width: 100px
+                height: auto
+                cursor: pointer
+                &:hover
+                    background-color: var(--color-sig-bg-5)
+                    color: var(--color-sig-fg-5)
+                &.unselectable:hover
+                    background-color: var(--color-std-bg-1)
+                    color: var(--color-std-fg-1)
+                    cursor: default
     .control
         display: grid
         grid-template-columns: auto auto auto 7vw auto auto
@@ -1768,6 +1796,21 @@ export default defineComponent({
                 throw new Error("failed to load mixer state")
             this.mixer.program = state.program
             this.mixer.preview = state.preview
+        },
+
+        /*  synchronize renderer instances  */
+        async syncCanvas () {
+            if (this.state.canvas.texture2 === "")
+                return
+
+            /*  tell server about sync  */
+            this.connection.send = true
+            await axios({
+                method: "GET",
+                url:    `${this.serviceUrl}canvas/sync`
+            }).then((response) => response.data).catch(() => null).finally(() => {
+                this.connection.send = false
+            })
         }
     }
 })

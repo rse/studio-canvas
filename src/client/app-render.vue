@@ -110,6 +110,10 @@ export default defineComponent({
                 const mixer = data.arg.mixer as MixerState
                 renderer!.reflectMixerState(mixer)
             }
+            else if (data.cmd === "SYNC") {
+                const timestamp = data.arg.timestamp as number
+                renderer!.reflectSyncTime(timestamp)
+            }
         })
 
         /*  load scene state once  */

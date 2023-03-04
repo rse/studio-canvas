@@ -7,7 +7,5 @@ TODO
   y-rotate -9.06 (CAM2) +1.13 (CAM3)
   fov 2.4?
 
-- sync cross-fade
-
 - vMix sometimes does not load the scene
 

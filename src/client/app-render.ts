@@ -46,6 +46,9 @@ export default class CanvasRenderer {
     private mixerProgram = ""
     private mixerPreview = ""
 
+    /*  latest sync time  */
+    private syncTime = 0
+
     /*  effectively constant values  */
     private wallWidth   = 10540
     private wallHeight  = 3570
@@ -77,6 +80,7 @@ export default class CanvasRenderer {
 
     /*  cross-fade timer  */
     private fadeTimer: ReturnType<typeof setTimeout> | null = null
+    private texFade: BABYLON.Nullable<BABYLON.InputBlock> | null = null
 
     /*  (re-)configure camera (by name) and options (by URL)  */
     configure (params: { camera?: string, ptzFreeD?: boolean, ptzKeys?: boolean } = {}) {
@@ -327,36 +331,11 @@ export default class CanvasRenderer {
             wall.albedoTexture = this.texture3
 
             /*  perform cross-fadings between textures  */
-            const texFade = this.material.getBlockByName("TextureFade") as
+            this.texFade = this.material.getBlockByName("TextureFade") as
                 BABYLON.Nullable<BABYLON.InputBlock>
-            if (texFade === null)
+            if (this.texFade === null)
                 throw new Error("no such input block named 'TextureFade' found")
-            let fade        = 0
-            let fadeSign    = +1
-            texFade.value = 1.0
-            const fader = () => {
-                this.fadeTimer = null
-                const fadeInterval = 1000 / (this.fps === 0 ? 1 : this.fps)
-                const fadeStep = 1.0 / (this.fadeTrans / fadeInterval)
-                fade = fade + (fadeSign * fadeStep)
-                let wait = fadeInterval
-                if (fade > 1.0) {
-                    fade = 1.0
-                    fadeSign = -1
-                    wait = this.fadeWait
-                }
-                else if (fade < 0.0) {
-                    fade = 0.0
-                    fadeSign = +1
-                    wait = this.fadeWait
-                }
-                texFade.value = fade
-                if (this.texture2URL !== "")
-                    this.fadeTimer = setTimeout(fader, wait)
-            }
-            if (this.fadeTimer !== null)
-                clearTimeout(this.fadeTimer)
-            this.fadeTimer = setTimeout(fader, 0)
+            await this.startWallFader()
         }
     }
 
@@ -366,13 +345,7 @@ export default class CanvasRenderer {
         if (wall === null)
             throw new Error("cannot find Wall object")
         wall.albedoTexture = null
-        if (this.fadeTimer !== null) {
-            clearTimeout(this.fadeTimer)
-            await new Promise((resolve, reject) => {
-                setTimeout(() => resolve(true), 2 * (1000 / (this.fps === 0 ? 1 : this.fps)))
-            })
-            this.fadeTimer = null
-        }
+        await this.stopWallFader()
         if (this.material !== null) {
             const textureBlock1 = this.material.getBlockByPredicate((input) =>
                 input.name === "Texture1") as BABYLON.Nullable<BABYLON.TextureBlock>
@@ -388,6 +361,49 @@ export default class CanvasRenderer {
             this.texture3 = null
             this.material.dispose(true, true)
             this.material = null
+        }
+    }
+
+    /*  start wall fader  */
+    async startWallFader () {
+        if (this.texFade === null)
+            return
+        let fade        = 0
+        let fadeSign    = +1
+        this.texFade.value = 1.0
+        const fader = () => {
+            this.fadeTimer = null
+            const fadeInterval = 1000 / (this.fps === 0 ? 1 : this.fps)
+            const fadeStep = 1.0 / (this.fadeTrans / fadeInterval)
+            fade = fade + (fadeSign * fadeStep)
+            let wait = fadeInterval
+            if (fade > 1.0) {
+                fade = 1.0
+                fadeSign = -1
+                wait = this.fadeWait
+            }
+            else if (fade < 0.0) {
+                fade = 0.0
+                fadeSign = +1
+                wait = this.fadeWait
+            }
+            this.texFade!.value = fade
+            if (this.texture2URL !== "")
+                this.fadeTimer = setTimeout(fader, wait)
+        }
+        if (this.fadeTimer !== null)
+            clearTimeout(this.fadeTimer)
+        this.fadeTimer = setTimeout(fader, 0)
+    }
+
+    /*  stop wall fader  */
+    async stopWallFader () {
+        if (this.fadeTimer !== null) {
+            clearTimeout(this.fadeTimer)
+            await new Promise((resolve, reject) => {
+                setTimeout(() => resolve(true), 2 * (1000 / (this.fps === 0 ? 1 : this.fps)))
+            })
+            this.fadeTimer = null
         }
     }
 
@@ -477,6 +493,13 @@ export default class CanvasRenderer {
             oldDecal.material = null
             oldDecal.dispose()
         }
+    }
+
+    /*  sync renderer  */
+    async reflectSyncTime (timestamp: number) {
+        this.syncTime = timestamp
+        await this.stopWallFader()
+        await this.startWallFader()
     }
 
     /*  control scene  */
