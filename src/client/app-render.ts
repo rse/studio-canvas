@@ -419,13 +419,14 @@ export default class CanvasRenderer extends EventEmitter {
         const device = devices.find((device) =>
             device.kind === "videoinput" && device.label === label)
         if (device === undefined) {
-            material.albedoColor = new BABYLON.Color3(1.00, 1.00, 1.00)
+            material.albedoColor = new BABYLON.Color3(1.00, 0.00, 0.00)
             material.albedoTexture = null
             material.unlit = true
         }
         else {
             await BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!,
                 { deviceId: device.deviceId } as any, false, false).then((vt) => {
+                material.albedoColor = new BABYLON.Color3(1.0, 1.0, 1.0)
                 material.albedoTexture = vt
                 material.unlit = true
             })
@@ -516,23 +517,34 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adust canvas  */
         if (state.canvas !== undefined) {
-            if (state.canvas.texture1 !== undefined)
+            let changed = false
+            if (state.canvas.texture1 !== undefined && this.texture1URL !== state.canvas.texture1) {
                 this.texture1URL = state.canvas.texture1
-            if (state.canvas.texture2 !== undefined)
+                changed = true
+            }
+            if (state.canvas.texture2 !== undefined && this.texture2URL !== state.canvas.texture2) {
                 this.texture2URL = state.canvas.texture2
-            if (state.canvas.fadeTrans !== undefined)
+                changed = true
+            }
+            if (state.canvas.fadeTrans !== undefined && this.fadeTrans !== state.canvas.fadeTrans) {
                 this.fadeTrans = state.canvas.fadeTrans
-            if (state.canvas.fadeWait !== undefined)
+                changed = true
+            }
+            if (state.canvas.fadeWait !== undefined && this.fadeWait !== state.canvas.fadeWait) {
                 this.fadeWait = state.canvas.fadeWait
-            await this.stop()
-            await this.unloadWall()
-            await this.loadWall()
-            await this.start()
+                changed = true
+            }
+            if (changed) {
+                await this.stop()
+                await this.unloadWall()
+                await this.loadWall()
+                await this.start()
+            }
         }
 
         /*  adust monitor  */
         if (state.monitor !== undefined) {
-            if (state.monitor.enable !== undefined) {
+            if (state.monitor.enable !== undefined && this.monitor.isEnabled() !== state.monitor.enable) {
                 this.monitor.setEnabled(state.monitor.enable)
                 if (state.monitor.enable && this.deviceMonitor !== "") {
                     await this.stop()
@@ -546,7 +558,7 @@ export default class CanvasRenderer extends EventEmitter {
                     await this.start()
                 }
             }
-            if (state.monitor.device !== undefined) {
+            if (state.monitor.device !== undefined && this.deviceMonitor !== state.monitor.device) {
                 this.deviceMonitor = state.monitor.device
                 await this.stop()
                 await this.unloadVideoStream(this.monitorDisplay!)
@@ -572,7 +584,7 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adust decal  */
         if (state.decal !== undefined) {
-            if (state.decal.enable !== undefined) {
+            if (state.decal.enable !== undefined && this.decal.isEnabled() !== state.decal.enable) {
                 this.decal.setEnabled(state.decal.enable)
                 if (state.decal.enable && this.deviceDecal !== "") {
                     await this.stop()
@@ -586,7 +598,7 @@ export default class CanvasRenderer extends EventEmitter {
                     await this.start()
                 }
             }
-            if (state.decal.device !== undefined) {
+            if (state.decal.device !== undefined && this.deviceMonitor !== state.decal.device) {
                 this.deviceDecal = state.decal.device
                 await this.stop()
                 await this.unloadVideoStream(this.decal!)
@@ -594,15 +606,24 @@ export default class CanvasRenderer extends EventEmitter {
                 await this.start()
             }
             if (state.decal.rotate !== undefined || state.decal.lift !== undefined || state.decal.scale !== undefined) {
-                if (state.decal.rotate !== undefined)
+                let changed = false
+                if (state.decal.rotate !== undefined && this.decalRotate !== state.decal.rotate) {
                     this.decalRotate = state.decal.rotate
-                if (state.decal.lift !== undefined)
+                    changed = true
+                }
+                if (state.decal.lift !== undefined && this.decalLift !== state.decal.lift) {
                     this.decalLift = state.decal.lift
-                if (state.decal.scale !== undefined)
+                    changed = true
+                }
+                if (state.decal.scale !== undefined && this.decalScale !== state.decal.scale) {
                     this.decalScale = state.decal.scale
-                await this.stop()
-                await this.decalGenerate()
-                await this.start()
+                    changed = true
+                }
+                if (changed) {
+                    await this.stop()
+                    await this.decalGenerate()
+                    await this.start()
+                }
             }
             if (state.decal.opacity !== undefined) {
                 const material = this.decal.material as BABYLON.PBRMaterial
