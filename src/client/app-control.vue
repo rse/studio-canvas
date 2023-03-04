@@ -150,13 +150,12 @@
                 <!--  ==== CANVAS ====  -->
                 <tab id="canvas" name="Canvas" class="canvas">
                     <div class="desc">
-                        The <b>Canvas</b> is the background image projected onto the chroma-keyed
-                         greenscreen of the scene.
+                        The <b>Canvas</b> is the background image projected onto the chroma-keyed greenscreen of the scene.
                         It can be either based on a single image for rendering a static canvas,
-                        or it can be two images providing a dynamic canvas through a cross-fade effect (indicated by the tag "FADE").
-                        Some canvas are exclusively designed for particular events (indicated by the tag "EXCL")
-                        and hence should be not used for arbitrary other types of events. The image
-                        have to be 10542x3570 pixels in size to provide a decent rendering even
+                        or it can be two images providing a dynamic canvas through a cross-fade effect (indicated
+                        by the tag "FADE"). Some canvas are exclusively designed for particular events (indicated
+                        by the tag "EXCL") and hence should be not used for arbitrary other types of events.
+                        The canvas images have to be 10542 x 3570 pixels in size to provide a decent rendering even
                         in 4K resolutions and with Full-HD crop-outs.
                     </div>
                     <div class="list" ref="list">
@@ -1074,6 +1073,12 @@
                 color: var(--color-acc-fg-5)
                 background-color: var(--color-acc-bg-3)
                 border-radius: 4px
+            &:hover
+                background-color: var(--color-acc-bg-1)
+            &.alt:hover
+                background-color: var(--color-acc-bg-2)
+            &.selected:hover
+                background-color: var(--color-acc-bg-3)
             .name
                 width: 100%
             .tags
