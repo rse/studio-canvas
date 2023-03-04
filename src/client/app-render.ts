@@ -515,7 +515,7 @@ export default class CanvasRenderer extends EventEmitter {
             || this.light1 === null || this.light2 === null || this.light3 === null)
             return
 
-        /*  adust canvas  */
+        /*  adjust canvas  */
         if (state.canvas !== undefined) {
             let changed = false
             if (state.canvas.texture1 !== undefined && this.texture1URL !== state.canvas.texture1) {
@@ -542,7 +542,7 @@ export default class CanvasRenderer extends EventEmitter {
             }
         }
 
-        /*  adust monitor  */
+        /*  adjust monitor  */
         if (state.monitor !== undefined) {
             if (state.monitor.enable !== undefined && this.monitor.isEnabled() !== state.monitor.enable) {
                 this.monitor.setEnabled(state.monitor.enable)
@@ -582,7 +582,7 @@ export default class CanvasRenderer extends EventEmitter {
                 this.monitor.position.y = this.monitorBase.positionY + (state.monitor.lift / 100)
         }
 
-        /*  adust decal  */
+        /*  adjust decal  */
         if (state.decal !== undefined) {
             if (state.decal.enable !== undefined && this.decal.isEnabled() !== state.decal.enable) {
                 this.decal.setEnabled(state.decal.enable)
@@ -631,7 +631,7 @@ export default class CanvasRenderer extends EventEmitter {
             }
         }
 
-        /*  adust lights  */
+        /*  adjust lights  */
         if (state.lights !== undefined) {
             if (state.lights.intensity1 !== undefined)
                 this.light1.intensity = state.lights.intensity1
@@ -641,13 +641,13 @@ export default class CanvasRenderer extends EventEmitter {
                 this.light3.intensity = state.lights.intensity3
         }
 
-        /*  adust reference points  */
+        /*  adjust reference points  */
         if (state.references !== undefined) {
             if (state.references.enable !== undefined)
                 this.references.setEnabled(state.references.enable)
         }
 
-        /*  adust camera calibration  */
+        /*  adjust camera calibration  */
         if ((state as any)[this.cameraName] !== undefined && this.camera !== null) {
             /*  adjust X position  */
             if ((state as any)[this.cameraName].position?.x !== undefined) {
