@@ -224,6 +224,18 @@ export class StateUtil {
         }
         return stateDiff
     }
+    static reduce (stateBase: Readonly<StateTypePartial>, stateDiff: Readonly<StateTypePartial>): StateTypePartial {
+        const stateReduced = {} as StateTypePartial
+        for (const path of StatePaths) {
+            if (objectPath.has(stateDiff, path)) {
+                const valBase = objectPath.get(stateBase, path)
+                const valDiff = objectPath.get(stateDiff, path)
+                if (valBase !== valDiff)
+                    objectPath.set(stateReduced, path, valDiff)
+            }
+        }
+        return stateReduced
+    }
     static copy (dst: StateTypePartial, src: Readonly<StateTypePartial>, patterns: Readonly<string[]> = [ "**" ]): boolean {
         let changed = false
         for (const pattern of patterns) {
