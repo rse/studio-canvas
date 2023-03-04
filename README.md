@@ -78,13 +78,16 @@ as illustrated in the following diagram:
 See Also
 --------
 
-- [Blender](https://blender.org)
-- [BabylonJS](https://babylonjs.com):
+- [TypeScript](https://www.typescriptlang.org/)
+- [Vue.js](https://vuejs.org/)
+- [BabylonJS](https://babylonjs.com)
     - [BabylonJS Documentation](https://doc.babylonjs.com/)
     - [BabylonJS Playground](https://playground.babylonjs.com/)
     - [BabylonJS Sandbox](https://sandbox.babylonjs.com/)
     - [BabylonJS Node Material Editor (NME)](https://nme.babylonjs.com/)
     - [BabylonJS Editor](https://editor.babylonjs.com/)
+- [Node.js](https://nodejs.org)
+- [Blender](https://blender.org)
 
 Copyright & License
 -------------------
