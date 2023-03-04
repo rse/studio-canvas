@@ -28,6 +28,7 @@
 import { defineComponent }        from "vue"
 import RecWebSocket               from "reconnecting-websocket"
 import Ducky                      from "ducky"
+import moment                     from "moment"
 import axios                      from "axios"
 import CanvasRenderer             from "./app-render"
 import { MixerState }             from "../common/app-mixer"
@@ -58,10 +59,12 @@ export default defineComponent({
             ptzKeys:  this.options.get("ptzKeys")
         })
         const canvas = this.$refs.canvas as HTMLCanvasElement
+        this.log("INFO", "establish Babylon game engine")
         await renderer.establish(canvas)
         await renderer.start()
 
         /*  connect to server for PTZ and state updates  */
+        this.log("INFO", "establish WebSocket server connection")
         const ws = new RecWebSocket(this.wsUrl + "/render", [], {
             reconnectionDelayGrowFactor: 1.3,
             maxReconnectionDelay:        4000,
@@ -69,19 +72,25 @@ export default defineComponent({
             connectionTimeout:           4000,
             minUptime:                   5000
         })
+        let opened = 0
         ws.addEventListener("open", (ev) => {
+            if (opened++ > 0)
+                this.log("INFO", "re-established WebSocket server connection")
             ws.send(JSON.stringify({ cmd: "SUBSCRIBE", arg: this.cam }))
+        })
+        ws.addEventListener("error", (ev) => {
+            this.log("WARNING", "WebSocket server connection error")
         })
         const queueSceneState = [] as Array<StateTypePartial>
         let queueSceneStateProcessed = false
         ws.addEventListener("message", (ev: MessageEvent) => {
             if (typeof ev.data !== "string") {
-                console.log("WARNING: invalid WebSocket message received")
+                this.log("WARNING", "invalid WebSocket server message received")
                 return
             }
             const data: any = JSON.parse(ev.data)
             if (!(typeof data === "object" && typeof data.cmd === "string" && data.arg !== undefined)) {
-                console.log("WARNING: invalid WebSocket message received", data)
+                this.log("WARNING", "invalid WebSocket server message received")
                 return
             }
             if (data.cmd === "PTZ" && data.arg?.cam === this.cam) {
@@ -92,8 +101,10 @@ export default defineComponent({
             else if (data.cmd === "STATE") {
                 const state = data.arg.state as StateTypePartial
                 const errors = [] as Array<string>
-                if (!Ducky.validate(state, StateSchemaPartial, errors))
-                    throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
+                if (!Ducky.validate(state, StateSchemaPartial, errors)) {
+                    this.log("WARNING", `invalid schema of loaded state: ${errors.join(", ")}`)
+                    return
+                }
                 queueSceneState.push(state)
                 if (!queueSceneStateProcessed) {
                     setTimeout(async () => {
@@ -117,6 +128,7 @@ export default defineComponent({
         })
 
         /*  load scene state once  */
+        this.log("INFO", "initially configuring Studio Canvas scene")
         const state = await axios({
             method: "GET",
             url:    `${this.serviceUrl}state`
@@ -130,10 +142,12 @@ export default defineComponent({
 
         /*  give renderer time to initially render the scence at least once
             (before we potentially cause 0 FPS in the next step)  */
+        this.log("INFO", "initially rendering Studio Canvas scene")
         await renderer.reflectMixerState({ program: this.cam, preview: "" } satisfies MixerState)
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
         /*  load mixer state once  */
+        this.log("INFO", "initially loading Studio Canvas camera mixer state")
         const mixer = await axios({
             method: "GET",
             url:    `${this.serviceUrl}mixer/state`
@@ -141,6 +155,13 @@ export default defineComponent({
         if (mixer === null)
             throw new Error("failed to load mixer state")
         await renderer.reflectMixerState(mixer as MixerState)
+        this.log("INFO", "ready for operation")
+    },
+    methods: {
+        log (level: string, msg: string) {
+            const timestamp = moment().format("YYYY-MM-DD hh:mm:ss.SSS")
+            console.log(`${timestamp} [${level}]: ${msg}`)
+        }
     }
 })
 </script>
