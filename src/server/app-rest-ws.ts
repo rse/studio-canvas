@@ -59,6 +59,8 @@ export default class RESTWS extends Latching {
                     websocket: {
                         only: true,
                         autoping: 30 * 1000,
+
+                        /*  on WebSocket connection open  */
                         connect: (args: any) => {
                             const ctx: wsPeerCtx            = args.ctx
                             const ws:  WebSocket            = args.ws
@@ -74,6 +76,8 @@ export default class RESTWS extends Latching {
                                 this.stats.peers.render++
                             this.notifyStats()
                         },
+
+                        /*  on WebSocket connection close  */
                         disconnect: (args: any) => {
                             const ctx: wsPeerCtx = args.ctx
                             const id = ctx.id
@@ -89,6 +93,7 @@ export default class RESTWS extends Latching {
                 }
             },
             handler: (request: HAPI.Request, h: HAPI.ResponseToolkit) => {
+                /*  on WebSocket message transfer  */
                 const { ctx, ws } = request.websocket()
                 if (typeof request.payload !== "object" || request.payload === null)
                     return Boom.badRequest("invalid request")
