@@ -5,6 +5,7 @@
 */
 
 /*  import external dependencies  */
+import EventEmitter   from "eventemitter2"
 import * as BABYLON   from "@babylonjs/core"
 import                     "@babylonjs/loaders/glTF"
 
@@ -15,7 +16,7 @@ import { FreeDState } from "../common/app-freed"
 import { StateType, StateTypePartial } from "../common/app-state"
 
 /*  the canvas rendering class  */
-export default class CanvasRenderer {
+export default class CanvasRenderer extends EventEmitter {
     /*  internal parameter state  */
     private ptzFreeD    = false
     private ptzKeys     = false
@@ -71,6 +72,10 @@ export default class CanvasRenderer {
     private texture1:       BABYLON.Nullable<BABYLON.Texture>        = null
     private texture2:       BABYLON.Nullable<BABYLON.Texture>        = null
     private texture3:       BABYLON.Nullable<BABYLON.Texture>        = null
+
+    /*  video stream device names  */
+    private deviceMonitor = ""
+    private deviceDecal   = ""
 
     /*  PTZ sub-module  */
     private ptz = new PTZ()
@@ -527,12 +532,25 @@ export default class CanvasRenderer {
 
         /*  adust monitor  */
         if (state.monitor !== undefined) {
-            if (state.monitor.enable !== undefined)
+            if (state.monitor.enable !== undefined) {
                 this.monitor.setEnabled(state.monitor.enable)
+                if (state.monitor.enable && this.deviceMonitor) {
+                    await this.stop()
+                    await this.unloadVideoStream(this.monitorDisplay!)
+                    await this.loadVideoStream(this.monitorDisplay!, this.deviceMonitor)
+                    await this.start()
+                }
+                else if (!state.monitor.enable) {
+                    await this.stop()
+                    await this.unloadVideoStream(this.monitorDisplay!)
+                    await this.start()
+                }
+            }
             if (state.monitor.device !== undefined) {
+                this.deviceMonitor = state.monitor.device
                 await this.stop()
                 await this.unloadVideoStream(this.monitorDisplay!)
-                await this.loadVideoStream(this.monitorDisplay!, state.monitor.device)
+                await this.loadVideoStream(this.monitorDisplay!, this.deviceMonitor)
                 await this.start()
             }
             if (state.monitor.scale !== undefined) {
@@ -556,7 +574,19 @@ export default class CanvasRenderer {
         if (state.decal !== undefined) {
             if (state.decal.enable !== undefined)
                 this.decal.setEnabled(state.decal.enable)
+                if (state.decal.enable && this.deviceDecal) {
+                    await this.stop()
+                    await this.unloadVideoStream(this.decal!)
+                    await this.loadVideoStream(this.decal!, this.deviceDecal)
+                    await this.start()
+                }
+                else if (!state.decal.enable) {
+                    await this.stop()
+                    await this.unloadVideoStream(this.decal!)
+                    await this.start()
+                }
             if (state.decal.device !== undefined) {
+                this.deviceDecal = state.decal.device
                 await this.stop()
                 await this.unloadVideoStream(this.decal!)
                 await this.loadVideoStream(this.decal!, state.decal.device)
@@ -665,11 +695,7 @@ export default class CanvasRenderer {
                 if (this.mixerProgram === this.cameraName)
                     fps = this.fpsProgram
             }
-            if (this.fps !== fps) {
-                this.fps = fps
-                if (this.optimizer !== null)
-                    this.optimizer.targetFrameRate = fps
-            }
+            this.configureFPS(fps)
         }
     }
 
@@ -686,7 +712,13 @@ export default class CanvasRenderer {
             if (this.mixerProgram === this.cameraName)
                 fps = this.fpsProgram
         }
+        this.configureFPS(fps)
+    }
+
+    /*  (re-)configure FPS  */
+    configureFPS (fps: number) {
         if (this.fps !== fps) {
+            this.emit("log", "INFO", `switching from ${this.fps} to ${fps} frames-per-second (FPS)`)
             this.fps = fps
             if (this.optimizer !== null)
                 this.optimizer.targetFrameRate = fps
