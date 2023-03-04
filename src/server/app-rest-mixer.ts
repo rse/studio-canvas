@@ -12,8 +12,8 @@ import { MixerState }  from "../common/app-mixer"
 
 export default class RESTMixer {
     private mixer = {
-        preview: "",
-        program: ""
+        preview: "CAM1",
+        program: "CAM2"
     } satisfies MixerState
     constructor (
         private rest:   REST,
