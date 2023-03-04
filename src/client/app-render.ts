@@ -534,7 +534,7 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.monitor !== undefined) {
             if (state.monitor.enable !== undefined) {
                 this.monitor.setEnabled(state.monitor.enable)
-                if (state.monitor.enable && this.deviceMonitor) {
+                if (state.monitor.enable && this.deviceMonitor !== "") {
                     await this.stop()
                     await this.unloadVideoStream(this.monitorDisplay!)
                     await this.loadVideoStream(this.monitorDisplay!, this.deviceMonitor)
@@ -572,9 +572,9 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adust decal  */
         if (state.decal !== undefined) {
-            if (state.decal.enable !== undefined)
+            if (state.decal.enable !== undefined) {
                 this.decal.setEnabled(state.decal.enable)
-                if (state.decal.enable && this.deviceDecal) {
+                if (state.decal.enable && this.deviceDecal !== "") {
                     await this.stop()
                     await this.unloadVideoStream(this.decal!)
                     await this.loadVideoStream(this.decal!, this.deviceDecal)
@@ -585,6 +585,7 @@ export default class CanvasRenderer extends EventEmitter {
                     await this.unloadVideoStream(this.decal!)
                     await this.start()
                 }
+            }
             if (state.decal.device !== undefined) {
                 this.deviceDecal = state.decal.device
                 await this.stop()
