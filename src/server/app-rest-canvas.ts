@@ -14,13 +14,15 @@ import * as HAPI      from "@hapi/hapi"
 import Argv           from "./app-argv"
 import Log            from "./app-log"
 import REST           from "./app-rest"
+import RESTWS         from "./app-rest-ws"
 import { ImageEntry, ImageSchema } from "../common/app-canvas"
 
 export default class RESTCanvas {
     constructor (
-        private argv: Argv,
-        private log:  Log,
-        private rest: REST
+        private argv:   Argv,
+        private log:    Log,
+        private rest:   REST,
+        private restWS: RESTWS
     ) {}
     async init () {
         /*  serve dedicated canvas files  */
@@ -95,6 +97,14 @@ export default class RESTCanvas {
                     redirectToSlash: true,
                     index: true
                 }
+            }
+        })
+        this.rest.server!.route({
+            method: "GET",
+            path: `${canvasURL}/sync`,
+            handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
+                this.restWS.notifyRendererSync(Date.now())
+                return h.response().code(204)
             }
         })
     }

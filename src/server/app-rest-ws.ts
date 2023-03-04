@@ -135,6 +135,13 @@ export default class RESTWS extends Latching {
             info.ws.send(msg)
     }
 
+    /*  notify clients about renderer sync  */
+    notifyRendererSync (timestamp: number) {
+        const msg = JSON.stringify({ cmd: "SYNC", arg: { timestamp } })
+        for (const info of this.wsPeers.values())
+            info.ws.send(msg)
+    }
+
     /*  notify clients about statistics change  */
     notifyStats () {
         const msg = JSON.stringify({ cmd: "STATS", arg: { stats: this.stats } })
