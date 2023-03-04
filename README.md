@@ -10,8 +10,8 @@ About
 -----
 
 **Studio-Canvas** is a client/server applications, written in
-TypeScript, for dynamically rendering the virtual canvas of a filmstudio
-through the help of a game engine.
+[TypeScript](https://www.typescriptlang.org/), for dynamically rendering
+the virtual canvas of a filmstudio through the help of a game engine.
 
 The application consists of a central [Node.js](https://nodejs.org)-based
 server component and a HTML5 Single-Page Application (SPA) as the client component. The
