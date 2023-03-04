@@ -60,6 +60,8 @@ export default class RESTPreset {
                 })
             }
         })
+
+        /*  bare selection of preset  */
         this.rest.server!.route({
             method: "GET",
             path: "/state/preset/{slot}/select",
@@ -75,10 +77,12 @@ export default class RESTPreset {
                             StateUtil.copy(state, obj)
                     }
                     this.restWS.notifySceneState(state)
-                    return h.response(state).code(200)
+                    return h.response().code(204)
                 })
             }
         })
+
+        /*  load preset  */
         this.rest.server!.route({
             method: "GET",
             path: "/state/preset/{slot}",
