@@ -128,8 +128,9 @@ export default defineComponent({
             throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
         await renderer.reflectSceneState(state as StateType)
 
-        /*  give renderer time to initially render the scence
+        /*  give renderer time to initially render the scence at least once
             (before we potentially cause 0 FPS in the next step)  */
+        await renderer.reflectMixerState({ program: this.cam, preview: "" } satisfies MixerState)
         await new Promise((resolve) => setTimeout(resolve, 2000))
 
         /*  load mixer state once  */
