@@ -620,7 +620,11 @@
                                     program: mixer.program === 'CAM1'
                                 }">
                                 CAM1
-                                <div class="badge" v-bind:class="mixerStatus2Class('CAM1')"></div>
+                                <div class="badge" v-bind:class="mixerStatus2Class('CAM1')">
+                                    {{ mixer.program === 'CAM1' ? state.renderer.program :
+                                    (mixer.preview === 'CAM1' ? state.renderer.preview :
+                                    state.renderer.other) }}
+                                </div>
                             </div>
                             <div class="button cam" v-on:click="changePreview('CAM4')"
                                 v-bind:class="{
@@ -629,7 +633,11 @@
                                     program: mixer.program === 'CAM4'
                                 }">
                                 CAM4
-                                <div class="badge" v-bind:class="mixerStatus2Class('CAM4')"></div>
+                                <div class="badge" v-bind:class="mixerStatus2Class('CAM4')">
+                                    {{ mixer.program === 'CAM4' ? state.renderer.program :
+                                    (mixer.preview === 'CAM4' ? state.renderer.preview :
+                                    state.renderer.other) }}
+                                </div>
                             </div>
                             <div class="button cut" v-on:click="cutPreviewToProgram()">
                                 CUT
@@ -641,7 +649,11 @@
                                     program: mixer.program === 'CAM2'
                                 }">
                                 CAM2
-                                <div class="badge" v-bind:class="mixerStatus2Class('CAM2')"></div>
+                                <div class="badge" v-bind:class="mixerStatus2Class('CAM2')">
+                                    {{ mixer.program === 'CAM2' ? state.renderer.program :
+                                    (mixer.preview === 'CAM2' ? state.renderer.preview :
+                                    state.renderer.other) }}
+                                </div>
                             </div>
                             <div class="button cam" v-on:click="changePreview('CAM3')"
                                 v-bind:class="{
@@ -650,7 +662,11 @@
                                     program: mixer.program === 'CAM3'
                                 }">
                                 CAM3
-                                <div class="badge" v-bind:class="mixerStatus2Class('CAM3')"></div>
+                                <div class="badge" v-bind:class="mixerStatus2Class('CAM3')">
+                                    {{ mixer.program === 'CAM3' ? state.renderer.program :
+                                    (mixer.preview === 'CAM3' ? state.renderer.preview :
+                                    state.renderer.other) }}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1189,6 +1205,7 @@
                 padding: 2px 8px 2px 8px
                 text-align: center
                 font-size: 12pt
+                font-weight: normal
                 line-height: 50px
                 width: calc(100% - 2 * 8px)
                 height: calc(100% - 2 * 2px)
@@ -1218,16 +1235,21 @@
                     width: 30px
                     height: 30px
                     border-radius: 4px
-                    font-size: 14px
-                    font-weight: normal
+                    font-size: 16px
+                    font-weight: 200
+                    line-height: 28px
                     &.other
-                        display: none
+                        background-color: var(--color-std-bg-4)
+                        color: var(--color-std-fg-5)
                     &.preview
                         background-color: var(--color-acc-bg-2)
-                        color: var(--color-sig-fg-5)
+                        color: var(--color-acc-fg-5)
                     &.program
                         background-color: var(--color-sig-bg-2)
-                        color: var(--color-acc-fg-5)
+                        color: var(--color-sig-fg-5)
+                &:hover .badge.other
+                    background-color: var(--color-acc-bg-4)
+                    color: var(--color-acc-fg-5)
     .slider
         width: 400px
         --slider-bg: var(--color-std-bg-1)
