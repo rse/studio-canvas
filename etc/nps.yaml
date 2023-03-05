@@ -15,7 +15,7 @@ scripts:
 
     #   static code analysis (linting)
     lint-watch:             nodemon --exec "npm start lint" --watch src --ext html,styl,js,ts,vue
-    lint:                   nps -c etc/nps.yaml lint-tsc lint-vue-tsc lint-eslint lint-stylelint lint-htmllint
+    lint:                   npm start lint-tsc lint-vue-tsc lint-eslint lint-stylelint lint-htmllint
     lint-tsc:               tsc --project etc/tsc-server.json --noEmit
     lint-vue-tsc:           vue-tsc --project etc/tsc-client.json --noEmit
     lint-eslint:            eslint --config etc/eslint.yaml --ext ts,vue src/**/*.vue src/**/*.ts
@@ -23,8 +23,8 @@ scripts:
     lint-htmllint:          htmllint --rc etc/htmllint.json src/**/*.html
 
     #  code compilation/transpiling (building)
-    build:                  nps -c etc/nps.yaml build-client build-server
-    build-dev:              nps -c etc/nps.yaml build-client-dev build-server-dev
+    build:                  npm start build-client build-server
+    build-dev:              npm start build-client-dev build-server-dev
     build-client: >
                             cross-env NODE_OPTIONS=--max-old-space-size=8192
                             vite --config etc/vite-client.ts build --logLevel info --mode production
