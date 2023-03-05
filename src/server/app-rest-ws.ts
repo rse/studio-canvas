@@ -11,6 +11,7 @@ import Boom                 from "@hapi/boom"
 import WebSocket            from "ws"
 import Latching             from "latching"
 
+import Log                  from "./app-log"
 import { FreeDEntry }       from "./app-freed"
 import REST                 from "./app-rest"
 import { MixerState }       from "../common/app-mixer"
@@ -43,6 +44,7 @@ export default class RESTWS extends Latching {
 
     /*  creation  */
     constructor (
+        private log:  Log,
         private rest: REST
     ) {
         super()
@@ -74,6 +76,7 @@ export default class RESTWS extends Latching {
                                 this.stats.peers.control++
                             else if (peer === "render")
                                 this.stats.peers.render++
+                            this.log.log(2, `WebSocket: connect: remote=${id}`)
                             this.notifyStats()
                         },
 
@@ -87,6 +90,7 @@ export default class RESTWS extends Latching {
                             else if (peer === "render")
                                 this.stats.peers.render--
                             this.wsPeers.delete(id)
+                            this.log.log(2, `WebSocket: disconnect: remote=${id}`)
                             this.notifyStats()
                         }
                     }
