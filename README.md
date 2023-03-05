@@ -20,6 +20,12 @@ based control mode for real-time adjusting the scene parameters and a rendering 
 for real-time rendering the scene with the help of the
 [Babylon.js](https://www.babylonjs.com/) game engine.
 
+Screenshots
+-----------
+
+![screenshot-02](doc/screenshot-01.png)
+![screenshot-11](doc/screenshot-11.png)
+
 Usage (Production)
 ------------------
 
