@@ -11,14 +11,9 @@ extends:
 rules:
     indentation: 4
     stylus/indentation: 4
-    max-line-length: 200
+    shorthand-property-no-redundant-values: null
     unit-allowed-list: [ "px", "pt", "%", "vh", "vw", "fr", "rem", "ms" ]
-    at-rule-empty-line-before: null
     rule-empty-line-before: null
-    declaration-colon-space-after: null
-    no-empty-source: null
-    property-no-vendor-prefix: null
-    declaration-block-trailing-semicolon: null
     no-descending-specificity: null
     custom-property-empty-line-before: null
     stylus/declaration-colon: null
