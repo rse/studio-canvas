@@ -5,11 +5,10 @@
 ##
 
 extends:
-    - "stylelint-stylus/standard"
+    - "./stylelint.js"
     - "stylelint-config-standard-vue"
 
 rules:
-    indentation: 4
     stylus/indentation: 4
     shorthand-property-no-redundant-values: null
     unit-allowed-list: [ "px", "pt", "%", "vh", "vw", "fr", "rem", "ms" ]
