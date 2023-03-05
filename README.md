@@ -25,13 +25,15 @@ the scene parameters and a rendering mode for real-time rendering the
 scene with the help of the [Babylon.js](https://www.babylonjs.com/) game
 engine.
 
-Screenshots
------------
+![screenshot-11](doc/screenshot-11.png)
+
+Control User Interface
+----------------------
 
 **Studio-Canvas** is based on a client/server architecture.
 The client runs in either control mode or render mode. The
-following are two screenshots of the client in both modes.
-More screenshots can be found [here](doc/).
+render client(s) are remote controlled from control client(s).
+Here are screenshots of the user interface of the control client.
 
 ![screenshot-01](doc/screenshot-01.png)
 ![screenshot-02](doc/screenshot-02.png)
@@ -43,7 +45,6 @@ More screenshots can be found [here](doc/).
 ![screenshot-08](doc/screenshot-08.png)
 ![screenshot-09](doc/screenshot-09.png)
 ![screenshot-10](doc/screenshot-10.png)
-![screenshot-11](doc/screenshot-11.png)
 
 Usage (Production)
 ------------------
