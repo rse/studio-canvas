@@ -23,6 +23,11 @@ for real-time rendering the scene with the help of the
 Screenshots
 -----------
 
+**Studio-Canvas** is based on a client/server architecture.
+The client runs in either control mode or render mode. The
+following are two screenshots of the client in both modes.
+More screenshots can be found [here](doc/).
+
 ![screenshot-02](doc/screenshot-02.png)
 ![screenshot-11](doc/screenshot-11.png)
 
