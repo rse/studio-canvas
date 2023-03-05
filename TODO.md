@@ -13,3 +13,5 @@ TODO
 - Decal from some camera positions (mainly CAM4)
   incorrectly shows its video texture
 
+- CAMx: Rotate Y multiplies itself during pan left/right?!
+
