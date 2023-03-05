@@ -8,10 +8,10 @@ scripts:
     #   multiview-style development dashboard
     dev: >
                             stmux -w always -m beep -e "built.in.+ms" --
-                            [ "npm start lint-watch" :
-                            "npm start build-client-dev-watch" :
-                            "npm start build-server-dev-watch" :
-                            "npm start server-dev" ]
+                            [ -s 40% "npm start lint-watch" :
+                            -s 20% "npm start build-client-dev-watch" :
+                            -s 20% "npm start build-server-dev-watch" :
+                            -s 20% "npm start server-delay server-dev" ]
 
     #   static code analysis (linting)
     lint-watch:             nodemon --exec "npm start lint" --watch src --ext html,styl,js,ts,vue
@@ -39,6 +39,7 @@ scripts:
     build-server-dev-watch: tsc --project etc/tsc-server.json --sourceMap --watch
 
     #  start server run-time
+    server-delay:           delay 8.0
     server-dev: >
                             cross-env NODE_OPTIONS="-r source-map-support/register"
                             nodemon --exec "npm start server" --watch dst/server --ext js --delay 1.0
