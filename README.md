@@ -23,7 +23,7 @@ for real-time rendering the scene with the help of the
 Screenshots
 -----------
 
-![screenshot-02](doc/screenshot-01.png)
+![screenshot-02](doc/screenshot-02.png)
 ![screenshot-11](doc/screenshot-11.png)
 
 Usage (Production)
