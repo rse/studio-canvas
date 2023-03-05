@@ -28,7 +28,9 @@ The client runs in either control mode or render mode. The
 following are two screenshots of the client in both modes.
 More screenshots can be found [here](doc/).
 
+![screenshot-01](doc/screenshot-01.png)
 ![screenshot-02](doc/screenshot-02.png)
+![screenshot-07](doc/screenshot-07.png)
 ![screenshot-11](doc/screenshot-11.png)
 
 Usage (Production)
