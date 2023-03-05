@@ -29,72 +29,74 @@
                 <tab id="presets" name="Presets">
                     <div class="desc">
                         The <b>Presets</b> can be used to load and save the entire &mdash; or just the partial &mdash;
-                        current canvas scence control state from or to pre-defined and persisted slots.
+                        current canvas scence control state from or to persistent preset slots.
                         When loading a partial state from a preset slot, the partial state is merged
-                        into the current state.
+                        onto the current state.
                     </div>
                     <div class="presets">
                         <div class="slots">
                             <div class="button" v-bind:class="{ selected: preset.slot === 0 }"
-                                v-on:click="preset.slot = 0">
+                                v-on:click="preset.slot = preset.slot !== 0 ? 0 : -1">
                                 1
                                 <div class="badge" v-bind:class="presetStatus2Class(0)">{{ preset.status[0] }}</div>
                             </div>
                             <div class="button" v-bind:class="{ selected: preset.slot === 1 }"
-                                v-on:click="preset.slot = 1">
+                                v-on:click="preset.slot = preset.slot !== 1 ? 1 : -1">
                                 2
                                 <div class="badge" v-bind:class="presetStatus2Class(1)">{{ preset.status[1] }}</div>
                             </div>
                             <div class="button" v-bind:class="{ selected: preset.slot === 2 }"
-                                v-on:click="preset.slot = 2">
+                                v-on:click="preset.slot = preset.slot !== 2 ? 2 : -1">
                                 3
                                 <div class="badge" v-bind:class="presetStatus2Class(2)">{{ preset.status[2] }}</div>
                             </div>
                             <div class="button" v-bind:class="{ selected: preset.slot === 3 }"
-                                v-on:click="preset.slot = 3">
+                                v-on:click="preset.slot = preset.slot !== 3 ? 3 : -1">
                                 4
                                 <div class="badge" v-bind:class="presetStatus2Class(3)">{{ preset.status[3] }}</div>
                             </div>
                             <div class="button" v-bind:class="{ selected: preset.slot === 4 }"
-                                v-on:click="preset.slot = 4">
+                                v-on:click="preset.slot = preset.slot !== 4 ? 4 : -1">
                                 5
                                 <div class="badge" v-bind:class="presetStatus2Class(4)">{{ preset.status[4] }}</div>
                             </div>
                             <div class="button" v-bind:class="{ selected: preset.slot === 5 }"
-                                v-on:click="preset.slot = 5">
+                                v-on:click="preset.slot = preset.slot !== 5 ? 5 : -1">
                                 6
                                 <div class="badge" v-bind:class="presetStatus2Class(5)">{{ preset.status[5] }}</div>
                             </div>
                             <div class="button" v-bind:class="{ selected: preset.slot === 6 }"
-                                v-on:click="preset.slot = 6">
+                                v-on:click="preset.slot = preset.slot !== 6 ? 6 : -1">
                                 7
                                 <div class="badge" v-bind:class="presetStatus2Class(6)">{{ preset.status[6] }}</div>
                             </div>
                             <div class="button" v-bind:class="{ selected: preset.slot === 7 }"
-                                v-on:click="preset.slot = 7">
+                                v-on:click="preset.slot = preset.slot !== 7 ? 7 : -1">
                                 8
                                 <div class="badge" v-bind:class="presetStatus2Class(7)">{{ preset.status[7] }}</div>
                             </div>
                             <div class="button" v-bind:class="{ selected: preset.slot === 8 }"
-                                v-on:click="preset.slot = 8">
+                                v-on:click="preset.slot = preset.slot !== 8 ? 8 : -1">
                                 9
                                 <div class="badge" v-bind:class="presetStatus2Class(8)">{{ preset.status[8] }}</div>
                             </div>
                         </div>
                         <div class="actions1">
                             <div class="button destructive"
-                                v-bind:class="{ unselectable: preset.status[preset.slot] === 0 }"
+                                v-bind:class="{ unselectable: preset.slot === -1 || preset.status[preset.slot] === 0 }"
                                 v-on:click="presetLoad">
                                 LOAD
                             </div>
                             <div class="button destructive"
-                                v-bind:class="{ unselectable: preset.status[preset.slot] === 0 }"
+                                v-bind:class="{ unselectable: preset.slot === -1 || preset.status[preset.slot] === 0 }"
                                 v-on:click="presetClear">
                                 CLEAR
                             </div>
                         </div>
                         <div class="actions2">
-                            <div class="button destructive" v-on:click="presetSave">
+                            <div class="button destructive"
+                                v-bind:class="{ unselectable: preset.slot === -1 }"
+                                v-on:click="presetSave">
                                 SAVE
                             </div>
                         </div>
@@ -150,13 +152,12 @@
                 <!--  ==== CANVAS ====  -->
                 <tab id="canvas" name="Canvas" class="canvas">
                     <div class="desc">
-                        The <b>Canvas</b> is the background image projected onto the chroma-keyed greenscreen of the scene.
+                        The <b>Canvas</b> is the background of the scene.
                         It can be either based on a single image for rendering a static canvas,
                         or it can be two images providing a dynamic canvas through a cross-fade effect (indicated
-                        by the tag "FADE"). Some canvas are exclusively designed for particular events (indicated
-                        by the tag "EXCL") and hence should be not used for arbitrary other types of events.
-                        The canvas images have to be 10542 x 3570 pixels in size to provide a decent rendering even
-                        in 4K resolutions and with Full-HD crop-outs.
+                        by "FADE"). Some canvas are exclusively designed for particular events (indicated
+                        by "EXCL") and hence should be not reused for other events.
+                        All canvas images have to be exactly 10542 x 3570 pixels in size.
                     </div>
                     <div class="list" ref="list">
                         <div
@@ -186,8 +187,9 @@
                 <tab id="monitor" name="Monitor">
                     <div class="desc">
                         The <b>Monitor</b> is the optional TV-style monitor which can be shown
-                        in the scene. It can be given a particular input video source device,
-                        scaled in size, and positioned on in a radial way in the scene.
+                        in front of the background canvas. It can be given a particular
+                        video source device as input, scaled in size, and positioned on in a
+                        radial way in front of the background canvas.
                     </div>
                     <div class="control">
                         <div class="label1">enable</div>
@@ -263,8 +265,9 @@
                 <tab id="decal" name="Decal">
                     <div class="desc">
                         The <b>Decal</b> is the optional poster-style display which can be projected
-                        onto the canvas. It can be given a particular input video source device,
-                        scaled in size, positioned in a radial way on the canvas and opacity-controlled.
+                        onto the background canvas. It can be given a particular video source device
+                        as input, scaled in size, positioned in a radial way on the background canvas,
+                        and its opacity can be controlled to mix with the canvas.
                     </div>
                     <div class="control">
                         <div class="label1">enable</div>
@@ -354,9 +357,9 @@
                 <!--  ==== LIGHTS ====  -->
                 <tab id="lights" name="Lights">
                     <div class="desc">
-                        The <b>Lights</b> are the three optional additional point lights in the scene,
+                        The <b>Lights</b> are three optional, additional point lights in the scene,
                         which can further light up the scene and especially produce a shadow of
-                        the monitor on the canvas.
+                        the monitor on the background canvas.
                     </div>
                     <div class="control">
                         <div class="label1">intensity1</div>
@@ -411,8 +414,9 @@
                     <div class="desc">
                         The <b>References</b> are the optional red balls in the scence
                         which can help calibrating the virtual cameras against the physical
-                        camera viewpoint. If calibrated correctly, the virtual balls should
-                        match as close as possible with the physical red markers in the scene.
+                        camera viewpoint before an event. If calibrated correctly, the virtual balls
+                        in the scene should match as close as possible with the physical red markers
+                        on the stage.
                     </div>
                     <div class="control">
                         <div class="label1">enable</div>
@@ -431,11 +435,12 @@
                 <!--  ==== CAM1/2/3/4 ====  -->
                 <tab v-for="cam in [ 'CAM1', 'CAM2', 'CAM3', 'CAM4' ]" v-bind:key="cam" v-bind:id="cam.toLowerCase()" v-bind:name="cam">
                     <div class="desc">
-                        The <b>{{ cam }}</b> is the digital twin of the physical
-                        camera named "{{ cam }}". It has to be calibrated to match as close
+                        The <b>{{ cam }}</b> is a digital twin of the corresponding physical
+                        camera. It has to be calibrated to match as close
                         as possible to the physical viewpoint of the camera in order
                         to allow precise pan/tilt/zoom (PTZ) of both the physical camera via NDI
-                        and PTZ of the virtual camera via FreeD.
+                        and PTZ of the virtual camera via the FreeD information emitted by the physical
+                        camera.
                     </div>
                     <div class="control">
                         <div class="label1">X-position</div>
@@ -549,8 +554,9 @@
                 <tab id="renderer" name="Renderer">
                     <div class="desc">
                         The <b>Renderer</b> allows you to configure the Frames per Second (FPS)
-                        of a camera renderer when in program, preview or neither of them (other).
-                        This in total allows you to reduce the overall load all renderers cause on a system.
+                        of a scene renderer when it is in program, preview or neither of them (other).
+                        This in total allows you to reduce the overall load all renderers cause on the
+                        underlying hardware. Never use more FPS than absolutely necessary.
                     </div>
                     <div class="control">
                         <div class="label1">Program</div>
@@ -608,7 +614,10 @@
                     <div class="desc">
                         The <b>Mixer</b> allows you to select a camera to be logically
                         in preview and to logically cut a camera from preview to program.
-                        This in allows you to ad-hoc apply the configured Renderer FPS.
+                        This allows you to ad-hoc adjust the configured FPS
+                        onto all renderer instances during production in order
+                        to allows you to reduce the overall load all renderers cause on the
+                        underlying hardware.
                     </div>
                     <div class="control">
                         <div class="cams">
@@ -674,11 +683,12 @@
                 <!--  ==== PREVIEW ====  -->
                 <tab id="preview" name="Preview" class="preview">
                     <div class="desc">
-                        The <b>Preview</b> is a sneak preview of the rendered camera view
+                        The <b>Preview</b> is a rendering preview of the rendered camera view
                         within the BabylonJS game engine. It is exactly the same content intended
-                        to be loaded into the vMix Browser input and allows one to preview the scene
-                        in the browser here, too. The camera view can be optionally controlled
-                        by reflecting the FreeD information from the physical camera
+                        to be loaded into the vMix Browser input (or OBS Studio Browser source)
+                        and allows you to preview the scene in the browser here, too.
+                        The camera view can be optionally controlled
+                        by reflecting the emitted FreeD information from the physical camera,
                         or being interactively adjusted by cursor keys.
                     </div>
                     <div class="preview-url" v-on:click="previewCopy()">
@@ -979,6 +989,10 @@
             font-size: 120%
             font-weight: bold
             line-height: 170px
+            &.unselectable:hover
+                background-color: var(--color-std-bg-3)
+                color: var(--color-std-fg-5)
+                cursor: default
         .actions3 .button
             line-height: 80px
     .preview
@@ -1057,9 +1071,9 @@
         padding: 4px 4px 4px 4px
         border-radius: 4px
         background-color: var(--color-std-bg-3)
-        height: 280px
-        min-height: 280px
-        max-height: 280px
+        height: 300px
+        min-height: 300px
+        max-height: 300px
         .list-entry
             cursor: pointer;
             color: var(--color-std-fg-5)
@@ -1359,7 +1373,7 @@ export default defineComponent({
                 CAM4:       true,
                 renderer:   true
             } as StateFilterType,
-            slot: 0,
+            slot: -1,
             status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         state: StateDefault as StateType,
@@ -1685,6 +1699,8 @@ export default defineComponent({
 
         /*  load preset slot  */
         async presetLoad () {
+            if (this.preset.slot === -1)
+                return
             if (this.preset.status[this.preset.slot] === 0)
                 return
             this.raiseStatus("info", `Loading state from preset slot #${this.preset.slot + 1}...`, 1000)
@@ -1708,14 +1724,21 @@ export default defineComponent({
                 .filter((key) => (this.preset.filters as any)[key])
                 .map((key) => `${key}.**`)
             this.mergeState(state as StateType, filters)
+            this.preset.slot = -1
         },
 
         /*  save preset slot  */
         async presetSave () {
-            this.raiseStatus("info", `Saving state to preset slot #${this.preset.slot + 1}...`, 1000)
+            if (this.preset.slot === -1)
+                return
             const filters = Object.keys(this.preset.filters)
                 .filter((key) => (this.preset.filters as any)[key])
                 .map((key) => `${key}.**`)
+            if (filters.length === 0) {
+                this.raiseStatus("error", "Empty preset filter", 1000)
+                return
+            }
+            this.raiseStatus("info", `Saving state to preset slot #${this.preset.slot + 1}...`, 1000)
             const state = this.exportState(filters)
             this.connection.send = true
             await axios({
@@ -1725,11 +1748,14 @@ export default defineComponent({
             }).finally(() => {
                 this.connection.send = false
             })
+            this.preset.slot = -1
             await this.presetStatus()
         },
 
         /*  clear preset slot  */
         async presetClear () {
+            if (this.preset.slot === -1)
+                return
             if (this.preset.status[this.preset.slot] === 0)
                 return
             this.raiseStatus("info", `Clearing preset slot #${this.preset.slot + 1}...`, 1000)
@@ -1740,6 +1766,7 @@ export default defineComponent({
             }).then((response) => response.data).catch(() => null).finally(() => {
                 this.connection.send = false
             })
+            this.preset.slot = -1
             await this.presetStatus()
         },
 
