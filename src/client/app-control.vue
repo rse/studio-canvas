@@ -806,10 +806,10 @@
             padding: 2px 8px 2px 8px
             .icon
                 color: var(--color-std-fg-1)
-                margin-right: 8px;
+                margin-right: 8px
             .figure
                 color: var(--color-std-fg-5)
-                margin-right: 16px;
+                margin-right: 16px
     .body
         flex-grow: 1
         background-color: var(--color-std-bg-2)
@@ -917,18 +917,17 @@
             margin-right: 10px
         .actions2
             margin-right: 20px
+            display: grid
+            grid-template-columns: 100px
+            grid-template-rows: 170px
+            justify-items: center
+            align-items: center
+            gap: 10px 10px
         .filter
             margin-right: 10px
             display: grid
             grid-template-columns: 100px 100px
             grid-template-rows: 25px 25px 25px 25px 25px
-            justify-items: center
-            align-items: center
-            gap: 10px 10px
-        .actions2
-            display: grid
-            grid-template-columns: 100px
-            grid-template-rows: 170px
             justify-items: center
             align-items: center
             gap: 10px 10px
@@ -1028,7 +1027,7 @@
                     justify-items: start
                     align-items: center
                     gap: 10px 10px
-                    padding: 0px 10px 0px 10px
+                    padding: 0 10px 0 10px
                     border-radius: 4px
             .action
                 display: grid
@@ -1075,14 +1074,14 @@
         min-height: 300px
         max-height: 300px
         .list-entry
-            cursor: pointer;
+            cursor: pointer
             color: var(--color-std-fg-5)
             background-color: var(--color-std-bg-4)
-            &.alt
-                background-color: var(--color-std-bg-5)
             padding: 1px 10px 1px 10px
             display: flex
             flex-direction: row
+            &.alt
+                background-color: var(--color-std-bg-5)
             &.selected
                 color: var(--color-acc-fg-5)
                 background-color: var(--color-acc-bg-3)
@@ -1101,7 +1100,7 @@
                 flex-direction: row
                 .tag
                     width: 40px
-                    padding: 4px 4px 0px 4px
+                    padding: 4px 4px 0 4px
                     text-align: center
                     border-radius: 4px
                     margin-right: 4px

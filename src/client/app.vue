@@ -29,9 +29,6 @@
     </div>
 </template>
 
-<style lang="stylus">
-</style>
-
 <script setup lang="ts">
 import { defineComponent } from "vue"
 import URI                 from "urijs"
