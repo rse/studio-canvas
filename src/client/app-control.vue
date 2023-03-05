@@ -542,12 +542,12 @@
                         <div class="label3">[cm]:</div>
                         <div class="value">
                             <input tabindex="1" v-bind:value="fieldExport((state as any)[cam].position.x)"
-                                v-on:change="(ev) => (state as any)[cam].position.x = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
+                                v-on:change="(ev) => (state as any)[cam].position.x = fieldImport((ev.target! as HTMLInputElement).value, -50, +50)"/>
                         </div>
                         <div class="button" v-on:click="(state as any)[cam].position.x = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].position.x"
-                                v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
+                                v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
@@ -557,12 +557,12 @@
                         <div class="label3">[cm]:</div>
                         <div class="value">
                             <input tabindex="2" v-bind:value="fieldExport((state as any)[cam].position.y)"
-                                v-on:change="(ev) => (state as any)[cam].position.y = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
+                                v-on:change="(ev) => (state as any)[cam].position.y = fieldImport((ev.target! as HTMLInputElement).value, -50, +50)"/>
                         </div>
                         <div class="button" v-on:click="(state as any)[cam].position.y = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].position.y"
-                                v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
+                                v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
@@ -572,12 +572,12 @@
                         <div class="label3">[cm]:</div>
                         <div class="value">
                             <input tabindex="3" v-bind:value="fieldExport((state as any)[cam].position.z)"
-                                v-on:change="(ev) => (state as any)[cam].position.z = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
+                                v-on:change="(ev) => (state as any)[cam].position.z = fieldImport((ev.target! as HTMLInputElement).value, -50, +50)"/>
                         </div>
                         <div class="button" v-on:click="(state as any)[cam].position.z = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].position.z"
-                                v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
+                                v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
