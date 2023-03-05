@@ -30,7 +30,14 @@ More screenshots can be found [here](doc/).
 
 ![screenshot-01](doc/screenshot-01.png)
 ![screenshot-02](doc/screenshot-02.png)
+![screenshot-03](doc/screenshot-03.png)
+![screenshot-04](doc/screenshot-04.png)
+![screenshot-05](doc/screenshot-05.png)
+![screenshot-06](doc/screenshot-06.png)
 ![screenshot-07](doc/screenshot-07.png)
+![screenshot-08](doc/screenshot-08.png)
+![screenshot-09](doc/screenshot-09.png)
+![screenshot-10](doc/screenshot-10.png)
 ![screenshot-11](doc/screenshot-11.png)
 
 Usage (Production)
