@@ -8,4 +8,8 @@ TODO
   fov 2.4?
 
 - vMix sometimes does not load the scene
+  (manual reload required)
+
+- Decal from some camera positions (mainly CAM4)
+  incorrectly shows its video texture
 
