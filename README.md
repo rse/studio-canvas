@@ -9,16 +9,21 @@ Studio-Canvas
 About
 -----
 
-**Studio-Canvas** is a client/server applications, written in
-[TypeScript](https://www.typescriptlang.org/), for dynamically rendering
-the virtual canvas of a filmstudio through the help of a game engine.
+**Studio-Canvas** is a client/server applications for dynamically
+rendering the virtual canvas of a filmstudio through the help of a game
+engine. The canvas optionally is overlayed with a standalone monitor
+and/or an embedded decal, both showing a video stream. The virtual
+cameras optionally can follow the physical PTZ cameras throught their
+emitted FreeD information.
 
-The application consists of a central [Node.js](https://nodejs.org)-based
-server component and a HTML5 Single-Page Application (SPA) as the client component. The
-client component it turn runs in two distinct modes: a [Vue.js](https://vuejs.org/)
-based control mode for real-time adjusting the scene parameters and a rendering mode
-for real-time rendering the scene with the help of the
-[Babylon.js](https://www.babylonjs.com/) game engine.
+The application, written in [TypeScript](https://www.typescriptlang.org/),
+consists of a central [Node.js](https://nodejs.org)-based server component and
+a HTML5 Single-Page Application (SPA) as the client component.
+The client component it turn runs in two distinct modes: a
+[Vue.js](https://vuejs.org/) based control mode for real-time adjusting
+the scene parameters and a rendering mode for real-time rendering the
+scene with the help of the [Babylon.js](https://www.babylonjs.com/) game
+engine.
 
 Screenshots
 -----------
