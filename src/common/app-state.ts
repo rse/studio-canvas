@@ -155,69 +155,69 @@ export const StateSchemaPartial = StateSchema.replace(/:/g, "?:")
 /*  complete state default (all fields with default values)  */
 export const StateDefault: StateType = {
     canvas: {
-        id:         "",
-        texture1:   "",
-        texture2:   "",
-        fadeTrans:  0,
-        fadeWait:   0
+        id:         "hexagons",
+        texture1:   "/canvas/hexagons-1.jpg",
+        texture2:   "/canvas/hexagons-2.jpg",
+        fadeTrans:  150,
+        fadeWait:   10000
     },
     monitor: {
-        enable:    false,
-        device:    "",
-        scale:     1.0,
-        rotate:    0,
-        lift:      0
+        enable:     false,
+        device:     "",
+        scale:      1.0,
+        rotate:     10,
+        lift:       0
     },
     decal: {
-        enable:    false,
-        device:    "",
-        scale:     1.0,
-        rotate:    0,
-        lift:      0,
-        opacity:   1.0
+        enable:     false,
+        device:     "",
+        scale:      1.0,
+        rotate:     -25,
+        lift:       -2.5,
+        opacity:    1.0
     },
     lights: {
-        intensity1: 0,
-        intensity2: 0,
-        intensity3: 0
+        intensity1: 100,
+        intensity2: 100,
+        intensity3: 100
     },
     avatar1: {
-        enable:     false,
+        enable:     true,
         size:       185,
         rotate:     -7
     },
     avatar2: {
-        enable:     false,
+        enable:     true,
         size:       185,
         rotate:     7
     },
     references: {
-        enable:   false
+        enable:     true
     },
     CAM1: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0 },
-        fov:      { m: 1 }
+        position:   { x: 0, y: 0, z: 0 },
+        rotation:   { x: 0, y: 0, z: 0 },
+        fov:        { m: 1 }
     },
     CAM2: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0 },
-        fov:      { m: 1 }
+        position:   { x: 0, y: 0, z: 0 },
+        rotation:   { x: 0, y: 0, z: 0 },
+        fov:        { m: 1 }
     },
     CAM3: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0 },
-        fov:      { m: 1 }
+        position:   { x: 0, y: 0, z: 0 },
+        rotation:   { x: 0, y: 0, z: 0 },
+        fov:        { m: 1 }
     },
     CAM4: {
-        position: { x: 0, y: 0, z: 0 },
-        rotation: { x: 0, y: 0, z: 0 },
-        fov:      { m: 1 }
+        position:   { x: 0, y: 0, z: 0 },
+        rotation:   { x: 0, y: 0, z: 0 },
+        fov:        { m: 1 }
     },
     renderer: {
-        program: 30,
-        preview: 15,
-        other:    0
+        program:    30,
+        preview:    15,
+        other:      0
     }
 } satisfies StateType
 
