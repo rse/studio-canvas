@@ -986,6 +986,8 @@
         font-weight: 200
         color: var(--color-std-fg-3)
         margin-bottom: 20px
+        b
+            font-weight: normal
     .presets
         display: flex
         flex-direction: row
