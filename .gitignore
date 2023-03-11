@@ -2,4 +2,5 @@ package-lock.json
 node_modules
 dst
 res/canvas-scene.blend1
+var/canvas-state.yaml
 var/canvas-preset-*.yaml
