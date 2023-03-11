@@ -412,8 +412,8 @@
                 <!--  ==== AVATARS ====  -->
                 <tab name="Avatars">
                     <div class="desc">
-                        The <b>Avatars</b> are the two optional 3D models of a latin woman (A1, "Sophia") and a
-                        european man (A2, "Dennis") which can be temporarily placed into the scene
+                        The <b>Avatars</b> are the two optional 3D models of a latin woman (A1, <i>Sophia</i>) and a
+                        european man (A2, <i>Dennis</i>) which can be temporarily placed into the scene
                         to help setting up the various virtual pan/tilt/zoom (PTZ) views of the scene.
                         Their body height can be adjusted and they can be rotated onto the usual 9
                         positions on the scene.
