@@ -33,6 +33,8 @@ export default class CanvasRenderer extends EventEmitter {
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
         rotationY:     0, positionY:     0
     }
+    private avatar1Scale = { x: 0, y: 0, z: 0 }
+    private avatar2Scale = { x: 0, y: 0, z: 0 }
 
     /*  frames per second (FPS) control  */
     private fps = 30
@@ -62,6 +64,10 @@ export default class CanvasRenderer extends EventEmitter {
     private monitor:        BABYLON.Nullable<BABYLON.TransformNode>  = null
     private monitorCase:    BABYLON.Nullable<BABYLON.Mesh>           = null
     private monitorDisplay: BABYLON.Nullable<BABYLON.Mesh>           = null
+    private avatar1:        BABYLON.Nullable<BABYLON.TransformNode>  = null
+    private avatar1Model:   BABYLON.Nullable<BABYLON.Mesh>           = null
+    private avatar2:        BABYLON.Nullable<BABYLON.TransformNode>  = null
+    private avatar2Model:   BABYLON.Nullable<BABYLON.Mesh>           = null
     private references:     BABYLON.Nullable<BABYLON.TransformNode>  = null
     private wall:           BABYLON.Nullable<BABYLON.Mesh>           = null
     private decal:          BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -171,6 +177,30 @@ export default class CanvasRenderer extends EventEmitter {
         const options = new BABYLON.SceneOptimizerOptions(this.fps, 2000)
         options.addOptimization(new BABYLON.HardwareScalingOptimization(0, 1))
         this.optimizer = new BABYLON.SceneOptimizer(this.scene, options)
+
+        /*  gather reference to avatar 1  */
+        this.avatar1 = this.scene.getNodeByName("Avatar1") as BABYLON.Nullable<BABYLON.TransformNode>
+        this.avatar1Model = this.scene.getNodeByName("Avatar1-Model") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.avatar1 === null)
+            throw new Error("cannot find node 'Avatar1'")
+        if (this.avatar1Model === null)
+            throw new Error("cannot find node 'Avatar1-Model'")
+        this.avatar1.setEnabled(false)
+        this.avatar1Scale.x = this.avatar1Model.scaling.x
+        this.avatar1Scale.y = this.avatar1Model.scaling.y
+        this.avatar1Scale.z = this.avatar1Model.scaling.z
+
+        /*  gather reference to avatar 2  */
+        this.avatar2 = this.scene.getNodeByName("Avatar2") as BABYLON.Nullable<BABYLON.TransformNode>
+        this.avatar2Model = this.scene.getNodeByName("Avatar2-Model") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.avatar2 === null)
+            throw new Error("cannot find node 'Avatar2'")
+        if (this.avatar2Model === null)
+            throw new Error("cannot find node 'Avatar2-Model'")
+        this.avatar2.setEnabled(false)
+        this.avatar2Scale.x = this.avatar2Model.scaling.x
+        this.avatar2Scale.y = this.avatar2Model.scaling.y
+        this.avatar2Scale.z = this.avatar2Model.scaling.z
 
         /*  gather reference to reference points  */
         this.references = this.scene.getNodeByName("Reference") as BABYLON.Nullable<BABYLON.TransformNode>
@@ -511,7 +541,7 @@ export default class CanvasRenderer extends EventEmitter {
     /*  control scene  */
     async reflectSceneState (state: StateTypePartial) {
         if (this.monitor === null || this.monitorCase === null || this.monitorDisplay === null
-            || this.decal === null || this.references === null
+            || this.decal === null || this.avatar1 === null || this.avatar2 === null || this.references === null
             || this.light1 === null || this.light2 === null || this.light3 === null)
             return
 
@@ -639,6 +669,40 @@ export default class CanvasRenderer extends EventEmitter {
                 this.light2.intensity = state.lights.intensity2
             if (state.lights.intensity3 !== undefined)
                 this.light3.intensity = state.lights.intensity3
+        }
+
+        /*  adjust avatar 1  */
+        if (state.avatar1 !== undefined) {
+            if (state.avatar1.enable !== undefined && this.avatar1.isEnabled() !== state.avatar1.enable)
+                this.avatar1.setEnabled(state.avatar1.enable)
+            if (state.avatar1.size !== undefined) {
+                const scale = state.avatar1.size / 185
+                this.avatar1Model!.scaling.x = this.avatar1Scale.x * scale
+                this.avatar1Model!.scaling.y = this.avatar1Scale.y * scale
+                this.avatar1Model!.scaling.z = this.avatar1Scale.z * scale
+            }
+            if (state.avatar1.rotate !== undefined) {
+                this.avatar1.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.avatar1.rotate(new BABYLON.Vector3(0, 1, 0),
+                    this.ptz.deg2rad(-state.avatar1.rotate), BABYLON.Space.WORLD)
+            }
+        }
+
+        /*  adjust avatar 2  */
+        if (state.avatar2 !== undefined) {
+            if (state.avatar2.enable !== undefined && this.avatar2.isEnabled() !== state.avatar2.enable)
+                this.avatar2.setEnabled(state.avatar2.enable)
+            if (state.avatar2.size !== undefined) {
+                const scale = state.avatar2.size / 185
+                this.avatar2Model!.scaling.x = this.avatar2Scale.x * scale
+                this.avatar2Model!.scaling.y = this.avatar2Scale.y * scale
+                this.avatar2Model!.scaling.z = this.avatar2Scale.z * scale
+            }
+            if (state.avatar2.rotate !== undefined) {
+                this.avatar2.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.avatar2.rotate(new BABYLON.Vector3(0, 1, 0),
+                    this.ptz.deg2rad(-state.avatar2.rotate), BABYLON.Space.WORLD)
+            }
         }
 
         /*  adjust reference points  */
