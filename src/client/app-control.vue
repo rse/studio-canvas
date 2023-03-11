@@ -409,6 +409,100 @@
                     </div>
                 </tab>
 
+                <!--  ==== AVATARS ====  -->
+                <tab name="Avatars">
+                    <div class="desc">
+                        The <b>Avatars</b> are the two optional 3D models of a latin woman (A1, "Sophia") and a
+                        european man (A2, "Dennis") which can be temporarily placed into the scene
+                        to help setting up the various virtual pan/tilt/zoom (PTZ) views of the scene.
+                        Their body height can be adjusted and they can be rotated onto the usual 9
+                        positions on the scene.
+                    </div>
+                    <div class="control">
+                        <div class="label1">A1 enable</div>
+                        <div class="label2">(visible)</div>
+                        <div class="label3">[flag]:</div>
+                        <div class="value">
+                            <div class="fixed">{{ state.avatar1.enable ? "YES" : "NO" }}</div>
+                        </div>
+                        <div class="button" v-on:click="state.avatar1.enable = false">RESET</div>
+                        <div class="slider">
+                            <toggle class="toggle" v-model="state.avatar1.enable"></toggle>
+                        </div>
+
+                        <div class="label1">A1 size</div>
+                        <div class="label2">(height)</div>
+                        <div class="label3">[cm]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.avatar1.size)"
+                                v-on:change="(ev) => state.avatar1.size = fieldImport((ev.target! as HTMLInputElement).value, 160, 210)"/>
+                        </div>
+                        <div class="button" v-on:click="state.avatar1.size = 185">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.avatar1.size"
+                                v-bind:min="160" v-bind:max="210" v-bind:step="1"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">A1 rotate</div>
+                        <div class="label2">(pan left/right)</div>
+                        <div class="label3">[deg]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.avatar1.rotate)"
+                                v-on:change="(ev) => state.avatar1.rotate = fieldImport((ev.target! as HTMLInputElement).value, -28, +28)"/>
+                        </div>
+                        <div class="button" v-on:click="state.avatar1.rotate = 0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.avatar1.rotate"
+                                v-bind:min="-28" v-bind:max="+28" v-bind:step="7"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">A2 enable</div>
+                        <div class="label2">(visible)</div>
+                        <div class="label3">[flag]:</div>
+                        <div class="value">
+                            <div class="fixed">{{ state.avatar2.enable ? "YES" : "NO" }}</div>
+                        </div>
+                        <div class="button" v-on:click="state.avatar2.enable = false">RESET</div>
+                        <div class="slider">
+                            <toggle class="toggle" v-model="state.avatar2.enable"></toggle>
+                        </div>
+
+                        <div class="label1">A2 size</div>
+                        <div class="label2">(height)</div>
+                        <div class="label3">[cm]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.avatar2.size)"
+                                v-on:change="(ev) => state.avatar2.size = fieldImport((ev.target! as HTMLInputElement).value, 160, 210)"/>
+                        </div>
+                        <div class="button" v-on:click="state.avatar2.size = 185">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.avatar2.size"
+                                v-bind:min="160" v-bind:max="210" v-bind:step="1"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">A2 rotate</div>
+                        <div class="label2">(pan left/right)</div>
+                        <div class="label3">[deg]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.avatar2.rotate)"
+                                v-on:change="(ev) => state.avatar2.rotate = fieldImport((ev.target! as HTMLInputElement).value, -28, +28)"/>
+                        </div>
+                        <div class="button" v-on:click="state.avatar2.rotate = 0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.avatar2.rotate"
+                                v-bind:min="-28" v-bind:max="+28" v-bind:step="7"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+                    </div>
+                </tab>
+
                 <!--  ==== REFERENCES ====  -->
                 <tab name="References">
                     <div class="desc">
@@ -423,7 +517,7 @@
                         <div class="label2">(visible)</div>
                         <div class="label3">[flag]:</div>
                         <div class="value">
-                            <div class="fixed">{{  state.references.enable ? "YES" : "NO" }}</div>
+                            <div class="fixed">{{ state.references.enable ? "YES" : "NO" }}</div>
                         </div>
                         <div class="button" v-on:click="state.references.enable = false">RESET</div>
                         <div class="slider">

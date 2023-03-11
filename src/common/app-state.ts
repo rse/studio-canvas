@@ -37,6 +37,16 @@ export type StateType = {
         intensity2: number,
         intensity3: number
     },
+    avatar1: {
+        enable:     boolean,
+        size:       number,
+        rotate:     number
+    },
+    avatar2: {
+        enable:     boolean,
+        size:       number,
+        rotate:     number
+    },
     references: {
         enable:     boolean
     },
@@ -99,6 +109,16 @@ export const StateSchema = `{
         intensity2: number,
         intensity3: number
     },
+    avatar1: {
+        enable:     boolean,
+        size:       number,
+        rotate:     number
+    },
+    avatar2: {
+        enable:     boolean,
+        size:       number,
+        rotate:     number
+    },
     references: {
         enable:     boolean
     },
@@ -160,6 +180,16 @@ export const StateDefault: StateType = {
         intensity1: 0,
         intensity2: 0,
         intensity3: 0
+    },
+    avatar1: {
+        enable:     false,
+        size:       185,
+        rotate:     -7
+    },
+    avatar2: {
+        enable:     false,
+        size:       185,
+        rotate:     7
     },
     references: {
         enable:   false
