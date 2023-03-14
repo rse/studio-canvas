@@ -33,7 +33,7 @@
 
         "@hapi/hapi":                       "21.3.0",
         "@hapi/boom":                       "10.0.1",
-        "@hapi/inert":                      "7.0.1",
+        "@hapi/inert":                      "7.1.0",
         "hapi-plugin-header":               "1.1.8",
         "hapi-plugin-traffic":              "1.1.8",
         "hapi-plugin-websocket":            "2.4.7",
@@ -72,8 +72,8 @@
     },
     "devDependencies": {
         "@rollup/plugin-yaml":              "4.0.1",
-        "@typescript-eslint/eslint-plugin": "5.54.1",
-        "@typescript-eslint/parser":        "5.54.1",
+        "@typescript-eslint/eslint-plugin": "5.55.0",
+        "@typescript-eslint/parser":        "5.55.0",
         "@vitejs/plugin-vue":               "4.0.0",
 
         "@vue/eslint-config-typescript":    "11.0.2",
