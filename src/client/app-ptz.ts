@@ -165,8 +165,8 @@ export default class PTZ {
     private zoomCurves = {
         /*  Linear Zoom (ideal) */
         "linear": {
-            zoom2size: (x: number) => { return x },
-            size2zoom: (y: number) => { return y }
+            zoom2size (x: number) { return x },
+            size2zoom (y: number) { return y }
         },
 
         /*  Non-linear Zoom of BirdDog P400 (real).
@@ -174,8 +174,8 @@ export default class PTZ {
             because the P400 zoom lenses (like many zoom lenses) are actually complex zoom lense systems where some
             lenses move in a parabolic arc and hence cause the zoom to act in a non-linear fashion.  */
         "birddog": {
-            zoom2size: (x: number) => {
-                let y =
+            zoom2size (x: number) {
+                const y =
                     (+3.35504883) * Math.pow(x, 5) +
                     (-6.17763477) * Math.pow(x, 4) +
                     (+4.79587236) * Math.pow(x, 3) +
@@ -184,8 +184,8 @@ export default class PTZ {
                     (+0.00070000)
                 return Math.max(0.0, Math.min(1.0, y))
             },
-            size2zoom: (y: number) => {
-                let x =
+            size2zoom (y: number) {
+                const x =
                     ( +4.75573252) * Math.pow(y, 5) +
                     (-15.18016820) * Math.pow(y, 4) +
                     (+19.01568950) * Math.pow(y, 3) +
@@ -194,6 +194,11 @@ export default class PTZ {
                     ( -0.01000000)
                 return Math.max(0.0, Math.min(1.0, x))
             }
+        }
+    } as {
+        [ id: string ]: {
+            zoom2size (x: number): number,
+            size2zoom (y: number): number
         }
     }
 
