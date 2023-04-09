@@ -156,16 +156,46 @@ export default class PTZ {
     public zoomLevels    = 40
     public zoomStep      = (this.fovMax - this.fovMin) / this.zoomLevels
 
+    private sensorSize   = 35     // mm
+    private sensorWidth  = 6.28   // mm
+    private focalLenMin  = 4.4    // mm
+    private focalLenMax  = 88.4   // mm
+
     /*  convert zoom
         from PHYSICAL BirdDog zoom level    (0..20)
         to   VIRTUAL  Babylon field of view (radians of 70.2 to 4.1 degree)  */
     zoomP2V (zoom: number) {
         if (zoom < this.zoomMin) zoom = this.zoomMin
         if (zoom > this.zoomMax) zoom = this.zoomMax
-        return (this.fovMax * this.fovMult) - (
-            (zoom - this.zoomMin) *
-            (((this.fovMax * this.fovMult) - this.fovMin) / (this.zoomMax - this.zoomMin))
-        )
+
+        /*  linear mapping from BirdDog zoom level [0..20] to normalized zoom [0..1]
+            (this formula is a standard rule of three)  */
+        const x = (zoom - this.zoomMin) / (this.zoomMax - this.zoomMin)
+
+        /*  polynomial mapping from normalized zoom [0..1] to normalized size [0..1]
+            (this formula was determined by a polynomial fitting through measured points)  */
+        const f = (x: number) => {
+            let y =
+                (+3.35504883) * Math.pow(x, 5) +
+                (-6.17763477) * Math.pow(x, 4) +
+                (+4.79587236) * Math.pow(x, 3) +
+                (-1.36548877) * Math.pow(x, 2) +
+                (+0.39140991) *          x     +
+                (+0.00070000)
+            y = Math.max(0.0, Math.min(1.0, y))
+            return y
+        }
+        const y = f(x)
+
+        /*  linear mapping of normalized zoom [0..1] to BirdDog focal length [4.4mm...88.4mm]
+            (this formula is a standard rule of three)  */
+        const focalLen = this.focalLenMin + (this.focalLenMax - this.focalLenMin) * y
+
+        /*  trigonomial mapping of BirdDog focal length [4.4mm...88.4mm] to BirdDog field of view [rad(70.2)...rad(4.1)]
+            (this formular is standard trigonometry from lens physics)  */
+        const fov = 2 * Math.atan(this.sensorWidth / (2 * focalLen))
+
+        return fov
     }
 
     /*  convert zoom
@@ -173,11 +203,36 @@ export default class PTZ {
         to   PHYSICAL BirdDog zoom level    (0..20)  */
     zoomV2P (fov: number) {
         if (fov < this.fovMin) fov = this.fovMin
-        if (fov > (this.fovMax * this.fovMult)) fov = (this.fovMax * this.fovMult)
-        return this.zoomMax - (
-            (fov - this.fovMin) *
-            ((this.zoomMax - this.zoomMin) / ((this.fovMax * this.fovMult) - this.fovMin))
-        )
+        if (fov > this.fovMax) fov = this.fovMax
+
+        /*  trigonomial mapping of BirdDog field of view [rad(70.2)...rad(4.1)] to BirdDog focal length [4.4mm...88.4mm]
+            (this formular is standard trigonometry from lens physics)  */
+        const focalLen = this.sensorWidth / (2 * Math.tan(fov / 2))
+
+        /*  linear mapping of  BirdDog focal length [4.4mm...88.4mm] to normalized zoom [0..1]
+            (this formula is a standard rule of three)  */
+        const y = (focalLen - this.focalLenMin) / (this.focalLenMax - this.focalLenMin)
+
+        /*  polynomial mapping from normalized size [0..1] to normalized zoom [0..1]
+            (this formula was determined by a polynomial fitting through measured points)  */
+        const F = (y: number) => {
+            let x =
+                ( +4.75573252) * Math.pow(y, 5) +
+                (-15.18016820) * Math.pow(y, 4) +
+                (+19.01568950) * Math.pow(y, 3) +
+                (-12.16289180) * Math.pow(y, 2) +
+                ( +4.58138959) *          y     +
+                ( -0.01000000)
+            x = Math.max(0.0, Math.min(1.0, x))
+            return x
+        }
+        const x = F(y)
+
+        /*  linear mapping from normalized zoom [0..1] to BirdDog zoom level [0..20]
+            (this formula is a standard rule of three)  */
+        const zoom = this.zoomMin + (this.zoomMax - this.zoomMin) * x
+
+        return zoom
     }
 }
 
