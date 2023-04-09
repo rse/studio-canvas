@@ -9,11 +9,15 @@
 <template>
     <div class="app-render">
         <canvas ref="canvas"></canvas>
+        <div v-show="debug !== ''" class="debug">
+            {{ debug }}
+        </div>
     </div>
 </template>
 
 <style lang="stylus">
 .app-render
+    position: relative
     canvas
         top: 0
         left: 0
@@ -22,6 +26,16 @@
         touch-action: none
         border: 0
         outline: none
+    .debug
+        position: absolute
+        top: 0
+        left: 0
+        width: 100%
+        text-align: center
+        background-color: #cc333380
+        color: #fff
+        font-size: 3vw
+        word-wrap: break-word
 </style>
 
 <script setup lang="ts">
@@ -50,6 +64,9 @@ export default defineComponent({
         serviceUrl: { type: String, default: "" },
         wsUrl:      { type: String, default: "" }
     },
+    data: () => ({
+        debug: ""
+    }),
     async mounted () {
         /*  establish renderer  */
         renderer = new CanvasRenderer()
@@ -60,6 +77,9 @@ export default defineComponent({
             camera:   this.cam,
             ptzFreeD: this.options.get("ptzFreeD"),
             ptzKeys:  this.options.get("ptzKeys")
+        })
+        renderer.on("DEBUG", (msg: string) => {
+            this.debug = msg
         })
         const canvas = this.$refs.canvas as HTMLCanvasElement
         this.log("INFO", "establish Babylon game engine")
