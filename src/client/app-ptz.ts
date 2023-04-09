@@ -155,11 +155,47 @@ export default class PTZ {
     public zoomMax       = 20
     public zoomLevels    = 40
     public zoomStep      = (this.fovMax - this.fovMin) / this.zoomLevels
+    public sensorSize    = 35
+    public sensorWidth   = 6.28
+    public focalLenMin   = 4.4
+    public focalLenMax   = 88.4
+    public zoomCurve     = "birddog"
 
-    private sensorSize   = 35     // mm
-    private sensorWidth  = 6.28   // mm
-    private focalLenMin  = 4.4    // mm
-    private focalLenMax  = 88.4   // mm
+    /*  internal zoom curve details  */
+    private zoomCurves = {
+        /*  Linear Zoom (ideal) */
+        "linear": {
+            zoom2size: (x: number) => { return x },
+            size2zoom: (y: number) => { return y }
+        },
+
+        /*  Non-linear Zoom of BirdDog P400 (real).
+            NOTICE: These particular mapping functions were determined by a polynomial fitting through measured points,
+            because the P400 zoom lenses (like many zoom lenses) are actually complex zoom lense systems where some
+            lenses move in a parabolic arc and hence cause the zoom to act in a non-linear fashion.  */
+        "birddog": {
+            zoom2size: (x: number) => {
+                let y =
+                    (+3.35504883) * Math.pow(x, 5) +
+                    (-6.17763477) * Math.pow(x, 4) +
+                    (+4.79587236) * Math.pow(x, 3) +
+                    (-1.36548877) * Math.pow(x, 2) +
+                    (+0.39140991) *          x     +
+                    (+0.00070000)
+                return Math.max(0.0, Math.min(1.0, y))
+            },
+            size2zoom: (y: number) => {
+                let x =
+                    ( +4.75573252) * Math.pow(y, 5) +
+                    (-15.18016820) * Math.pow(y, 4) +
+                    (+19.01568950) * Math.pow(y, 3) +
+                    (-12.16289180) * Math.pow(y, 2) +
+                    ( +4.58138959) *          y     +
+                    ( -0.01000000)
+                return Math.max(0.0, Math.min(1.0, x))
+            }
+        }
+    }
 
     /*  convert zoom
         from PHYSICAL BirdDog zoom level    (0..20)
@@ -173,19 +209,8 @@ export default class PTZ {
         const x = (zoom - this.zoomMin) / (this.zoomMax - this.zoomMin)
 
         /*  polynomial mapping from normalized zoom [0..1] to normalized size [0..1]
-            (this formula was determined by a polynomial fitting through measured points)  */
-        const f = (x: number) => {
-            let y =
-                (+3.35504883) * Math.pow(x, 5) +
-                (-6.17763477) * Math.pow(x, 4) +
-                (+4.79587236) * Math.pow(x, 3) +
-                (-1.36548877) * Math.pow(x, 2) +
-                (+0.39140991) *          x     +
-                (+0.00070000)
-            y = Math.max(0.0, Math.min(1.0, y))
-            return y
-        }
-        const y = f(x)
+            (the underlying formula usually has to be determined by a polynomial fitting through measured points)  */
+        const y = this.zoomCurves[this.zoomCurve].zoom2size(x)
 
         /*  linear mapping of normalized zoom [0..1] to BirdDog focal length [4.4mm...88.4mm]
             (this formula is a standard rule of three)  */
@@ -214,19 +239,8 @@ export default class PTZ {
         const y = (focalLen - this.focalLenMin) / (this.focalLenMax - this.focalLenMin)
 
         /*  polynomial mapping from normalized size [0..1] to normalized zoom [0..1]
-            (this formula was determined by a polynomial fitting through measured points)  */
-        const F = (y: number) => {
-            let x =
-                ( +4.75573252) * Math.pow(y, 5) +
-                (-15.18016820) * Math.pow(y, 4) +
-                (+19.01568950) * Math.pow(y, 3) +
-                (-12.16289180) * Math.pow(y, 2) +
-                ( +4.58138959) *          y     +
-                ( -0.01000000)
-            x = Math.max(0.0, Math.min(1.0, x))
-            return x
-        }
-        const x = F(y)
+            (the underlying formula usually has to be determined by a polynomial fitting through measured points)  */
+        const x = this.zoomCurves[this.zoomCurve].size2zoom(y)
 
         /*  linear mapping from normalized zoom [0..1] to BirdDog zoom level [0..20]
             (this formula is a standard rule of three)  */
