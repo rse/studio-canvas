@@ -31,7 +31,7 @@ export default class CanvasRenderer extends EventEmitter {
     private monitorBase = {
         scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationY:     0, positionY:     0
+        rotationZ:     0, positionZ:     0
     }
     private avatar1Scale = { x: 0, y: 0, z: 0 }
     private avatar2Scale = { x: 0, y: 0, z: 0 }
@@ -60,7 +60,9 @@ export default class CanvasRenderer extends EventEmitter {
     private engine:         BABYLON.Nullable<BABYLON.Engine>         = null
     private scene:          BABYLON.Nullable<BABYLON.Scene>          = null
     private optimizer:      BABYLON.Nullable<BABYLON.SceneOptimizer> = null
-    private camera:         BABYLON.Nullable<BABYLON.FreeCamera>     = null
+    private cameraHull:     BABYLON.Nullable<BABYLON.TransformNode>  = null
+    private cameraCase:     BABYLON.Nullable<BABYLON.TransformNode>  = null
+    private cameraLens:     BABYLON.Nullable<BABYLON.FreeCamera>     = null
     private monitor:        BABYLON.Nullable<BABYLON.TransformNode>  = null
     private monitorCase:    BABYLON.Nullable<BABYLON.Mesh>           = null
     private monitorDisplay: BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -78,13 +80,17 @@ export default class CanvasRenderer extends EventEmitter {
     private texture1:       BABYLON.Nullable<BABYLON.Texture>        = null
     private texture2:       BABYLON.Nullable<BABYLON.Texture>        = null
     private texture3:       BABYLON.Nullable<BABYLON.Texture>        = null
+    private wallRotBase:    BABYLON.Nullable<BABYLON.Quaternion>     = null
 
     /*  video stream device names  */
     private deviceMonitor = ""
     private deviceDecal   = ""
 
     /*  PTZ sub-module  */
-    private ptz = new PTZ()
+    private ptz     = new PTZ()
+    private ptzHull = new PTZ()
+    private ptzCase = new PTZ()
+    private ptzLens = new PTZ()
 
     /*  FreeD state  */
     private state: FreeDState | null = null
@@ -132,28 +138,39 @@ export default class CanvasRenderer extends EventEmitter {
         })
 
         /*  use particular camera of scene  */
-        this.camera = this.scene.getCameraByName(this.cameraName) as BABYLON.FreeCamera
-        if (this.camera === null)
-            throw new Error("cannot find camera")
-        this.camera.fovMode = BABYLON.FreeCamera.FOVMODE_HORIZONTAL_FIXED
-        this.scene.activeCamera = this.camera
+        this.cameraHull = this.scene.getNodeByName(this.cameraName + "-Hull") as BABYLON.Nullable<BABYLON.TransformNode>
+        if (this.cameraHull === null)
+            throw new Error("cannot find camera hull")
+        this.cameraCase = this.scene.getNodeByName(this.cameraName + "-Case") as BABYLON.Nullable<BABYLON.TransformNode>
+        if (this.cameraCase === null)
+            throw new Error("cannot find camera case")
+        this.cameraLens = this.scene.getCameraByName(this.cameraName + "-Lens") as BABYLON.FreeCamera
+        if (this.cameraLens === null)
+            throw new Error("cannot find camera device")
+
+        /*  initialize camera  */
+        this.scene.activeCamera = this.cameraLens
+        this.cameraLens.fovMode = BABYLON.FreeCamera.FOVMODE_HORIZONTAL_FIXED
+        this.cameraCase.rotationQuaternion = null
 
         /*  initialize camera pan/tilt center position  */
-        this.ptz.posXOrigin   = this.camera.position.x
-        this.ptz.posYOrigin   = this.camera.position.y
-        this.ptz.posZOrigin   = this.camera.position.z
-        this.ptz.tiltOrigin   = this.camera.rotation.x
-        this.ptz.panOrigin    = this.camera.rotation.y
-        this.ptz.rotateOrigin = this.camera.rotation.z
+        this.ptzHull.posXOrigin   = this.cameraHull.position.x
+        this.ptzHull.posYOrigin   = this.cameraHull.position.y
+        this.ptzHull.posZOrigin   = this.cameraHull.position.z
+        this.ptzCase.tiltOrigin   = this.cameraCase.rotation.x
+        this.ptzCase.panOrigin    = this.cameraCase.rotation.y
+        this.ptzCase.rotateOrigin = this.cameraCase.rotation.z
+        this.ptzLens.tiltOrigin   = this.cameraLens.rotation.x
 
         /*  go to camera home position  */
-        this.camera!.position.x = this.ptz.posXP2V(0)
-        this.camera!.position.y = this.ptz.posYP2V(0)
-        this.camera!.position.z = this.ptz.posZP2V(0)
-        this.camera!.rotation.x = this.ptz.tiltP2V(0)
-        this.camera!.rotation.y = this.ptz.panP2V(0)
-        this.camera!.rotation.z = this.ptz.rotateP2V(0)
-        this.camera!.fov        = this.ptz.zoomP2V(0)
+        this.cameraHull!.position.x = this.ptzHull.posXP2V(0)
+        this.cameraHull!.position.y = this.ptzHull.posYP2V(0)
+        this.cameraHull!.position.z = this.ptzHull.posZP2V(0)
+        this.cameraCase!.rotation.x = this.ptzCase.tiltP2V(0)
+        this.cameraCase!.rotation.y = this.ptzCase.panP2V(0)
+        this.cameraCase!.rotation.z = this.ptzCase.rotateP2V(0)
+        this.cameraLens!.rotation.x = this.ptzLens.tiltP2V(0)
+        this.cameraLens!.fov        = this.ptzLens.zoomP2V(0)
 
         /*  apply latest PTZ (if already available)  */
         if (this.state !== null && this.ptzFreeD)
@@ -217,6 +234,7 @@ export default class CanvasRenderer extends EventEmitter {
         this.wall = this.scene.getMeshByName("Wall") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.wall === null)
             throw new Error("cannot find wall node")
+        this.wallRotBase = this.wall.rotationQuaternion
 
         /*  on-the-fly generate wall video decal  */
         this.decalGenerate()
@@ -257,8 +275,8 @@ export default class CanvasRenderer extends EventEmitter {
         this.monitorBase.scaleDisplayX = this.monitorDisplay.scaling.x
         this.monitorBase.scaleDisplayY = this.monitorDisplay.scaling.y
         this.monitorBase.scaleDisplayZ = this.monitorDisplay.scaling.z
-        this.monitorBase.rotationY     = this.monitor.rotation.y
-        this.monitorBase.positionY     = this.monitor.position.y
+        this.monitorBase.rotationZ     = this.monitor.rotation.z
+        this.monitorBase.positionZ     = this.monitor.position.z
 
         /*  apply glass material to monitor case  */
         const glass = new BABYLON.PBRMaterial("glass", this.scene)
@@ -495,7 +513,7 @@ export default class CanvasRenderer extends EventEmitter {
         const rayBeginPos = BABYLON.Vector3.TransformCoordinates(rayBegin.position, rayBegin.getWorldMatrix())
         let rayDirection = rayEndPos.subtract(rayBeginPos).normalize()
         rayDirection = rotateVector(rayDirection, this.ptz.deg2rad(-this.decalLift),
-            this.ptz.deg2rad(this.decalRotate), this.ptz.deg2rad(-this.decalLift))
+            0, this.ptz.deg2rad(this.decalRotate))
         const ray = new BABYLON.Ray(rayBeginPos, rayDirection, 10 /* meters, enough to be behind wall */)
         const decalBase = this.scene!.pickWithRay(ray, (mesh) => (mesh === this.wall!))
         if (decalBase === null)
@@ -508,6 +526,7 @@ export default class CanvasRenderer extends EventEmitter {
         this.decal = BABYLON.MeshBuilder.CreateDecal("Decal", this.wall!, {
             position:      decalBase!.pickedPoint!,
             normal:        decalBase!.getNormal(true)!,
+            angle:         this.ptz.deg2rad(-90),
             size,
             cullBackFaces: true,
             localMode:     true
@@ -564,6 +583,10 @@ export default class CanvasRenderer extends EventEmitter {
                 this.fadeWait = state.canvas.fadeWait
                 changed = true
             }
+            if (state.canvas.rotationY !== undefined) {
+                this.wall!.rotationQuaternion = this.wallRotBase!.clone()
+                this.wall!.rotate(new BABYLON.Vector3(0, 1, 0), this.ptz.deg2rad(state.canvas.rotationY), BABYLON.Space.WORLD)
+            }
             if (changed) {
                 await this.stop()
                 await this.unloadWall()
@@ -605,11 +628,11 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.monitor.rotate !== undefined) {
                 this.monitor.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.monitor.rotate(new BABYLON.Vector3(0, 1, 0),
+                this.monitor.rotate(new BABYLON.Vector3(0, 0, 1),
                     this.ptz.deg2rad(-state.monitor.rotate), BABYLON.Space.WORLD)
             }
             if (state.monitor.lift !== undefined)
-                this.monitor.position.y = this.monitorBase.positionY + (state.monitor.lift / 100)
+                this.monitor.position.z = this.monitorBase.positionZ + (state.monitor.lift / 100)
         }
 
         /*  adjust decal  */
@@ -683,7 +706,7 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.avatar1.rotate !== undefined) {
                 this.avatar1.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.avatar1.rotate(new BABYLON.Vector3(0, 1, 0),
+                this.avatar1.rotate(new BABYLON.Vector3(0, 0, 1),
                     this.ptz.deg2rad(-state.avatar1.rotate), BABYLON.Space.WORLD)
             }
         }
@@ -700,7 +723,7 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.avatar2.rotate !== undefined) {
                 this.avatar2.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.avatar2.rotate(new BABYLON.Vector3(0, 1, 0),
+                this.avatar2.rotate(new BABYLON.Vector3(0, 0, 1),
                     this.ptz.deg2rad(-state.avatar2.rotate), BABYLON.Space.WORLD)
             }
         }
@@ -712,54 +735,61 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  adjust camera calibration  */
-        if ((state as any)[this.cameraName] !== undefined && this.camera !== null) {
-            /*  adjust X position  */
-            if ((state as any)[this.cameraName].position?.x !== undefined) {
-                const x = this.ptz.posXV2P(this.camera.position.x)
-                this.ptz.posXDelta = (state as any)[this.cameraName].position.x / 100
-                this.camera.position.x = this.ptz.posXP2V(x)
+        if ((state as any)[this.cameraName] !== undefined && this.cameraHull !== null && this.cameraCase !== null && this.cameraLens !== null) {
+            /*  adjust hull X position  */
+            if ((state as any)[this.cameraName].hullPosition?.x !== undefined) {
+                const x = this.ptzHull.posXV2P(this.cameraHull.position.x)
+                this.ptzHull.posXDelta = (state as any)[this.cameraName].hullPosition.x / 100
+                this.cameraHull.position.x = this.ptzHull.posXP2V(x)
             }
 
-            /*  adjust Y position  */
-            if ((state as any)[this.cameraName].position?.y !== undefined) {
-                const y = this.ptz.posYV2P(this.camera.position.y)
-                this.ptz.posYDelta = (state as any)[this.cameraName].position.y / 100
-                this.camera.position.y = this.ptz.posYP2V(y)
+            /*  adjust hull Y position  */
+            if ((state as any)[this.cameraName].hullPosition?.y !== undefined) {
+                const y = this.ptzHull.posYV2P(this.cameraHull.position.y)
+                this.ptzHull.posYDelta = (state as any)[this.cameraName].hullPosition.y / 100
+                this.cameraHull.position.y = this.ptzHull.posYP2V(y)
             }
 
-            /*  adjust Z position  */
-            if ((state as any)[this.cameraName].position?.z !== undefined) {
-                const z = this.ptz.posZV2P(this.camera.position.z)
-                this.ptz.posZDelta = (state as any)[this.cameraName].position.z / 100
-                this.camera.position.z = this.ptz.posZP2V(z)
+            /*  adjust hull Z position  */
+            if ((state as any)[this.cameraName].hullPosition?.z !== undefined) {
+                const z = this.ptzHull.posZV2P(this.cameraHull.position.z)
+                this.ptzHull.posZDelta = (state as any)[this.cameraName].hullPosition.z / 100
+                this.cameraHull.position.z = this.ptzHull.posZP2V(z)
             }
 
-            /*  adjust pan  */
-            if ((state as any)[this.cameraName].rotation?.y !== undefined) {
-                const pan = this.ptz.panV2P(this.camera.rotation.y)
-                this.ptz.panDelta = this.ptz.deg2rad((state as any)[this.cameraName].rotation.y)
-                this.camera.rotation.y = this.ptz.panP2V(pan)
+            /*  adjust case tilt  */
+            if ((state as any)[this.cameraName].caseRotation?.x !== undefined) {
+                const tilt = this.ptzCase.tiltV2P(this.cameraCase.rotation.x)
+                this.ptzCase.tiltDelta = this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.x)
+                this.cameraCase.rotation.x = this.ptzCase.tiltP2V(tilt)
             }
 
-            /*  adjust tilt  */
-            if ((state as any)[this.cameraName].rotation?.x !== undefined) {
-                const tilt = this.ptz.tiltV2P(this.camera.rotation.x)
-                this.ptz.tiltDelta = this.ptz.deg2rad((state as any)[this.cameraName].rotation.x)
-                this.camera.rotation.x = this.ptz.tiltP2V(tilt)
+            /*  adjust case pan  */
+            if ((state as any)[this.cameraName].caseRotation?.y !== undefined) {
+                const pan = this.ptzCase.panV2P(this.cameraCase.rotation.y)
+                this.ptzCase.panDelta = this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.y)
+                this.cameraCase.rotation.y = this.ptzCase.panP2V(pan)
             }
 
-            /*  adjust rotation  */
-            if ((state as any)[this.cameraName].rotation?.z !== undefined) {
-                const rotate = this.ptz.rotateV2P(this.camera.rotation.z)
-                this.ptz.rotateDelta = this.ptz.deg2rad((state as any)[this.cameraName].rotation.z)
-                this.camera.rotation.z = this.ptz.rotateP2V(rotate)
+            /*  adjust case rotation  */
+            if ((state as any)[this.cameraName].caseRotation?.z !== undefined) {
+                const rotate = this.ptzCase.rotateV2P(this.cameraCase.rotation.z)
+                this.ptzCase.rotateDelta = this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.z)
+                this.cameraCase.rotation.z = this.ptzCase.rotateP2V(rotate)
+            }
+
+            /*  adjust lens tilt  */
+            if ((state as any)[this.cameraName].lensRotation?.x !== undefined) {
+                const tilt = this.ptzLens.tiltV2P(this.cameraLens.rotation.x)
+                this.ptzLens.tiltDelta = this.ptzLens.deg2rad((state as any)[this.cameraName].lensRotation.x)
+                this.cameraLens.rotation.x = this.ptzLens.tiltP2V(tilt)
             }
 
             /*  adjust field-of-view  */
             if ((state as any)[this.cameraName].fov?.m !== undefined) {
-                const zoom = this.ptz.zoomV2P(this.camera.fov)
-                this.ptz.fovMult = (state as any)[this.cameraName].fov.m
-                this.camera.fov = this.ptz.zoomP2V(zoom)
+                const zoom = this.ptzLens.zoomV2P(this.cameraLens.fov)
+                this.ptzLens.fovMult = (state as any)[this.cameraName].fov.m
+                this.cameraLens.fov = this.ptzLens.zoomP2V(zoom)
             }
         }
 
@@ -814,11 +844,13 @@ export default class CanvasRenderer extends EventEmitter {
     /*  react on a received FreeD state record by reflecting its camera PTZ state  */
     reflectFreeDState (state: FreeDState) {
         this.state = state
-        if (this.ptzFreeD && this.camera !== null /* notice: FreeD can be faster than Babylon */) {
-            this.camera.rotation.x = this.ptz.tiltP2V(state.tilt)
-            this.camera.rotation.y = this.ptz.panP2V(state.pan)
-            this.camera.rotation.z = this.ptz.rotateP2V(0)
-            this.camera.fov        = this.ptz.zoomP2V(state.zoom)
+        /*  notice: FreeD can be faster than Babylon, so we have to be careful...  */
+        if (this.ptzFreeD && this.cameraCase !== null && this.cameraLens !== null) {
+            this.cameraCase.rotation.x = this.ptzCase.tiltP2V(0)
+            this.cameraCase.rotation.y = this.ptzCase.panP2V(state.pan)
+            this.cameraCase.rotation.z = this.ptzCase.rotateP2V(0)
+            this.cameraLens.rotation.x = this.ptzLens.tiltP2V(state.tilt)
+            this.cameraLens.fov        = this.ptzLens.zoomP2V(state.zoom)
         }
     }
 
@@ -829,45 +861,46 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  pan  */
         if (key === "ArrowLeft")
-            this.camera!.rotation.y =
-                Math.min(this.camera!.rotation.y + this.ptz.panStep, this.ptz.panP2V(this.ptz.panMinDeg))
+            this.cameraCase!.rotation.y =
+                Math.min(this.cameraCase!.rotation.y + this.ptzCase.panStep, this.ptzCase.panP2V(this.ptzCase.panMinDeg))
         else if (key === "ArrowRight")
-            this.camera!.rotation.y =
-                Math.max(this.camera!.rotation.y - this.ptz.panStep, this.ptz.panP2V(this.ptz.panMaxDeg))
+            this.cameraCase!.rotation.y =
+                Math.max(this.cameraCase!.rotation.y - this.ptzCase.panStep, this.ptzCase.panP2V(this.ptzCase.panMaxDeg))
 
         /*  tilt  */
         else if (key === "ArrowDown")
-            this.camera!.rotation.x =
-                Math.min(this.camera!.rotation.x + this.ptz.tiltStep, this.ptz.tiltP2V(this.ptz.tiltMinDeg))
+            this.cameraLens!.rotation.x =
+                Math.min(this.cameraLens!.rotation.x + this.ptzLens.tiltStep, this.ptzLens.tiltP2V(this.ptzLens.tiltMinDeg))
         else if (key === "ArrowUp")
-            this.camera!.rotation.x =
-                Math.max(this.camera!.rotation.x - this.ptz.tiltStep, this.ptz.tiltP2V(this.ptz.tiltMaxDeg))
+            this.cameraLens!.rotation.x =
+                Math.max(this.cameraLens!.rotation.x - this.ptzLens.tiltStep, this.ptzLens.tiltP2V(this.ptzLens.tiltMaxDeg))
 
         /*  rotate  */
         else if (key === "+")
-            this.camera!.rotation.z =
-                Math.min(this.camera!.rotation.z + this.ptz.rotateStep, this.ptz.rotateP2V(this.ptz.rotateMinDeg))
+            this.cameraCase!.rotation.z =
+                Math.min(this.cameraCase!.rotation.z + this.ptzCase.rotateStep, this.ptzCase.rotateP2V(this.ptzCase.rotateMinDeg))
         else if (key === "-")
-            this.camera!.rotation.z =
-                Math.max(this.camera!.rotation.z - this.ptz.rotateStep, this.ptz.rotateP2V(this.ptz.rotateMaxDeg))
+            this.cameraCase!.rotation.z =
+                Math.max(this.cameraCase!.rotation.z - this.ptzCase.rotateStep, this.ptzCase.rotateP2V(this.ptzCase.rotateMaxDeg))
 
         /*  zoom  */
         else if (key === "PageUp")
-            this.camera!.fov =
-                Math.max(this.camera!.fov - this.ptz.zoomStep, this.ptz.zoomP2V(this.ptz.zoomMax))
+            this.cameraLens!.fov =
+                Math.max(this.cameraLens!.fov - this.ptzLens.zoomStep, this.ptzLens.zoomP2V(this.ptzLens.zoomMax))
         else if (key === "PageDown")
-            this.camera!.fov =
-                Math.min(this.camera!.fov + this.ptz.zoomStep, this.ptz.zoomP2V(this.ptz.zoomMin))
+            this.cameraLens!.fov =
+                Math.min(this.cameraLens!.fov + this.ptzLens.zoomStep, this.ptzLens.zoomP2V(this.ptzLens.zoomMin))
 
         /*  reset  */
         else if (key === "Home") {
-            this.camera!.position.x = this.ptz.posXP2V(0)
-            this.camera!.position.y = this.ptz.posYP2V(0)
-            this.camera!.position.z = this.ptz.posZP2V(0)
-            this.camera!.rotation.x = this.ptz.tiltP2V(0)
-            this.camera!.rotation.y = this.ptz.panP2V(0)
-            this.camera!.rotation.z = this.ptz.rotateP2V(0)
-            this.camera!.fov        = this.ptz.zoomP2V(0)
+            this.cameraHull!.position.x = this.ptzHull.posXP2V(0)
+            this.cameraHull!.position.y = this.ptzHull.posYP2V(0)
+            this.cameraHull!.position.z = this.ptzHull.posZP2V(0)
+            this.cameraCase!.rotation.x = this.ptzCase.tiltP2V(0)
+            this.cameraCase!.rotation.y = this.ptzCase.panP2V(0)
+            this.cameraCase!.rotation.z = this.ptzCase.rotateP2V(0)
+            this.cameraLens!.rotation.x = this.ptzLens.tiltP2V(0)
+            this.cameraLens!.fov        = this.ptzLens.zoomP2V(0)
         }
     }
 }

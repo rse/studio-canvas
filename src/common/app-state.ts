@@ -15,7 +15,8 @@ export type StateType = {
         texture1:   string,
         texture2?:  string,
         fadeTrans?: number,
-        fadeWait?:  number
+        fadeWait?:  number,
+        rotationY:  number
     },
     monitor: {
         enable:     boolean,
@@ -51,24 +52,28 @@ export type StateType = {
         enable:     boolean
     },
     CAM1: {
-        position: { x: number, y: number, z: number },
-        rotation: { x: number, y: number, z: number },
-        fov:      { m: number }
+        hullPosition: { x: number, y: number, z: number },
+        caseRotation: { x: number, y: number, z: number },
+        lensRotation: { x: number },
+        fov:          { m: number }
     },
     CAM2: {
-        position: { x: number, y: number, z: number },
-        rotation: { x: number, y: number, z: number },
-        fov:      { m: number }
+        hullPosition: { x: number, y: number, z: number },
+        caseRotation: { x: number, y: number, z: number },
+        lensRotation: { x: number },
+        fov:          { m: number }
     },
     CAM3: {
-        position: { x: number, y: number, z: number },
-        rotation: { x: number, y: number, z: number },
-        fov:      { m: number }
+        hullPosition: { x: number, y: number, z: number },
+        caseRotation: { x: number, y: number, z: number },
+        lensRotation: { x: number },
+        fov:          { m: number }
     },
     CAM4: {
-        position: { x: number, y: number, z: number },
-        rotation: { x: number, y: number, z: number },
-        fov:      { m: number }
+        hullPosition: { x: number, y: number, z: number },
+        caseRotation: { x: number, y: number, z: number },
+        lensRotation: { x: number },
+        fov:          { m: number }
     },
     renderer: {
         program: number
@@ -87,7 +92,8 @@ export const StateSchema = `{
         texture1:   string,
         texture2:   string,
         fadeTrans:  number,
-        fadeWait:   number
+        fadeWait:   number,
+        rotationY:  number
     },
     monitor: {
         enable:     boolean,
@@ -123,24 +129,28 @@ export const StateSchema = `{
         enable:     boolean
     },
     CAM1: {
-        position: { x: number, y: number, z: number },
-        rotation: { x: number, y: number, z: number },
-        fov:      { m: number }
+        hullPosition: { x: number, y: number, z: number },
+        caseRotation: { x: number, y: number, z: number },
+        lensRotation: { x: number },
+        fov:          { m: number }
     },
     CAM2: {
-        position: { x: number, y: number, z: number },
-        rotation: { x: number, y: number, z: number },
-        fov:      { m: number }
+        hullPosition: { x: number, y: number, z: number },
+        caseRotation: { x: number, y: number, z: number },
+        lensRotation: { x: number },
+        fov:          { m: number }
     },
     CAM3: {
-        position: { x: number, y: number, z: number },
-        rotation: { x: number, y: number, z: number },
-        fov:      { m: number }
+        hullPosition: { x: number, y: number, z: number },
+        caseRotation: { x: number, y: number, z: number },
+        lensRotation: { x: number },
+        fov:          { m: number }
     },
     CAM4: {
-        position: { x: number, y: number, z: number },
-        rotation: { x: number, y: number, z: number },
-        fov:      { m: number }
+        hullPosition: { x: number, y: number, z: number },
+        caseRotation: { x: number, y: number, z: number },
+        lensRotation: { x: number },
+        fov:          { m: number }
     },
     renderer: {
         program: number,
@@ -159,7 +169,8 @@ export const StateDefault: StateType = {
         texture1:   "/canvas/hexagons-1.jpg",
         texture2:   "/canvas/hexagons-2.jpg",
         fadeTrans:  150,
-        fadeWait:   10000
+        fadeWait:   10000,
+        rotationY:  0
     },
     monitor: {
         enable:     false,
@@ -195,24 +206,28 @@ export const StateDefault: StateType = {
         enable:     true
     },
     CAM1: {
-        position:   { x: 0, y: 0, z: 0 },
-        rotation:   { x: 0, y: 0, z: 0 },
-        fov:        { m: 1 }
+        hullPosition: { x: 0, y: 0, z: 0 },
+        caseRotation: { x: 0, y: 0, z: 0 },
+        lensRotation: { x: 0 },
+        fov:          { m: 1 }
     },
     CAM2: {
-        position:   { x: 0, y: 0, z: 0 },
-        rotation:   { x: 0, y: 0, z: 0 },
-        fov:        { m: 1 }
+        hullPosition: { x: 0, y: 0, z: 0 },
+        caseRotation: { x: 0, y: 0, z: 0 },
+        lensRotation: { x: 0 },
+        fov:          { m: 1 }
     },
     CAM3: {
-        position:   { x: 0, y: 0, z: 0 },
-        rotation:   { x: 0, y: 0, z: 0 },
-        fov:        { m: 1 }
+        hullPosition: { x: 0, y: 0, z: 0 },
+        caseRotation: { x: 0, y: 0, z: 0 },
+        lensRotation: { x: 0 },
+        fov:          { m: 1 }
     },
     CAM4: {
-        position:   { x: 0, y: 0, z: 0 },
-        rotation:   { x: 0, y: 0, z: 0 },
-        fov:        { m: 1 }
+        hullPosition: { x: 0, y: 0, z: 0 },
+        caseRotation: { x: 0, y: 0, z: 0 },
+        lensRotation: { x: 0 },
+        fov:          { m: 1 }
     },
     renderer: {
         program:    30,
