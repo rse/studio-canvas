@@ -771,6 +771,11 @@ export default class CanvasRenderer extends EventEmitter {
                 this.ptzCase.panDelta = this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.y)
                 this.cameraCase.rotation.y = this.ptzCase.panP2V(pan)
             }
+            if ((state as any)[this.cameraName].caseRotation?.ym !== undefined) {
+                const pan = this.ptzCase.panV2P(this.cameraCase.rotation.y)
+                this.ptzCase.panMult = (state as any)[this.cameraName].caseRotation.ym
+                this.cameraCase.rotation.y = this.ptzCase.panP2V(pan)
+            }
 
             /*  adjust case rotation  */
             if ((state as any)[this.cameraName].caseRotation?.z !== undefined) {
@@ -783,6 +788,11 @@ export default class CanvasRenderer extends EventEmitter {
             if ((state as any)[this.cameraName].lensRotation?.x !== undefined) {
                 const tilt = this.ptzLens.tiltV2P(this.cameraLens.rotation.x)
                 this.ptzLens.tiltDelta = this.ptzLens.deg2rad((state as any)[this.cameraName].lensRotation.x)
+                this.cameraLens.rotation.x = this.ptzLens.tiltP2V(tilt)
+            }
+            if ((state as any)[this.cameraName].lensRotation?.xm !== undefined) {
+                const tilt = this.ptzLens.tiltV2P(this.cameraLens.rotation.x)
+                this.ptzLens.tiltMult = (state as any)[this.cameraName].lensRotation.xm
                 this.cameraLens.rotation.x = this.ptzLens.tiltP2V(tilt)
             }
 

@@ -46,6 +46,7 @@ export default class PTZ {
     public panMaxDeg     = 175
     public panTotal      = this.deg2rad(360)
     public panStep       = this.deg2rad(1)
+    public panMult       = 1
 
     /*  convert pan
         from PHYSICAL BirdDog pan        (-175/left...0/center...+175/right degree)
@@ -54,9 +55,9 @@ export default class PTZ {
         if (deg < this.panMinDeg) deg = this.panMinDeg
         if (deg > this.panMaxDeg) deg = this.panMaxDeg
         if (deg < 0)
-            return (this.panOrigin + this.panDelta) + this.deg2rad(-deg)
+            return (this.panOrigin + this.panDelta) + this.deg2rad(-deg * this.panMult)
         else
-            return (this.panOrigin + this.panDelta) - this.deg2rad(deg)
+            return (this.panOrigin + this.panDelta) - this.deg2rad(deg * this.panMult)
     }
 
     /*  convert pan
@@ -66,9 +67,9 @@ export default class PTZ {
         let deg
         rad = (rad % this.panTotal)
         if (rad <= (this.panOrigin + this.panDelta))
-            deg = +this.rad2deg(Math.abs((this.panOrigin + this.panDelta) - rad))
+            deg = +this.rad2deg(Math.abs((this.panOrigin + this.panDelta) - rad)) / this.panMult
         else
-            deg = -this.rad2deg(Math.abs((this.panOrigin + this.panDelta) - rad))
+            deg = -this.rad2deg(Math.abs((this.panOrigin + this.panDelta) - rad)) / this.panMult
         return deg
     }
 
@@ -80,6 +81,7 @@ export default class PTZ {
     public tiltMaxDeg    = 90
     public tiltTotal     = this.deg2rad(360)
     public tiltStep      = this.deg2rad(1)
+    public tiltMult      = 1
 
     /*  convert tilt
         from  PHYSICAL BirdDog pan        (-30/down...0/center...+90/up degree)
@@ -88,9 +90,9 @@ export default class PTZ {
         if (deg < this.tiltMinDeg) deg = this.tiltMinDeg
         if (deg > this.tiltMaxDeg) deg = this.tiltMaxDeg
         if (deg < 0)
-            return (this.tiltOrigin + this.tiltDelta) + this.deg2rad(-deg)
+            return (this.tiltOrigin + this.tiltDelta) + this.deg2rad(-deg * this.tiltMult)
         else
-            return (this.tiltOrigin + this.tiltDelta) - this.deg2rad(deg)
+            return (this.tiltOrigin + this.tiltDelta) - this.deg2rad(deg * this.tiltMult)
     }
 
     /*  convert tilt
@@ -100,9 +102,9 @@ export default class PTZ {
         let deg
         rad = (rad % this.tiltTotal)
         if (rad <= (this.tiltOrigin + this.tiltDelta))
-            deg = +this.rad2deg(Math.abs((this.tiltOrigin + this.tiltDelta) - rad))
+            deg = +this.rad2deg(Math.abs((this.tiltOrigin + this.tiltDelta) - rad)) / this.tiltMult
         else
-            deg = -this.rad2deg(Math.abs((this.tiltOrigin + this.tiltDelta) - rad))
+            deg = -this.rad2deg(Math.abs((this.tiltOrigin + this.tiltDelta) - rad)) / this.tiltMult
         return deg
     }
 
