@@ -42,13 +42,13 @@ export default class PTZ {
 
     public panOrigin     = 0
     public panDelta      = 0
-    public panMinDeg     = -180
-    public panMaxDeg     = 180
+    public panMinDeg     = -175
+    public panMaxDeg     = 175
     public panTotal      = this.deg2rad(360)
     public panStep       = this.deg2rad(1)
 
     /*  convert pan
-        from PHYSICAL BirdDog pan        (-180/left...0/center...+180/right degree)
+        from PHYSICAL BirdDog pan        (-175/left...0/center...+175/right degree)
         to   VIRTUAL  Babylon y-rotation (offset from center in radians)  */
     panP2V (deg: number) {
         if (deg < this.panMinDeg) deg = this.panMinDeg
