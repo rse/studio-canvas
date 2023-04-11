@@ -5,8 +5,8 @@
 */
 
 /*  external dependencies  */
-import objectPath from "object-path"
-import minimatch  from "minimatch"
+import objectPath    from "object-path"
+import { minimatch } from "minimatch"
 
 /*  complete state type (all fields required)  */
 export type StateType = {
