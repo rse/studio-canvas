@@ -12,7 +12,7 @@ About
 **Studio-Canvas** is a client/server applications for dynamically
 rendering the virtual canvas of a filmstudio through the help of a game
 engine. The canvas optionally is overlayed with a standalone monitor
-and/or an embedded decal, both showing a video stream. The virtual
+and/or an embedded decal, both showing an own video stream. The virtual
 cameras optionally can follow the physical PTZ cameras throught their
 emitted FreeD information.
 
