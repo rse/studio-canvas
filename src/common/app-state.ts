@@ -53,26 +53,26 @@ export type StateType = {
     },
     CAM1: {
         hullPosition: { x: number, y: number, z: number },
-        caseRotation: { x: number, y: number, z: number },
-        lensRotation: { x: number },
+        caseRotation: { x: number, y: number, z: number, ym: number },
+        lensRotation: { x: number, xm: number },
         fov:          { m: number }
     },
     CAM2: {
         hullPosition: { x: number, y: number, z: number },
-        caseRotation: { x: number, y: number, z: number },
-        lensRotation: { x: number },
+        caseRotation: { x: number, y: number, z: number, ym: number },
+        lensRotation: { x: number, xm: number },
         fov:          { m: number }
     },
     CAM3: {
         hullPosition: { x: number, y: number, z: number },
-        caseRotation: { x: number, y: number, z: number },
-        lensRotation: { x: number },
+        caseRotation: { x: number, y: number, z: number, ym: number },
+        lensRotation: { x: number, xm: number },
         fov:          { m: number }
     },
     CAM4: {
         hullPosition: { x: number, y: number, z: number },
-        caseRotation: { x: number, y: number, z: number },
-        lensRotation: { x: number },
+        caseRotation: { x: number, y: number, z: number, ym: number },
+        lensRotation: { x: number, xm: number },
         fov:          { m: number }
     },
     renderer: {
@@ -130,26 +130,26 @@ export const StateSchema = `{
     },
     CAM1: {
         hullPosition: { x: number, y: number, z: number },
-        caseRotation: { x: number, y: number, z: number },
-        lensRotation: { x: number },
+        caseRotation: { x: number, y: number, z: number, ym: number },
+        lensRotation: { x: number, xm: number },
         fov:          { m: number }
     },
     CAM2: {
         hullPosition: { x: number, y: number, z: number },
-        caseRotation: { x: number, y: number, z: number },
-        lensRotation: { x: number },
+        caseRotation: { x: number, y: number, z: number, ym: number },
+        lensRotation: { x: number, xm: number },
         fov:          { m: number }
     },
     CAM3: {
         hullPosition: { x: number, y: number, z: number },
-        caseRotation: { x: number, y: number, z: number },
-        lensRotation: { x: number },
+        caseRotation: { x: number, y: number, z: number, ym: number },
+        lensRotation: { x: number, xm: number },
         fov:          { m: number }
     },
     CAM4: {
         hullPosition: { x: number, y: number, z: number },
-        caseRotation: { x: number, y: number, z: number },
-        lensRotation: { x: number },
+        caseRotation: { x: number, y: number, z: number, ym: number },
+        lensRotation: { x: number, xm: number },
         fov:          { m: number }
     },
     renderer: {
@@ -207,26 +207,26 @@ export const StateDefault: StateType = {
     },
     CAM1: {
         hullPosition: { x: 0, y: 0, z: 0 },
-        caseRotation: { x: 0, y: 0, z: 0 },
-        lensRotation: { x: 0 },
+        caseRotation: { x: 0, y: 0, z: 0, ym: 1 },
+        lensRotation: { x: 0, xm: 1 },
         fov:          { m: 1 }
     },
     CAM2: {
         hullPosition: { x: 0, y: 0, z: 0 },
-        caseRotation: { x: 0, y: 0, z: 0 },
-        lensRotation: { x: 0 },
+        caseRotation: { x: 0, y: 0, z: 0, ym: 1 },
+        lensRotation: { x: 0, xm: 1 },
         fov:          { m: 1 }
     },
     CAM3: {
         hullPosition: { x: 0, y: 0, z: 0 },
-        caseRotation: { x: 0, y: 0, z: 0 },
-        lensRotation: { x: 0 },
+        caseRotation: { x: 0, y: 0, z: 0, ym: 1 },
+        lensRotation: { x: 0, xm: 1 },
         fov:          { m: 1 }
     },
     CAM4: {
         hullPosition: { x: 0, y: 0, z: 0 },
-        caseRotation: { x: 0, y: 0, z: 0 },
-        lensRotation: { x: 0 },
+        caseRotation: { x: 0, y: 0, z: 0, ym: 1 },
+        lensRotation: { x: 0, xm: 1 },
         fov:          { m: 1 }
     },
     renderer: {
