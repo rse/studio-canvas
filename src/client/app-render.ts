@@ -585,7 +585,8 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.canvas.rotationY !== undefined) {
                 this.wall!.rotationQuaternion = this.wallRotBase!.clone()
-                this.wall!.rotate(new BABYLON.Vector3(0, 1, 0), this.ptz.deg2rad(state.canvas.rotationY), BABYLON.Space.WORLD)
+                this.wall!.rotate(new BABYLON.Vector3(0, 1, 0),
+                    this.ptz.deg2rad(state.canvas.rotationY), BABYLON.Space.WORLD)
             }
             if (changed) {
                 await this.stop()
