@@ -150,7 +150,7 @@ export default class PTZ {
     public fovMaxDeg     = 70.2
     public fovMin        = this.deg2rad(this.fovMinDeg)
     public fovMax        = this.deg2rad(this.fovMaxDeg)
-    public fovMult       = 1
+    public fovMult       = 1 /* FIXME: unused until polynomial adjustment is implemented  */
     public zoomMin       = 0
     public zoomMax       = 20
     public zoomLevels    = 40
