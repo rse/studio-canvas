@@ -119,6 +119,7 @@ export default class CanvasRenderer extends EventEmitter {
         })
 
         /*  load the Blender glTF scene export  */
+        this.emit("log", "INFO", "loading studio scene")
         BABYLON.SceneLoader.ShowLoadingScreen = false
         this.scene = await new Promise((resolve, reject) => {
             BABYLON.SceneLoader.Load("/res/", "canvas-scene.glb", this.engine, (scene) => {
@@ -132,6 +133,7 @@ export default class CanvasRenderer extends EventEmitter {
             throw new Error("failed to create scene")
 
         /*  create studio environment for correct texture image colors  */
+        this.emit("log", "INFO", "loading studio environment")
         this.scene.createDefaultEnvironment({
             environmentTexture: "/res/canvas-scene.env",
             skyboxColor: new BABYLON.Color3(0.5, 0.5, 0.5)
@@ -291,6 +293,7 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  ensure video devices can be enumerated later
             (we just ignore resulting stream for now)  */
+        this.emit("log", "INFO", "requesting video device access")
         await navigator.mediaDevices.getUserMedia({ audio: true, video: true }).catch(() => {})
     }
 
