@@ -119,7 +119,7 @@ export default class CanvasRenderer extends EventEmitter {
         })
 
         /*  load the Blender glTF scene export  */
-        this.emit("log", "INFO", "loading studio scene")
+        this.emit("log", "INFO", "loading Studio Canvas scene")
         BABYLON.SceneLoader.ShowLoadingScreen = false
         this.scene = await new Promise((resolve, reject) => {
             BABYLON.SceneLoader.Load("/res/", "canvas-scene.glb", this.engine, (scene) => {
@@ -133,7 +133,7 @@ export default class CanvasRenderer extends EventEmitter {
             throw new Error("failed to create scene")
 
         /*  create studio environment for correct texture image colors  */
-        this.emit("log", "INFO", "loading studio environment")
+        this.emit("log", "INFO", "loading Studio Canvas environment")
         this.scene.createDefaultEnvironment({
             environmentTexture: "/res/canvas-scene.env",
             skyboxColor: new BABYLON.Color3(0.5, 0.5, 0.5)
