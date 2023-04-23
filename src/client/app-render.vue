@@ -18,6 +18,9 @@
                 <div class="name"><span class="name1">Studio</span> <span class="name2">Canvas</span></div>
                 <div class="vers">{{ pkg.version }} ({{ pkg["x-date"] }})</div>
             </div>
+            <div class="spin">
+                <i class="fa-solid fa-spinner fa-spin"></i>
+            </div>
             <div class="text">{{ overlayText }}</div>
         </div>
     </div>
@@ -79,10 +82,14 @@
                 font-size: 2vw
                 font-weight: 200
                 color: var(--color-std-fg-1)
+        .spin
+            font-size: 5vw
+            color: var(--color-acc-fg-3)
+            margin-bottom: 1vw
         .text
             font-size: 2vw
             color: var(--color-acc-fg-3)
-            margin-bottom: 15vw
+            margin-bottom: 10vw
 </style>
 
 <script setup lang="ts">
