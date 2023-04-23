@@ -118,6 +118,9 @@ export default defineComponent({
         overlayShow: false,
         overlayText: ""
     }),
+    created () {
+        this.log("INFO", `starting ${pkg.name} ${pkg.version} (${pkg["x-date"]})`)
+    },
     async mounted () {
         /*  establish renderer  */
         this.log("INFO", "establish Babylon game engine")
