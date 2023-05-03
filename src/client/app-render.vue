@@ -64,22 +64,22 @@
             flex-direction: column
             align-items: center
             justify-content: center
-            border-radius: 3.5vw
+            border-radius: 2.5vw
             background-color: var(--color-std-bg-3)
-            padding: 2vw
-            margin-bottom: 3vw
+            padding: 1.5vw
+            margin-bottom: 2vw
             .logo
-                width: 20vw
+                width: 15vw
                 margin-bottom: 1vw
             .name
-                font-size: 3vw
+                font-size: 2vw
                 font-weight: bold
                 .name1
                     color: var(--color-std-fg-3)
                 .name2
                     color: var(--color-std-fg-5)
             .vers
-                font-size: 2vw
+                font-size: 1.5vw
                 font-weight: 200
                 color: var(--color-std-fg-1)
         .spin
@@ -89,7 +89,6 @@
         .text
             font-size: 2vw
             color: var(--color-acc-fg-3)
-            margin-bottom: 10vw
 </style>
 
 <script setup lang="ts">
