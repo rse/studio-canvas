@@ -1598,7 +1598,7 @@ export default defineComponent({
     }),
     async mounted () {
         /*  force particular tab to be selected  */
-        this.$refs.tabs.selectTab(`#${this.selectTab}`)
+        (this.$refs.tabs as any).selectTab(`#${this.selectTab}`)
 
         /*  establish server connection  */
         const ws = new RecWebSocket(this.wsUrl + "/control", [], {
