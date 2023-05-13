@@ -24,7 +24,7 @@
 
         <!--  BODY  -->
         <div class="body">
-            <tabs ref="tabs" v-bind:options="{ useUrlFragment: false, defaultTabHash: tab }" v-bind:cache-lifetime="0" class="tabs-level-1" v-on:changed="tabChanged">
+            <tabs ref="tabs" v-bind:options="{ useUrlFragment: false }" v-bind:cache-lifetime="0" class="tabs-level-1" v-on:changed="tabChanged">
                 <!--  ==== PRESETS ====  -->
                 <tab id="presets" name="Presets">
                     <div class="desc">
@@ -1596,10 +1596,10 @@ export default defineComponent({
             program: ""
         } as MixerState
     }),
-    async created () {
-        this.tab = this.selectTab
-    },
     async mounted () {
+        /*  force particular tab to be selected  */
+        this.$refs.tabs.selectTab(`#${this.selectTab}`)
+
         /*  establish server connection  */
         const ws = new RecWebSocket(this.wsUrl + "/control", [], {
             reconnectionDelayGrowFactor: 1.3,
@@ -1765,7 +1765,7 @@ export default defineComponent({
 
         /*  update URL on tab changes  */
         tabChanged (tab: any) {
-            this.tab = tab.tab.name
+            this.tab = tab.tab.computedId
             window.location.hash = `#/control/${tab.tab.computedId}`
         },
 
