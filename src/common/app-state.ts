@@ -21,6 +21,7 @@ export type StateType = {
     monitor: {
         enable:     boolean,
         device:     string,
+        fadeTime:   number,
         scale:      number,
         rotate:     number,
         lift:       number
@@ -28,6 +29,7 @@ export type StateType = {
     decal: {
         enable:     boolean,
         device:     string,
+        fadeTime:   number,
         scale:      number,
         rotate:     number,
         lift:       number,
@@ -98,6 +100,7 @@ export const StateSchema = `{
     monitor: {
         enable:     boolean,
         device:     string,
+        fadeTime:   number,
         scale:      number,
         rotate:     number,
         lift:       number
@@ -105,6 +108,7 @@ export const StateSchema = `{
     decal: {
         enable:     boolean,
         device:     string,
+        fadeTime:   number,
         scale:      number,
         rotate:     number,
         lift:       number,
@@ -175,6 +179,7 @@ export const StateDefault: StateType = {
     monitor: {
         enable:     false,
         device:     "",
+        fadeTime:   2.0,
         scale:      1.0,
         rotate:     10,
         lift:       0
@@ -182,6 +187,7 @@ export const StateDefault: StateType = {
     decal: {
         enable:     false,
         device:     "",
+        fadeTime:   2.0,
         scale:      1.0,
         rotate:     -25,
         lift:       -2.5,
