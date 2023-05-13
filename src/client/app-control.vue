@@ -230,6 +230,21 @@
                             <input class="text" v-model.lazy="state.monitor.device"/>
                         </div>
 
+                        <div class="label1">fade</div>
+                        <div class="label2">(time)</div>
+                        <div class="label3">[sec]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.fadeTime)"
+                                v-on:change="(ev) => state.monitor.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0, 4.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.monitor.fadeTime = 2.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.monitor.fadeTime"
+                                v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
                         <div class="label1">scale</div>
                         <div class="label2">(resize)</div>
                         <div class="label3">[mult]:</div>
@@ -306,6 +321,21 @@
                         <div class="button" v-on:click="state.decal.device = ''">RESET</div>
                         <div class="slider">
                             <input class="text" v-model.lazy="state.decal.device"/>
+                        </div>
+
+                        <div class="label1">fade</div>
+                        <div class="label2">(time)</div>
+                        <div class="label3">[sec]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.decal.fadeTime)"
+                                v-on:change="(ev) => state.decal.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0, 4.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.decal.fadeTime = 2.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.decal.fadeTime"
+                                v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
                         </div>
 
                         <div class="label1">scale</div>
