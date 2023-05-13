@@ -466,19 +466,19 @@ export default class CanvasRenderer extends EventEmitter {
     }
 
     /*  load video stream (and apply onto monitor/decal mesh)  */
-    async loadVideoStream (mesh: BABYLON.Mesh, label: string) {
+    async loadVideoStream (name: string, mesh: BABYLON.Mesh, label: string) {
         const material = mesh.material as BABYLON.PBRMaterial
         const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
         const device = devices.find((device) =>
             device.kind === "videoinput" && device.label.substring(0, label.length) === label)
         if (device === undefined) {
-            this.emit("log", "INFO", `loading video stream "${label}": no such device (using replacement texture)`)
+            this.emit("log", "INFO", `loading video stream "${label}" onto ${name}: no such device (using replacement texture)`)
             material.albedoColor = new BABYLON.Color3(1.00, 0.00, 0.00)
             material.albedoTexture = null
             material.unlit = true
         }
         else {
-            this.emit("log", "INFO", `loading video stream "${label}"`)
+            this.emit("log", "INFO", `loading video stream "${label}" onto ${name}`)
             await BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!,
                 { deviceId: device.deviceId } as any, false, false).then((vt) => {
                 material.albedoColor = new BABYLON.Color3(1.0, 1.0, 1.0)
@@ -489,8 +489,8 @@ export default class CanvasRenderer extends EventEmitter {
     }
 
     /*  unload video stream  */
-    async unloadVideoStream (mesh: BABYLON.Mesh) {
-        this.emit("log", "INFO", "unloading video stream")
+    async unloadVideoStream (name: string, mesh: BABYLON.Mesh) {
+        this.emit("log", "INFO", `unloading video stream from ${name}`)
         const material = mesh.material as BABYLON.PBRMaterial
         material.albedoTexture?.dispose()
         material.albedoTexture = null
@@ -624,8 +624,8 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.monitor.device !== undefined && this.deviceMonitor !== state.monitor.device) {
                 this.deviceMonitor = state.monitor.device
                 await this.stop()
-                await this.unloadVideoStream(this.monitorDisplay!)
-                await this.loadVideoStream(this.monitorDisplay!, this.deviceMonitor)
+                await this.unloadVideoStream("monitor", this.monitorDisplay!)
+                await this.loadVideoStream("monitor", this.monitorDisplay!, this.deviceMonitor)
                 await this.start()
             }
             if (state.monitor.fadeTime !== undefined && this.monitorFade !== state.monitor.fadeTime)
@@ -633,8 +633,8 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.monitor.enable !== undefined && this.monitor.isEnabled() !== state.monitor.enable) {
                 if (state.monitor.enable && this.deviceMonitor !== "") {
                     await this.stop()
-                    await this.unloadVideoStream(this.monitorDisplay!)
-                    await this.loadVideoStream(this.monitorDisplay!, this.deviceMonitor)
+                    await this.unloadVideoStream("monitor", this.monitorDisplay!)
+                    await this.loadVideoStream("monitor", this.monitorDisplay!, this.deviceMonitor)
                     await this.start()
                     if (this.monitorFade > 0) {
                         this.emit("log", "INFO", "enabling monitor (fading: start)")
@@ -675,7 +675,7 @@ export default class CanvasRenderer extends EventEmitter {
                             this.emit("log", "INFO", "disabling monitor (fading: end)")
                             this.monitor!.setEnabled(false)
                             await this.stop()
-                            await this.unloadVideoStream(this.monitorDisplay!)
+                            await this.unloadVideoStream("monitor", this.monitorDisplay!)
                             await this.start()
                         })
                     }
@@ -685,7 +685,7 @@ export default class CanvasRenderer extends EventEmitter {
                         this.monitorDisplay.visibility = 0
                         this.monitor.setEnabled(false)
                         await this.stop()
-                        await this.unloadVideoStream(this.monitorDisplay!)
+                        await this.unloadVideoStream("monitor", this.monitorDisplay!)
                         await this.start()
                     }
                 }
@@ -721,8 +721,8 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.decal.device !== undefined && this.deviceMonitor !== state.decal.device) {
                 this.deviceDecal = state.decal.device
                 await this.stop()
-                await this.unloadVideoStream(this.decal!)
-                await this.loadVideoStream(this.decal!, state.decal.device)
+                await this.unloadVideoStream("decal", this.decal!)
+                await this.loadVideoStream("decal", this.decal!, state.decal.device)
                 await this.start()
             }
             if (state.decal.fadeTime !== undefined && this.decalFade !== state.decal.fadeTime)
@@ -730,8 +730,8 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.decal.enable !== undefined && this.decal.isEnabled() !== state.decal.enable) {
                 if (state.decal.enable && this.deviceDecal !== "") {
                     await this.stop()
-                    await this.unloadVideoStream(this.decal!)
-                    await this.loadVideoStream(this.decal!, this.deviceDecal)
+                    await this.unloadVideoStream("decal", this.decal!)
+                    await this.loadVideoStream("decal", this.decal!, this.deviceDecal)
                     await this.start()
                     if (this.decalFade > 0) {
                         this.emit("log", "INFO", "enabling decal (fading: start)")
@@ -766,7 +766,7 @@ export default class CanvasRenderer extends EventEmitter {
                             this.emit("log", "INFO", "disabling decal (fading: end)")
                             this.decal!.setEnabled(false)
                             await this.stop()
-                            await this.unloadVideoStream(this.decal!)
+                            await this.unloadVideoStream("decal", this.decal!)
                             await this.start()
                         })
                     }
@@ -775,7 +775,7 @@ export default class CanvasRenderer extends EventEmitter {
                         this.decal.visibility = 0
                         this.decal.setEnabled(false)
                         await this.stop()
-                        await this.unloadVideoStream(this.decal!)
+                        await this.unloadVideoStream("decal", this.decal!)
                         await this.start()
                     }
                 }
