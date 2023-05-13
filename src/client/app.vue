@@ -74,8 +74,10 @@ export default defineComponent({
             this.mode = "control"
             this.tab = m[1] ?? "presets"
         }
-        else
-            window.location.href = "#/control"
+        else {
+            url.hash("#/control/presets")
+            window.location.replace(url.toString())
+        }
 
         /*  determine URL for WebSocket connections  */
         url = new URI(window.location.href)
