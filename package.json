@@ -98,7 +98,7 @@
         "stylus":                           "0.59.0",
         "typescript":                       "5.0.4",
         "vite":                             "4.3.5",
-        "vue-tsc":                          "1.6.4",
+        "vue-tsc":                          "1.6.5",
         "delay-cli":                        "2.0.0",
         "nps":                              "5.10.0",
         "cross-env":                        "7.0.3",
