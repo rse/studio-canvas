@@ -78,9 +78,10 @@ export type StateType = {
         fov:          { m: number }
     },
     renderer: {
-        program: number
-        preview: number
-        other: number
+        program: number,
+        preview: number,
+        other:   number,
+        overlay: boolean
     }
 }
 
@@ -159,7 +160,8 @@ export const StateSchema = `{
     renderer: {
         program: number,
         preview: number,
-        other:   number
+        other:   number,
+        overlay: boolean
     }
 }`
 
@@ -238,7 +240,8 @@ export const StateDefault: StateType = {
     renderer: {
         program:    30,
         preview:    15,
-        other:      0
+        other:      0,
+        overlay:    false
     }
 } satisfies StateType
 

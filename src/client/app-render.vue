@@ -23,6 +23,15 @@
             </div>
             <div class="text">{{ overlayText }}</div>
         </div>
+        <div v-show="fpsOverlayEnable && fps === 0" class="mask">
+            <div class="box">
+                <div class="icon">
+                    <i class="fas fa-circle-pause"></i>
+                </div>
+                <div class="text1">RENDERING PAUSED</div>
+                <div class="text2">(not in preview or program)</div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -89,6 +98,35 @@
         .text
             font-size: 2vw
             color: var(--color-acc-fg-3)
+    .mask
+        position: absolute
+        top: 0
+        left: 0
+        width: 100%
+        height: 100%
+        background-color: var(--color-acc-bg-1)
+        color: var(--color-acc-fg-3)
+        display: flex
+        flex-direction: column
+        align-items: center
+        justify-content: center
+        opacity: 0.75
+        .box
+            display: flex
+            flex-direction: column
+            align-items: center
+            justify-content: center
+            border-radius: 1vw
+            padding: 2vw
+            color: var(--color-acc-fg-5)
+            text-align: center
+            .icon
+                font-size: 16vw
+            .text1
+                font-size: 4vw
+                font-weight: bold
+            .text2
+                font-size: 3vw
 </style>
 
 <script setup lang="ts">
@@ -121,8 +159,11 @@ export default defineComponent({
     },
     data: () => ({
         debug: "",
+        state: null,
         overlayShow: false,
-        overlayText: ""
+        overlayText: "",
+        fpsOverlayEnable: false,
+        fps: 30
     }),
     created () {
         this.log("INFO", `starting ${pkg.name} ${pkg.version} (${pkg["x-date"]})`)
@@ -144,6 +185,9 @@ export default defineComponent({
         })
         renderer.on("DEBUG", (msg: string) => {
             this.debug = msg
+        })
+        renderer.on("fps", (fps: number) => {
+            this.fps = fps
         })
         const canvas = this.$refs.canvas as HTMLCanvasElement
         await renderer.establish(canvas)
@@ -199,6 +243,7 @@ export default defineComponent({
                         while (queueSceneState.length > 0) {
                             const state = queueSceneState.shift()!
                             await renderer!.reflectSceneState(state)
+                            this.reflectSceneState(state)
                         }
                         queueSceneStateProcessed = false
                     }, 0)
@@ -227,6 +272,7 @@ export default defineComponent({
         if (!Ducky.validate(state, StateSchema, errors))
             throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
         await renderer.reflectSceneState(state as StateType)
+        this.reflectSceneState(state as StateType)
 
         /*  give renderer time to initially render the scence at least once
             (before we potentially cause 0 FPS in the next step)  */
@@ -258,6 +304,10 @@ export default defineComponent({
         },
         overlay (msg: string) {
             this.overlayText = msg
+        },
+        reflectSceneState (state: StateTypePartial) {
+            if (state.renderer?.overlay !== undefined)
+                this.fpsOverlayEnable = state.renderer?.overlay
         }
     }
 })

@@ -820,6 +820,17 @@
                                 show-tooltip="drag"
                             ></slider>
                         </div>
+
+                        <div class="label1">Overlay</div>
+                        <div class="label2">(visible)</div>
+                        <div class="label3">[flag]:</div>
+                        <div class="value">
+                            <div class="fixed">{{ state.renderer.overlay ? "YES" : "NO" }}</div>
+                        </div>
+                        <div class="button" v-on:click="state.renderer.overlay = false">RESET</div>
+                        <div class="slider">
+                            <toggle class="toggle" v-model="state.renderer.overlay"></toggle>
+                        </div>
                     </div>
                 </tab>
 
