@@ -212,8 +212,7 @@ export default defineComponent({
         ws.addEventListener("error", (ev) => {
             this.log("WARNING", "WebSocket server connection error")
         })
-        const queueSceneState = [] as Array<StateTypePartial>
-        let queueSceneStateProcessed = false
+        let queueSceneState = Promise.resolve()
         ws.addEventListener("message", (ev: MessageEvent) => {
             if (typeof ev.data !== "string") {
                 this.log("WARNING", "invalid WebSocket server message received")
@@ -236,18 +235,10 @@ export default defineComponent({
                     this.log("WARNING", `invalid schema of loaded state: ${errors.join(", ")}`)
                     return
                 }
-                queueSceneState.push(state)
-                if (!queueSceneStateProcessed) {
-                    setTimeout(async () => {
-                        queueSceneStateProcessed = true
-                        while (queueSceneState.length > 0) {
-                            const state = queueSceneState.shift()!
-                            await renderer!.reflectSceneState(state)
-                            this.reflectSceneState(state)
-                        }
-                        queueSceneStateProcessed = false
-                    }, 0)
-                }
+                queueSceneState = queueSceneState.then(() => {
+                    console.log("NEXT", state)
+                    return renderer!.reflectSceneState(state)
+                })
             }
             else if (data.cmd === "MIXER") {
                 const mixer = data.arg.mixer as MixerState
