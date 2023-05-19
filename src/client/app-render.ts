@@ -946,6 +946,7 @@ export default class CanvasRenderer extends EventEmitter {
             this.fps = fps
             if (this.optimizer !== null)
                 this.optimizer.targetFrameRate = fps
+            this.emit("fps", fps)
         }
     }
 
