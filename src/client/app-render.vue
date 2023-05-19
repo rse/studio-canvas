@@ -236,7 +236,6 @@ export default defineComponent({
                     return
                 }
                 queueSceneState = queueSceneState.then(() => {
-                    console.log("NEXT", state)
                     return renderer!.reflectSceneState(state)
                 })
             }
