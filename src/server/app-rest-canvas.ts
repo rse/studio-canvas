@@ -25,9 +25,10 @@ export default class RESTCanvas {
         private restWS: RESTWS
     ) {}
     async init () {
-        /*  serve dedicated canvas files  */
         const canvasDir = this.argv.canvasDir
         const canvasURL = "/canvas"
+
+        /*  serve canvas index  */
         this.rest.server!.route({
             method: "GET",
             path: canvasURL,
@@ -88,6 +89,8 @@ export default class RESTCanvas {
                 return result
             }
         })
+
+        /*  serve dedicated canvas files  */
         this.rest.server!.route({
             method: "GET",
             path: `${canvasURL}/{param*}`,
@@ -99,6 +102,8 @@ export default class RESTCanvas {
                 }
             }
         })
+
+        /*  serve canvas sync action  */
         this.rest.server!.route({
             method: "GET",
             path: `${canvasURL}/sync`,
