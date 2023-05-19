@@ -177,7 +177,36 @@
                     </div>
                     <div class="list" ref="list">
                         <div
-                            v-for="(entry, i) in imageList"
+                            v-for="(group, i) in imageList.map((e) => e.group).filter((v, i, a) => v !== '' && a.indexOf(v) === i)"
+                            class="list-group"
+                            v-bind:class="{ selected: openGroup === group, alt: i % 2 == 1 }"
+                            v-bind:key="group"
+                        >
+                            <div class="name"
+                                v-on:click="openGroup = openGroup !== group ? group : ''">
+                                <span class="icon">
+                                    <span v-show="openGroup !== group"><i class="fa fa-caret-right"></i></span>
+                                    <span v-show="openGroup === group"><i class="fa fa-caret-down" ></i></span>
+                                </span>
+                                <span>{{ group }}</span>
+                            </div>
+                            <div
+                                v-show="openGroup === group"
+                                v-for="(entry, j) in imageList.filter((e) => e.group === group)"
+                                class="list-entry"
+                                v-bind:class="{ selected: entry.id === state.canvas.id, alt: j % 2 == 1 }"
+                                v-bind:key="entry.id!"
+                                v-on:click="selectImage(entry.id!)"
+                            >
+                                <div class="name">{{ entry.name }}</div>
+                                <div class="tags">
+                                    <div v-show="entry.texture2" class="tag tag-fade">FADE</div>
+                                    <div v-show="entry.exclusive" class="tag tag-exclusive">EXCL</div>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            v-for="(entry, i) in imageList.filter((e) => e.group === '')"
                             class="list-entry"
                             v-bind:class="{ selected: entry.id === state.canvas.id, alt: i % 2 == 1 }"
                             v-bind:key="entry.id!"
@@ -1250,7 +1279,7 @@
             height: auto
     .list
         flex-grow: 1
-        width: 100%
+        width: calc(100% - 48px)
         overflow-y: scroll
         overflow-x: hidden
         position: relative
@@ -1261,6 +1290,25 @@
         height: 270px
         min-height: 270px
         max-height: 270px
+        .list-group
+            cursor: pointer
+            color: var(--color-std-fg-5)
+            background-color: var(--color-std-bg-4)
+            display: flex
+            flex-direction: column
+            &.alt
+                background-color: var(--color-std-bg-5)
+            &.selected
+                color: var(--color-acc-fg-5)
+            > .name
+                padding: 1px 10px 1px 10px
+                width: 100%
+                font-weight: bold
+                > .icon
+                    display: inline-block
+                    width: 20px
+            .list-entry
+                padding: 1px 10px 1px 30px
         .list-entry
             cursor: pointer
             color: var(--color-std-fg-5)
@@ -1294,10 +1342,10 @@
                     margin-right: 4px
                     font-size: 75%
                     &.tag-fade
-                        background-color: var(--color-acc-bg-1)
+                        background-color: var(--color-acc-bg-2)
                         color: var(--color-acc-fg-5)
                     &.tag-exclusive
-                        background-color: var(--color-sig-bg-1)
+                        background-color: var(--color-sig-bg-2)
                         color: var(--color-sig-fg-5)
     .canvas
         .actions
@@ -1545,6 +1593,7 @@ export default defineComponent({
     },
     data: () => ({
         imageList: [] as ImageEntry[],
+        openGroup: "",
         ps: null as PerfectScrollbar | null,
         tab: "",
         preset: {
@@ -1654,7 +1703,14 @@ export default defineComponent({
         /*  initialize and enrich canvas list  */
         this.imageList = await this.imageListFetch()
         this.state.canvas.id = this.imageList[0]?.id ?? ""
-        this.ps = new PerfectScrollbar(this.$refs.list as HTMLElement)
+        this.openGroup = this.imageList.find((e) => e.id === this.state.canvas.id)?.group ?? ""
+        this.$watch("state.canvas.id", (id: string) => {
+            this.openGroup = this.imageList.find((e) => e.id === id)?.group ?? ""
+        })
+        this.ps = new PerfectScrollbar(this.$refs.list as HTMLElement, {
+            suppressScrollX: true,
+            scrollXMarginOffset: 100
+        })
 
         /*  initially load state and presets once  */
         await this.loadState()
