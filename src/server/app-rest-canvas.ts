@@ -33,12 +33,18 @@ export default class RESTCanvas {
             method: "GET",
             path: canvasURL,
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
+                /*  the result record  */
                 const result = { images: [] as Array<ImageEntry> }
+
+                /*  internal image path cache  */
                 const images = [] as string[]
-                let files = await glob("*.yaml", { cwd: canvasDir })
+
+                /*  find all explicitly configured canvas images  */
+                let files = await glob("**/*.yaml", { cwd: canvasDir })
                 for (const file of files) {
-                    const m = file.match(/^(.+).yaml$/)
-                    const id = m![1]
+                    const m = file.match(/^(?:(.+)\/)?([^/]+).yaml$/)
+                    const group = m![1] ?? ""
+                    const id    = `${m![1] ? `${m![1]}/` : ""}${m![2]}`
                     const txt: string = await fs.promises.readFile(
                         path.join(canvasDir, file), { encoding: "utf8" })
                     const entry = jsYAML.load(txt) as ImageEntry
@@ -47,20 +53,26 @@ export default class RESTCanvas {
                         this.log.log(1, `invalid schema in canvas image file "${file}": ${errors.join(", ")}`)
                         continue
                     }
+                    if (!entry.group)
+                        entry.group = group
                     if (!entry.id)
                         entry.id = id
+                    entry.texture1 = `${group !== "" ? `${group}/` : ""}${entry.texture1}`
                     images.push(entry.texture1)
                     entry.texture1 = `${canvasURL}/${entry.texture1}`
                     if (entry.texture2) {
+                        entry.texture2 = `${group !== "" ? `${group}/` : ""}${entry.texture2}`
                         images.push(entry.texture2)
                         entry.texture2 = `${canvasURL}/${entry.texture2}`
                     }
                     result.images.push(entry)
                 }
+
+                /*  find all implicitly configured canvas images  */
                 const id2name = (id: string) =>
                     id.replaceAll(/(^|-)(\S)/g, (_, prefix, char) =>
                         (prefix ? " " : "") + char.toUpperCase())
-                files = await glob("*.{png,jpg}", { cwd: canvasDir })
+                files = await glob("**/*.{png,jpg}", { cwd: canvasDir })
                 for (const file of files) {
                     if (images.includes(file))
                         continue
@@ -69,7 +81,8 @@ export default class RESTCanvas {
                         && (await (fs.promises.stat(`${canvasDir}/${m[1]}-2.${m[2]}`).then(() => true).catch(() => false)))) {
                         result.images.push({
                             id:        m[1],
-                            name:      id2name(m[1]),
+                            name:      id2name(m[1].replace(/^.+?\//, "")),
+                            group:     m[1].replace(/^[^/]+$/, "").replace(/^(.+)\/.+$/, "$1"),
                             texture1:  `${canvasURL}/${m[1]}-1.${m[2]}`,
                             texture2:  `${canvasURL}/${m[1]}-2.${m[2]}`,
                             fadeTrans: 20  * 1000,
@@ -77,14 +90,17 @@ export default class RESTCanvas {
                         })
                     }
                     else if ((m = file.match(/^(.+).(png|jpg)$/)) !== null
-                    && file.match(/^(.+)-[12]\.(png|jpg)$/) === null) {
+                        && file.match(/^(.+)-[12]\.(png|jpg)$/) === null) {
                         result.images.push({
-                            id:       m[1],
-                            name:     id2name(m[1]),
-                            texture1: `${canvasURL}/${file}`
+                            id:        m[1],
+                            name:      id2name(m[1].replace(/^.+?\//, "")),
+                            group:     m[1].replace(/^[^/]+$/, "").replace(/^(.+)\/.+$/, "$1"),
+                            texture1:  `${canvasURL}/${file}`
                         })
                     }
                 }
+
+                /*  sort canvas images by name  */
                 result.images = result.images.sort((a, b) => a.name.localeCompare(b.name))
                 return result
             }

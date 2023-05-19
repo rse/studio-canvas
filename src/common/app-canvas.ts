@@ -7,6 +7,7 @@
 export type ImageEntry = {
     id?:        string
     name:       string
+    group:      string
     texture1:   string
     texture2?:  string
     fadeTrans?: number
@@ -17,6 +18,7 @@ export type ImageEntry = {
 export const ImageSchema = `{
     id?:        string,
     name:       string,
+    group?:     string,
     texture1:   string,
     texture2?:  string,
     fadeTrans?: number,
