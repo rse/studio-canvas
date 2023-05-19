@@ -26,7 +26,7 @@ ChangeLog
 - FEATURE:  add x/y rotation multiplication factors
 - FEATURE:  reflect hull/case/lens terminology also in Blender model
 - REFACTOR: major revamp of camera calibration: distinction between hull, case and lens
-- REFACTOR: split each camera into a hull, a case and the inner device and export with the same coordination system as BabylonJS
+- REFACTOR: split each camera into a hull, a case and the inner device and export with same coord system as BabylonJS
 - BUGFIX:   fix Blender model by giving Dennis avatar its texture back
 
 1.0.0 (2023-03-11)
