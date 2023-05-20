@@ -636,7 +636,7 @@ export default class CanvasRenderer extends EventEmitter {
                     await this.unloadVideoStream("monitor", this.monitorDisplay!)
                     await this.loadVideoStream("monitor", this.monitorDisplay!, this.deviceMonitor)
                     await this.start()
-                    if (this.monitorFade > 0) {
+                    if (this.monitorFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling monitor (fading: start)")
                         this.monitorCase.visibility    = 0
                         this.monitorDisplay.visibility = 0
@@ -661,7 +661,7 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                 }
                 else if (!state.monitor.enable) {
-                    if (this.monitorFade > 0) {
+                    if (this.monitorFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "disabling monitor (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
@@ -733,7 +733,7 @@ export default class CanvasRenderer extends EventEmitter {
                     await this.unloadVideoStream("decal", this.decal!)
                     await this.loadVideoStream("decal", this.decal!, this.deviceDecal)
                     await this.start()
-                    if (this.decalFade > 0) {
+                    if (this.decalFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling decal (fading: start)")
                         this.decal.visibility = 0
                         this.decal.setEnabled(true)
@@ -754,7 +754,7 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                 }
                 else if (!state.decal.enable) {
-                    if (this.decalFade > 0) {
+                    if (this.decalFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "disabling decal (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
