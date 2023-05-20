@@ -5,7 +5,9 @@
 **  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
 */
 
-import locks from "locks"
+import fs              from "node:fs"
+import locks           from "locks"
+import writeFileAtomic from "write-file-atomic"
 
 export enum Transaction { READ, WRITE }
 
@@ -42,4 +44,22 @@ export default class DB {
                 reject(new Error("transaction call failed: invalid transaction type"))
         })
     }
+
+    /*  perform atomic read  */
+    async readFile (filename: string) {
+        return fs.promises.readFile(filename, { encoding: "utf8" })
+    }
+
+    /*  perform atomic read/write  */
+    async writeFile (filename: string, data: any) {
+        const oldname = (i: number) => `${filename}.OLD.${i}`
+        if (await (fs.promises.stat(oldname(9)).then(() => true).catch(() => false)))
+            await (fs.promises.unlink(oldname(9)).then(() => true).catch(() => false))
+        for (let i = 8; i >= 1; i--)
+            if (await (fs.promises.stat(oldname(i)).then(() => true).catch(() => false)))
+                await (fs.promises.rename(oldname(i), oldname(i + 1)).then(() => true).catch(() => false))
+        await (fs.promises.copyFile(filename, oldname(1)).then(() => true).catch(() => false))
+        return writeFileAtomic(filename, data, { encoding: "utf8" })
+    }
 }
+

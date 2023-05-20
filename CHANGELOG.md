@@ -2,6 +2,16 @@
 ChangeLog
 =========
 
+1.3.2 (2023-05-20)
+------------------
+
+- FEATURE:  use atomic write operations and automatic file rotation for presets/state files
+
+1.3.1 (2023-05-20)
+------------------
+
+- BUGFIX:   fixed description of canvas image sizes
+
 1.3.0 (2023-05-19)
 ------------------
 

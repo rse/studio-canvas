@@ -48,7 +48,7 @@ export default class RESTPreset {
                         const state = {} as StateTypePartial
                         const filename = util.format(this.presetsFile, i.toString())
                         if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
-                            const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
+                            const txt = await this.db.readFile(filename)
                             const obj = jsYAML.load(txt) as StateTypePartial
                             if (ducky.validate(obj, StateSchemaPartial))
                                 StateUtil.copy(state, obj)
@@ -81,7 +81,7 @@ export default class RESTPreset {
                     /*  load original state  */
                     const state = StateDefault
                     if (await (fs.promises.stat(this.restState.stateFile).then(() => true).catch(() => false))) {
-                        const txt = await fs.promises.readFile(this.restState.stateFile, { encoding: "utf8" })
+                        const txt = await this.db.readFile(this.restState.stateFile)
                         const obj = jsYAML.load(txt) as StateType
                         if (ducky.validate(obj, StateSchema))
                             StateUtil.copy(state, obj)
@@ -95,7 +95,7 @@ export default class RESTPreset {
                     let preset = {}
                     const filename = util.format(this.presetsFile, slot)
                     if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
-                        const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
+                        const txt = await this.db.readFile(filename)
                         const obj = jsYAML.load(txt) as StateTypePartial
                         if (ducky.validate(obj, StateSchemaPartial))
                             StateUtil.copy(preset, obj)
@@ -106,7 +106,7 @@ export default class RESTPreset {
 
                     /*  save new state  */
                     const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
-                    await fs.promises.writeFile(this.restState.stateFile, txt, { encoding: "utf8" })
+                    await this.db.writeFile(this.restState.stateFile, txt)
 
                     /*  notify clients about reduced preset  */
                     preset = StateUtil.reduce(stateOrig, preset)
@@ -127,7 +127,7 @@ export default class RESTPreset {
                     const filename = util.format(this.presetsFile, slot)
                     const state = {}
                     if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
-                        const txt = await fs.promises.readFile(filename, { encoding: "utf8" })
+                        const txt = await this.db.readFile(filename)
                         const obj = jsYAML.load(txt) as StateTypePartial
                         if (ducky.validate(obj, StateSchemaPartial))
                             StateUtil.copy(state, obj)
@@ -157,7 +157,7 @@ export default class RESTPreset {
                     const filename = util.format(this.presetsFile, slot)
                     const state = req.payload as StateTypePartial
                     const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
-                    await fs.promises.writeFile(filename, txt, { encoding: "utf8" })
+                    await this.db.writeFile(filename, txt)
                     return h.response().code(204)
                 })
             }
