@@ -41,7 +41,7 @@ export default class RESTState {
                 return this.db.transaction(Transaction.READ, 4000, async () => {
                     const state = StateDefault
                     if (await (fs.promises.stat(this.stateFile).then(() => true).catch(() => false))) {
-                        const txt = await fs.promises.readFile(this.stateFile, { encoding: "utf8" })
+                        const txt = await this.db.readFile(this.stateFile)
                         const obj = jsYAML.load(txt) as StateType
                         if (ducky.validate(obj, StateSchema))
                             StateUtil.copy(state, obj)
@@ -69,7 +69,7 @@ export default class RESTState {
                 return this.db.transaction(Transaction.WRITE, 4000, async () => {
                     const state = req.payload as StateType
                     const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
-                    await fs.promises.writeFile(this.stateFile, txt, { encoding: "utf8" })
+                    await this.db.writeFile(this.stateFile, txt)
                     this.restWS.notifySceneState(state)
                     return h.response().code(204)
                 })
@@ -94,7 +94,7 @@ export default class RESTState {
                 return this.db.transaction(Transaction.WRITE, 4000, async () => {
                     const state = StateDefault
                     if (await (fs.promises.stat(this.stateFile).then(() => true).catch(() => false))) {
-                        const txt = await fs.promises.readFile(this.stateFile, { encoding: "utf8" })
+                        const txt = await this.db.readFile(this.stateFile)
                         const obj = jsYAML.load(txt) as StateType
                         if (ducky.validate(obj, StateSchema))
                             StateUtil.copy(state, obj)
@@ -102,7 +102,7 @@ export default class RESTState {
                     const statePatch = req.payload as StateTypePartial
                     StateUtil.copy(state, statePatch)
                     const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
-                    await fs.promises.writeFile(this.stateFile, txt, { encoding: "utf8" })
+                    await this.db.writeFile(this.stateFile, txt)
                     this.restWS.notifySceneState(statePatch)
                     return h.response().code(204)
                 })
