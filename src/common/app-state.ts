@@ -40,15 +40,13 @@ export type StateType = {
         intensity2: number,
         intensity3: number
     },
-    avatar1: {
-        enable:     boolean,
-        size:       number,
-        rotate:     number
-    },
-    avatar2: {
-        enable:     boolean,
-        size:       number,
-        rotate:     number
+    avatars: {
+        enable1:    boolean,
+        size1:      number,
+        rotate1:    number,
+        enable2:    boolean,
+        size2:      number,
+        rotate2:    number
     },
     references: {
         enable:     boolean
@@ -126,15 +124,13 @@ export const StateSchema = `{
         intensity2: number,
         intensity3: number
     },
-    avatar1: {
-        enable:     boolean,
-        size:       number,
-        rotate:     number
-    },
-    avatar2: {
-        enable:     boolean,
-        size:       number,
-        rotate:     number
+    avatars: {
+        enable1:    boolean,
+        size1:      number,
+        rotate1:    number,
+        enable2:    boolean,
+        size2:      number,
+        rotate2:    number
     },
     references: {
         enable:     boolean
@@ -212,15 +208,13 @@ export const StateDefault: StateType = {
         intensity2: 100,
         intensity3: 100
     },
-    avatar1: {
-        enable:     true,
-        size:       185,
-        rotate:     -7
-    },
-    avatar2: {
-        enable:     true,
-        size:       185,
-        rotate:     7
+    avatars: {
+        enable1:    true,
+        size1:       185,
+        rotate1:    -7,
+        enable2:    true,
+        size2:      185,
+        rotate2:    7
     },
     references: {
         enable:     true

@@ -57,6 +57,7 @@ export default class RESTPreset {
                         if (state.monitor    !== undefined) n++
                         if (state.decal      !== undefined) n++
                         if (state.lights     !== undefined) n++
+                        if (state.avatars    !== undefined) n++
                         if (state.references !== undefined) n++
                         if (state.CAM1       !== undefined) n++
                         if (state.CAM2       !== undefined) n++
