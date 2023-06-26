@@ -62,6 +62,7 @@ export default class RESTPreset {
                         if (state.CAM2       !== undefined) n++
                         if (state.CAM3       !== undefined) n++
                         if (state.CAM4       !== undefined) n++
+                        if (state.CAM5       !== undefined) n++
                         if (state.renderer   !== undefined) n++
                         presets.push(n)
                     }

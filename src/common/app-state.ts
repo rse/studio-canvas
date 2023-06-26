@@ -77,6 +77,12 @@ export type StateType = {
         lensRotation: { x: number, xm: number },
         fov:          { m: number }
     },
+    CAM5: {
+        hullPosition: { x: number, y: number, z: number },
+        caseRotation: { x: number, y: number, z: number, ym: number },
+        lensRotation: { x: number, xm: number },
+        fov:          { m: number }
+    },
     renderer: {
         program: number,
         preview: number,
@@ -157,6 +163,12 @@ export const StateSchema = `{
         lensRotation: { x: number, xm: number },
         fov:          { m: number }
     },
+    CAM5: {
+        hullPosition: { x: number, y: number, z: number },
+        caseRotation: { x: number, y: number, z: number, ym: number },
+        lensRotation: { x: number, xm: number },
+        fov:          { m: number }
+    },
     renderer: {
         program: number,
         preview: number,
@@ -232,6 +244,12 @@ export const StateDefault: StateType = {
         fov:          { m: 1 }
     },
     CAM4: {
+        hullPosition: { x: 0, y: 0, z: 0 },
+        caseRotation: { x: 0, y: 0, z: 0, ym: 1 },
+        lensRotation: { x: 0, xm: 1 },
+        fov:          { m: 1 }
+    },
+    CAM5: {
         hullPosition: { x: 0, y: 0, z: 0 },
         caseRotation: { x: 0, y: 0, z: 0, ym: 1 },
         lensRotation: { x: 0, xm: 1 },
