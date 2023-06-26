@@ -117,6 +117,10 @@
                                 v-on:click="preset.filters.lights = !preset.filters.lights">
                                 Lights
                             </div>
+                            <div class="button" v-bind:class="{ selected: preset.filters.avatars }"
+                                v-on:click="preset.filters.avatars = !preset.filters.avatars">
+                                Avatars
+                            </div>
                             <div class="button" v-bind:class="{ selected: preset.filters.references }"
                                 v-on:click="preset.filters.references = !preset.filters.references">
                                 References
