@@ -2,6 +2,21 @@
 ChangeLog
 =========
 
+1.3.5 (2023-05-23)
+------------------
+
+- UPDATE: update dependencies
+
+1.3.4 (2023-05-22)
+------------------
+
+- UPDATE: update dependencies
+
+1.3.3 (2023-05-21)
+------------------
+
+- UPDATE: update dependencies
+
 1.3.2 (2023-05-20)
 ------------------
 
