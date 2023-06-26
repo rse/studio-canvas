@@ -792,37 +792,36 @@ export default class CanvasRenderer extends EventEmitter {
                 this.light3.intensity = state.lights.intensity3
         }
 
-        /*  adjust avatar 1  */
-        if (state.avatar1 !== undefined) {
-            if (state.avatar1.enable !== undefined && this.avatar1.isEnabled() !== state.avatar1.enable)
-                this.avatar1.setEnabled(state.avatar1.enable)
-            if (state.avatar1.size !== undefined) {
-                const scale = state.avatar1.size / 185
+        /*  adjust avatars  */
+        if (state.avatars !== undefined) {
+            /*  adjust avatar 1  */
+            if (state.avatars.enable1 !== undefined && this.avatar1.isEnabled() !== state.avatars.enable1)
+                this.avatar1.setEnabled(state.avatars.enable1)
+            if (state.avatars.size1 !== undefined) {
+                const scale = state.avatars.size1 / 185
                 this.avatar1Model!.scaling.x = this.avatar1Scale.x * scale
                 this.avatar1Model!.scaling.y = this.avatar1Scale.y * scale
                 this.avatar1Model!.scaling.z = this.avatar1Scale.z * scale
             }
-            if (state.avatar1.rotate !== undefined) {
+            if (state.avatars.rotate1 !== undefined) {
                 this.avatar1.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.avatar1.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(-state.avatar1.rotate), BABYLON.Space.WORLD)
+                    this.ptz.deg2rad(-state.avatars.rotate1), BABYLON.Space.WORLD)
             }
-        }
 
-        /*  adjust avatar 2  */
-        if (state.avatar2 !== undefined) {
-            if (state.avatar2.enable !== undefined && this.avatar2.isEnabled() !== state.avatar2.enable)
-                this.avatar2.setEnabled(state.avatar2.enable)
-            if (state.avatar2.size !== undefined) {
-                const scale = state.avatar2.size / 185
+            /*  adjust avatar 2  */
+            if (state.avatars.enable2 !== undefined && this.avatar2.isEnabled() !== state.avatars.enable2)
+                this.avatar2.setEnabled(state.avatars.enable2)
+            if (state.avatars.size2 !== undefined) {
+                const scale = state.avatars.size2 / 185
                 this.avatar2Model!.scaling.x = this.avatar2Scale.x * scale
                 this.avatar2Model!.scaling.y = this.avatar2Scale.y * scale
                 this.avatar2Model!.scaling.z = this.avatar2Scale.z * scale
             }
-            if (state.avatar2.rotate !== undefined) {
+            if (state.avatars.rotate2 !== undefined) {
                 this.avatar2.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.avatar2.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(-state.avatar2.rotate), BABYLON.Space.WORLD)
+                    this.ptz.deg2rad(-state.avatars.rotate2), BABYLON.Space.WORLD)
             }
         }
 
