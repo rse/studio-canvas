@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - FEATURE: add CAM5 support
+- UPDATE: update dependencies
 
 1.3.5 (2023-05-23)
 ------------------
