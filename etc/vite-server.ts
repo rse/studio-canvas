@@ -9,18 +9,18 @@ import YAMLPlugin from "@rollup/plugin-yaml"
 
 export default Vite.defineConfig(({ command, mode }) => ({
     appType: "custom",
-	base: "",
+    base: "",
     root: "src/server",
     plugins: [
         YAMLPlugin()
     ],
-	resolve: {
+    resolve: {
         alias: {
           './runtimeConfig': './runtimeConfig.browser',
         },
     },
     build: {
-	    sourcemap:              (mode === "development"),
+        sourcemap:              (mode === "development"),
         outDir:                 "../../dst/server",
         emptyOutDir:            (mode === "production"),
         chunkSizeWarningLimit:  5000,
