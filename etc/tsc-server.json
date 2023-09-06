@@ -3,7 +3,7 @@
 		"outDir":                  "../dst",
         "target":                  "esnext",
         "module":                  "nodenext",
-        "moduleResolution":        "node",
+        "moduleResolution":        "nodenext",
         "useDefineForClassFields": true,
         "composite":               false,
         "strict":                  true,
