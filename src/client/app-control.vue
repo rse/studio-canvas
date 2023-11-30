@@ -168,16 +168,16 @@
                         All canvas images have to be exactly 10540 x 3570 pixels in size.
                     </div>
                     <div class="control">
-                        <div class="label1">Y-rotate</div>
+                        <div class="label1">Z-rotate</div>
                         <div class="label2">(rotate right/left)</div>
                         <div class="label3">[deg]:</div>
                         <div class="value">
-                            <input tabindex="5" v-bind:value="fieldExport(state.canvas.rotationY)"
-                                v-on:change="(ev) => state.canvas.rotationY = fieldImport((ev.target! as HTMLInputElement).value, -10, +10)"/>
+                            <input tabindex="5" v-bind:value="fieldExport(state.canvas.rotationZ)"
+                                v-on:change="(ev) => state.canvas.rotationZ = fieldImport((ev.target! as HTMLInputElement).value, -10, +10)"/>
                         </div>
-                        <div class="button" v-on:click="state.canvas.rotationY = 0">RESET</div>
+                        <div class="button" v-on:click="state.canvas.rotationZ = 0">RESET</div>
                         <div class="slider">
-                            <slider class="slider" v-model="state.canvas.rotationY"
+                            <slider class="slider" v-model="state.canvas.rotationZ"
                                 v-bind:min="-10" v-bind:max="+10" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
@@ -302,12 +302,12 @@
                         <div class="label3">[deg]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.monitor.rotate)"
-                                v-on:change="(ev) => state.monitor.rotate = fieldImport((ev.target! as HTMLInputElement).value, -45, +35)"/>
+                                v-on:change="(ev) => state.monitor.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
                         </div>
                         <div class="button" v-on:click="state.monitor.rotate = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.monitor.rotate"
-                                v-bind:min="-45" v-bind:max="+35" v-bind:step="0.01"
+                                v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
@@ -317,12 +317,12 @@
                         <div class="label3">[cm]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.monitor.lift)"
-                                v-on:change="(ev) => state.monitor.lift = fieldImport((ev.target! as HTMLInputElement).value, -150, +150)"/>
+                                v-on:change="(ev) => state.monitor.lift = fieldImport((ev.target! as HTMLInputElement).value, -150, +70)"/>
                         </div>
                         <div class="button" v-on:click="state.monitor.lift = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.monitor.lift"
-                                v-bind:min="-150" v-bind:max="+150" v-bind:step="0.01"
+                                v-bind:min="-150" v-bind:max="+70" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
@@ -380,12 +380,12 @@
                         <div class="label3">[mult]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.decal.scale)"
-                                v-on:change="(ev) => state.decal.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 3.0)"/>
+                                v-on:change="(ev) => state.decal.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 3.5)"/>
                         </div>
                         <div class="button" v-on:click="state.decal.scale = 1.0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.scale"
-                                v-bind:min="0.1" v-bind:max="3.0" v-bind:step="0.01"
+                                v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
@@ -395,27 +395,27 @@
                         <div class="label3">[deg]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.decal.rotate)"
-                                v-on:change="(ev) => state.decal.rotate = fieldImport((ev.target! as HTMLInputElement).value, -45, +45)"/>
+                                v-on:change="(ev) => state.decal.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
                         </div>
                         <div class="button" v-on:click="state.decal.rotate = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.rotate"
-                                v-bind:min="-45" v-bind:max="+45" v-bind:step="0.01"
+                                v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
 
                         <div class="label1">lift</div>
                         <div class="label2">(tilt down/up)</div>
-                        <div class="label3">[deg]:</div>
+                        <div class="label3">[m]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.decal.lift)"
-                                v-on:change="(ev) => state.decal.lift = fieldImport((ev.target! as HTMLInputElement).value, -20, +10)"/>
+                                v-on:change="(ev) => state.decal.lift = fieldImport((ev.target! as HTMLInputElement).value, -15, +9)"/>
                         </div>
                         <div class="button" v-on:click="state.decal.lift = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.lift"
-                                v-bind:min="-20" v-bind:max="+10" v-bind:step="0.01"
+                                v-bind:min="-15" v-bind:max="+9" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
@@ -533,12 +533,12 @@
                         <div class="label3">[deg]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.avatars.rotate1)"
-                                v-on:change="(ev) => state.avatars.rotate1 = fieldImport((ev.target! as HTMLInputElement).value, -28, +28)"/>
+                                v-on:change="(ev) => state.avatars.rotate1 = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
                         </div>
                         <div class="button" v-on:click="state.avatars.rotate1 = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.avatars.rotate1"
-                                v-bind:min="-28" v-bind:max="+28" v-bind:step="7"
+                                v-bind:min="-90" v-bind:max="+90" v-bind:step="7"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
@@ -574,12 +574,12 @@
                         <div class="label3">[deg]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.avatars.rotate2)"
-                                v-on:change="(ev) => state.avatars.rotate2 = fieldImport((ev.target! as HTMLInputElement).value, -28, +28)"/>
+                                v-on:change="(ev) => state.avatars.rotate2 = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
                         </div>
                         <div class="button" v-on:click="state.avatars.rotate2 = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.avatars.rotate2"
-                                v-bind:min="-28" v-bind:max="+28" v-bind:step="7"
+                                v-bind:min="-90" v-bind:max="+90" v-bind:step="7"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
@@ -621,7 +621,7 @@
                     </div>
                     <div class="control">
                         <div class="label1">hull X-pos</div>
-                        <div class="label2">(shift left/right)</div>
+                        <div class="label2">(shift bwd/fwd)</div>
                         <div class="label3">[cm]:</div>
                         <div class="value">
                             <input tabindex="1" v-bind:value="fieldExport((state as any)[cam].hullPosition.x)"
@@ -636,7 +636,7 @@
                         </div>
 
                         <div class="label1">hull Y-pos</div>
-                        <div class="label2">(shift down/up)</div>
+                        <div class="label2">(shift left/right)</div>
                         <div class="label3">[cm]:</div>
                         <div class="value">
                             <input tabindex="2" v-bind:value="fieldExport((state as any)[cam].hullPosition.y)"
@@ -651,7 +651,7 @@
                         </div>
 
                         <div class="label1">hull Z-pos</div>
-                        <div class="label2">(shift fwd/bwd)</div>
+                        <div class="label2">(shift down/up)</div>
                         <div class="label3">[cm]:</div>
                         <div class="value">
                             <input tabindex="3" v-bind:value="fieldExport((state as any)[cam].hullPosition.z)"
@@ -666,7 +666,7 @@
                         </div>
 
                         <div class="label1">case X-rot</div>
-                        <div class="label2">(tilt up/down)</div>
+                        <div class="label2">(tilt down/up)</div>
                         <div class="label3">[deg]:</div>
                         <div class="value">
                             <input tabindex="4" v-bind:value="fieldExport((state as any)[cam].caseRotation.x)"
@@ -681,7 +681,7 @@
                         </div>
 
                         <div class="label1">case Y-rot</div>
-                        <div class="label2">(pan right/left)</div>
+                        <div class="label2">(pan left/right)</div>
                         <div class="label3">[deg]:</div>
                         <div class="value">
                             <input tabindex="5" v-bind:value="fieldExport((state as any)[cam].caseRotation.y)"
@@ -696,7 +696,7 @@
                         </div>
 
                         <div class="label1">case Y-rot</div>
-                        <div class="label2">(pan right/left)</div>
+                        <div class="label2">(pan left/right)</div>
                         <div class="label3">[mult]:</div>
                         <div class="value">
                             <input tabindex="7" v-bind:value="fieldExport((state as any)[cam].caseRotation.ym)"
@@ -726,7 +726,7 @@
                         </div>
 
                         <div class="label1">lens X-rot</div>
-                        <div class="label2">(tilt up/down)</div>
+                        <div class="label2">(tilt down/up)</div>
                         <div class="label3">[deg]:</div>
                         <div class="value">
                             <input tabindex="4" v-bind:value="fieldExport((state as any)[cam].lensRotation.x)"
@@ -741,7 +741,7 @@
                         </div>
 
                         <div class="label1">lens X-rot</div>
-                        <div class="label2">(tilt up/down)</div>
+                        <div class="label2">(tilt down/up)</div>
                         <div class="label3">[mult]:</div>
                         <div class="value">
                             <input tabindex="7" v-bind:value="fieldExport((state as any)[cam].lensRotation.xm)"
@@ -755,6 +755,8 @@
                             ></slider>
                         </div>
 
+                        <!--
+                        FIXME: currently unused!
                         <div class="label1">FOV</div>
                         <div class="label2">(zoom)</div>
                         <div class="label3">[mult]:</div>
@@ -769,6 +771,7 @@
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
+                        -->
                     </div>
                 </tab>
 
@@ -829,6 +832,8 @@
                             ></slider>
                         </div>
 
+                        <!--
+                        FIXME: currently unused!
                         <div class="label1">Overlay</div>
                         <div class="label2">(visible)</div>
                         <div class="label3">[flag]:</div>
@@ -839,6 +844,7 @@
                         <div class="slider">
                             <toggle class="toggle" v-model="state.renderer.overlay"></toggle>
                         </div>
+                        -->
                     </div>
                 </tab>
 

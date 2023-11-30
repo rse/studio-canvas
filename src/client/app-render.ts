@@ -85,8 +85,8 @@ export default class CanvasRenderer extends EventEmitter {
     private wallRotBase:    BABYLON.Nullable<BABYLON.Quaternion>     = null
 
     /*  video stream device names  */
-    private deviceMonitor = ""
-    private deviceDecal   = ""
+    private deviceMonitor = "dummy"
+    private deviceDecal   = "dummy"
 
     /*  PTZ sub-module  */
     private ptz     = new PTZ()
@@ -469,8 +469,9 @@ export default class CanvasRenderer extends EventEmitter {
     async loadVideoStream (name: string, mesh: BABYLON.Mesh, label: string) {
         const material = mesh.material as BABYLON.PBRMaterial
         const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
-        const device = devices.find((device) =>
-            device.kind === "videoinput" && device.label.substring(0, label.length) === label)
+        const device = label !== "" ?
+            devices.find((device) => device.kind === "videoinput" && device.label.substring(0, label.length) === label) :
+            undefined
         if (device === undefined) {
             this.emit("log", "INFO", `loading video stream "${label}" onto ${name}: no such device (using replacement texture)`)
             material.albedoColor = new BABYLON.Color3(1.00, 0.00, 0.00)
@@ -508,6 +509,14 @@ export default class CanvasRenderer extends EventEmitter {
             throw new Error("cannot find 'DecalRay-Begin' or 'DecalRay-End' nodes")
         rayBegin.setEnabled(false)
         rayEnd.setEnabled(false)
+        rayBegin.computeWorldMatrix()
+        rayEnd.computeWorldMatrix()
+
+        /*  tilt end point to achieve lift effect  */
+        const rayEndLifted = rayEnd!.clone()
+        rayEndLifted.position.z += this.decalLift
+        rayEndLifted.setEnabled(false)
+        rayEndLifted.computeWorldMatrix()
 
         /*  helper function for rotating a Vector3 by Euler angles  */
         const rotateVector = (vec: BABYLON.Vector3, x: number, y: number, z: number) => {
@@ -517,11 +526,10 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  determine decal base position on wall  */
-        const rayEndPos   = BABYLON.Vector3.TransformCoordinates(rayEnd.position,   rayEnd.getWorldMatrix())
+        const rayEndPos   = BABYLON.Vector3.TransformCoordinates(rayEndLifted.position, rayEndLifted.getWorldMatrix())
         const rayBeginPos = BABYLON.Vector3.TransformCoordinates(rayBegin.position, rayBegin.getWorldMatrix())
         let rayDirection = rayEndPos.subtract(rayBeginPos).normalize()
-        rayDirection = rotateVector(rayDirection, this.ptz.deg2rad(-this.decalLift),
-            0, this.ptz.deg2rad(this.decalRotate))
+        rayDirection = rotateVector(rayDirection, 0, 0, this.ptz.deg2rad(this.decalRotate))
         const ray = new BABYLON.Ray(rayBeginPos, rayDirection, 10 /* meters, enough to be behind wall */)
         const decalBase = this.scene!.pickWithRay(ray, (mesh) => (mesh === this.wall!))
         if (decalBase === null)
@@ -534,10 +542,10 @@ export default class CanvasRenderer extends EventEmitter {
         this.decal = BABYLON.MeshBuilder.CreateDecal("Decal", this.wall!, {
             position:      decalBase!.pickedPoint!,
             normal:        decalBase!.getNormal(true)!,
-            angle:         this.ptz.deg2rad(-90),
+            angle:         this.ptz.deg2rad(90),
             size,
             cullBackFaces: true,
-            localMode:     true
+            localMode:     false
         })
 
         /*  take over material or create a fresh one  */
@@ -591,10 +599,10 @@ export default class CanvasRenderer extends EventEmitter {
                 this.fadeWait = state.canvas.fadeWait
                 changed = true
             }
-            if (state.canvas.rotationY !== undefined) {
+            if (state.canvas.rotationZ !== undefined) {
                 this.wall!.rotationQuaternion = this.wallRotBase!.clone()
-                this.wall!.rotate(new BABYLON.Vector3(0, 1, 0),
-                    this.ptz.deg2rad(state.canvas.rotationY), BABYLON.Space.WORLD)
+                this.wall!.rotate(new BABYLON.Vector3(0, 0, 1),
+                    this.ptz.deg2rad(state.canvas.rotationZ), BABYLON.Space.WORLD)
             }
             if (changed) {
                 await this.stop()
@@ -631,7 +639,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.monitor.fadeTime !== undefined && this.monitorFade !== state.monitor.fadeTime)
                 this.monitorFade = state.monitor.fadeTime
             if (state.monitor.enable !== undefined && this.monitor.isEnabled() !== state.monitor.enable) {
-                if (state.monitor.enable && this.deviceMonitor !== "") {
+                if (state.monitor.enable) {
                     await this.stop()
                     await this.unloadVideoStream("monitor", this.monitorDisplay!)
                     await this.loadVideoStream("monitor", this.monitorDisplay!, this.deviceMonitor)
@@ -728,7 +736,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.decal.fadeTime !== undefined && this.decalFade !== state.decal.fadeTime)
                 this.decalFade = state.decal.fadeTime
             if (state.decal.enable !== undefined && this.decal.isEnabled() !== state.decal.enable) {
-                if (state.decal.enable && this.deviceDecal !== "") {
+                if (state.decal.enable) {
                     await this.stop()
                     await this.unloadVideoStream("decal", this.decal!)
                     await this.loadVideoStream("decal", this.decal!, this.deviceDecal)
@@ -836,7 +844,7 @@ export default class CanvasRenderer extends EventEmitter {
             /*  adjust hull X position  */
             if ((state as any)[this.cameraName].hullPosition?.x !== undefined) {
                 const x = this.ptzHull.posXV2P(this.cameraHull.position.x)
-                this.ptzHull.posXDelta = (state as any)[this.cameraName].hullPosition.x / 100
+                this.ptzHull.posXDelta = -((state as any)[this.cameraName].hullPosition.x / 100)
                 this.cameraHull.position.x = this.ptzHull.posXP2V(x)
             }
 
@@ -864,7 +872,7 @@ export default class CanvasRenderer extends EventEmitter {
             /*  adjust case pan  */
             if ((state as any)[this.cameraName].caseRotation?.y !== undefined) {
                 const pan = this.ptzCase.panV2P(this.cameraCase.rotation.y)
-                this.ptzCase.panDelta = this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.y)
+                this.ptzCase.panDelta = -(this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.y))
                 this.cameraCase.rotation.y = this.ptzCase.panP2V(pan)
             }
             if ((state as any)[this.cameraName].caseRotation?.ym !== undefined) {
@@ -876,14 +884,14 @@ export default class CanvasRenderer extends EventEmitter {
             /*  adjust case rotation  */
             if ((state as any)[this.cameraName].caseRotation?.z !== undefined) {
                 const rotate = this.ptzCase.rotateV2P(this.cameraCase.rotation.z)
-                this.ptzCase.rotateDelta = this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.z)
+                this.ptzCase.rotateDelta = -(this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.z))
                 this.cameraCase.rotation.z = this.ptzCase.rotateP2V(rotate)
             }
 
             /*  adjust lens tilt  */
             if ((state as any)[this.cameraName].lensRotation?.x !== undefined) {
                 const tilt = this.ptzLens.tiltV2P(this.cameraLens.rotation.x)
-                this.ptzLens.tiltDelta = this.ptzLens.deg2rad((state as any)[this.cameraName].lensRotation.x)
+                this.ptzLens.tiltDelta = -(this.ptzLens.deg2rad((state as any)[this.cameraName].lensRotation.x))
                 this.cameraLens.rotation.x = this.ptzLens.tiltP2V(tilt)
             }
             if ((state as any)[this.cameraName].lensRotation?.xm !== undefined) {
