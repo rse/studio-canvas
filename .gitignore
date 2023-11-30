@@ -4,3 +4,4 @@ dst
 res/canvas-scene.blend1
 var/canvas-state.yaml
 var/canvas-preset-*.yaml
+var/canvas-*.OLD.*
