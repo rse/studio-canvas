@@ -8,4 +8,4 @@ title Studio-Canvas-Server
     -C 10.0.0.11:CAM2 ^
     -C 10.0.0.12:CAM3 ^
     -C 10.0.0.13:CAM4 ^
-    -C 10.0.0.19:CAM5
+    -C 10.0.0.14:CAM5
