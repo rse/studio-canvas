@@ -11,6 +11,7 @@ extends:
 rules:
     stylus/indentation: 4
     shorthand-property-no-redundant-values: null
+    declaration-block-no-redundant-longhand-properties: null
     unit-allowed-list: [ "px", "pt", "%", "vh", "vw", "fr", "rem", "ms" ]
     rule-empty-line-before: null
     no-descending-specificity: null
