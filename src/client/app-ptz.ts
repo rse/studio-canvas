@@ -206,7 +206,8 @@ export default class PTZ {
 
     /*  convert zoom
         from PHYSICAL BirdDog zoom level    (0..20)
-        to   VIRTUAL  Babylon field of view (radians of 70.2 to 4.1 degree)  */
+        to   VIRTUAL  Babylon field of view (radians of 70.2 to 4.1 degree)
+        (Hint: fovMult is currently unused!)  */
     zoomP2V (zoom: number) {
         if (zoom < this.zoomMin) zoom = this.zoomMin
         if (zoom > this.zoomMax) zoom = this.zoomMax
