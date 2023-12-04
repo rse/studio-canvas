@@ -625,7 +625,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.monitor.rotate !== undefined) {
                 this.monitor.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.monitor.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(-state.monitor.rotate), BABYLON.Space.WORLD)
+                    this.ptz.deg2rad(state.monitor.rotate), BABYLON.Space.WORLD)
             }
             if (state.monitor.lift !== undefined)
                 this.monitor.position.z = this.monitorBase.positionZ + (state.monitor.lift / 100)
