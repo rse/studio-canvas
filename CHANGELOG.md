@@ -2,7 +2,12 @@
 ChangeLog
 =========
 
-1.5.1 (2023-12-20)
+1.5.2 (2023-12-23)
+------------------
+
+- UPDATE: update dependencies
+
+1.5.1 (2023-12-02)
 ------------------
 
 - UPRADE: align with new studio situation
