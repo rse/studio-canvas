@@ -2,6 +2,21 @@
 ChangeLog
 =========
 
+1.5.1 (2023-12-20)
+------------------
+
+- UPRADE: align with new studio situation
+
+1.5.0 (2023-xx-xx)
+------------------
+
+- UPRADE: align with new studio situation
+
+1.4.5 (2023-08-11)
+------------------
+
+- UPDATE: update dependencies
+
 1.4.4 (2023-08-11)
 ------------------
 
