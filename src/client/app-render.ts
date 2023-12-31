@@ -726,7 +726,7 @@ export default class CanvasRenderer extends EventEmitter {
                 const material = this.decal.material as BABYLON.PBRMaterial
                 material.alpha = state.decal.opacity
             }
-            if (state.decal.device !== undefined && this.deviceMonitor !== state.decal.device) {
+            if (state.decal.device !== undefined && this.deviceDecal !== state.decal.device) {
                 this.deviceDecal = state.decal.device
                 await this.stop()
                 await this.unloadVideoStream("decal", this.decal!)
