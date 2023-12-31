@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - BUGFIX: increase lightning scale to make canvas less dark
+- UPDATE: update dependencies
 
 1.5.2 (2023-12-23)
 ------------------
