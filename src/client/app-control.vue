@@ -450,12 +450,12 @@
                         <div class="label3">[lum]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.lights.intensity1, 0)"
-                                v-on:change="(ev) => state.lights.intensity1 = fieldImport((ev.target! as HTMLInputElement).value, 0, 200)"/>
+                                v-on:change="(ev) => state.lights.intensity1 = fieldImport((ev.target! as HTMLInputElement).value, 0, 600)"/>
                         </div>
-                        <div class="button" v-on:click="state.lights.intensity1 = 100">RESET</div>
+                        <div class="button" v-on:click="state.lights.intensity1 = 300">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.lights.intensity1"
-                                v-bind:min="0" v-bind:max="200" v-bind:step="1"
+                                v-bind:min="0" v-bind:max="600" v-bind:step="1"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(0)"
                             ></slider>
                         </div>
@@ -465,12 +465,12 @@
                         <div class="label3">[lum]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.lights.intensity2, 0)"
-                                v-on:change="(ev) => state.lights.intensity2 = fieldImport((ev.target! as HTMLInputElement).value, 0, 200)"/>
+                                v-on:change="(ev) => state.lights.intensity2 = fieldImport((ev.target! as HTMLInputElement).value, 0, 600)"/>
                         </div>
-                        <div class="button" v-on:click="state.lights.intensity2 = 100">RESET</div>
+                        <div class="button" v-on:click="state.lights.intensity2 = 300">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.lights.intensity2"
-                                v-bind:min="0" v-bind:max="200" v-bind:step="1"
+                                v-bind:min="0" v-bind:max="600" v-bind:step="1"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(0)"
                             ></slider>
                         </div>
@@ -480,12 +480,12 @@
                         <div class="label3">[lum]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.lights.intensity3, 0)"
-                                v-on:change="(ev) => state.lights.intensity3 = fieldImport((ev.target! as HTMLInputElement).value, 0, 200)"/>
+                                v-on:change="(ev) => state.lights.intensity3 = fieldImport((ev.target! as HTMLInputElement).value, 0, 600)"/>
                         </div>
-                        <div class="button" v-on:click="state.lights.intensity3 = 100">RESET</div>
+                        <div class="button" v-on:click="state.lights.intensity3 = 300">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.lights.intensity3"
-                                v-bind:min="0" v-bind:max="200" v-bind:step="1"
+                                v-bind:min="0" v-bind:max="600" v-bind:step="1"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(0)"
                             ></slider>
                         </div>

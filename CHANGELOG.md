@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+1.5.3 (2023-12-31)
+------------------
+
+- BUGFIX: increase lightning scale to make canvas less dark
+
 1.5.2 (2023-12-23)
 ------------------
 
