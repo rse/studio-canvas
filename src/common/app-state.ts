@@ -204,9 +204,9 @@ export const StateDefault: StateType = {
         opacity:    1.0
     },
     lights: {
-        intensity1: 100,
-        intensity2: 100,
-        intensity3: 100
+        intensity1: 300,
+        intensity2: 300,
+        intensity3: 300
     },
     avatars: {
         enable1:    true,
