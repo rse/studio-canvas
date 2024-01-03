@@ -8,11 +8,6 @@ ChangeLog
 - FEATURE: add support for chroma-key to decal
 - FEATURE: add support for rounded corners to decal
 - BUGFIX: apply workaround for decal rendering glitches
-- UPDATE: update dependencies
-
-1.5.3 (2023-12-31)
-------------------
-
 - BUGFIX: increase lightning scale to make canvas less dark
 - UPDATE: update dependencies
 
