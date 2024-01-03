@@ -58,6 +58,7 @@ rules:
     lines-between-class-members:         off
     symbol-description:                  off
     no-useless-constructor:              off
+    n/no-callback-literal:               off
     
     "vue/html-indent":                   off
     "vue/v-bind-style":                  [ "error", "longform" ]
