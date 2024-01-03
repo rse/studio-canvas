@@ -18,7 +18,7 @@
     "browser":         "src/client/index.html",
     "main":            "src/client/index.html",
     "dependencies": {
-        "vue":                              "3.4.3",
+        "vue":                              "3.4.4",
         "vue-tippy":                        "6.4.1",
         "@vueform/slider":                  "2.1.10",
         "@vueform/toggle":                  "2.1.4",
@@ -75,8 +75,8 @@
     },
     "devDependencies": {
         "@rollup/plugin-yaml":              "4.1.2",
-        "@typescript-eslint/eslint-plugin": "6.16.0",
-        "@typescript-eslint/parser":        "6.16.0",
+        "@typescript-eslint/eslint-plugin": "6.17.0",
+        "@typescript-eslint/parser":        "6.17.0",
         "@vitejs/plugin-vue":               "5.0.2",
 
         "@vue/eslint-config-typescript":    "12.0.0",
