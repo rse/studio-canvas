@@ -434,6 +434,62 @@
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(enable)</div>
+                        <div class="label3">[flag]:</div>
+                        <div class="value">
+                            <div class="fixed">{{ state.decal.chromaKey.enable ? "YES" : "NO" }}</div>
+                        </div>
+                        <div class="button" v-on:click="state.decal.chromaKey.enable = false">RESET</div>
+                        <div class="slider">
+                            <toggle class="toggle" v-model="state.decal.chromaKey.enable"></toggle>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(threshold)</div>
+                        <div class="label3">[distance]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.decal.chromaKey.threshold)"
+                                v-on:change="(ev) => state.decal.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.decal.chromaKey.threshold = 0.4">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.decal.chromaKey.threshold"
+                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(smoothing)</div>
+                        <div class="label3">[distance]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.decal.chromaKey.smoothing)"
+                                v-on:change="(ev) => state.decal.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
+                        </div>
+                        <div class="button" v-on:click="state.decal.chromaKey.smoothing = 0.1">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.decal.chromaKey.smoothing"
+                                v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">border</div>
+                        <div class="label2">(radius)</div>
+                        <div class="label3">[px]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.decal.borderRad)"
+                                v-on:change="(ev) => state.decal.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
+                        </div>
+                        <div class="button" v-on:click="state.decal.borderRad = 40">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.decal.borderRad"
+                                v-bind:min="0" v-bind:max="540" v-bind:step="10"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
                     </div>
                 </tab>
 

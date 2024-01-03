@@ -33,7 +33,9 @@ export type StateType = {
         scale:      number,
         rotate:     number,
         lift:       number,
-        opacity:    number
+        opacity:    number,
+        borderRad:  number,
+        chromaKey:  { enable: boolean, threshold: number, smoothing: number }
     },
     lights: {
         intensity1: number,
@@ -117,7 +119,9 @@ export const StateSchema = `{
         scale:      number,
         rotate:     number,
         lift:       number,
-        opacity:    number
+        opacity:    number,
+        borderRad:  number,
+        chromaKey:  { enable: boolean, threshold: number, smoothing: number }
     },
     lights: {
         intensity1: number,
@@ -201,7 +205,9 @@ export const StateDefault: StateType = {
         scale:      1.0,
         rotate:     -25,
         lift:       -2.5,
-        opacity:    1.0
+        opacity:    1.0,
+        borderRad:  40,
+        chromaKey:  { enable: false, threshold: 0.4, smoothing: 0.1 }
     },
     lights: {
         intensity1: 300,

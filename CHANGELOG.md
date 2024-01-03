@@ -2,6 +2,14 @@
 ChangeLog
 =========
 
+1.6.0 (2024-01-03)
+------------------
+
+- FEATURE: add support for chroma-key to decal
+- FEATURE: add support for rounded corners to decal
+- BUGFIX: apply workaround for decal rendering glitches
+- UPDATE: update dependencies
+
 1.5.3 (2023-12-31)
 ------------------
 
