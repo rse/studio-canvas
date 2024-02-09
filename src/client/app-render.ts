@@ -22,29 +22,29 @@ type ChromaKey = { enable: boolean, threshold: number, smoothing: number }
 /*  the canvas rendering class  */
 export default class CanvasRenderer extends EventEmitter {
     /*  internal parameter state  */
-    private ptzFreeD    = false
-    private ptzKeys     = false
-    private cameraName  = ""
-    private texture1URL = ""
-    private texture2URL = ""
-    private fadeTrans   = 2  * 1000
-    private fadeWait    = 10 * 1000
-    private decalRotate = 0.0
-    private decalLift   = 0.0
-    private decalScale  = 1.0
-    private decalFade   = 0
-    private decalOpacity = 1.0
-    private decalBorderRad = 40
-    private decalChromaKey = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    private monitorFade = 0
+    private ptzFreeD          = false
+    private ptzKeys           = false
+    private cameraName        = ""
+    private texture1URL       = ""
+    private texture2URL       = ""
+    private fadeTrans         = 2  * 1000
+    private fadeWait          = 10 * 1000
+    private decalRotate       = 0.0
+    private decalLift         = 0.0
+    private decalScale        = 1.0
+    private decalFade         = 0
+    private decalOpacity      = 1.0
+    private decalBorderRad    = 40
+    private decalChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
+    private monitorFade       = 0
     private videoMeshMaterial = {} as { [ name: string ]: BABYLON.Nullable<BABYLON.Material> }
-    private monitorBase = {
+    private monitorBase       = {
         scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
         rotationZ:     0, positionZ:     0
     }
-    private avatar1Scale = { x: 0, y: 0, z: 0 }
-    private avatar2Scale = { x: 0, y: 0, z: 0 }
+    private avatar1Scale      = { x: 0, y: 0, z: 0 }
+    private avatar2Scale      = { x: 0, y: 0, z: 0 }
 
     /*  frames per second (FPS) control  */
     private fps = 30
