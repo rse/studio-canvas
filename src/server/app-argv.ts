@@ -1,6 +1,6 @@
 /*
 **  Studio-Canvas - Real-Time Virtual Studio Canvas Rendering
-**  Copyright (c) 2023 Dr. Ralf S. Engelschall <rse@engelschall.com>
+**  Copyright (c) 2023-2024 Dr. Ralf S. Engelschall <rse@engelschall.com>
 **  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
 */
 
@@ -82,7 +82,7 @@ export default class Argv {
         if (this.version) {
             process.stderr.write(`${this.pkg.name} ${this.pkg.version} <${this.pkg.homepage}>\n`)
             process.stderr.write(`${this.pkg.description}\n`)
-            process.stderr.write(`Copyright (c) 2023 ${this.pkg.authorName} <${this.pkg.authorUrl}>\n`)
+            process.stderr.write(`Copyright (c) 2023-2024 ${this.pkg.authorName} <${this.pkg.authorUrl}>\n`)
             process.stderr.write(`Licensed under ${this.pkg.license} <http://spdx.org/licenses/${this.pkg.license}.html>\n`)
             process.exit(0)
         }
