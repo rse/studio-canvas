@@ -16,10 +16,6 @@ export default Vite.defineConfig(({ command, mode, ssrBuild }) => ({
         VuePlugin(),
         YAMLPlugin()
     ],
-    optimizeDeps: {
-        include: [
-        ]
-    },
     css: {
         devSourcemap: mode === "development"
     },
