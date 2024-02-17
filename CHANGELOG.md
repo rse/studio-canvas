@@ -2,6 +2,13 @@
 ChangeLog
 =========
 
+1.7.0 (2024-02-17)
+------------------
+
+- BUGFIX: downgrade Vite to 5.0.12 (from 5.1.3) to fix build problems
+- CLEANUP: remove empty Vite config sections
+- UPDATE: update dependencies
+
 1.6.0 (2024-01-03)
 ------------------
 
