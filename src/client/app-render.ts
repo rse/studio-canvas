@@ -34,7 +34,8 @@ export default class CanvasRenderer extends EventEmitter {
     private decalScale        = 1.0
     private decalFade         = 0
     private decalOpacity      = 1.0
-    private decalBorderRad    = 40
+    private decalBorderRad    = 40.0
+    private decalBorderCrop   = 0.0
     private decalChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private monitorFade       = 0
     private videoMeshMaterial = {} as { [ name: string ]: BABYLON.Nullable<BABYLON.Material> }
@@ -62,9 +63,14 @@ export default class CanvasRenderer extends EventEmitter {
     /*  latest sync time  */
     private syncTime = 0
 
-    /*  effectively constant values  */
+    /*  effectively constant values of canvas/wall  */
     private wallWidth   = 10540
     private wallHeight  = 3570
+
+    /*  effectively constant values of video stream  */
+    private videoStreamWidth  = 1920
+    private videoStreamHeight = 1080
+    private videoStreamFPS    = 30
 
     /*  rendering object references  */
     private engine:         BABYLON.Nullable<BABYLON.Engine>         = null
@@ -95,6 +101,7 @@ export default class CanvasRenderer extends EventEmitter {
     /*  video stream device names  */
     private deviceMonitor = "dummy"
     private deviceDecal   = "dummy"
+    private deviceDecal2  = "dummy"
 
     /*  PTZ sub-module  */
     private ptz     = new PTZ()
@@ -474,65 +481,154 @@ export default class CanvasRenderer extends EventEmitter {
     }
 
     /*  load video stream (and apply onto monitor/decal mesh)  */
-    async loadVideoStream (name: string, mesh: BABYLON.Mesh, label: string, opacity: number, borderRad: number, chromaKey: ChromaKey | null) {
+    async loadVideoStream (name: string, mesh: BABYLON.Mesh, label: string, label2: string, opacity: number, borderRad: number, borderCrop: number, chromaKey: ChromaKey | null) {
         const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
+
+        /*  determine primary/content device  */
         const device = label !== "" ?
             devices.find((device) => device.kind === "videoinput" && device.label.substring(0, label.length) === label) :
             undefined
+        if (device === undefined)
+            this.emit("log", "INFO", `failed to load video stream "${label}" onto ${name}: no such device (using replacement content)`)
+        else
+            this.emit("log", "INFO", `loading video stream "${label}" onto ${name} (content channel)`)
+
+        /*  determine secondary/alpha device  */
+        const device2 = label2 !== "" ?
+            devices.find((device) => device.kind === "videoinput" && device.label.substring(0, label2.length) === label2) :
+            undefined
+        if (label2 !== "") {
+            if (device2 === undefined)
+                this.emit("log", "INFO", `failed to load video stream "${label2}" onto ${name}: no such device (ignoring alpha channel)`)
+            else
+                this.emit("log", "INFO", `loading video stream "${label}" onto ${name} (alpha channel)`)
+        }
+
+        /*  optionally unload previously loaded material  */
         if (mesh.material instanceof BABYLON.ShaderMaterial && this.videoMeshMaterial[name]) {
             mesh.material.dispose()
             mesh.material = this.videoMeshMaterial[name]
             delete this.videoMeshMaterial[name]
         }
-        if (device === undefined) {
-            this.emit("log", "INFO", `loading video stream "${label}" onto ${name}: no such device (using replacement texture)`)
+
+        /*  short-circuit processing in case a device was not found  */
+        if (device === undefined || (label2 !== "" && device2 === undefined)) {
             const material = mesh.material as BABYLON.PBRMaterial
             material.albedoColor = new BABYLON.Color3(1.0, 0.0, 0.0)
             material.albedoTexture?.dispose()
             material.albedoTexture = null
             material.unlit = true
+            return
         }
-        else {
-            this.emit("log", "INFO", `loading video stream "${label}" onto ${name}`)
-            await BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!, {
-                deviceId: device.deviceId,
+
+        /*  load mandatory primary/content device  */
+        const vt1 = await BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!, {
+            deviceId: device.deviceId,
+            audio:    false,
+            video:    {
+                aspectRatio: 16 / 9,
+                resizeMode:  "none",
+                minWidth:    this.videoStreamWidth,
+                width:       this.videoStreamWidth,
+                maxWidth:    this.videoStreamWidth,
+                minHeight:   this.videoStreamHeight,
+                height:      this.videoStreamHeight,
+                maxHeight:   this.videoStreamHeight,
+                frameRate:   this.videoStreamFPS
+            }
+        } as any, false, false)
+
+        /*  load optional secondary/alpha device  */
+        let vt2: BABYLON.Nullable<BABYLON.Texture> = null
+        if (device2 !== undefined) {
+            vt2 = await BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!, {
+                deviceId: device2.deviceId,
                 audio:    false,
                 video:    {
                     aspectRatio: 16 / 9,
                     resizeMode:  "none",
-                    minWidth:    1920,
-                    width:       1920,
-                    maxWidth:    1920,
-                    minHeight:   1080,
-                    height:      1080,
-                    maxHeight:   1080,
-                    frameRate:   30
+                    minWidth:    this.videoStreamWidth,
+                    width:       this.videoStreamWidth,
+                    maxWidth:    this.videoStreamWidth,
+                    minHeight:   this.videoStreamHeight,
+                    height:      this.videoStreamHeight,
+                    maxHeight:   this.videoStreamHeight,
+                    frameRate:   this.videoStreamFPS
                 }
-            } as any, false, false).then((vt) => {
-                if (name === "decal") {
-                    /*  special-effects video texture for Decal  */
-                    const materialOld = mesh.material as BABYLON.PBRMaterial
-                    materialOld.albedoTexture?.dispose()
-                    materialOld.albedoTexture = null
-                    this.videoMeshMaterial[name] = materialOld
-                    const material = mesh.material = ShaderMaterial.videoStream(name, this.scene!)
-                    material.setTexture("textureSampler", vt)
-                    material.setFloat("opacity", opacity)
-                    material.setFloat("borderRadius", borderRad)
-                    material.setInt("chromaEnable", chromaKey?.enable ? 1 : 0)
-                    material.setFloat("chromaThreshold", chromaKey?.threshold ?? 0.4)
-                    material.setFloat("chromaSmoothing", chromaKey?.smoothing ?? 0.1)
-                    material.zOffset = -200
-                }
-                else {
-                    /*  regular video texture for Monitor  */
-                    const material = mesh.material as BABYLON.PBRMaterial
-                    material.albedoColor = new BABYLON.Color3(1.0, 1.0, 1.0)
-                    material.albedoTexture?.dispose()
-                    material.albedoTexture = vt
-                    material.unlit = true
-                }
-            })
+            } as any, false, false)
+        }
+
+        /*  await textures  */
+        await new Promise((resolve) => {
+            BABYLON.Texture.WhenAllReady(vt2 !== null ? [ vt1, vt2 ] : [ vt1 ], () => { resolve(true) })
+        })
+
+        /*  establish outer texture from device(s)  */
+        let texture: BABYLON.Nullable<BABYLON.Texture>
+        if (device2 === undefined)
+            texture = vt1
+        else {
+            /*  load externally defined node material  */
+            const material = await BABYLON.NodeMaterial.ParseFromFileAsync("material",
+                "/res/device-material.json", this.scene!)
+
+            /*  apply texture #1  */
+            const textureBlock1 = material.getBlockByPredicate((input) =>
+                input.name === "Texture1") as BABYLON.Nullable<BABYLON.TextureBlock>
+            if (textureBlock1 === null)
+                throw new Error("no such texture block named 'Texture1' found")
+            textureBlock1.texture = vt1
+
+            /*  apply texture #2  */
+            const textureBlock2 = material.getBlockByPredicate((input) =>
+                input.name === "Texture2") as BABYLON.Nullable<BABYLON.TextureBlock>
+            if (textureBlock2 === null)
+                throw new Error("no such texture block named 'Texture2' found")
+            textureBlock2.texture = vt2
+
+            /*  build and freeze material  */
+            material.build(false)
+            material.freeze()
+
+            /*  create and apply composed RBA texture  */
+            texture = material.createProceduralTexture({
+                width: this.videoStreamWidth,
+                height: this.videoStreamHeight
+            }, this.scene!)
+            if (texture === null)
+                throw new Error("failed to create texture from video stream")
+            texture.hasAlpha = true
+        }
+
+        /*  target mesh specific handling...  */
+        if (name === "decal") {
+            /*  special-effects video texture for Decal  */
+            const materialOld = mesh.material as BABYLON.PBRMaterial
+            materialOld.albedoTexture?.dispose()
+            materialOld.albedoTexture = null
+            this.videoMeshMaterial[name] = materialOld
+            const material = mesh.material = ShaderMaterial.videoStream(name, this.scene!)
+            material.setTexture("textureSampler", texture)
+            material.setFloat("opacity", opacity)
+            material.setFloat("borderRadius", borderRad)
+            material.setFloat("borderCrop", borderCrop)
+            material.setInt("chromaEnable", chromaKey?.enable ? 1 : 0)
+            material.setFloat("chromaThreshold", chromaKey?.threshold ?? 0.4)
+            material.setFloat("chromaSmoothing", chromaKey?.smoothing ?? 0.1)
+            material.zOffset = -200
+            material.needAlphaBlending = () => true
+            material.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
+        }
+        else if (name === "monitor") {
+            /*  regular video texture for Monitor  */
+            const material = mesh.material as BABYLON.PBRMaterial
+            material.albedoColor = new BABYLON.Color3(1.0, 1.0, 1.0)
+            material.albedoTexture?.dispose()
+            material.albedoTexture = texture
+            material.unlit = true
+            material.useAlphaFromAlbedoTexture = true
+            material.needAlphaBlending = () => true
+            material.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
         }
     }
 
@@ -707,7 +803,7 @@ export default class CanvasRenderer extends EventEmitter {
                 this.deviceMonitor = state.monitor.device
                 await this.stop()
                 await this.unloadVideoStream("monitor", this.monitorDisplay!)
-                await this.loadVideoStream("monitor", this.monitorDisplay!, this.deviceMonitor, 1.0, 0, null)
+                await this.loadVideoStream("monitor", this.monitorDisplay!, this.deviceMonitor, "", 1.0, 0, 0, null)
                 await this.start()
             }
             if (state.monitor.fadeTime !== undefined && this.monitorFade !== state.monitor.fadeTime)
@@ -716,7 +812,7 @@ export default class CanvasRenderer extends EventEmitter {
                 if (state.monitor.enable) {
                     await this.stop()
                     await this.unloadVideoStream("monitor", this.monitorDisplay!)
-                    await this.loadVideoStream("monitor", this.monitorDisplay!, this.deviceMonitor, 1.0, 0, null)
+                    await this.loadVideoStream("monitor", this.monitorDisplay!, this.deviceMonitor, "", 1.0, 0, 0, null)
                     await this.start()
                     if (this.monitorFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling monitor (fading: start)")
@@ -812,6 +908,13 @@ export default class CanvasRenderer extends EventEmitter {
                     material.setFloat("borderRadius", this.decalBorderRad)
                 }
             }
+            if (state.decal.borderCrop !== undefined) {
+                this.decalBorderCrop = state.decal.borderCrop
+                if (this.decal.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.decal.material
+                    material.setFloat("borderCrop", this.decalBorderCrop)
+                }
+            }
             if (state.decal.chromaKey !== undefined) {
                 if (state.decal.chromaKey.enable !== undefined && this.decalChromaKey.enable !== state.decal.chromaKey.enable) {
                     this.decalChromaKey.enable = state.decal.chromaKey.enable
@@ -835,18 +938,26 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                 }
             }
+            let deviceChanged = false
             if (state.decal.device !== undefined && this.deviceDecal !== state.decal.device) {
                 this.deviceDecal = state.decal.device
+                deviceChanged = true
+            }
+            if (state.decal.device2 !== undefined && this.deviceDecal2 !== state.decal.device2) {
+                this.deviceDecal2 = state.decal.device2
+                deviceChanged = true
+            }
+            if (deviceChanged) {
                 await this.stop()
                 await this.unloadVideoStream("decal", this.decal!)
-                await this.loadVideoStream("decal", this.decal!, this.deviceDecal, this.decalOpacity, this.decalBorderRad, this.decalChromaKey)
+                await this.loadVideoStream("decal", this.decal!, this.deviceDecal, this.deviceDecal2, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
                 await this.start()
             }
             if (state.decal.enable !== undefined && this.decal.isEnabled() !== state.decal.enable) {
                 if (state.decal.enable) {
                     await this.stop()
                     await this.unloadVideoStream("decal", this.decal!)
-                    await this.loadVideoStream("decal", this.decal!, this.deviceDecal, this.decalOpacity, this.decalBorderRad, this.decalChromaKey)
+                    await this.loadVideoStream("decal", this.decal!, this.deviceDecal, this.deviceDecal2, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
                     await this.start()
                     if (this.decalFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling decal (fading: start)")

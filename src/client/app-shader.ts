@@ -40,7 +40,7 @@ export default class ShaderMaterial {
         })
     }
 
-    /*  video stream (with optional opacity, chroma-key, and rounded corners)  */
+    /*  video stream (with optional opacity, chroma-key, border cropping, and border radius)  */
     static videoStream (name: string, scene: BABYLON.Scene) {
         const material = new BABYLON.ShaderMaterial(name, scene, {
             vertexSource: `
@@ -68,6 +68,7 @@ export default class ShaderMaterial {
                 uniform float     opacity;
                 uniform float     borderRadius;
                 uniform float     borderRadiusSoftness;
+                uniform float     borderCrop;
                 uniform int       chromaEnable;
                 uniform float     chromaThreshold;
                 uniform float     chromaSmoothing;
@@ -96,23 +97,33 @@ export default class ShaderMaterial {
                     /*  determine current pixel color  */
                     vec4 sampleColVec4 = texture2D(textureSampler, vUV);
                     vec3 sampleCol     = sampleColVec4.rgb;
+                    float sampleAlpha  = sampleColVec4.a;
 
-                    /*  determine optional chroma-key  */
-                    float chromaBlend = 1.0;
-                    if (chromaEnable != 0) {
+                    /*  determine position in real texture coordinates  */
+                    ivec2 size = textureSize(textureSampler, 0);
+                    vec2 pos = vec2(vUV.x * float(size.x), vUV.y * float(size.y));
+
+                    /*  optionally apply border cropping  */
+                    float cropping = (borderCrop > 0.0 && (
+                        pos.x < borderCrop || pos.x > (float(size.x) - borderCrop) ||
+                        pos.y < borderCrop || pos.y > (float(size.y) - borderCrop)   )) ? 0.0 : 1.0;
+
+                    /*  optionally apply chroma-key  */
+                    float chromaKey = 1.0;
+                    if (chromaEnable == 1) {
                         vec2 sampleColVec  = colVec(rgb4ycc(sampleCol));
                         vec2 chromaColVec  = colVec(rgb4ycc(chromaCol));
-                        chromaBlend = smoothstep(
+                        chromaKey = smoothstep(
                             chromaThreshold, chromaThreshold + chromaSmoothing,
                             distance(sampleColVec, chromaColVec)
                         );
+                        if (chromaKey < 0.95)
+                            sampleCol.g = 0.0;
                     }
 
-                    /*  determine optional rounded corners  */
+                    /*  optionally apply rounded corners  */
                     float cornerBlend = 1.0;
                     if (borderRadius > 0.0) {
-                        ivec2 size = textureSize(textureSampler, 0);
-                        vec2 pos = vec2(vUV.x * float(size.x), vUV.y * float(size.y));
                         float distance = max(max(max(
                             roundedCornerOutsideDistance(pos, vec2(-1.0,  1.0),
                                 vec2(0.0 + borderRadius, float(size.y) - borderRadius), borderRadius),
@@ -126,8 +137,8 @@ export default class ShaderMaterial {
                     }
 
                     /*  calculate and apply final color value  */
-                    float color = visibility * opacity * chromaBlend * cornerBlend;
-                    gl_FragColor = vec4(sampleCol, color);
+                    sampleAlpha *= visibility * opacity * cropping * chromaKey * cornerBlend;
+                    gl_FragColor = vec4(sampleCol, sampleAlpha);
                 }
             `
         }, {
@@ -144,9 +155,12 @@ export default class ShaderMaterial {
                 "opacity",
                 "borderRadius",
                 "borderRadiusSoftness",
+                "borderCrop",
                 "chromaEnable",
                 "chromaThreshold",
                 "chromaSmoothing",
+
+                /*  custom application uniforms (hard-coded)  */
                 "chromaCol"
             ],
             samplers: [ "textureSampler" ]
@@ -155,6 +169,7 @@ export default class ShaderMaterial {
         material.setFloat("opacity", 1.0)
         material.setFloat("borderRadius", 40)
         material.setFloat("bordersRadiusSoftness", 1.0)
+        material.setFloat("borderCrop", 0.0)
         material.setInt("chromaEnable", 0)
         material.setFloat("chromaThreshold", 0.4)
         material.setFloat("chromaSmoothing", 0.1)
