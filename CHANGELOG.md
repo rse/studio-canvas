@@ -5,6 +5,7 @@ ChangeLog
 1.7.0 (2024-02-17)
 ------------------
 
+- FEATURE: border cropping and full alpha channel support for Decal
 - BUGFIX: downgrade Vite to 5.0.12 (from 5.1.3) to fix build problems
 - CLEANUP: remove empty Vite config sections
 - UPDATE: update dependencies

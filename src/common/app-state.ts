@@ -29,13 +29,19 @@ export type StateType = {
     decal: {
         enable:     boolean,
         device:     string,
+        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
         lift:       number,
         opacity:    number,
         borderRad:  number,
-        chromaKey:  { enable: boolean, threshold: number, smoothing: number }
+        borderCrop: number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
     },
     lights: {
         intensity1: number,
@@ -115,13 +121,19 @@ export const StateSchema = `{
     decal: {
         enable:     boolean,
         device:     string,
+        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
         lift:       number,
         opacity:    number,
         borderRad:  number,
-        chromaKey:  { enable: boolean, threshold: number, smoothing: number }
+        borderCrop: number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
     },
     lights: {
         intensity1: number,
@@ -201,13 +213,19 @@ export const StateDefault: StateType = {
     decal: {
         enable:     false,
         device:     "",
+        device2:    "",
         fadeTime:   2.0,
         scale:      1.0,
         rotate:     -25,
         lift:       -2.5,
         opacity:    1.0,
         borderRad:  40,
-        chromaKey:  { enable: false, threshold: 0.4, smoothing: 0.1 }
+        borderCrop: 0,
+        chromaKey:  {
+            enable:     false,
+            threshold:  0.4,
+            smoothing:  0.1
+        }
     },
     lights: {
         intensity1: 300,

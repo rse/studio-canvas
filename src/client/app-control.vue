@@ -257,7 +257,7 @@
                         </div>
 
                         <div class="label1">video</div>
-                        <div class="label2">(device)</div>
+                        <div class="label2">(device, content)</div>
                         <div class="label3">[id]:</div>
                         <div class="value">
                             <div class="fixed">*</div>
@@ -333,9 +333,10 @@
                 <tab id="decal" name="Decal">
                     <div class="desc">
                         The <b>Decal</b> is the optional poster-style display which can be projected
-                        onto the background canvas. It can be given a particular video source device
-                        as input, scaled in size, positioned in a radial way on the background canvas,
-                        and its opacity can be controlled to mix with the canvas.
+                        onto the background canvas. It can be given a particular video (content) source device
+                        as input, optionally a alpha-channel carrying video device, scaled in size, positioned in a radial way on the background canvas,
+                        its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
+                        and a chroma-key filter applied.
                     </div>
                     <div class="control">
                         <div class="label1">enable</div>
@@ -350,7 +351,7 @@
                         </div>
 
                         <div class="label1">video</div>
-                        <div class="label2">(device)</div>
+                        <div class="label2">(device, content)</div>
                         <div class="label3">[id]:</div>
                         <div class="value">
                             <div class="fixed">*</div>
@@ -358,6 +359,17 @@
                         <div class="button" v-on:click="state.decal.device = ''">RESET</div>
                         <div class="slider">
                             <input class="text" v-model.lazy="state.decal.device"/>
+                        </div>
+
+                        <div class="label1">video</div>
+                        <div class="label2">(device, alpha)</div>
+                        <div class="label3">[id]:</div>
+                        <div class="value">
+                            <div class="fixed">*</div>
+                        </div>
+                        <div class="button" v-on:click="state.decal.device2 = ''">RESET</div>
+                        <div class="slider">
+                            <input class="text" v-model.lazy="state.decal.device2"/>
                         </div>
 
                         <div class="label1">fade</div>
@@ -435,6 +447,36 @@
                             ></slider>
                         </div>
 
+                        <div class="label1">border</div>
+                        <div class="label2">(radius)</div>
+                        <div class="label3">[px]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.decal.borderRad)"
+                                v-on:change="(ev) => state.decal.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
+                        </div>
+                        <div class="button" v-on:click="state.decal.borderRad = 40">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.decal.borderRad"
+                                v-bind:min="0" v-bind:max="540" v-bind:step="10"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">border</div>
+                        <div class="label2">(cropping)</div>
+                        <div class="label3">[px]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.decal.borderCrop)"
+                                v-on:change="(ev) => state.decal.borderCrop = fieldImport((ev.target! as HTMLInputElement).value, 0, 50)"/>
+                        </div>
+                        <div class="button" v-on:click="state.decal.borderCrop = 0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.decal.borderCrop"
+                                v-bind:min="0" v-bind:max="50" v-bind:step="1"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
                         <div class="label1">chromaKey</div>
                         <div class="label2">(enable)</div>
                         <div class="label3">[flag]:</div>
@@ -472,21 +514,6 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.chromaKey.smoothing"
                                 v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">border</div>
-                        <div class="label2">(radius)</div>
-                        <div class="label3">[px]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.decal.borderRad)"
-                                v-on:change="(ev) => state.decal.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
-                        </div>
-                        <div class="button" v-on:click="state.decal.borderRad = 40">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.decal.borderRad"
-                                v-bind:min="0" v-bind:max="540" v-bind:step="10"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
