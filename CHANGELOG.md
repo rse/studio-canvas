@@ -2,7 +2,7 @@
 ChangeLog
 =========
 
-1.7.0 (2024-02-17)
+1.7.0 (2024-02-23)
 ------------------
 
 - FEATURE: border cropping and full alpha channel support for Decal
