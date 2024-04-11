@@ -5,19 +5,48 @@
 */
 
 /*  the Babylon PTZ state class  */
+type PTZCamType = "birddog" | "panasonic"
 export default class PTZ {
+    constructor (private camType: PTZCamType) {}
+
     /*  convert between degree and radians  */
     deg2rad (deg: number) { return (deg * (Math.PI / 180)) }
     rad2deg (rad: number) { return (rad * (180 / Math.PI)) }
 
     /*  ==== X/Y/Z Position ====  */
 
-    public posXOrigin    = 0
-    public posXDelta     = 0
-    public posYOrigin    = 0
-    public posYDelta     = 0
-    public posZOrigin    = 0
-    public posZDelta     = 0
+    private posConst = {
+        "birddog": {
+            posXOrigin:  0,
+            posXDelta:   0,
+            posYOrigin:  0,
+            posYDelta:   0,
+            posZOrigin:  0,
+            posZDelta:   0
+        },
+        "panasonic": {
+            posXOrigin:  0,
+            posXDelta:   0,
+            posYOrigin:  0,
+            posYDelta:   0,
+            posZOrigin:  0,
+            posZDelta:   0
+        }
+    }
+
+    get posXOrigin () { return this.posConst[this.camType].posXOrigin }
+    get posXDelta  () { return this.posConst[this.camType].posXDelta  }
+    get posYOrigin () { return this.posConst[this.camType].posYOrigin }
+    get posYDelta  () { return this.posConst[this.camType].posYDelta  }
+    get posZOrigin () { return this.posConst[this.camType].posZOrigin }
+    get posZDelta  () { return this.posConst[this.camType].posZDelta  }
+
+    set posXOrigin (v) { this.posConst[this.camType].posXOrigin = v }
+    set posXDelta  (v) { this.posConst[this.camType].posXDelta  = v }
+    set posYOrigin (v) { this.posConst[this.camType].posYOrigin = v }
+    set posYDelta  (v) { this.posConst[this.camType].posYDelta  = v }
+    set posZOrigin (v) { this.posConst[this.camType].posZOrigin = v }
+    set posZDelta  (v) { this.posConst[this.camType].posZDelta  = v }
 
     posXP2V (x: number) {
         return (this.posXOrigin + this.posXDelta) + x
@@ -40,13 +69,42 @@ export default class PTZ {
 
     /*  ==== PAN ====  */
 
-    public panOrigin     = 0
-    public panDelta      = 0
-    public panMinDeg     = -175
-    public panMaxDeg     = 175
-    public panTotal      = this.deg2rad(360)
-    public panStep       = this.deg2rad(1)
-    public panMult       = 1
+    private panConst = {
+        "birddog": {
+            panOrigin: 0,
+            panDelta:  0,
+            panMinDeg: -175,
+            panMaxDeg: 175,
+            panTotal:  this.deg2rad(360),
+            panStep:   this.deg2rad(1),
+            panMult:   1
+        },
+        "panasonic": {
+            panOrigin: 0,
+            panDelta:  0,
+            panMinDeg: -175,  // FIXME
+            panMaxDeg: 175,   // FIXME
+            panTotal:  this.deg2rad(360),
+            panStep:   this.deg2rad(1),
+            panMult:   1
+        }
+    }
+
+    get panOrigin () { return this.panConst[this.camType].panOrigin }
+    get panDelta  () { return this.panConst[this.camType].panDelta  }
+    get panMinDeg () { return this.panConst[this.camType].panMinDeg }
+    get panMaxDeg () { return this.panConst[this.camType].panMaxDeg }
+    get panTotal  () { return this.panConst[this.camType].panTotal  }
+    get panStep   () { return this.panConst[this.camType].panStep   }
+    get panMult   () { return this.panConst[this.camType].panMult   }
+
+    set panOrigin (v) { this.panConst[this.camType].panOrigin = v }
+    set panDelta  (v) { this.panConst[this.camType].panDelta  = v }
+    set panMinDeg (v) { this.panConst[this.camType].panMinDeg = v }
+    set panMaxDeg (v) { this.panConst[this.camType].panMaxDeg = v }
+    set panTotal  (v) { this.panConst[this.camType].panTotal  = v }
+    set panStep   (v) { this.panConst[this.camType].panStep   = v }
+    set panMult   (v) { this.panConst[this.camType].panMult   = v }
 
     /*  convert pan
         from PHYSICAL BirdDog pan        (-175/left...0/center...+175/right degree)
@@ -75,13 +133,42 @@ export default class PTZ {
 
     /*  ==== TILT ====  */
 
-    public tiltOrigin    = 0
-    public tiltDelta     = 0
-    public tiltMinDeg    = -30
-    public tiltMaxDeg    = 90
-    public tiltTotal     = this.deg2rad(360)
-    public tiltStep      = this.deg2rad(1)
-    public tiltMult      = 1
+    private tiltConst = {
+        "birddog": {
+            tiltOrigin: 0,
+            tiltDelta:  0,
+            tiltMinDeg: -30,
+            tiltMaxDeg: 90,
+            tiltTotal:  this.deg2rad(360),
+            tiltStep:   this.deg2rad(1),
+            tiltMult:   1
+        },
+        "panasonic": {
+            tiltOrigin: 0,
+            tiltDelta:  0,
+            tiltMinDeg: -30,  // FIXME
+            tiltMaxDeg: 90,   // FIXME
+            tiltTotal:  this.deg2rad(360),
+            tiltStep:   this.deg2rad(1),
+            tiltMult:   1
+        }
+    }
+
+    get tiltOrigin () { return this.tiltConst[this.camType].tiltOrigin }
+    get tiltDelta  () { return this.tiltConst[this.camType].tiltDelta  }
+    get tiltMinDeg () { return this.tiltConst[this.camType].tiltMinDeg }
+    get tiltMaxDeg () { return this.tiltConst[this.camType].tiltMaxDeg }
+    get tiltTotal  () { return this.tiltConst[this.camType].tiltTotal  }
+    get tiltStep   () { return this.tiltConst[this.camType].tiltStep   }
+    get tiltMult   () { return this.tiltConst[this.camType].tiltMult   }
+
+    set tiltOrigin (v) { this.tiltConst[this.camType].tiltOrigin = v }
+    set tiltDelta  (v) { this.tiltConst[this.camType].tiltDelta  = v }
+    set tiltMinDeg (v) { this.tiltConst[this.camType].tiltMinDeg = v }
+    set tiltMaxDeg (v) { this.tiltConst[this.camType].tiltMaxDeg = v }
+    set tiltTotal  (v) { this.tiltConst[this.camType].tiltTotal  = v }
+    set tiltStep   (v) { this.tiltConst[this.camType].tiltStep   = v }
+    set tiltMult   (v) { this.tiltConst[this.camType].tiltMult   = v }
 
     /*  convert tilt
         from  PHYSICAL BirdDog pan        (-30/down...0/center...+90/up degree)
@@ -110,12 +197,38 @@ export default class PTZ {
 
     /*  ==== ROTATE ====  */
 
-    public rotateOrigin = 0
-    public rotateDelta  = 0
-    public rotateMinDeg = -30
-    public rotateMaxDeg = 30
-    public rotateTotal  = this.deg2rad(360)
-    public rotateStep   = this.deg2rad(0.5)
+    private rotateConst = {
+        "birddog": {
+            rotateOrigin:  0,
+            rotateDelta:   0,
+            rotateMinDeg:  -30,
+            rotateMaxDeg:  30,
+            rotateTotal:   this.deg2rad(360),
+            rotateStep:    this.deg2rad(0.5)
+        },
+        "panasonic": {
+            rotateOrigin:  0,
+            rotateDelta:   0,
+            rotateMinDeg:  -30,  // FIXME
+            rotateMaxDeg:  30,   // FIXME
+            rotateTotal:   this.deg2rad(360),
+            rotateStep:    this.deg2rad(0.5)
+        }
+    }
+
+    get rotateOrigin () { return this.rotateConst[this.camType].rotateOrigin }
+    get rotateDelta  () { return this.rotateConst[this.camType].rotateDelta  }
+    get rotateMinDeg () { return this.rotateConst[this.camType].rotateMinDeg }
+    get rotateMaxDeg () { return this.rotateConst[this.camType].rotateMaxDeg }
+    get rotateTotal  () { return this.rotateConst[this.camType].rotateTotal  }
+    get rotateStep   () { return this.rotateConst[this.camType].rotateStep   }
+
+    set rotateOrigin (v) { this.rotateConst[this.camType].rotateOrigin = v }
+    set rotateDelta  (v) { this.rotateConst[this.camType].rotateDelta  = v }
+    set rotateMinDeg (v) { this.rotateConst[this.camType].rotateMinDeg = v }
+    set rotateMaxDeg (v) { this.rotateConst[this.camType].rotateMaxDeg = v }
+    set rotateTotal  (v) { this.rotateConst[this.camType].rotateTotal  = v }
+    set rotateStep   (v) { this.rotateConst[this.camType].rotateStep   = v }
 
     /*  convert rotation
         from  PHYSICAL BirdDog rotation   (FICTIVE -30/left...0/center...+30/right degree)
@@ -144,65 +257,102 @@ export default class PTZ {
 
     /*  ==== ZOOM ====  */
 
-    /*  Babylon Field Of View (FOV) is set in Radians (default is 0.8).
-        Birddog P400 has a FOV of 70.2 - 4.1 degree and a 20x optical zoom
-        and the BirdDog CamControl usually does 40 steps on zooming
-        (compare https://birddog.tv/p400-overview/p400-techspecs/)  */
-    public fovMinDeg     = 4.1
-    public fovMaxDeg     = 70.2
-    public fovMin        = this.deg2rad(this.fovMinDeg)
-    public fovMax        = this.deg2rad(this.fovMaxDeg)
-    public fovMult       = 1 /* FIXME: unused until polynomial adjustment is implemented  */
-    public zoomMin       = 0
-    public zoomMax       = 20
-    public zoomLevels    = 40
-    public zoomStep      = (this.fovMax - this.fovMin) / this.zoomLevels
-    public sensorSize    = 35
-    public sensorWidth   = 6.28
-    public focalLenMin   = 4.4
-    public focalLenMax   = 88.4
-    public zoomCurve     = "birddog"
-
-    /*  internal zoom curve details  */
-    private zoomCurves = {
-        /*  Linear Zoom (ideal) */
-        "linear": {
-            zoom2size (x: number) { return x },
-            size2zoom (y: number) { return y }
-        },
-
-        /*  Non-linear Zoom of BirdDog P400 (real).
-            NOTICE: These particular mapping functions were determined by a polynomial fitting through measured points,
-            because the P400 zoom lenses (like many zoom lenses) are actually complex zoom lense systems where some
-            lenses move in a parabolic arc and hence cause the zoom to act in a non-linear fashion.  */
+    private zoomConst = {
         "birddog": {
-            zoom2size (x: number) {
-                const y =
-                    (+3.35504883) * Math.pow(x, 5) +
-                    (-6.17763477) * Math.pow(x, 4) +
-                    (+4.79587236) * Math.pow(x, 3) +
-                    (-1.36548877) * Math.pow(x, 2) +
-                    (+0.39140991) *          x     +
-                    (+0.00070000)
-                return Math.max(0.0, Math.min(1.0, y))
-            },
-            size2zoom (y: number) {
-                const x =
-                    ( +4.75573252) * Math.pow(y, 5) +
-                    (-15.18016820) * Math.pow(y, 4) +
-                    (+19.01568950) * Math.pow(y, 3) +
-                    (-12.16289180) * Math.pow(y, 2) +
-                    ( +4.58138959) *          y     +
-                    ( -0.01000000)
-                return Math.max(0.0, Math.min(1.0, x))
+            /*  Babylon Field Of View (FOV) is set in Radians (default is 0.8).
+                Birddog P400 has a FOV of 70.2 - 4.1 degree and a 20x optical zoom
+                and the BirdDog CamControl usually does 40 steps on zooming
+                (compare https://birddog.tv/p400-overview/p400-techspecs/)  */
+            fovMinDeg:      4.1,
+            fovMaxDeg:      70.2,
+            fovMin:         this.deg2rad(4.1),
+            fovMax:         this.deg2rad(70.2),
+            fovMult:        1, /* FIXME: unused until polynomial adjustment is implemented  */
+            zoomMin:        0,
+            zoomMax:        20,
+            zoomLevels:     40,
+            zoomStep:       (this.deg2rad(70.2) - this.deg2rad(4.1)) / 40,
+            sensorSize:     35,
+            sensorWidth:    6.28,
+            focalLenMin:    4.4,
+            focalLenMax:    88.4,
+            zoomCurve:      {
+                /*  Non-linear Zoom of BirdDog P400 (real).
+                    NOTICE: These particular mapping functions were determined by a polynomial fitting through measured points,
+                    because the P400 zoom lenses (like many zoom lenses) are actually complex zoom lense systems where some
+                    lenses move in a parabolic arc and hence cause the zoom to act in a non-linear fashion.  */
+                zoom2size (x: number) {
+                    const y =
+                        (+3.35504883) * Math.pow(x, 5) +
+                        (-6.17763477) * Math.pow(x, 4) +
+                        (+4.79587236) * Math.pow(x, 3) +
+                        (-1.36548877) * Math.pow(x, 2) +
+                        (+0.39140991) *          x     +
+                        (+0.00070000)
+                    return Math.max(0.0, Math.min(1.0, y))
+                },
+                size2zoom (y: number) {
+                    const x =
+                        ( +4.75573252) * Math.pow(y, 5) +
+                        (-15.18016820) * Math.pow(y, 4) +
+                        (+19.01568950) * Math.pow(y, 3) +
+                        (-12.16289180) * Math.pow(y, 2) +
+                        ( +4.58138959) *          y     +
+                        ( -0.01000000)
+                    return Math.max(0.0, Math.min(1.0, x))
+                }
+            }
+        },
+        "panasonic": {
+            fovMinDeg:      3.3,
+            fovMaxDeg:      74.1,
+            fovMin:         this.deg2rad(3.3),
+            fovMax:         this.deg2rad(74.1),
+            fovMult:        1, /* FIXME: unused until polynomial adjustment is implemented  */
+            zoomMin:        1.666259765625,
+            zoomMax:        4.998779296875,
+            zoomLevels:     24,
+            zoomStep:       (this.deg2rad(74.1) - this.deg2rad(3.3)) / 24,
+            sensorSize:     35,
+            sensorWidth:    5.75,
+            focalLenMin:    4.12,
+            focalLenMax:    98.9,
+            zoomCurve:      {
+                zoom2size (x: number) { return x },
+                size2zoom (y: number) { return y }
             }
         }
-    } as {
-        [ id: string ]: {
-            zoom2size (x: number): number,
-            size2zoom (y: number): number
-        }
     }
+
+    get fovMinDeg    () { return this.zoomConst[this.camType].fovMinDeg   }
+    get fovMaxDeg    () { return this.zoomConst[this.camType].fovMaxDeg   }
+    get fovMin       () { return this.zoomConst[this.camType].fovMin      }
+    get fovMax       () { return this.zoomConst[this.camType].fovMax      }
+    get fovMult      () { return this.zoomConst[this.camType].fovMult     }
+    get zoomMin      () { return this.zoomConst[this.camType].zoomMin     }
+    get zoomMax      () { return this.zoomConst[this.camType].zoomMax     }
+    get zoomLevels   () { return this.zoomConst[this.camType].zoomLevels  }
+    get zoomStep     () { return this.zoomConst[this.camType].zoomStep    }
+    get sensorSize   () { return this.zoomConst[this.camType].sensorSize  }
+    get sensorWidth  () { return this.zoomConst[this.camType].sensorWidth }
+    get focalLenMin  () { return this.zoomConst[this.camType].focalLenMin }
+    get focalLenMax  () { return this.zoomConst[this.camType].focalLenMax }
+    get zoomCurve    () { return this.zoomConst[this.camType].zoomCurve   }
+
+    set fovMinDeg    (v) { this.zoomConst[this.camType].fovMinDeg   = v }
+    set fovMaxDeg    (v) { this.zoomConst[this.camType].fovMaxDeg   = v }
+    set fovMin       (v) { this.zoomConst[this.camType].fovMin      = v }
+    set fovMax       (v) { this.zoomConst[this.camType].fovMax      = v }
+    set fovMult      (v) { this.zoomConst[this.camType].fovMult     = v }
+    set zoomMin      (v) { this.zoomConst[this.camType].zoomMin     = v }
+    set zoomMax      (v) { this.zoomConst[this.camType].zoomMax     = v }
+    set zoomLevels   (v) { this.zoomConst[this.camType].zoomLevels  = v }
+    set zoomStep     (v) { this.zoomConst[this.camType].zoomStep    = v }
+    set sensorSize   (v) { this.zoomConst[this.camType].sensorSize  = v }
+    set sensorWidth  (v) { this.zoomConst[this.camType].sensorWidth = v }
+    set focalLenMin  (v) { this.zoomConst[this.camType].focalLenMin = v }
+    set focalLenMax  (v) { this.zoomConst[this.camType].focalLenMax = v }
+    set zoomCurve    (v) { this.zoomConst[this.camType].zoomCurve   = v }
 
     /*  convert zoom
         from PHYSICAL BirdDog zoom level    (0..20)
@@ -218,7 +368,7 @@ export default class PTZ {
 
         /*  polynomial mapping from normalized zoom [0..1] to normalized size [0..1]
             (the underlying formula usually has to be determined by a polynomial fitting through measured points)  */
-        const y = this.zoomCurves[this.zoomCurve].zoom2size(x)
+        const y = this.zoomCurve.zoom2size(x)
 
         /*  linear mapping of normalized zoom [0..1] to BirdDog focal length [4.4mm...88.4mm]
             (this formula is a standard rule of three)  */
@@ -248,7 +398,7 @@ export default class PTZ {
 
         /*  polynomial mapping from normalized size [0..1] to normalized zoom [0..1]
             (the underlying formula usually has to be determined by a polynomial fitting through measured points)  */
-        const x = this.zoomCurves[this.zoomCurve].size2zoom(y)
+        const x = this.zoomCurve.size2zoom(y)
 
         /*  linear mapping from normalized zoom [0..1] to BirdDog zoom level [0..20]
             (this formula is a standard rule of three)  */
