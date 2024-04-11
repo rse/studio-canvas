@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+1.8.0 (2024-04-11)
+------------------
+
+- FEATURE: refactoring to support different camera types
+
 1.7.2 (2024-03-14)
 ------------------
 
