@@ -82,8 +82,8 @@ export default class PTZ {
         "panasonic": {
             panOrigin: 0,
             panDelta:  0,
-            panMinDeg: -175,  // FIXME
-            panMaxDeg: 175,   // FIXME
+            panMinDeg: -175,
+            panMaxDeg: 175,
             panTotal:  this.deg2rad(360),
             panStep:   this.deg2rad(1),
             panMult:   1
@@ -146,8 +146,8 @@ export default class PTZ {
         "panasonic": {
             tiltOrigin: 0,
             tiltDelta:  0,
-            tiltMinDeg: -30,  // FIXME
-            tiltMaxDeg: 90,   // FIXME
+            tiltMinDeg: -30,
+            tiltMaxDeg: 210,
             tiltTotal:  this.deg2rad(360),
             tiltStep:   this.deg2rad(1),
             tiltMult:   1
@@ -209,8 +209,8 @@ export default class PTZ {
         "panasonic": {
             rotateOrigin:  0,
             rotateDelta:   0,
-            rotateMinDeg:  -30,  // FIXME
-            rotateMaxDeg:  30,   // FIXME
+            rotateMinDeg:  -30,
+            rotateMaxDeg:  30,
             rotateTotal:   this.deg2rad(360),
             rotateStep:    this.deg2rad(0.5)
         }
@@ -313,13 +313,31 @@ export default class PTZ {
             zoomMax:        4.998779296875,
             zoomLevels:     24,
             zoomStep:       (this.deg2rad(74.1) - this.deg2rad(3.3)) / 24,
-            sensorSize:     35,
+            sensorSize:     25,
             sensorWidth:    5.75,
             focalLenMin:    4.12,
             focalLenMax:    98.9,
             zoomCurve:      {
-                zoom2size (x: number) { return x },
-                size2zoom (y: number) { return y }
+                zoom2size (x: number) {
+                    const y =
+                        (+3.1543) * Math.pow(x, 5) +
+                        (-5.6345) * Math.pow(x, 4) +
+                        (+4.2720) * Math.pow(x, 3) +
+                        (-1.1903) * Math.pow(x, 2) +
+                        (+0.3963) *          x     +
+                        (+0.0004)
+                    return Math.max(0.0, Math.min(1.0, y))
+                },
+                size2zoom (y: number) {
+                    const x =
+                        (+1.7939) * Math.pow(y, 5) +
+                        (-7.0223) * Math.pow(y, 4) +
+                        (+10.957) * Math.pow(y, 3) +
+                        (-8.8107) * Math.pow(y, 2) +
+                        (+4.0947) *          y     +
+                        (-0.0131)
+                    return Math.max(0.0, Math.min(1.0, x))
+                }
             }
         }
     }
