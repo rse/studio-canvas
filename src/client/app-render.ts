@@ -21,10 +21,34 @@ type ChromaKey = { enable: boolean, threshold: number, smoothing: number }
 
 /*  the canvas rendering class  */
 export default class CanvasRenderer extends EventEmitter {
+    /*  (re-)configure camera (by name) and options (by URL)  */
+    constructor (params: { cameraName: string, ptzFreeD: boolean, ptzKeys: boolean }) {
+        super()
+        this.cameraName = params.cameraName
+        this.ptzFreeD   = params.ptzFreeD
+        this.ptzKeys    = params.ptzKeys
+
+        /*  mapping of camera to type  */
+        const camNameToTypeMap = {
+            CAM1: "birddog",
+            CAM2: "birddog",
+            CAM3: "panasonic",
+            CAM4: "birddog",
+            CAM5: "birddog"
+        }
+        const cameraType = camNameToTypeMap[this.cameraName as "CAM1" | "CAM2" | "CAM3" | "CAM4"| "CAM5"] as "birddog" | "panasonic"
+
+        /*  instantiate PTZ  */
+        this.ptz     = new PTZ(cameraType)
+        this.ptzHull = new PTZ(cameraType)
+        this.ptzCase = new PTZ(cameraType)
+        this.ptzLens = new PTZ(cameraType)
+    }
+
     /*  internal parameter state  */
     private ptzFreeD          = false
     private ptzKeys           = false
-    private cameraName        = ""
+    private cameraName:       string
     private texture1URL       = ""
     private texture2URL       = ""
     private fadeTrans         = 2  * 1000
@@ -104,10 +128,10 @@ export default class CanvasRenderer extends EventEmitter {
     private deviceDecal2  = "dummy"
 
     /*  PTZ sub-module  */
-    private ptz     = new PTZ()
-    private ptzHull = new PTZ()
-    private ptzCase = new PTZ()
-    private ptzLens = new PTZ()
+    private ptz:     PTZ
+    private ptzHull: PTZ
+    private ptzCase: PTZ
+    private ptzLens: PTZ
 
     /*  FreeD state  */
     private state: FreeDState | null = null
@@ -115,13 +139,6 @@ export default class CanvasRenderer extends EventEmitter {
     /*  cross-fade timer  */
     private fadeTimer: ReturnType<typeof setTimeout> | null = null
     private texFade: BABYLON.Nullable<BABYLON.InputBlock> | null = null
-
-    /*  (re-)configure camera (by name) and options (by URL)  */
-    configure (params: { camera?: string, ptzFreeD?: boolean, ptzKeys?: boolean } = {}) {
-        this.cameraName = params.camera   ?? this.cameraName
-        this.ptzFreeD   = params.ptzFreeD ?? this.ptzFreeD
-        this.ptzKeys    = params.ptzKeys  ?? this.ptzKeys
-    }
 
     /*  initially establish rendering engine and scene  */
     async establish (canvas: HTMLCanvasElement) {

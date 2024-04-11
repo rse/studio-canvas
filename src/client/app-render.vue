@@ -173,15 +173,14 @@ export default defineComponent({
         this.log("INFO", "establish Babylon game engine")
         this.overlay("establish Babylon game engine")
         this.overlayShow = true
-        renderer = new CanvasRenderer()
+        renderer = new CanvasRenderer({
+            cameraName:  this.cam,
+            ptzFreeD:    this.options.get("ptzFreeD"),
+            ptzKeys:     this.options.get("ptzKeys")
+        })
         renderer.on("log", (level: string, msg: string) => {
             this.log(level, msg)
             this.overlay(msg)
-        })
-        renderer.configure({
-            camera:   this.cam,
-            ptzFreeD: this.options.get("ptzFreeD"),
-            ptzKeys:  this.options.get("ptzKeys")
         })
         renderer.on("DEBUG", (msg: string) => {
             this.debug = msg
