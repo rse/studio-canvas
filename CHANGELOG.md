@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - FEATURE: refactoring to support different camera types
+- UPDATE: update dependencies
 
 1.7.2 (2024-03-14)
 ------------------
