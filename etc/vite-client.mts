@@ -4,6 +4,7 @@
 **  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
 */
 
+import path       from "node:path"
 import * as Vite  from "vite"
 import VuePlugin  from "@vitejs/plugin-vue"
 import YAMLPlugin from "@rollup/plugin-yaml"
@@ -27,7 +28,7 @@ export default Vite.defineConfig(({ command, mode, ssrBuild }) => ({
         assetsInlineLimit:      0,
         sourcemap:              (mode === "development"),
         rollupOptions: {
-            input: "src/client/index.html",
+            input: path.resolve("src/client/index.html"),
             output: {
                 entryFileNames: "[name].js",
                 chunkFileNames: "[name]-[hash:8].js",
