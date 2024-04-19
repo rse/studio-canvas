@@ -221,6 +221,9 @@ export default class CanvasRenderer extends EventEmitter {
             })
         }
 
+        /*  manually optimize engine  */
+        this.engine.enableOfflineSupport = false
+
         /*  manually optimize scene  */
         this.scene.skipPointerMovePicking = true
         this.scene.autoClear = false
@@ -329,6 +332,9 @@ export default class CanvasRenderer extends EventEmitter {
             (we just ignore resulting stream for now)  */
         this.emit("log", "INFO", "requesting video device access")
         await navigator.mediaDevices.getUserMedia({ audio: true, video: true }).catch(() => {})
+
+        /*  manually optimize scene  */
+        this.scene.cleanCachedTextureBuffer()
     }
 
     /*  render the scene once  */
