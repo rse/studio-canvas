@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - FEATURE: extend number of presets from 9 to 12 to have more room available to store information
+- FEATURE: apply some performance/memory optimizations in BabylonJS
 
 1.8.1 (2024-04-14)
 ------------------
