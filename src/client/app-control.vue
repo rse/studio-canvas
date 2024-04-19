@@ -80,6 +80,21 @@
                                 9
                                 <div class="badge" v-bind:class="presetStatus2Class(8)">{{ preset.status[8] }}</div>
                             </div>
+                            <div class="button" v-bind:class="{ selected: preset.slot === 9 }"
+                                v-on:click="preset.slot = preset.slot !== 9 ? 9 : -1">
+                                10
+                                <div class="badge" v-bind:class="presetStatus2Class(9)">{{ preset.status[9] }}</div>
+                            </div>
+                            <div class="button" v-bind:class="{ selected: preset.slot === 10 }"
+                                v-on:click="preset.slot = preset.slot !== 10 ? 10 : -1">
+                                11
+                                <div class="badge" v-bind:class="presetStatus2Class(10)">{{ preset.status[10] }}</div>
+                            </div>
+                            <div class="button" v-bind:class="{ selected: preset.slot === 11 }"
+                                v-on:click="preset.slot = preset.slot !== 11 ? 11 : -1">
+                                12
+                                <div class="badge" v-bind:class="presetStatus2Class(11)">{{ preset.status[11] }}</div>
+                            </div>
                         </div>
                         <div class="actions1">
                             <div class="button destructive"
@@ -1250,7 +1265,7 @@
         .actions3
             display: grid
             grid-template-columns: 100px
-            grid-template-rows: 95px 95px
+            grid-template-rows: 127px 127px
             justify-items: center
             align-items: center
             gap: 10px 10px
@@ -1260,7 +1275,7 @@
             margin-right: 20px
             display: grid
             grid-template-columns: 100px
-            grid-template-rows: 200px
+            grid-template-rows: 264px
             justify-items: center
             align-items: center
             gap: 10px 10px
@@ -1268,10 +1283,10 @@
             margin-right: 10px
             display: grid
             grid-template-columns: 100px 100px
-            grid-template-rows: 25px 25px 25px 25px 25px 25px
+            grid-template-rows: 34px 34px 34px 34px 34px 34px
             justify-items: center
             align-items: center
-            gap: 10px 10px
+            gap: 12px 12px
         .button
             background-color: var(--color-std-bg-3)
             color: var(--color-std-fg-5)
@@ -1313,14 +1328,14 @@
                     color: var(--color-acc-fg-5)
         .filter .button
             font-weight: 200
-            line-height: 22px
+            line-height: 34px
         .slots .button
             font-size: 150%
             font-weight: bold
         .actions1 .button
             font-size: 120%
             font-weight: bold
-            line-height: 80px
+            line-height: 127px
             &.unselectable:hover
                 background-color: var(--color-std-bg-3)
                 color: var(--color-std-fg-5)
@@ -1328,13 +1343,13 @@
         .actions2 .button
             font-size: 120%
             font-weight: bold
-            line-height: 170px
+            line-height: 264px
             &.unselectable:hover
                 background-color: var(--color-std-bg-3)
                 color: var(--color-std-fg-5)
                 cursor: default
         .actions3 .button
-            line-height: 80px
+            line-height: 127px
     .preview
         .preview-control
             margin-top: 20px
@@ -1742,7 +1757,7 @@ export default defineComponent({
                 renderer:   true
             } as StateFilterType,
             slot: -1,
-            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
         },
         state: StateDefault as StateType,
         watchState: true,
@@ -1881,7 +1896,7 @@ export default defineComponent({
         /*  re-generate the preview URL  */
         this.$watch("preview.opts", () => {
             let url = `${this.serviceUrl}#/render/${this.preview.opts.cam}`
-            const opts = []
+            const opts = [] as string[]
             if (this.preview.opts.freed) opts.push("ptzFreeD=true")
             if (this.preview.opts.keys)  opts.push("ptzKeys=true")
             if (opts.length > 0)

@@ -43,7 +43,7 @@ export default class RESTPreset {
                 return this.db.transaction(Transaction.READ, 4000, async () => {
                     /*  determine number of stored top-level entries  */
                     const presets = [] as number[]
-                    for (let i = 1; i <= 9; i++) {
+                    for (let i = 1; i <= 12; i++) {
                         let n = 0
                         const state = {} as StateTypePartial
                         const filename = util.format(this.presetsFile, i.toString())
