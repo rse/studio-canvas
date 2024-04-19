@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+1.8.2 (2024-04-19)
+------------------
+
+- FEATURE: extend number of presets from 9 to 12 to have more room available to store information
+
 1.8.1 (2024-04-14)
 ------------------
 
