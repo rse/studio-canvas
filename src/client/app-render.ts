@@ -144,7 +144,8 @@ export default class CanvasRenderer extends EventEmitter {
     async establish (canvas: HTMLCanvasElement) {
         /*  establish rendering engine on canvas element  */
         this.engine = new BABYLON.Engine(canvas, true, {
-            useExactSrgbConversions: true
+            useExactSrgbConversions: true,
+            doNotHandleContextLost:  true
         })
         if (this.engine === null)
             throw new Error("cannot establish Babylon engine")
