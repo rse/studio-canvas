@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+1.8.4 (2024-05-02)
+------------------
+
+- FEATURE: support 180 degree flipped cameras (X/Y inverted)
+
 1.8.3 (2024-04-20)
 ------------------
 

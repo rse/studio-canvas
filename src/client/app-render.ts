@@ -24,9 +24,10 @@ export default class CanvasRenderer extends EventEmitter {
     /*  (re-)configure camera (by name) and options (by URL)  */
     constructor (params: { cameraName: string, ptzFreeD: boolean, ptzKeys: boolean }) {
         super()
-        this.cameraName = params.cameraName
-        this.ptzFreeD   = params.ptzFreeD
-        this.ptzKeys    = params.ptzKeys
+        this.cameraName  = params.cameraName
+        this.ptzFreeD    = params.ptzFreeD
+        this.ptzKeys     = params.ptzKeys
+        this.flippedCam  = this.flippedCams.includes(params.cameraName)
 
         /*  mapping of camera to type  */
         const camNameToTypeMap = {
@@ -70,6 +71,8 @@ export default class CanvasRenderer extends EventEmitter {
     }
     private avatar1Scale      = { x: 0, y: 0, z: 0 }
     private avatar2Scale      = { x: 0, y: 0, z: 0 }
+    private flippedCams       = [ "CAM3" ]
+    private flippedCam        = false
 
     /*  frames per second (FPS) control  */
     private fps = 30
@@ -1221,9 +1224,9 @@ export default class CanvasRenderer extends EventEmitter {
         /*  notice: FreeD can be faster than Babylon, so we have to be careful...  */
         if (this.ptzFreeD && this.cameraCase !== null && this.cameraLens !== null) {
             this.cameraCase.rotation.x = this.ptzCase.tiltP2V(0)
-            this.cameraCase.rotation.y = this.ptzCase.panP2V(state.pan)
+            this.cameraCase.rotation.y = this.ptzCase.panP2V((this.flippedCam ? -1 : 1) * state.pan)
             this.cameraCase.rotation.z = this.ptzCase.rotateP2V(0)
-            this.cameraLens.rotation.x = this.ptzLens.tiltP2V(state.tilt)
+            this.cameraLens.rotation.x = this.ptzLens.tiltP2V((this.flippedCam ? -1 : 1) * state.tilt)
             this.cameraLens.fov        = this.ptzLens.zoomP2V(state.zoom)
         }
     }
