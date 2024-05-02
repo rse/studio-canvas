@@ -549,40 +549,32 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  load mandatory primary/content device  */
-        const vt1 = await BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!, {
-            deviceId: device.deviceId,
-            audio:    false,
-            video:    {
+        const dev1 = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+            video: {
+                deviceId: device.deviceId,
                 aspectRatio: 16 / 9,
-                resizeMode:  "none",
-                minWidth:    this.videoStreamWidth,
-                width:       this.videoStreamWidth,
-                maxWidth:    this.videoStreamWidth,
-                minHeight:   this.videoStreamHeight,
-                height:      this.videoStreamHeight,
-                maxHeight:   this.videoStreamHeight,
-                frameRate:   this.videoStreamFPS
+                width:     { min: this.videoStreamWidth,  ideal: this.videoStreamWidth,  max: this.videoStreamWidth  },
+                height:    { min: this.videoStreamHeight, ideal: this.videoStreamHeight, max: this.videoStreamHeight },
+                frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
             }
-        } as any, false, false)
+        }).catch(() => {})
+        const vt1 = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, dev1!, {} as any, false)
 
         /*  load optional secondary/alpha device  */
         let vt2: BABYLON.Nullable<BABYLON.Texture> = null
         if (device2 !== undefined) {
-            vt2 = await BABYLON.VideoTexture.CreateFromWebCamAsync(this.scene!, {
-                deviceId: device2.deviceId,
-                audio:    false,
-                video:    {
+            const dev2 = await navigator.mediaDevices.getUserMedia({
+                audio: true,
+                video: {
+                    deviceId: device2.deviceId,
                     aspectRatio: 16 / 9,
-                    resizeMode:  "none",
-                    minWidth:    this.videoStreamWidth,
-                    width:       this.videoStreamWidth,
-                    maxWidth:    this.videoStreamWidth,
-                    minHeight:   this.videoStreamHeight,
-                    height:      this.videoStreamHeight,
-                    maxHeight:   this.videoStreamHeight,
-                    frameRate:   this.videoStreamFPS
+                    width:     { min: this.videoStreamWidth,  ideal: this.videoStreamWidth,  max: this.videoStreamWidth  },
+                    height:    { min: this.videoStreamHeight, ideal: this.videoStreamHeight, max: this.videoStreamHeight },
+                    frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
                 }
-            } as any, false, false)
+            }).catch(() => {})
+            vt2 = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, dev2!, {} as any, false)
         }
 
         /*  await textures  */
