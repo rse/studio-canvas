@@ -7,6 +7,7 @@ ChangeLog
 
 - FEATURE: support 180 degree flipped cameras (X/Y inverted)
 - BUGFIX: workaround OBS Virtual Camera device compatibility (BabylonJS always received just 360p)
+- BUGFIX: try to improve unloading of Decal shader and its video streams
 
 1.8.3 (2024-04-20)
 ------------------

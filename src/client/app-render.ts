@@ -64,6 +64,7 @@ export default class CanvasRenderer extends EventEmitter {
     private decalChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private monitorFade       = 0
     private videoMeshMaterial = {} as { [ name: string ]: BABYLON.Nullable<BABYLON.Material> }
+    private videoStreams      = new Map<BABYLON.Material, Array<MediaStream>>()
     private monitorBase       = {
         scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
@@ -558,13 +559,16 @@ export default class CanvasRenderer extends EventEmitter {
                 height:    { min: this.videoStreamHeight, ideal: this.videoStreamHeight, max: this.videoStreamHeight },
                 frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
             }
-        }).catch(() => {})
-        const vt1 = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, dev1!, {} as any, false)
+        }).catch(() => null)
+        if (dev1 === null)
+            throw new Error(`failed to gather video stream "${label}" onto ${name}: no device received`)
+        const vt1 = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, dev1, {} as any, false)
 
         /*  load optional secondary/alpha device  */
+        let dev2: MediaStream | null = null
         let vt2: BABYLON.Nullable<BABYLON.Texture> = null
         if (device2 !== undefined) {
-            const dev2 = await navigator.mediaDevices.getUserMedia({
+            dev2 = await navigator.mediaDevices.getUserMedia({
                 audio: true,
                 video: {
                     deviceId: device2.deviceId,
@@ -573,8 +577,10 @@ export default class CanvasRenderer extends EventEmitter {
                     height:    { min: this.videoStreamHeight, ideal: this.videoStreamHeight, max: this.videoStreamHeight },
                     frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
                 }
-            }).catch(() => {})
-            vt2 = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, dev2!, {} as any, false)
+            }).catch(() => null)
+            if (dev2 === null)
+                throw new Error(`failed to gather video stream "${label2}" onto ${name}: no device received`)
+            vt2 = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, dev2, {} as any, false)
         }
 
         /*  await textures  */
@@ -637,6 +643,7 @@ export default class CanvasRenderer extends EventEmitter {
             material.zOffset = -200
             material.needAlphaBlending = () => true
             material.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
+            this.videoStreams.set(material, dev2 !== null ? [ dev1, dev2 ] : [ dev1 ])
         }
         else if (name === "monitor") {
             /*  regular video texture for Monitor  */
@@ -648,14 +655,22 @@ export default class CanvasRenderer extends EventEmitter {
             material.useAlphaFromAlbedoTexture = true
             material.needAlphaBlending = () => true
             material.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
+            this.videoStreams.set(material, dev2 !== null ? [ dev1, dev2 ] : [ dev1 ])
         }
     }
 
     /*  unload video stream  */
     async unloadVideoStream (name: string, mesh: BABYLON.Mesh) {
         this.emit("log", "INFO", `unloading video stream from ${name}`)
+        if (mesh.material !== null) {
+            const devs = this.videoStreams.get(mesh.material)
+            if (devs) {
+                for (const dev of devs)
+                    dev.getTracks().forEach((track) => track.stop())
+            }
+        }
         if (mesh.material instanceof BABYLON.ShaderMaterial && this.videoMeshMaterial[name]) {
-            mesh.material.dispose()
+            mesh.material.dispose(true, true)
             mesh.material = this.videoMeshMaterial[name]
             delete this.videoMeshMaterial[name]
         }
