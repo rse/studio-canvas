@@ -25,12 +25,9 @@ scripts:
     #   code compilation/transpiling (building)
     build:                  npm start build-client build-server
     build-dev:              npm start build-client-dev build-server-dev
-    build-client: >
-                            vite --config etc/vite-client.mts build --logLevel info --mode production
-    build-client-dev: >
-                            vite --config etc/vite-client.mts build --logLevel info --mode development
-    build-client-dev-watch: >
-                            vite --config etc/vite-client.mts build --logLevel info --mode development --watch
+    build-client:           vite --config etc/vite-client.mts build --logLevel info --mode production
+    build-client-dev:       vite --config etc/vite-client.mts build --logLevel info --mode development
+    build-client-dev-watch: vite --config etc/vite-client.mts build --logLevel info --mode development --watch
     build-server:           tsc --project etc/tsc-server.json
     build-server-dev:       tsc --project etc/tsc-server.json --sourceMap
     build-server-dev-watch: tsc --project etc/tsc-server.json --sourceMap --watch
