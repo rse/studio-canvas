@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+1.8.6 (2024-05-05)
+------------------
+
+- CLEANUP: remove workaround for previously Node versions
+
 1.8.5 (2024-05-05)
 ------------------
 
