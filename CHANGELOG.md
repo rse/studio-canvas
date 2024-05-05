@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - UPDATE: update dependencies
+- CLEANUP: remove workaround for previously broken Vite
 
 1.8.4 (2024-05-02)
 ------------------

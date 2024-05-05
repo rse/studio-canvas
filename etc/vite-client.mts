@@ -28,7 +28,7 @@ export default Vite.defineConfig(({ command, mode, ssrBuild }) => ({
         assetsInlineLimit:      0,
         sourcemap:              (mode === "development"),
         rollupOptions: {
-            input: path.resolve("src/client/index.html"),
+            input: "src/client/index.html",
             output: {
                 entryFileNames: "[name].js",
                 chunkFileNames: "[name]-[hash:8].js",
