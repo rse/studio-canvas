@@ -32,9 +32,9 @@ export default class CanvasRenderer extends EventEmitter {
         /*  mapping of camera to type  */
         const camNameToTypeMap = {
             CAM1: "birddog",
-            CAM2: "birddog",
-            CAM3: "panasonic",
-            CAM4: "birddog",
+            CAM2: "panasonic",
+            CAM3: "birddog",
+            CAM4: "panasonic",
             CAM5: "birddog"
         }
         const cameraType = camNameToTypeMap[this.cameraName as "CAM1" | "CAM2" | "CAM3" | "CAM4"| "CAM5"] as "birddog" | "panasonic"
@@ -72,7 +72,7 @@ export default class CanvasRenderer extends EventEmitter {
     }
     private avatar1Scale      = { x: 0, y: 0, z: 0 }
     private avatar2Scale      = { x: 0, y: 0, z: 0 }
-    private flippedCams       = [ "CAM3" ]
+    private flippedCams       = [ "" ]
     private flippedCam        = false
 
     /*  frames per second (FPS) control  */
