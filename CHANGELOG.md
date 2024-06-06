@@ -2,6 +2,12 @@
 ChangeLog
 =========
 
+1.8.8 (2024-06-06)
+------------------
+
+- UPDATE: align camera setup with current studio situation
+- UPDATE: update dependencies
+
 1.8.7 (2024-05-18)
 ------------------
 
