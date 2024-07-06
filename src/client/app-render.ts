@@ -31,11 +31,11 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  mapping of camera to type  */
         const camNameToTypeMap = {
-            CAM1: "birddog",
+            CAM1: "panasonic",
             CAM2: "panasonic",
             CAM3: "birddog",
             CAM4: "panasonic",
-            CAM5: "birddog"
+            CAM5: "panasonic"
         }
         const cameraType = camNameToTypeMap[this.cameraName as "CAM1" | "CAM2" | "CAM3" | "CAM4"| "CAM5"] as "birddog" | "panasonic"
 
