@@ -16,8 +16,8 @@ export default Vite.defineConfig(({ command, mode }) => ({
     ],
     resolve: {
         alias: {
-          './runtimeConfig': './runtimeConfig.browser',
-        },
+            "./runtimeConfig": "./runtimeConfig.browser"
+        }
     },
     build: {
         sourcemap:              (mode === "development"),
