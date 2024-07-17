@@ -2,6 +2,13 @@
 ChangeLog
 =========
 
+1.8.10 (2024-07-17)
+-------------------
+
+- BUGFIX: workaround for "device in use" problem by (surprisingly) switching to video-only streams
+- BUGFIX: fix variable reference and this fix error message
+- IMPROVEMENT: use more specific error messages to have better change for debugging
+
 1.8.9 (2024-07-06)
 ------------------
 
