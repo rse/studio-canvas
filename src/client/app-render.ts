@@ -529,7 +529,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (device2 === undefined)
                 this.emit("log", "INFO", `failed to load video stream "${label2}" onto ${name}: no such device (ignoring alpha channel)`)
             else
-                this.emit("log", "INFO", `loading video stream "${label}" onto ${name} (alpha channel)`)
+                this.emit("log", "INFO", `loading video stream "${label2}" onto ${name} (alpha channel)`)
         }
 
         /*  optionally unload previously loaded material  */
