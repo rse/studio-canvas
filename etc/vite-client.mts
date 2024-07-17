@@ -4,7 +4,6 @@
 **  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
 */
 
-import path       from "node:path"
 import * as Vite  from "vite"
 import VuePlugin  from "@vitejs/plugin-vue"
 import YAMLPlugin from "@rollup/plugin-yaml"
@@ -27,6 +26,8 @@ export default Vite.defineConfig(({ command, mode, ssrBuild }) => ({
         chunkSizeWarningLimit:  6500,
         assetsInlineLimit:      0,
         sourcemap:              (mode === "development"),
+        minify:                 (mode === "production"),
+        reportCompressedSize:   (mode === "production"),
         rollupOptions: {
             input: "src/client/index.html",
             output: {
