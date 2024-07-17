@@ -551,7 +551,7 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  load mandatory primary/content device  */
         const dev1 = await navigator.mediaDevices.getUserMedia({
-            audio: true,
+            audio: false,
             video: {
                 deviceId: device.deviceId,
                 aspectRatio: 16 / 9,
@@ -569,7 +569,7 @@ export default class CanvasRenderer extends EventEmitter {
         let vt2: BABYLON.Nullable<BABYLON.Texture> = null
         if (device2 !== undefined) {
             dev2 = await navigator.mediaDevices.getUserMedia({
-                audio: true,
+                audio: false,
                 video: {
                     deviceId: device2.deviceId,
                     aspectRatio: 16 / 9,
