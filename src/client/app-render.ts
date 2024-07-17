@@ -559,9 +559,9 @@ export default class CanvasRenderer extends EventEmitter {
                 height:    { min: this.videoStreamHeight, ideal: this.videoStreamHeight, max: this.videoStreamHeight },
                 frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
             }
-        }).catch(() => null)
-        if (dev1 === null)
-            throw new Error(`failed to gather video stream "${label}" onto ${name}: no device received`)
+        }).catch((error: Error) => {
+            throw new Error(`failed to load video stream (RGB) "${label}" onto ${name}: ${error})`)
+        })
         const vt1 = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, dev1, {} as any, false)
 
         /*  load optional secondary/alpha device  */
@@ -577,9 +577,9 @@ export default class CanvasRenderer extends EventEmitter {
                     height:    { min: this.videoStreamHeight, ideal: this.videoStreamHeight, max: this.videoStreamHeight },
                     frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
                 }
-            }).catch(() => null)
-            if (dev2 === null)
-                throw new Error(`failed to gather video stream "${label2}" onto ${name}: no device received`)
+            }).catch((error: Error) => {
+                throw new Error(`failed to load video stream (A) "${label2}" onto ${name}: ${error})`)
+            })
             vt2 = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, dev2, {} as any, false)
         }
 
