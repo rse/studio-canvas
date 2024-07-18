@@ -152,6 +152,7 @@ export default defineComponent({
     name: "app-render",
     components: {},
     props: {
+        layer:      { type: String, default: "back" },
         cam:        { type: String, default: "" },
         options:    { type: Object, default: new Map<string, string | boolean>() },
         serviceUrl: { type: String, default: "" },
@@ -174,6 +175,7 @@ export default defineComponent({
         this.overlay("establish Babylon game engine")
         this.overlayShow = true
         renderer = new CanvasRenderer({
+            layer:       this.layer,
             cameraName:  this.cam,
             ptzFreeD:    this.options.get("ptzFreeD"),
             ptzKeys:     this.options.get("ptzKeys")

@@ -21,12 +21,52 @@ export type StateType = {
     monitor: {
         enable:     boolean,
         device:     string,
+        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
-        lift:       number
+        lift:       number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
     },
     decal: {
+        enable:     boolean,
+        device:     string,
+        device2:    string,
+        fadeTime:   number,
+        scale:      number,
+        rotate:     number,
+        lift:       number,
+        opacity:    number,
+        borderRad:  number,
+        borderCrop: number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
+    },
+    plate: {
+        enable:     boolean,
+        device:     string,
+        device2:    string,
+        fadeTime:   number,
+        scale:      number,
+        rotate:     number,
+        lift:       number,
+        opacity:    number,
+        borderRad:  number,
+        borderCrop: number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
+    },
+    hologram: {
         enable:     boolean,
         device:     string,
         device2:    string,
@@ -113,12 +153,52 @@ export const StateSchema = `{
     monitor: {
         enable:     boolean,
         device:     string,
+        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
-        lift:       number
+        lift:       number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
     },
     decal: {
+        enable:     boolean,
+        device:     string,
+        device2:    string,
+        fadeTime:   number,
+        scale:      number,
+        rotate:     number,
+        lift:       number,
+        opacity:    number,
+        borderRad:  number,
+        borderCrop: number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
+    },
+    plate: {
+        enable:     boolean,
+        device:     string,
+        device2:    string,
+        fadeTime:   number,
+        scale:      number,
+        rotate:     number,
+        lift:       number,
+        opacity:    number,
+        borderRad:  number,
+        borderCrop: number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
+    },
+    hologram: {
         enable:     boolean,
         device:     string,
         device2:    string,
@@ -205,12 +285,52 @@ export const StateDefault: StateType = {
     monitor: {
         enable:     false,
         device:     "",
+        device2:    "",
         fadeTime:   2.0,
         scale:      1.0,
         rotate:     10,
-        lift:       0
+        lift:       0,
+        chromaKey:  {
+            enable:     false,
+            threshold:  0.4,
+            smoothing:  0.1
+        }
     },
     decal: {
+        enable:     false,
+        device:     "",
+        device2:    "",
+        fadeTime:   2.0,
+        scale:      1.0,
+        rotate:     -25,
+        lift:       -2.5,
+        opacity:    1.0,
+        borderRad:  40,
+        borderCrop: 0,
+        chromaKey:  {
+            enable:     false,
+            threshold:  0.4,
+            smoothing:  0.1
+        }
+    },
+    plate: {
+        enable:     false,
+        device:     "",
+        device2:    "",
+        fadeTime:   2.0,
+        scale:      1.0,
+        rotate:     -25,
+        lift:       -2.5,
+        opacity:    1.0,
+        borderRad:  40,
+        borderCrop: 0,
+        chromaKey:  {
+            enable:     false,
+            threshold:  0.4,
+            smoothing:  0.1
+        }
+    },
+    hologram: {
         enable:     false,
         device:     "",
         device2:    "",

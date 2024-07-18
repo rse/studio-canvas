@@ -51,12 +51,19 @@ html
     width: 100vw
     height: 100vh
     overflow: hidden
-    background-color: var(--color-std-bg-1)
     color: var(--color-std-fg-3)
     font-family: "TypoPRO Source Sans Pro", sans-serif
     font-size: 12pt
     font-weight: normal
     user-select: none
+
+body:not(:has(.app-render)),
+html:not(:has(.app-render))
+    background-color: var(--color-std-bg-1)
+
+body:has(.app-render),
+html:has(.app-render)
+    background-color: transparent
 
 .ps .ps__rail-x:hover,
 .ps .ps__rail-y:hover,

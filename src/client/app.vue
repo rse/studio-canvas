@@ -21,6 +21,7 @@
         <app-render
             ref="render"
             v-if="mode === 'render'"
+            v-bind:layer="layer"
             v-bind:cam="cam"
             v-bind:options="options"
             v-bind:ws-url="wsURL"
@@ -47,6 +48,7 @@ export default defineComponent({
         mode:       "control",
         tab:        "presets",
         cam:        "",
+        layer:      "back",
         options:    new Map<string, string | boolean>(),
         serviceURL: "",
         wsURL:      ""
@@ -56,11 +58,12 @@ export default defineComponent({
         let url = new URI(window.location.href)
         const hash = url.hash()
         let m
-        if ((m = hash.match(/^#\/render\/(.+?)(?:\?(.+))?$/)) !== null) {
-            this.cam  = m[1]
-            this.mode = "render"
-            if (m[2]) {
-                const opts = m[2].split("&")
+        if ((m = hash.match(/^#\/render(?:\/(.+?))?\/(.+?)(?:\?(.+))?$/)) !== null) {
+            this.layer = m[1] ?? "back"
+            this.cam   = m[2]
+            this.mode  = "render"
+            if (m[3]) {
+                const opts = m[3].split("&")
                 for (const opt of opts) {
                     let m2
                     if ((m2 = opt.match(/^(.+)=(.+)$/)) !== null)

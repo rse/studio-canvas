@@ -128,6 +128,14 @@
                                 v-on:click="preset.filters.decal = !preset.filters.decal">
                                 Decal
                             </div>
+                            <div class="button" v-bind:class="{ selected: preset.filters.plate }"
+                                v-on:click="preset.filters.plate = !preset.filters.plate">
+                                Plate
+                            </div>
+                            <div class="button" v-bind:class="{ selected: preset.filters.hologram }"
+                                v-on:click="preset.filters.hologram = !preset.filters.hologram">
+                                Hologram
+                            </div>
                             <div class="button" v-bind:class="{ selected: preset.filters.lights }"
                                 v-on:click="preset.filters.lights = !preset.filters.lights">
                                 Lights
@@ -282,6 +290,17 @@
                             <input class="text" v-model.lazy="state.monitor.device"/>
                         </div>
 
+                        <div class="label1">video</div>
+                        <div class="label2">(device, alpha)</div>
+                        <div class="label3">[id]:</div>
+                        <div class="value">
+                            <div class="fixed">*</div>
+                        </div>
+                        <div class="button" v-on:click="state.monitor.device2 = ''">RESET</div>
+                        <div class="slider">
+                            <input class="text" v-model.lazy="state.monitor.device2"/>
+                        </div>
+
                         <div class="label1">fade</div>
                         <div class="label2">(time)</div>
                         <div class="label3">[sec]:</div>
@@ -338,6 +357,47 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.monitor.lift"
                                 v-bind:min="-150" v-bind:max="+70" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(enable)</div>
+                        <div class="label3">[flag]:</div>
+                        <div class="value">
+                            <div class="fixed">{{ state.monitor.chromaKey.enable ? "YES" : "NO" }}</div>
+                        </div>
+                        <div class="button" v-on:click="state.monitor.chromaKey.enable = false">RESET</div>
+                        <div class="slider">
+                            <toggle class="toggle" v-model="state.monitor.chromaKey.enable"></toggle>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(threshold)</div>
+                        <div class="label3">[distance]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.chromaKey.threshold)"
+                                v-on:change="(ev) => state.monitor.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.monitor.chromaKey.threshold = 0.4">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.monitor.chromaKey.threshold"
+                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(smoothing)</div>
+                        <div class="label3">[distance]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.chromaKey.smoothing)"
+                                v-on:change="(ev) => state.monitor.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
+                        </div>
+                        <div class="button" v-on:click="state.monitor.chromaKey.smoothing = 0.1">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.monitor.chromaKey.smoothing"
+                                v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
                         </div>
@@ -528,6 +588,389 @@
                         <div class="button" v-on:click="state.decal.chromaKey.smoothing = 0.1">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.chromaKey.smoothing"
+                                v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+                    </div>
+                </tab>
+
+                <!--  ==== PLATE ====  -->
+                <tab id="plate" name="Plate">
+                    <div class="desc">
+                        The <b>Plate</b> is the optional planar display which can be projected
+                        in the foreground, intended as the optical plate on the desk's front side.
+                        It can be given a particular video (content) source device
+                        as input, optionally a alpha-channel carrying video device, scaled in size, positioned in a radial way on the background canvas,
+                        its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
+                        and a chroma-key filter applied.
+                    </div>
+                    <div class="control">
+                        <div class="label1">enable</div>
+                        <div class="label2">(visible)</div>
+                        <div class="label3">[flag]:</div>
+                        <div class="value">
+                            <div class="fixed">{{ state.plate.enable ? "YES" : "NO" }}</div>
+                        </div>
+                        <div class="button" v-on:click="state.plate.enable = false">RESET</div>
+                        <div class="slider">
+                            <toggle class="toggle" v-model="state.plate.enable"></toggle>
+                        </div>
+
+                        <div class="label1">video</div>
+                        <div class="label2">(device, content)</div>
+                        <div class="label3">[id]:</div>
+                        <div class="value">
+                            <div class="fixed">*</div>
+                        </div>
+                        <div class="button" v-on:click="state.plate.device = ''">RESET</div>
+                        <div class="slider">
+                            <input class="text" v-model.lazy="state.plate.device"/>
+                        </div>
+
+                        <div class="label1">video</div>
+                        <div class="label2">(device, alpha)</div>
+                        <div class="label3">[id]:</div>
+                        <div class="value">
+                            <div class="fixed">*</div>
+                        </div>
+                        <div class="button" v-on:click="state.plate.device2 = ''">RESET</div>
+                        <div class="slider">
+                            <input class="text" v-model.lazy="state.plate.device2"/>
+                        </div>
+
+                        <div class="label1">fade</div>
+                        <div class="label2">(time)</div>
+                        <div class="label3">[sec]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.plate.fadeTime)"
+                                v-on:change="(ev) => state.plate.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0, 4.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.plate.fadeTime = 2.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.plate.fadeTime"
+                                v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">scale</div>
+                        <div class="label2">(resize)</div>
+                        <div class="label3">[mult]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.plate.scale)"
+                                v-on:change="(ev) => state.plate.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 3.5)"/>
+                        </div>
+                        <div class="button" v-on:click="state.plate.scale = 1.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.plate.scale"
+                                v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">rotate</div>
+                        <div class="label2">(pan left/right)</div>
+                        <div class="label3">[deg]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.plate.rotate)"
+                                v-on:change="(ev) => state.plate.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
+                        </div>
+                        <div class="button" v-on:click="state.plate.rotate = 0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.plate.rotate"
+                                v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">lift</div>
+                        <div class="label2">(tilt down/up)</div>
+                        <div class="label3">[m]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.plate.lift)"
+                                v-on:change="(ev) => state.plate.lift = fieldImport((ev.target! as HTMLInputElement).value, -15, +9)"/>
+                        </div>
+                        <div class="button" v-on:click="state.plate.lift = 0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.plate.lift"
+                                v-bind:min="-15" v-bind:max="+9" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">opacity</div>
+                        <div class="label2">(less/more)</div>
+                        <div class="label3">[percent]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.plate.opacity)"
+                                v-on:change="(ev) => state.plate.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.plate.opacity = 1.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.plate.opacity"
+                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">border</div>
+                        <div class="label2">(radius)</div>
+                        <div class="label3">[px]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.plate.borderRad)"
+                                v-on:change="(ev) => state.plate.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
+                        </div>
+                        <div class="button" v-on:click="state.plate.borderRad = 40">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.plate.borderRad"
+                                v-bind:min="0" v-bind:max="540" v-bind:step="10"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">border</div>
+                        <div class="label2">(cropping)</div>
+                        <div class="label3">[px]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.plate.borderCrop)"
+                                v-on:change="(ev) => state.plate.borderCrop = fieldImport((ev.target! as HTMLInputElement).value, 0, 50)"/>
+                        </div>
+                        <div class="button" v-on:click="state.plate.borderCrop = 0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.plate.borderCrop"
+                                v-bind:min="0" v-bind:max="50" v-bind:step="1"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(enable)</div>
+                        <div class="label3">[flag]:</div>
+                        <div class="value">
+                            <div class="fixed">{{ state.plate.chromaKey.enable ? "YES" : "NO" }}</div>
+                        </div>
+                        <div class="button" v-on:click="state.plate.chromaKey.enable = false">RESET</div>
+                        <div class="slider">
+                            <toggle class="toggle" v-model="state.plate.chromaKey.enable"></toggle>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(threshold)</div>
+                        <div class="label3">[distance]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.plate.chromaKey.threshold)"
+                                v-on:change="(ev) => state.plate.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.plate.chromaKey.threshold = 0.4">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.plate.chromaKey.threshold"
+                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(smoothing)</div>
+                        <div class="label3">[distance]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.plate.chromaKey.smoothing)"
+                                v-on:change="(ev) => state.plate.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
+                        </div>
+                        <div class="button" v-on:click="state.plate.chromaKey.smoothing = 0.1">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.plate.chromaKey.smoothing"
+                                v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+                    </div>
+                </tab>
+
+                <!--  ==== HOLOGRAM ====  -->
+                <tab id="hologram" name="Hologram">
+                    <div class="desc">
+                        The <b>Hologram</b> is the optional planar display which can be projected
+                        in the foreground. It can be given a particular video (content) source device
+                        as input, optionally a alpha-channel carrying video device, scaled in size, positioned in a radial way on the background canvas,
+                        its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
+                        and a chroma-key filter applied.
+                    </div>
+                    <div class="control">
+                        <div class="label1">enable</div>
+                        <div class="label2">(visible)</div>
+                        <div class="label3">[flag]:</div>
+                        <div class="value">
+                            <div class="fixed">{{ state.hologram.enable ? "YES" : "NO" }}</div>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.enable = false">RESET</div>
+                        <div class="slider">
+                            <toggle class="toggle" v-model="state.hologram.enable"></toggle>
+                        </div>
+
+                        <div class="label1">video</div>
+                        <div class="label2">(device, content)</div>
+                        <div class="label3">[id]:</div>
+                        <div class="value">
+                            <div class="fixed">*</div>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.device = ''">RESET</div>
+                        <div class="slider">
+                            <input class="text" v-model.lazy="state.hologram.device"/>
+                        </div>
+
+                        <div class="label1">video</div>
+                        <div class="label2">(device, alpha)</div>
+                        <div class="label3">[id]:</div>
+                        <div class="value">
+                            <div class="fixed">*</div>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.device2 = ''">RESET</div>
+                        <div class="slider">
+                            <input class="text" v-model.lazy="state.hologram.device2"/>
+                        </div>
+
+                        <div class="label1">fade</div>
+                        <div class="label2">(time)</div>
+                        <div class="label3">[sec]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.fadeTime)"
+                                v-on:change="(ev) => state.hologram.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0, 4.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.fadeTime = 2.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.hologram.fadeTime"
+                                v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">scale</div>
+                        <div class="label2">(resize)</div>
+                        <div class="label3">[mult]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.scale)"
+                                v-on:change="(ev) => state.hologram.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 3.5)"/>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.scale = 1.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.hologram.scale"
+                                v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">rotate</div>
+                        <div class="label2">(pan left/right)</div>
+                        <div class="label3">[deg]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.rotate)"
+                                v-on:change="(ev) => state.hologram.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.rotate = 0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.hologram.rotate"
+                                v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">lift</div>
+                        <div class="label2">(tilt down/up)</div>
+                        <div class="label3">[m]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.lift)"
+                                v-on:change="(ev) => state.hologram.lift = fieldImport((ev.target! as HTMLInputElement).value, -15, +9)"/>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.lift = 0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.hologram.lift"
+                                v-bind:min="-15" v-bind:max="+9" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">opacity</div>
+                        <div class="label2">(less/more)</div>
+                        <div class="label3">[percent]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.opacity)"
+                                v-on:change="(ev) => state.hologram.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.opacity = 1.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.hologram.opacity"
+                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">border</div>
+                        <div class="label2">(radius)</div>
+                        <div class="label3">[px]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.borderRad)"
+                                v-on:change="(ev) => state.hologram.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.borderRad = 40">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.hologram.borderRad"
+                                v-bind:min="0" v-bind:max="540" v-bind:step="10"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">border</div>
+                        <div class="label2">(cropping)</div>
+                        <div class="label3">[px]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.borderCrop)"
+                                v-on:change="(ev) => state.hologram.borderCrop = fieldImport((ev.target! as HTMLInputElement).value, 0, 50)"/>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.borderCrop = 0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.hologram.borderCrop"
+                                v-bind:min="0" v-bind:max="50" v-bind:step="1"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(enable)</div>
+                        <div class="label3">[flag]:</div>
+                        <div class="value">
+                            <div class="fixed">{{ state.hologram.chromaKey.enable ? "YES" : "NO" }}</div>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.chromaKey.enable = false">RESET</div>
+                        <div class="slider">
+                            <toggle class="toggle" v-model="state.hologram.chromaKey.enable"></toggle>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(threshold)</div>
+                        <div class="label3">[distance]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.chromaKey.threshold)"
+                                v-on:change="(ev) => state.hologram.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.chromaKey.threshold = 0.4">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.hologram.chromaKey.threshold"
+                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">chromaKey</div>
+                        <div class="label2">(smoothing)</div>
+                        <div class="label3">[distance]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.chromaKey.smoothing)"
+                                v-on:change="(ev) => state.hologram.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.chromaKey.smoothing = 0.1">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.hologram.chromaKey.smoothing"
                                 v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
                             ></slider>
@@ -1045,6 +1488,16 @@
                         {{ preview.url }}
                     </div>
                     <div class="preview-control">
+                        <div class="layer">
+                            <div class="button" v-on:click="preview.opts.layer = 'back'"
+                                v-bind:class="{ selected: preview.opts.layer === 'back' }">
+                                Back
+                            </div>
+                            <div class="button" v-on:click="preview.opts.layer = 'front'"
+                                v-bind:class="{ selected: preview.opts.layer === 'front' }">
+                                Front
+                            </div>
+                        </div>
                         <div class="cams">
                             <div class="button" v-on:click="preview.opts.cam = 'CAM1'"
                                 v-bind:class="{ selected: preview.opts.cam === 'CAM1' }">
@@ -1242,6 +1695,9 @@
         flex-direction: column
         justify-items: flex-start
         align-items: flex-start
+    .tabs-component-tab-a
+        padding: 2px 4px 2px 4px
+        font-size: 11pt
     .desc
         font-weight: 200
         color: var(--color-std-fg-3)
@@ -1257,7 +1713,7 @@
             margin-right: 20px
             display: grid
             grid-template-columns: 70px 70px 70px
-            grid-template-rows: 60px 60px 60px
+            grid-template-rows: 65px 65px 65px 65px
             justify-items: center
             align-items: center
             gap: 10px 10px
@@ -1265,7 +1721,7 @@
         .actions3
             display: grid
             grid-template-columns: 100px
-            grid-template-rows: 127px 127px
+            grid-template-rows: 140px 140px
             justify-items: center
             align-items: center
             gap: 10px 10px
@@ -1275,7 +1731,7 @@
             margin-right: 20px
             display: grid
             grid-template-columns: 100px
-            grid-template-rows: 264px
+            grid-template-rows: 290px
             justify-items: center
             align-items: center
             gap: 10px 10px
@@ -1283,10 +1739,10 @@
             margin-right: 10px
             display: grid
             grid-template-columns: 100px 100px
-            grid-template-rows: 34px 34px 34px 34px 34px 34px
+            grid-template-rows: 30px 30px 30px 30px 30px 30px 30px
             justify-items: center
             align-items: center
-            gap: 12px 12px
+            gap: 13px 13px
         .button
             background-color: var(--color-std-bg-3)
             color: var(--color-std-fg-5)
@@ -1328,14 +1784,15 @@
                     color: var(--color-acc-fg-5)
         .filter .button
             font-weight: 200
-            line-height: 34px
+            line-height: 28px
         .slots .button
             font-size: 150%
             font-weight: bold
+            line-height: 65px
         .actions1 .button
             font-size: 120%
             font-weight: bold
-            line-height: 127px
+            line-height: 140px
             &.unselectable:hover
                 background-color: var(--color-std-bg-3)
                 color: var(--color-std-fg-5)
@@ -1343,13 +1800,13 @@
         .actions2 .button
             font-size: 120%
             font-weight: bold
-            line-height: 264px
+            line-height: 290px
             &.unselectable:hover
                 background-color: var(--color-std-bg-3)
                 color: var(--color-std-fg-5)
                 cursor: default
         .actions3 .button
-            line-height: 127px
+            line-height: 140px
     .preview
         .preview-control
             margin-top: 20px
@@ -1359,7 +1816,7 @@
             align-items: center
             .cams
                 display: grid
-                grid-template-columns: 110px 110px 110px 110px 110px
+                grid-template-columns: 80px 80px 80px 80px 80px
                 grid-template-rows: 110px
                 justify-items: center
                 align-items: center
@@ -1368,6 +1825,14 @@
                 cursor: pointer
                 .button
                     line-height: 110px !important
+            .layer
+                display: grid
+                grid-template-columns: 80px
+                grid-template-rows: 50px 50px
+                justify-items: center
+                align-items: center
+                gap: 10px 10px
+                margin-right: 20px
             .flags
                 display: grid
                 grid-template-columns: 210px
@@ -1712,6 +2177,8 @@ export type StateFilterType = {
     canvas:     boolean,
     monitor:    boolean,
     decal:      boolean,
+    plate:      boolean,
+    hologram:   boolean,
     lights:     boolean,
     avatars:    boolean,
     references: boolean,
@@ -1746,6 +2213,8 @@ export default defineComponent({
                 canvas:     true,
                 monitor:    true,
                 decal:      true,
+                plate:      true,
+                hologram:   true,
                 lights:     true,
                 avatars:    true,
                 references: true,
@@ -1763,6 +2232,7 @@ export default defineComponent({
         watchState: true,
         preview: {
             opts: {
+                layer: "back",
                 cam:   "CAM2",
                 home:  true,
                 freed: false,
@@ -1895,7 +2365,7 @@ export default defineComponent({
 
         /*  re-generate the preview URL  */
         this.$watch("preview.opts", () => {
-            let url = `${this.serviceUrl}#/render/${this.preview.opts.cam}`
+            let url = `${this.serviceUrl}#/render/${this.preview.opts.layer}/${this.preview.opts.cam}`
             const opts = [] as string[]
             if (this.preview.opts.freed) opts.push("ptzFreeD=true")
             if (this.preview.opts.keys)  opts.push("ptzKeys=true")
