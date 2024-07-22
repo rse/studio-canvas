@@ -951,8 +951,16 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.monitor.lift !== undefined)
                 this.monitor.position.z = this.monitorBase.positionZ + (state.monitor.lift / 100)
+            let deviceChanged = false
             if (state.monitor.device !== undefined && this.deviceMonitor !== state.monitor.device) {
                 this.deviceMonitor = state.monitor.device
+                deviceChanged = true
+            }
+            if (state.monitor.device2 !== undefined && this.deviceMonitor2 !== state.monitor.device2) {
+                this.deviceMonitor2 = state.monitor.device2
+                deviceChanged = true
+            }
+            if (deviceChanged) {
                 await this.stop()
                 await this.unloadVideoStream("monitor", this.monitorDisplay!)
                 await this.loadVideoStream("monitor", this.monitorDisplay!, this.deviceMonitor, this.deviceMonitor2, 1.0, 0, 0, this.monitorChromaKey)
