@@ -164,10 +164,6 @@
                                 v-on:click="preset.filters.CAM4 = !preset.filters.CAM4">
                                 CAM4
                             </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.CAM5 }"
-                                v-on:click="preset.filters.CAM5 = !preset.filters.CAM5">
-                                CAM5
-                            </div>
                             <div class="button" v-bind:class="{ selected: preset.filters.renderer }"
                                 v-on:click="preset.filters.renderer = !preset.filters.renderer">
                                 Renderer
@@ -1150,8 +1146,8 @@
                     </div>
                 </tab>
 
-                <!--  ==== CAM1/2/3/4/5 ====  -->
-                <tab v-for="cam in [ 'CAM1', 'CAM2', 'CAM3', 'CAM4', 'CAM5' ]" v-bind:key="cam" v-bind:id="cam.toLowerCase()" v-bind:name="cam">
+                <!--  ==== CAM1/2/3/4 ====  -->
+                <tab v-for="cam in [ 'CAM1', 'CAM2', 'CAM3', 'CAM4' ]" v-bind:key="cam" v-bind:id="cam.toLowerCase()" v-bind:name="cam">
                     <div class="desc">
                         The <b>{{ cam }}</b> is a digital twin of the corresponding physical
                         camera. It has to be calibrated to match as close
@@ -1453,19 +1449,6 @@
                                     state.renderer.other) }}
                                 </div>
                             </div>
-                            <div class="button cam" v-on:click="changePreview('CAM5')"
-                                v-bind:class="{
-                                    unselectable: mixer.preview === 'CAM5' || mixer.program === 'CAM5',
-                                    preview: mixer.program === 'CAM5',
-                                    program: mixer.program === 'CAM5'
-                                }">
-                                CAM5
-                                <div class="badge" v-bind:class="mixerStatus2Class('CAM5')">
-                                    {{ mixer.program === 'CAM5' ? state.renderer.program :
-                                    (mixer.preview === 'CAM5' ? state.renderer.preview :
-                                    state.renderer.other) }}
-                                </div>
-                            </div>
                             <div class="button cut" v-on:click="cutPreviewToProgram()">
                                 CUT
                             </div>
@@ -1514,10 +1497,6 @@
                             <div class="button" v-on:click="preview.opts.cam = 'CAM4'"
                                 v-bind:class="{ selected: preview.opts.cam === 'CAM4' }">
                                 CAM4
-                            </div>
-                            <div class="button" v-on:click="preview.opts.cam = 'CAM5'"
-                                v-bind:class="{ selected: preview.opts.cam === 'CAM5' }">
-                                CAM5
                             </div>
                         </div>
                         <div class="flags">
@@ -1816,7 +1795,7 @@
             align-items: center
             .cams
                 display: grid
-                grid-template-columns: 80px 80px 80px 80px 80px
+                grid-template-columns: 80px 80px 80px 80px
                 grid-template-rows: 110px
                 justify-items: center
                 align-items: center
@@ -2170,7 +2149,6 @@ export const StateFilterKeys = [
     "CAM2",
     "CAM3",
     "CAM4",
-    "CAM5",
     "renderer"
 ]
 export type StateFilterType = {
@@ -2186,7 +2164,6 @@ export type StateFilterType = {
     CAM2:       boolean,
     CAM3:       boolean,
     CAM4:       boolean,
-    CAM5:       boolean,
     renderer:   boolean
 }
 let statusTimer: ReturnType<typeof setTimeout> | null = null
@@ -2222,11 +2199,10 @@ export default defineComponent({
                 CAM2:       true,
                 CAM3:       true,
                 CAM4:       true,
-                CAM5:       true,
                 renderer:   true
             } as StateFilterType,
             slot: -1,
-            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         state: StateDefault as StateType,
         watchState: true,

@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - UPDATE: update dependencies
+- FEATURE: remove CAM5 from the setup
 - IMPROVEMENT: add back/front layers in renderer (front contains new plate and hologram)
 
 1.8.10 (2024-07-17)

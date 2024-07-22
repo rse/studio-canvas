@@ -34,11 +34,10 @@ export default class CanvasRenderer extends EventEmitter {
         const camNameToTypeMap = {
             CAM1: "panasonic",
             CAM2: "panasonic",
-            CAM3: "birddog",
-            CAM4: "panasonic",
-            CAM5: "panasonic"
+            CAM3: "panasonic",
+            CAM4: "panasonic"
         }
-        const cameraType = camNameToTypeMap[this.cameraName as "CAM1" | "CAM2" | "CAM3" | "CAM4"| "CAM5"] as "birddog" | "panasonic"
+        const cameraType = camNameToTypeMap[this.cameraName as "CAM1" | "CAM2" | "CAM3" | "CAM4"] as "birddog" | "panasonic"
 
         /*  instantiate PTZ  */
         this.ptz     = new PTZ(cameraType)
