@@ -998,18 +998,33 @@ export default class CanvasRenderer extends EventEmitter {
                     await this.start()
                     if (this.monitorFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling monitor (fading: start)")
-                        this.monitorCase.visibility    = 0
-                        this.monitorDisplay.visibility = 0
-                        this.monitor.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = 30
                         const fpsTotal = (1000 / fps) * this.monitorFade
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.monitorCase,
                             "visibility", fps, fpsTotal, 0, 1, 0, ease)!
-                        const anim2 = BABYLON.Animation.CreateAndStartAnimation("show", this.monitorDisplay,
-                            "visibility", fps, fpsTotal, 0, 1, 0, ease)!
-                        Promise.all([ anim1.waitAsync(), anim2.waitAsync() ]).then(() => {
+                        if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.monitorDisplay.material
+                            material.setFloat("visibility", 0.0)
+                        }
+                        this.monitor.setEnabled(true)
+                        this.monitorCase.visibility = 1
+                        this.monitorCase.setEnabled(true)
+                        this.monitorDisplay.visibility = 1
+                        this.monitorDisplay.setEnabled(true)
+                        const anim2 = this.manualAnimation(0, 1, this.monitorFade, 30, (gradient) => {
+                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.monitorDisplay!.material
+                                material.setFloat("visibility", gradient)
+                            }
+                        }).then(() => {
+                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.monitorDisplay!.material
+                                material.setFloat("visibility", 1.0)
+                            }
+                        })
+                        Promise.all([ anim1.waitAsync(), anim2 ]).then(() => {
                             this.emit("log", "INFO", "enabling monitor (fading: end)")
                         })
                     }
@@ -1023,16 +1038,35 @@ export default class CanvasRenderer extends EventEmitter {
                 else if (!state.monitor.enable) {
                     if (this.monitorFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "disabling monitor (fading: start)")
+                        this.monitorCase.visibility = 1
+                        this.monitorCase.setEnabled(true)
+                        this.monitorDisplay.visibility = 1
+                        this.monitorDisplay.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = 30
                         const fpsTotal = (1000 / fps) * this.monitorFade
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.monitorCase,
                             "visibility", fps, fpsTotal, 1, 0, 0, ease)!
-                        const anim2 = BABYLON.Animation.CreateAndStartAnimation("hide", this.monitorDisplay,
-                            "visibility", fps, fpsTotal, 1, 0, 0, ease)!
-                        Promise.all([ anim1.waitAsync(), anim2.waitAsync() ]).then(async () => {
+                        if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.monitorDisplay.material
+                            material.setFloat("visibility", 1.0)
+                        }
+                        const anim2 = this.manualAnimation(1, 0, this.monitorFade, 30, (gradient) => {
+                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.monitorDisplay!.material
+                                material.setFloat("visibility", gradient)
+                            }
+                        }).then(() => {
+                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.monitorDisplay!.material
+                                material.setFloat("visibility", 0.0)
+                            }
+                        })
+                        Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
                             this.emit("log", "INFO", "disabling monitor (fading: end)")
+                            this.monitorCase!.setEnabled(false)
+                            this.monitorDisplay!.setEnabled(false)
                             this.monitor!.setEnabled(false)
                             await this.stop()
                             await this.unloadVideoStream("monitor", this.monitorDisplay!)
