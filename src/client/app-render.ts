@@ -201,7 +201,8 @@ export default class CanvasRenderer extends EventEmitter {
         "Monitor-Case":                 { back: true,  front: false },
         "Monitor-Screen":               { back: true,  front: false },
         "Plate":                        { back: false, front: true  },
-        "Hologram":                     { back: false, front: true  }
+        "Hologram":                     { back: false, front: true  },
+        "Dummy":                        { back: true,  front: true  }
     } as { [ name: string ]: { back: boolean, front: boolean }}
 
     /*  initially establish rendering engine and scene  */
@@ -1326,25 +1327,32 @@ export default class CanvasRenderer extends EventEmitter {
                         if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.plateDisplay.material
                             material.setFloat("visibility", 0.0)
+                            this.plateDisplay.visibility = 1.0
                         }
-                        this.plateDisplay.visibility = 1
+                        else
+                            this.plateDisplay.visibility = 0.0
                         this.plateDisplay.setEnabled(true)
                         this.manualAnimation(0, 1, this.plateFade, 30, (gradient) => {
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
+                            else
+                                this.plateDisplay!.visibility = gradient
                         }).then(() => {
                             this.emit("log", "INFO", "enabling plate (fading: end)")
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", 1.0)
+                                this.plateDisplay!.visibility = 1.0
                             }
+                            else
+                                this.plateDisplay!.visibility = 1.0
                         })
                     }
                     else {
                         this.emit("log", "INFO", "enabling plate")
-                        this.plateDisplay!.visibility = 1
+                        this.plateDisplay!.visibility = 1.0
                         this.plateDisplay!.setEnabled(true)
                     }
                 }
@@ -1354,20 +1362,27 @@ export default class CanvasRenderer extends EventEmitter {
                         if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.plateDisplay.material
                             material.setFloat("visibility", 1.0)
+                            this.plateDisplay.visibility = 1.0
                         }
-                        this.plateDisplay.visibility = 1
+                        else
+                            this.plateDisplay.visibility = 1.0
                         this.plateDisplay.setEnabled(true)
                         this.manualAnimation(1, 0, this.plateFade, 30, (gradient) => {
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
+                            else
+                                this.plateDisplay!.visibility = gradient
                         }).then(async () => {
                             this.emit("log", "INFO", "disabling plate (fading: end)")
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", 0.0)
+                                this.plateDisplay!.visibility = 0.0
                             }
+                            else
+                                this.plateDisplay!.visibility = 0.0
                             this.plateDisplay!.setEnabled(false)
                             await this.stop()
                             await this.unloadVideoStream("plate", this.plateDisplay!)
@@ -1376,7 +1391,7 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                     else {
                         this.emit("log", "INFO", "disabling plate")
-                        this.plateDisplay.visibility = 0
+                        this.plateDisplay.visibility = 0.0
                         this.plateDisplay.setEnabled(false)
                         await this.stop()
                         await this.unloadVideoStream("plate", this.plateDisplay)
@@ -1472,25 +1487,32 @@ export default class CanvasRenderer extends EventEmitter {
                         if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.hologramDisplay.material
                             material.setFloat("visibility", 0.0)
+                            this.hologramDisplay.visibility = 1.0
                         }
-                        this.hologramDisplay.visibility = 1
+                        else
+                            this.hologramDisplay.visibility = 0.0
                         this.hologramDisplay.setEnabled(true)
                         this.manualAnimation(0, 1, this.hologramFade, 30, (gradient) => {
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
+                            else
+                                this.hologramDisplay!.visibility = gradient
                         }).then(() => {
                             this.emit("log", "INFO", "enabling hologram (fading: end)")
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", 1.0)
+                                this.hologramDisplay!.visibility = 1.0
                             }
+                            else
+                                this.hologramDisplay!.visibility = 1.0
                         })
                     }
                     else {
                         this.emit("log", "INFO", "enabling hologram")
-                        this.hologramDisplay!.visibility = 1
+                        this.hologramDisplay!.visibility = 1.0
                         this.hologramDisplay!.setEnabled(true)
                     }
                 }
@@ -1500,20 +1522,27 @@ export default class CanvasRenderer extends EventEmitter {
                         if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.hologramDisplay.material
                             material.setFloat("visibility", 1.0)
+                            this.hologramDisplay.visibility = 1.0
                         }
-                        this.hologramDisplay.visibility = 1
+                        else
+                            this.hologramDisplay.visibility = 1.0
                         this.hologramDisplay.setEnabled(true)
                         this.manualAnimation(1, 0, this.hologramFade, 30, (gradient) => {
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
+                            else
+                                this.hologramDisplay!.visibility = gradient
                         }).then(async () => {
                             this.emit("log", "INFO", "disabling hologram (fading: end)")
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", 0.0)
+                                this.hologramDisplay!.visibility = 0.0
                             }
+                            else
+                                this.hologramDisplay!.visibility = 0.0
                             this.hologramDisplay!.setEnabled(false)
                             await this.stop()
                             await this.unloadVideoStream("hologram", this.hologramDisplay!)
@@ -1522,7 +1551,7 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                     else {
                         this.emit("log", "INFO", "disabling hologram")
-                        this.hologramDisplay.visibility = 0
+                        this.hologramDisplay.visibility = 0.0
                         this.hologramDisplay.setEnabled(false)
                         await this.stop()
                         await this.unloadVideoStream("hologram", this.hologramDisplay)
