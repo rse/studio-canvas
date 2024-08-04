@@ -2,6 +2,12 @@
 ChangeLog
 =========
 
+2.0.1 (2024-08-04)
+------------------
+
+- UPDATE: update dependencies
+- FEATURE: adjust slider values already during dragging
+
 2.0.0 (2024-07-28)
 ------------------
 

@@ -198,7 +198,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.canvas.rotationZ"
                                 v-bind:min="-10" v-bind:max="+10" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
                     </div>
@@ -308,7 +308,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.monitor.fadeTime"
                                 v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -323,7 +323,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.monitor.scale"
                                 v-bind:min="0.1" v-bind:max="2.2" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -338,7 +338,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.monitor.rotate"
                                 v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -353,7 +353,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.monitor.lift"
                                 v-bind:min="-150" v-bind:max="+70" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -379,7 +379,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.monitor.chromaKey.threshold"
                                 v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -394,7 +394,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.monitor.chromaKey.smoothing"
                                 v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
                     </div>
@@ -454,7 +454,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.fadeTime"
                                 v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -469,7 +469,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.scale"
                                 v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -484,7 +484,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.rotate"
                                 v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -499,7 +499,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.lift"
                                 v-bind:min="-15" v-bind:max="+9" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -514,7 +514,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.opacity"
                                 v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -529,7 +529,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.borderRad"
                                 v-bind:min="0" v-bind:max="540" v-bind:step="10"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -544,7 +544,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.borderCrop"
                                 v-bind:min="0" v-bind:max="50" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -570,7 +570,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.chromaKey.threshold"
                                 v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -585,7 +585,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.chromaKey.smoothing"
                                 v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
                     </div>
@@ -646,7 +646,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.fadeTime"
                                 v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -661,7 +661,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.scale"
                                 v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -676,7 +676,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.rotate"
                                 v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -691,7 +691,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.lift"
                                 v-bind:min="-15" v-bind:max="+9" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -706,7 +706,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.opacity"
                                 v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -721,7 +721,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.borderRad"
                                 v-bind:min="0" v-bind:max="540" v-bind:step="10"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -736,7 +736,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.borderCrop"
                                 v-bind:min="0" v-bind:max="50" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -762,7 +762,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.chromaKey.threshold"
                                 v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -777,7 +777,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.chromaKey.smoothing"
                                 v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
                     </div>
@@ -837,7 +837,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.fadeTime"
                                 v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -852,7 +852,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.scale"
                                 v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -867,7 +867,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.rotate"
                                 v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -882,7 +882,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.lift"
                                 v-bind:min="-15" v-bind:max="+9" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -897,7 +897,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.opacity"
                                 v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -912,7 +912,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.borderRad"
                                 v-bind:min="0" v-bind:max="540" v-bind:step="10"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -927,7 +927,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.borderCrop"
                                 v-bind:min="0" v-bind:max="50" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -953,7 +953,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.chromaKey.threshold"
                                 v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -968,7 +968,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.chromaKey.smoothing"
                                 v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
                     </div>
@@ -993,7 +993,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.lights.intensity1"
                                 v-bind:min="0" v-bind:max="600" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(0)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1008,7 +1008,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.lights.intensity2"
                                 v-bind:min="0" v-bind:max="600" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(0)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1023,7 +1023,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.lights.intensity3"
                                 v-bind:min="0" v-bind:max="600" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(0)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
                     </div>
@@ -1061,7 +1061,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.avatars.size1"
                                 v-bind:min="160" v-bind:max="210" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1076,7 +1076,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.avatars.rotate1"
                                 v-bind:min="-90" v-bind:max="+90" v-bind:step="7"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1102,7 +1102,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.avatars.size2"
                                 v-bind:min="160" v-bind:max="210" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1117,7 +1117,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="state.avatars.rotate2"
                                 v-bind:min="-90" v-bind:max="+90" v-bind:step="7"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
                     </div>
@@ -1168,7 +1168,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].hullPosition.x"
                                 v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1183,7 +1183,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].hullPosition.y"
                                 v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1198,7 +1198,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].hullPosition.z"
                                 v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1213,7 +1213,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].caseRotation.x"
                                 v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1228,7 +1228,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].caseRotation.y"
                                 v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1243,7 +1243,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].caseRotation.ym"
                                 v-bind:min="0" v-bind:max="+2" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1258,7 +1258,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].caseRotation.z"
                                 v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1273,7 +1273,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].lensRotation.x"
                                 v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1288,7 +1288,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].lensRotation.xm"
                                 v-bind:min="0" v-bind:max="+2" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1305,7 +1305,7 @@
                         <div class="slider">
                             <slider class="slider" v-model="(state as any)[cam].fov.m"
                                 v-bind:min="0" v-bind:max="+4" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="(v: number) => v.toFixed(2)"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
                         -->
@@ -1333,7 +1333,7 @@
                             <slider class="slider" v-bind:value="state.renderer.program"
                                 v-on:change="(val: number) => state.renderer.program = saneFPS(state.renderer.program, val)"
                                 v-bind:min="0" v-bind:max="60" v-bind:step="1"
-                                show-tooltip="drag"
+                                show-tooltip="drag" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1349,7 +1349,7 @@
                             <slider class="slider" v-bind:value="state.renderer.preview"
                                 v-on:change="(val: number) => state.renderer.preview = saneFPS(state.renderer.preview, val)"
                                 v-bind:min="0" v-bind:max="60" v-bind:step="1"
-                                show-tooltip="drag"
+                                show-tooltip="drag" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -1365,7 +1365,7 @@
                             <slider class="slider" v-bind:value="state.renderer.other"
                                 v-on:change="(val: number) => state.renderer.other = saneFPS(state.renderer.other, val)"
                                 v-bind:min="0" v-bind:max="60" v-bind:step="1"
-                                show-tooltip="drag"
+                                show-tooltip="drag" v-bind:lazy="false"
                             ></slider>
                         </div>
 
@@ -2181,6 +2181,7 @@ export default defineComponent({
         wsUrl:      { type: String, default: "" }
     },
     data: () => ({
+        formatSliderValue: (v: number) => v.toFixed(2),
         imageList: [] as ImageEntry[],
         openGroup: "",
         ps: null as PerfectScrollbar | null,
