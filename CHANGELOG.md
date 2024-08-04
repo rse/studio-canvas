@@ -7,6 +7,7 @@ ChangeLog
 
 - UPDATE: update dependencies
 - FEATURE: adjust slider values already during dragging
+- FEATURE: support distance control of hologram/plate
 - BUGFIX: fix hologram/plate visibility handling
 
 2.0.0 (2024-07-28)

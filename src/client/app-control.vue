@@ -681,16 +681,31 @@
                         </div>
 
                         <div class="label1">lift</div>
-                        <div class="label2">(tilt down/up)</div>
+                        <div class="label2">(shift down/up)</div>
                         <div class="label3">[m]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.plate.lift)"
-                                v-on:change="(ev) => state.plate.lift = fieldImport((ev.target! as HTMLInputElement).value, -15, +9)"/>
+                                v-on:change="(ev) => state.plate.lift = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
                         </div>
                         <div class="button" v-on:click="state.plate.lift = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.lift"
-                                v-bind:min="-15" v-bind:max="+9" v-bind:step="0.01"
+                                v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">distance</div>
+                        <div class="label2">(shift bwd/fwd)</div>
+                        <div class="label3">[m]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.plate.distance)"
+                                v-on:change="(ev) => state.plate.distance = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.plate.distance = 0.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.plate.distance"
+                                v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
@@ -872,16 +887,31 @@
                         </div>
 
                         <div class="label1">lift</div>
-                        <div class="label2">(tilt down/up)</div>
+                        <div class="label2">(shift down/up)</div>
                         <div class="label3">[m]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.hologram.lift)"
-                                v-on:change="(ev) => state.hologram.lift = fieldImport((ev.target! as HTMLInputElement).value, -15, +9)"/>
+                                v-on:change="(ev) => state.hologram.lift = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
                         </div>
                         <div class="button" v-on:click="state.hologram.lift = 0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.lift"
-                                v-bind:min="-15" v-bind:max="+9" v-bind:step="0.01"
+                                v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">distance</div>
+                        <div class="label2">(shift bwd/fwd)</div>
+                        <div class="label3">[m]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.distance)"
+                                v-on:change="(ev) => state.hologram.distance = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
+                        </div>
+                        <div class="button" v-on:click="state.hologram.distance = 0.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.hologram.distance"
+                                v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>

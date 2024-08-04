@@ -84,7 +84,7 @@ export default class CanvasRenderer extends EventEmitter {
     private plateChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private plateBase = {
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationZ:     0, positionZ:     0
+        rotationZ:     0, positionZ:     0, positionX:     0
     }
     private hologramRotate       = 0.0
     private hologramLift         = 0.0
@@ -96,7 +96,7 @@ export default class CanvasRenderer extends EventEmitter {
     private hologramChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private hologramBase = {
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationZ:     0, positionZ:     0
+        rotationZ:     0, positionZ:     0, positionX:     0
     }
 
     /*  frames per second (FPS) control  */
@@ -379,6 +379,7 @@ export default class CanvasRenderer extends EventEmitter {
         this.plateBase.scaleDisplayZ = this.plateDisplay!.scaling.z
         this.plateBase.rotationZ     = this.plate!.rotation.z
         this.plateBase.positionZ     = this.plate!.position.z
+        this.plateBase.positionX     = this.plate!.position.x
 
         /*  gather references to hologram mesh nodes  */
         this.hologram        = this.scene.getNodeByName("Hologram")         as BABYLON.Nullable<BABYLON.TransformNode>
@@ -393,6 +394,7 @@ export default class CanvasRenderer extends EventEmitter {
         this.hologramBase.scaleDisplayZ = this.hologramDisplay!.scaling.z
         this.hologramBase.rotationZ     = this.hologram!.rotation.z
         this.hologramBase.positionZ     = this.hologram!.position.z
+        this.hologramBase.positionX     = this.hologram!.position.x
 
         /*  setup light shadow casting the display onto the wall  */
         const setupLight = (light: BABYLON.PointLight) => {
@@ -1254,7 +1256,9 @@ export default class CanvasRenderer extends EventEmitter {
                     this.ptz.deg2rad(state.plate.rotate), BABYLON.Space.WORLD)
             }
             if (state.plate.lift !== undefined)
-                this.plate.position.z = this.plateBase.positionZ + (state.plate.lift / 100)
+                this.plate.position.z = this.plateBase.positionZ + state.plate.lift
+            if (state.plate.distance !== undefined)
+                this.plate.position.x = this.plateBase.positionX + state.plate.distance
             if (state.plate.fadeTime !== undefined && this.plateFade !== state.plate.fadeTime)
                 this.plateFade = state.plate.fadeTime
             if (state.plate.opacity !== undefined) {
@@ -1414,7 +1418,9 @@ export default class CanvasRenderer extends EventEmitter {
                     this.ptz.deg2rad(state.hologram.rotate), BABYLON.Space.WORLD)
             }
             if (state.hologram.lift !== undefined)
-                this.hologram.position.z = this.hologramBase.positionZ + (state.hologram.lift / 100)
+                this.hologram.position.z = this.hologramBase.positionZ + state.hologram.lift
+            if (state.hologram.distance !== undefined)
+                this.hologram.position.x = this.hologramBase.positionX + state.hologram.distance
             if (state.hologram.fadeTime !== undefined && this.hologramFade !== state.hologram.fadeTime)
                 this.hologramFade = state.hologram.fadeTime
             if (state.hologram.opacity !== undefined) {
