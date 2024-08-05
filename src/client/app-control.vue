@@ -2551,9 +2551,9 @@ export default defineComponent({
             const clazz = {} as any
             if (this.preset.status[slot] === 0)
                 clazz.clear = true
-            else if (this.preset.status[slot] > 0 && this.preset.status[slot] < 12)
+            else if (this.preset.status[slot] > 0 && this.preset.status[slot] < 13)
                 clazz.partial = true
-            else if (this.preset.status[slot] === 12)
+            else if (this.preset.status[slot] === 13)
                 clazz.complete = true
             return clazz
         },
