@@ -1012,7 +1012,7 @@ export default class CanvasRenderer extends EventEmitter {
                         this.emit("log", "INFO", "enabling monitor (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = 30
+                        const fps = (this.fps === 0 ? 1 : this.fps)
                         const fpsTotal = (1000 / fps) * this.monitorFade
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.monitorCase,
                             "visibility", fps, fpsTotal, 0, 1, 0, ease)!
@@ -1025,7 +1025,7 @@ export default class CanvasRenderer extends EventEmitter {
                         this.monitorCase.setEnabled(true)
                         this.monitorDisplay.visibility = 1
                         this.monitorDisplay.setEnabled(true)
-                        const anim2 = this.manualAnimation(0, 1, this.monitorFade, 30, (gradient) => {
+                        const anim2 = this.manualAnimation(0, 1, this.monitorFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
                             if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.monitorDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -1056,7 +1056,7 @@ export default class CanvasRenderer extends EventEmitter {
                         this.monitorDisplay.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = 30
+                        const fps = (this.fps === 0 ? 1 : this.fps)
                         const fpsTotal = (1000 / fps) * this.monitorFade
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.monitorCase,
                             "visibility", fps, fpsTotal, 1, 0, 0, ease)!
@@ -1064,7 +1064,7 @@ export default class CanvasRenderer extends EventEmitter {
                             const material = this.monitorDisplay.material
                             material.setFloat("visibility", 1.0)
                         }
-                        const anim2 = this.manualAnimation(1, 0, this.monitorFade, 30, (gradient) => {
+                        const anim2 = this.manualAnimation(1, 0, this.monitorFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
                             if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.monitorDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -1195,7 +1195,7 @@ export default class CanvasRenderer extends EventEmitter {
                         }
                         this.decal.visibility = 1
                         this.decal.setEnabled(true)
-                        await this.manualAnimation(0, 1, this.decalFade, 30, (gradient) => {
+                        await this.manualAnimation(0, 1, this.decalFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
                                 material.setFloat("visibility", gradient)
@@ -1223,7 +1223,7 @@ export default class CanvasRenderer extends EventEmitter {
                         }
                         this.decal.visibility = 1
                         this.decal.setEnabled(true)
-                        await this.manualAnimation(1, 0, this.decalFade, 30, (gradient) => {
+                        await this.manualAnimation(1, 0, this.decalFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
                                 material.setFloat("visibility", gradient)
@@ -1345,7 +1345,7 @@ export default class CanvasRenderer extends EventEmitter {
                         else
                             this.plateDisplay.visibility = 0.0
                         this.plateDisplay.setEnabled(true)
-                        await this.manualAnimation(0, 1, this.plateFade, 30, (gradient) => {
+                        await this.manualAnimation(0, 1, this.plateFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -1380,7 +1380,7 @@ export default class CanvasRenderer extends EventEmitter {
                         else
                             this.plateDisplay.visibility = 1.0
                         this.plateDisplay.setEnabled(true)
-                        await this.manualAnimation(1, 0, this.plateFade, 30, (gradient) => {
+                        await this.manualAnimation(1, 0, this.plateFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -1507,7 +1507,7 @@ export default class CanvasRenderer extends EventEmitter {
                         else
                             this.hologramDisplay.visibility = 0.0
                         this.hologramDisplay.setEnabled(true)
-                        await this.manualAnimation(0, 1, this.hologramFade, 30, (gradient) => {
+                        await this.manualAnimation(0, 1, this.hologramFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -1542,7 +1542,7 @@ export default class CanvasRenderer extends EventEmitter {
                         else
                             this.hologramDisplay.visibility = 1.0
                         this.hologramDisplay.setEnabled(true)
-                        await this.manualAnimation(1, 0, this.hologramFade, 30, (gradient) => {
+                        await this.manualAnimation(1, 0, this.hologramFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", gradient)
