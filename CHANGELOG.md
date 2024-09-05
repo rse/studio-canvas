@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+2.0.3 (2024-09-06)
+------------------
+
+- IMPROVEMENT: add debug logging for WebSocket messages in server
+
 2.0.2 (2024-09-05)
 ------------------
 
