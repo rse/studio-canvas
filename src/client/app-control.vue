@@ -2149,7 +2149,7 @@
 // @ts-ignore
 import pkg                 from "../../package.json"
 import { defineComponent } from "vue"
-import RecWebSocket        from "reconnecting-websocket"
+import RecWebSocket        from "@opensumi/reconnecting-websocket"
 import Ducky               from "ducky"
 import Slider              from "@vueform/slider"
 import Toggle              from "@vueform/toggle"

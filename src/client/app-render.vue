@@ -133,7 +133,7 @@
 // @ts-ignore
 import pkg                        from "../../package.json"
 import { defineComponent }        from "vue"
-import RecWebSocket               from "reconnecting-websocket"
+import RecWebSocket               from "@opensumi/reconnecting-websocket"
 import Ducky                      from "ducky"
 import moment                     from "moment"
 import axios                      from "axios"
