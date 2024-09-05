@@ -11,6 +11,7 @@ ChangeLog
 - IMPROVEMENT: log more error cases
 - BUGFIX: ensure that asynchronous operations in state reflection handling are awaited
 - BUGFIX: ensure that an exception in the state handling does not lead to a stop of the mechanism
+- BUGFIX: use current FPS for animations instead of hard-coded 30 FPS
 
 2.0.2 (2024-09-05)
 ------------------
