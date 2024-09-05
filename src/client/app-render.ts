@@ -365,6 +365,8 @@ export default class CanvasRenderer extends EventEmitter {
         if (this.monitor === null || this.monitorCase === null || this.monitorDisplay === null)
             throw new Error("cannot find monitor mesh nodes")
         this.monitorDisplay.sideOrientation = BABYLON.Mesh.BACKSIDE
+        if (this.layer === "back")
+            this.monitor.setEnabled(false)
 
         /*  gather references to plate mesh nodes  */
         this.plate        = this.scene.getNodeByName("Plate")         as BABYLON.Nullable<BABYLON.TransformNode>
@@ -372,6 +374,8 @@ export default class CanvasRenderer extends EventEmitter {
         if (this.plate === null || this.plateDisplay === null)
             throw new Error("cannot find plate mesh nodes")
         this.plateDisplay.sideOrientation = BABYLON.Mesh.BACKSIDE
+        if (this.layer === "front")
+            this.plateDisplay.setEnabled(false)
 
         /*  initialize plate base values  */
         this.plateBase.scaleDisplayX = this.plateDisplay!.scaling.x
@@ -387,6 +391,8 @@ export default class CanvasRenderer extends EventEmitter {
         if (this.hologram === null || this.hologramDisplay === null)
             throw new Error("cannot find hologram mesh nodes")
         this.hologramDisplay.sideOrientation = BABYLON.Mesh.BACKSIDE
+        if (this.layer === "front")
+            this.hologramDisplay.setEnabled(false)
 
         /*  initialize plate base values  */
         this.hologramBase.scaleDisplayX = this.hologramDisplay!.scaling.x
@@ -901,10 +907,10 @@ export default class CanvasRenderer extends EventEmitter {
     async reflectSceneState (state: StateTypePartial) {
         /*  ensure we update only if we are already established  */
         if (!this.established)
-            return
+            return true
 
         /*  adjust canvas  */
-        if (state.canvas !== undefined) {
+        if (state.canvas !== undefined && this.layer === "back") {
             let changed = false
             if (state.canvas.texture1 !== undefined && this.texture1URL !== state.canvas.texture1) {
                 this.texture1URL = state.canvas.texture1
@@ -937,7 +943,8 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adjust monitor  */
         if (state.monitor !== undefined
-            && this.monitor !== null && this.monitorCase !== null && this.monitorDisplay !== null) {
+            && this.monitor !== null && this.monitorCase !== null && this.monitorDisplay !== null
+            && this.layer === "back") {
             if (state.monitor.scale !== undefined) {
                 this.monitorCase.scaling.x    = this.monitorBase.scaleCaseX    * state.monitor.scale
                 this.monitorCase.scaling.y    = this.monitorBase.scaleCaseY    * state.monitor.scale
@@ -1027,7 +1034,7 @@ export default class CanvasRenderer extends EventEmitter {
                                 material.setFloat("visibility", 1.0)
                             }
                         })
-                        Promise.all([ anim1.waitAsync(), anim2 ]).then(() => {
+                        await Promise.all([ anim1.waitAsync(), anim2 ]).then(() => {
                             this.emit("log", "INFO", "enabling monitor (fading: end)")
                         })
                     }
@@ -1066,7 +1073,7 @@ export default class CanvasRenderer extends EventEmitter {
                                 material.setFloat("visibility", 0.0)
                             }
                         })
-                        Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
+                        await Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
                             this.emit("log", "INFO", "disabling monitor (fading: end)")
                             this.monitorCase!.setEnabled(false)
                             this.monitorDisplay!.setEnabled(false)
@@ -1090,7 +1097,7 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  adjust decal  */
-        if (state.decal !== undefined && this.decal !== null) {
+        if (state.decal !== undefined && this.decal !== null && this.layer === "back") {
             if (state.decal.rotate !== undefined || state.decal.lift !== undefined || state.decal.scale !== undefined) {
                 let changed = false
                 if (state.decal.rotate !== undefined && this.decalRotate !== state.decal.rotate) {
@@ -1186,7 +1193,7 @@ export default class CanvasRenderer extends EventEmitter {
                         }
                         this.decal.visibility = 1
                         this.decal.setEnabled(true)
-                        this.manualAnimation(0, 1, this.decalFade, 30, (gradient) => {
+                        await this.manualAnimation(0, 1, this.decalFade, 30, (gradient) => {
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
                                 material.setFloat("visibility", gradient)
@@ -1214,7 +1221,7 @@ export default class CanvasRenderer extends EventEmitter {
                         }
                         this.decal.visibility = 1
                         this.decal.setEnabled(true)
-                        this.manualAnimation(1, 0, this.decalFade, 30, (gradient) => {
+                        await this.manualAnimation(1, 0, this.decalFade, 30, (gradient) => {
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
                                 material.setFloat("visibility", gradient)
@@ -1244,7 +1251,7 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  adjust plate  */
-        if (state.plate !== undefined && this.plate !== null && this.plateDisplay !== null) {
+        if (state.plate !== undefined && this.plate !== null && this.plateDisplay !== null && this.layer === "front") {
             if (state.plate.scale !== undefined) {
                 this.plateDisplay.scaling.x = this.plateBase.scaleDisplayX * state.plate.scale
                 this.plateDisplay.scaling.y = this.plateBase.scaleDisplayY * state.plate.scale
@@ -1336,7 +1343,7 @@ export default class CanvasRenderer extends EventEmitter {
                         else
                             this.plateDisplay.visibility = 0.0
                         this.plateDisplay.setEnabled(true)
-                        this.manualAnimation(0, 1, this.plateFade, 30, (gradient) => {
+                        await this.manualAnimation(0, 1, this.plateFade, 30, (gradient) => {
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -1371,7 +1378,7 @@ export default class CanvasRenderer extends EventEmitter {
                         else
                             this.plateDisplay.visibility = 1.0
                         this.plateDisplay.setEnabled(true)
-                        this.manualAnimation(1, 0, this.plateFade, 30, (gradient) => {
+                        await this.manualAnimation(1, 0, this.plateFade, 30, (gradient) => {
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -1498,7 +1505,7 @@ export default class CanvasRenderer extends EventEmitter {
                         else
                             this.hologramDisplay.visibility = 0.0
                         this.hologramDisplay.setEnabled(true)
-                        this.manualAnimation(0, 1, this.hologramFade, 30, (gradient) => {
+                        await this.manualAnimation(0, 1, this.hologramFade, 30, (gradient) => {
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -1533,7 +1540,7 @@ export default class CanvasRenderer extends EventEmitter {
                         else
                             this.hologramDisplay.visibility = 1.0
                         this.hologramDisplay.setEnabled(true)
-                        this.manualAnimation(1, 0, this.hologramFade, 30, (gradient) => {
+                        await this.manualAnimation(1, 0, this.hologramFade, 30, (gradient) => {
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -1578,7 +1585,7 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  adjust avatars  */
-        if (state.avatars !== undefined && this.avatar1 !== null && this.avatar2 !== null) {
+        if (state.avatars !== undefined && this.avatar1 !== null && this.avatar2 !== null && this.layer === "back") {
             /*  adjust avatar 1  */
             if (state.avatars.enable1 !== undefined && this.avatar1.isEnabled() !== state.avatars.enable1)
                 this.avatar1.setEnabled(state.avatars.enable1)
@@ -1611,7 +1618,7 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  adjust reference points  */
-        if (state.references !== undefined && this.references !== null) {
+        if (state.references !== undefined && this.references !== null && this.layer === "back") {
             if (state.references.enable !== undefined)
                 this.references.setEnabled(state.references.enable)
         }
@@ -1705,6 +1712,8 @@ export default class CanvasRenderer extends EventEmitter {
             }
             this.configureFPS(fps)
         }
+
+        return true
     }
 
     /*  react on a received mixer record by reflecting the camera mixer state  */
