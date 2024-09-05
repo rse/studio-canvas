@@ -2,10 +2,11 @@
 ChangeLog
 =========
 
-2.0.2 (2024-09-04)
+2.0.2 (2024-09-05)
 ------------------
 
 - UPDATE: update dependencies
+- BUGFIX: switch to fixed version of reconnecting-websocket package
 
 2.0.1 (2024-08-07)
 ------------------
