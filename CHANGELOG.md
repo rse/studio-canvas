@@ -8,6 +8,7 @@ ChangeLog
 - IMPROVEMENT: add debug logging for WebSocket messages in server
 - IMPROVEMENT: improve debug mechanism in renderer
 - IMPROVEMENT: improve front/back handling in state reflection handling
+- IMPROVEMENT: log more error cases
 - BUGFIX: ensure that asynchronous operations in state reflection handling are awaited
 - BUGFIX: ensure that an exception in the state handling does not lead to a stop of the mechanism
 
