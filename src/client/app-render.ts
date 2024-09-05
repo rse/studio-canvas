@@ -991,7 +991,7 @@ export default class CanvasRenderer extends EventEmitter {
                     this.monitorChromaKey.threshold = state.monitor.chromaKey.threshold
                     if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.monitorDisplay.material
-                        material.setFloat("chromaThreshold", this.decalChromaKey.threshold)
+                        material.setFloat("chromaThreshold", this.monitorChromaKey.threshold)
                     }
                 }
                 if (state.monitor.chromaKey.smoothing !== undefined && this.monitorChromaKey.smoothing !== state.monitor.chromaKey.smoothing) {
