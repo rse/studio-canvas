@@ -686,6 +686,7 @@ export default class CanvasRenderer extends EventEmitter {
                 frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
             }
         }).catch((error: Error) => {
+            this.emit("log", "ERROR", `failed to load video stream (RGB) "${label}" onto ${name}: ${error})`)
             throw new Error(`failed to load video stream (RGB) "${label}" onto ${name}: ${error})`)
         })
         const vt1 = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, dev1, {} as any, false)
@@ -704,6 +705,7 @@ export default class CanvasRenderer extends EventEmitter {
                     frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
                 }
             }).catch((error: Error) => {
+                this.emit("log", "ERROR", `failed to load video stream (A) "${label2}" onto ${name}: ${error})`)
                 throw new Error(`failed to load video stream (A) "${label2}" onto ${name}: ${error})`)
             })
             vt2 = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, dev2, {} as any, false)
