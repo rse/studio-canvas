@@ -1413,7 +1413,7 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  adjust hologram  */
-        if (state.hologram !== undefined && this.hologram !== null && this.hologramDisplay !== null) {
+        if (state.hologram !== undefined && this.hologram !== null && this.hologramDisplay !== null && this.layer === "front") {
             if (state.hologram.scale !== undefined) {
                 this.hologramDisplay.scaling.x = this.hologramBase.scaleDisplayX * state.hologram.scale
                 this.hologramDisplay.scaling.y = this.hologramBase.scaleDisplayY * state.hologram.scale
