@@ -125,36 +125,47 @@ export default class RESTWS extends Latching {
     /*  notify clients about camera state change  */
     notifyCamState (cam: string, state: FreeDState | null) {
         const msg = JSON.stringify({ cmd: "PTZ", arg: { cam, state } })
-        for (const info of this.wsPeers.values())
-            if (info.subscribed.get(cam))
+        for (const [ id, info ] of this.wsPeers.entries()) {
+            if (info.subscribed.get(cam)) {
+                this.log.log(3, `WebSocket: notify CAMERA STATE change: peer="${id} (${info.peer})" msg=${msg}`)
                 info.ws.send(msg)
+            }
+        }
     }
 
     /*  notify clients about scene state change  */
     notifySceneState (state: StateTypePartial) {
         const msg = JSON.stringify({ cmd: "STATE", arg: { state } })
-        for (const info of this.wsPeers.values())
+        for (const [ id, info ] of this.wsPeers.entries()) {
+            this.log.log(3, `WebSocket: notify SCENE STATE change: peer="${id} (${info.peer})" msg=${msg}`)
             info.ws.send(msg)
+        }
     }
 
     /*  notify clients about mixer change  */
     notifyMixerState (mixer: MixerState) {
         const msg = JSON.stringify({ cmd: "MIXER", arg: { mixer } })
-        for (const info of this.wsPeers.values())
+        for (const [ id, info ] of this.wsPeers.entries()) {
+            this.log.log(3, `WebSocket: notify MIXER change: peer="${id} (${info.peer})" msg=${msg}`)
             info.ws.send(msg)
+        }
     }
 
-    /*  notify clients about renderer sync  */
+    /*  notify clients about renderer sync action  */
     notifyRendererSync (timestamp: number) {
         const msg = JSON.stringify({ cmd: "SYNC", arg: { timestamp } })
-        for (const info of this.wsPeers.values())
+        for (const [ id, info ] of this.wsPeers.entries()) {
+            this.log.log(3, `WebSocket: notify RENDERER SYNC action: peer="${id} (${info.peer})" msg=${msg}`)
             info.ws.send(msg)
+        }
     }
 
     /*  notify clients about statistics change  */
     notifyStats () {
         const msg = JSON.stringify({ cmd: "STATS", arg: { stats: this.stats } })
-        for (const info of this.wsPeers.values())
+        for (const [ id, info ] of this.wsPeers.entries()) {
+            this.log.log(3, `WebSocket: notify STATISTICS change: peer="${id} (${info.peer})" msg=${msg}`)
             info.ws.send(msg)
+        }
     }
 }
