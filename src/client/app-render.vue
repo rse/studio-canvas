@@ -148,6 +148,7 @@ import {
 
 <script lang="ts">
 let renderer: CanvasRenderer | null = null
+let debugTimer: ReturnType<typeof setTimeout> | null = null
 export default defineComponent({
     name: "app-render",
     components: {},
@@ -185,7 +186,7 @@ export default defineComponent({
             this.overlay(msg)
         })
         renderer.on("DEBUG", (msg: string) => {
-            this.debug = msg
+            this.setDebug(msg)
         })
         renderer.on("fps", (fps: number) => {
             this.fps = fps
@@ -213,7 +214,7 @@ export default defineComponent({
         ws.addEventListener("error", (ev) => {
             this.log("WARNING", "WebSocket server connection error")
         })
-        let queueSceneState = Promise.resolve()
+        let queueSceneState: Promise<boolean> = Promise.resolve(true)
         ws.addEventListener("message", (ev: MessageEvent) => {
             if (typeof ev.data !== "string") {
                 this.log("WARNING", "invalid WebSocket server message received")
@@ -236,9 +237,26 @@ export default defineComponent({
                     this.log("WARNING", `invalid schema of loaded state: ${errors.join(", ")}`)
                     return
                 }
-                queueSceneState = queueSceneState.then(() => {
-                    return renderer!.reflectSceneState(state)
-                })
+                setTimeout(() => {
+                    queueSceneState = queueSceneState.then(() => {
+                        let promise: Promise<boolean>
+                        try {
+                            promise = renderer!.reflectSceneState(state).catch((err: Error) => {
+                                this.log("ERROR", `reflecting scene state FAILED (1): ${err.toString()}`)
+                                return true
+                            })
+                            this.reflectSceneState(state as StateType)
+                        }
+                        catch (err: any) {
+                            this.log("ERROR", `reflecting scene state FAILED (2): ${err.toString()}`)
+                            promise = Promise.resolve(true)
+                        }
+                        return promise
+                    }).catch((err: Error) => {
+                        this.log("ERROR", `reflecting scene state FAILED (3): ${err.toString()}`)
+                        return true
+                    })
+                }, 0)
             }
             else if (data.cmd === "MIXER") {
                 const mixer = data.arg.mixer as MixerState
@@ -248,6 +266,11 @@ export default defineComponent({
                 const timestamp = data.arg.timestamp as number
                 renderer!.reflectSyncTime(timestamp)
             }
+            else if (data.cmd === "STATS") {
+                /*  no-op in renderer  */
+            }
+            else
+                this.log("WARNING", `unknown message received: cmd=${data.cmd} ${JSON.stringify(data)}`)
         })
 
         /*  load scene state once  */
@@ -299,6 +322,12 @@ export default defineComponent({
         reflectSceneState (state: StateTypePartial) {
             if (state.renderer?.overlay !== undefined)
                 this.fpsOverlayEnable = state.renderer?.overlay
+        },
+        setDebug (msg: string) {
+            this.debug = msg
+            if (debugTimer !== null)
+                clearTimeout(debugTimer)
+            debugTimer = setTimeout(() => { this.debug = "" }, 4000)
         }
     }
 })

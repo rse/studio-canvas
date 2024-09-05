@@ -6,6 +6,8 @@ ChangeLog
 ------------------
 
 - IMPROVEMENT: add debug logging for WebSocket messages in server
+- IMPROVEMENT: improve debug mechanism in renderer
+- BUGFIX: ensure that an exception in the state handling does not lead to a stop of the mechanism
 
 2.0.2 (2024-09-05)
 ------------------
