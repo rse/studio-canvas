@@ -485,12 +485,12 @@
                         <div class="label3">[mult]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.decal.scale)"
-                                v-on:change="(ev) => state.decal.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 3.5)"/>
+                                v-on:change="(ev) => state.decal.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 5.0)"/>
                         </div>
                         <div class="button" v-on:click="state.decal.scale = 1.0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.scale"
-                                v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
+                                v-bind:min="0.1" v-bind:max="5.0" v-bind:step="0.01"
                                 show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
