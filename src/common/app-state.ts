@@ -10,6 +10,12 @@ import { minimatch } from "minimatch"
 
 /*  complete state type (all fields required)  */
 export type StateType = {
+    streams: {
+        device:     string,
+        width:      number,
+        height:     number,
+        fps:        number
+    },
     canvas: {
         id:         string
         texture1:   string,
@@ -20,8 +26,6 @@ export type StateType = {
     },
     monitor: {
         enable:     boolean,
-        device:     string,
-        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -34,8 +38,6 @@ export type StateType = {
     },
     decal: {
         enable:     boolean,
-        device:     string,
-        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -51,8 +53,6 @@ export type StateType = {
     },
     plate: {
         enable:     boolean,
-        device:     string,
-        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -69,8 +69,6 @@ export type StateType = {
     },
     hologram: {
         enable:     boolean,
-        device:     string,
-        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -138,6 +136,12 @@ export type StateTypePartial = Partial<StateType>
 
 /*  complete state schema (all fields required)  */
 export const StateSchema = `{
+    streams: {
+        device:     string,
+        width:      number,
+        height:     number,
+        fps:        number
+    },
     canvas: {
         id:         string,
         texture1:   string,
@@ -148,8 +152,6 @@ export const StateSchema = `{
     },
     monitor: {
         enable:     boolean,
-        device:     string,
-        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -162,8 +164,6 @@ export const StateSchema = `{
     },
     decal: {
         enable:     boolean,
-        device:     string,
-        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -179,8 +179,6 @@ export const StateSchema = `{
     },
     plate: {
         enable:     boolean,
-        device:     string,
-        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -197,8 +195,6 @@ export const StateSchema = `{
     },
     hologram: {
         enable:     boolean,
-        device:     string,
-        device2:    string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -266,6 +262,12 @@ export const StateSchemaPartial = StateSchema.replace(/:/g, "?:")
 
 /*  complete state default (all fields with default values)  */
 export const StateDefault: StateType = {
+    streams: {
+        device:     "",
+        width:      1920,
+        height:     1080,
+        fps:        30
+    },
     canvas: {
         id:         "hexagons",
         texture1:   "/canvas/hexagons-1.jpg",
@@ -276,8 +278,6 @@ export const StateDefault: StateType = {
     },
     monitor: {
         enable:     false,
-        device:     "",
-        device2:    "",
         fadeTime:   2.0,
         scale:      1.0,
         rotate:     10,
@@ -290,8 +290,6 @@ export const StateDefault: StateType = {
     },
     decal: {
         enable:     false,
-        device:     "",
-        device2:    "",
         fadeTime:   2.0,
         scale:      1.0,
         rotate:     -25,
@@ -307,8 +305,6 @@ export const StateDefault: StateType = {
     },
     plate: {
         enable:     false,
-        device:     "",
-        device2:    "",
         fadeTime:   2.0,
         scale:      1.0,
         rotate:     -25,
@@ -325,8 +321,6 @@ export const StateDefault: StateType = {
     },
     hologram: {
         enable:     false,
-        device:     "",
-        device2:    "",
         fadeTime:   2.0,
         scale:      1.0,
         rotate:     -25,

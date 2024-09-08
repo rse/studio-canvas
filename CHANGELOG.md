@@ -2,9 +2,10 @@
 ChangeLog
 =========
 
-2.0.3 (2024-09-06)
+2.1.0 (2024-09-08)
 ------------------
 
+- REFACTORING: switch to new stacked single-4K-video ingest
 - IMPROVEMENT: add debug logging for WebSocket messages in server
 - IMPROVEMENT: improve debug mechanism in renderer
 - IMPROVEMENT: improve front/back handling in state reflection handling

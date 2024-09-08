@@ -195,6 +195,21 @@ export default defineComponent({
         await renderer.establish(canvas)
         await renderer.start()
 
+        /*  load scene state once  */
+        this.log("INFO", "initially configuring Studio Canvas scene")
+        this.overlay("initially configuring Studio Canvas scene")
+        const state = await axios({
+            method: "GET",
+            url:    `${this.serviceUrl}state`
+        }).then((response) => response.data).catch(() => null)
+        if (state === null)
+            throw new Error("failed to load state")
+        const errors = [] as Array<string>
+        if (!Ducky.validate(state, StateSchema, errors))
+            throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
+        await renderer.reflectSceneState(state as StateType)
+        this.reflectSceneState(state as StateType)
+
         /*  connect to server for PTZ and state updates  */
         this.log("INFO", "establish WebSocket server connection")
         this.overlay("establish WebSocket server connection")
@@ -227,7 +242,7 @@ export default defineComponent({
             }
             if (data.cmd === "PTZ" && data.arg?.cam === this.cam) {
                 const state = data.arg.state as FreeDState
-                if (this.options.get("ptzFreeD"))
+                if (this.options.get("ptzFreeD") && state !== null)
                     renderer!.reflectFreeDState(state)
             }
             else if (data.cmd === "STATE") {
@@ -272,21 +287,6 @@ export default defineComponent({
             else
                 this.log("WARNING", `unknown message received: cmd=${data.cmd} ${JSON.stringify(data)}`)
         })
-
-        /*  load scene state once  */
-        this.log("INFO", "initially configuring Studio Canvas scene")
-        this.overlay("initially configuring Studio Canvas scene")
-        const state = await axios({
-            method: "GET",
-            url:    `${this.serviceUrl}state`
-        }).then((response) => response.data).catch(() => null)
-        if (state === null)
-            throw new Error("failed to load state")
-        const errors = [] as Array<string>
-        if (!Ducky.validate(state, StateSchema, errors))
-            throw new Error(`invalid schema of loaded state: ${errors.join(", ")}`)
-        await renderer.reflectSceneState(state as StateType)
-        this.reflectSceneState(state as StateType)
 
         /*  give renderer time to initially render the scence at least once
             (before we potentially cause 0 FPS in the next step)  */

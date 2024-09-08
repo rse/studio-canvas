@@ -255,12 +255,79 @@
                     </div>
                 </tab>
 
+                <!--  ==== STREAMS ====  -->
+                <tab id="streams" name="Streams">
+                    <div class="desc">
+                        The <b>Streams</b> are the video streams which can be shown on
+                        the Monitor, Decal, Plate and Hologram. The content is received
+                        with a single virtual video device which had to carry N content stacks
+                        (from left to right) and each stack consists of the content RGB
+                        on top of content alpha with (black-to-white, 100-0% visibillity).
+                    </div>
+                    <div class="control">
+                        <div class="label1">video</div>
+                        <div class="label2">(device)</div>
+                        <div class="label3">[id]:</div>
+                        <div class="value">
+                            <div class="fixed">*</div>
+                        </div>
+                        <div class="button" v-on:click="state.streams.device = ''">RESET</div>
+                        <div class="slider">
+                            <input class="text" v-model.lazy="state.streams.device"/>
+                        </div>
+
+                        <div class="label1">size</div>
+                        <div class="label2">(width)</div>
+                        <div class="label3">[px]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.streams.width, 0, true)"
+                                v-on:change="(ev) => state.streams.width = fieldImport((ev.target! as HTMLInputElement).value, 0, 3840)"/>
+                        </div>
+                        <div class="button" v-on:click="state.streams.width = 1920">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.streams.width"
+                                v-bind:min="0.0" v-bind:max="3840" v-bind:step="40"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">size</div>
+                        <div class="label2">(height)</div>
+                        <div class="label3">[px]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.streams.height, 0, true)"
+                                v-on:change="(ev) => state.streams.height = fieldImport((ev.target! as HTMLInputElement).value, 0, 2160)"/>
+                        </div>
+                        <div class="button" v-on:click="state.streams.height = 1080">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.streams.height"
+                                v-bind:min="0.0" v-bind:max="2160" v-bind:step="40"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                            ></slider>
+                        </div>
+
+                        <div class="label1">fps</div>
+                        <div class="label2">(fps)</div>
+                        <div class="label3">[fps]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.streams.fps, 2, true)"
+                                v-on:change="(ev) => state.streams.fps = fieldImport((ev.target! as HTMLInputElement).value, 0, 60)"/>
+                        </div>
+                        <div class="button" v-on:click="state.streams.fps = 30.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.streams.fps"
+                                v-bind:min="0.0" v-bind:max="60.0" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                            ></slider>
+                        </div>
+                    </div>
+                </tab>
+
                 <!--  ==== MONITOR ====  -->
                 <tab id="monitor" name="Monitor">
                     <div class="desc">
                         The <b>Monitor</b> is the optional TV-style monitor which can be shown
-                        in front of the background canvas. It can be given a particular
-                        video source device as input, scaled in size, and positioned on in a
+                        in front of the background canvas. It can be scaled in size, and positioned on in a
                         radial way in front of the background canvas.
                     </div>
                     <div class="control">
@@ -275,39 +342,17 @@
                             <toggle class="toggle" v-model="state.monitor.enable"></toggle>
                         </div>
 
-                        <div class="label1">video</div>
-                        <div class="label2">(device, content)</div>
-                        <div class="label3">[id]:</div>
-                        <div class="value">
-                            <div class="fixed">*</div>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.device = ''">RESET</div>
-                        <div class="slider">
-                            <input class="text" v-model.lazy="state.monitor.device"/>
-                        </div>
-
-                        <div class="label1">video</div>
-                        <div class="label2">(device, alpha)</div>
-                        <div class="label3">[id]:</div>
-                        <div class="value">
-                            <div class="fixed">*</div>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.device2 = ''">RESET</div>
-                        <div class="slider">
-                            <input class="text" v-model.lazy="state.monitor.device2"/>
-                        </div>
-
                         <div class="label1">fade</div>
                         <div class="label2">(time)</div>
                         <div class="label3">[sec]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.monitor.fadeTime)"
-                                v-on:change="(ev) => state.monitor.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0, 4.0)"/>
+                                v-on:change="(ev) => state.monitor.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 4.0)"/>
                         </div>
                         <div class="button" v-on:click="state.monitor.fadeTime = 2.0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.monitor.fadeTime"
-                                v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
+                                v-bind:min="0.1" v-bind:max="4.0" v-bind:step="0.10"
                                 show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
@@ -404,8 +449,7 @@
                 <tab id="decal" name="Decal">
                     <div class="desc">
                         The <b>Decal</b> is the optional poster-style display which can be projected
-                        onto the background canvas. It can be given a particular video (content) source device
-                        as input, optionally a alpha-channel carrying video device, scaled in size, positioned in a radial way on the background canvas,
+                        onto the background canvas. It can scaled in size, positioned in a radial way on the background canvas,
                         its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
                         and a chroma-key filter applied.
                     </div>
@@ -421,39 +465,17 @@
                             <toggle class="toggle" v-model="state.decal.enable"></toggle>
                         </div>
 
-                        <div class="label1">video</div>
-                        <div class="label2">(device, content)</div>
-                        <div class="label3">[id]:</div>
-                        <div class="value">
-                            <div class="fixed">*</div>
-                        </div>
-                        <div class="button" v-on:click="state.decal.device = ''">RESET</div>
-                        <div class="slider">
-                            <input class="text" v-model.lazy="state.decal.device"/>
-                        </div>
-
-                        <div class="label1">video</div>
-                        <div class="label2">(device, alpha)</div>
-                        <div class="label3">[id]:</div>
-                        <div class="value">
-                            <div class="fixed">*</div>
-                        </div>
-                        <div class="button" v-on:click="state.decal.device2 = ''">RESET</div>
-                        <div class="slider">
-                            <input class="text" v-model.lazy="state.decal.device2"/>
-                        </div>
-
                         <div class="label1">fade</div>
                         <div class="label2">(time)</div>
                         <div class="label3">[sec]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.decal.fadeTime)"
-                                v-on:change="(ev) => state.decal.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0, 4.0)"/>
+                                v-on:change="(ev) => state.decal.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 4.0)"/>
                         </div>
                         <div class="button" v-on:click="state.decal.fadeTime = 2.0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.decal.fadeTime"
-                                v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
+                                v-bind:min="0.1" v-bind:max="4.0" v-bind:step="0.10"
                                 show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
@@ -596,8 +618,7 @@
                     <div class="desc">
                         The <b>Plate</b> is the optional planar display which can be projected
                         in the foreground, intended as the optical plate on the desk's front side.
-                        It can be given a particular video (content) source device
-                        as input, optionally a alpha-channel carrying video device, scaled in size, positioned in a radial way on the background canvas,
+                        It can be given scaled in size, positioned in a radial way on the background canvas,
                         its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
                         and a chroma-key filter applied.
                     </div>
@@ -613,39 +634,17 @@
                             <toggle class="toggle" v-model="state.plate.enable"></toggle>
                         </div>
 
-                        <div class="label1">video</div>
-                        <div class="label2">(device, content)</div>
-                        <div class="label3">[id]:</div>
-                        <div class="value">
-                            <div class="fixed">*</div>
-                        </div>
-                        <div class="button" v-on:click="state.plate.device = ''">RESET</div>
-                        <div class="slider">
-                            <input class="text" v-model.lazy="state.plate.device"/>
-                        </div>
-
-                        <div class="label1">video</div>
-                        <div class="label2">(device, alpha)</div>
-                        <div class="label3">[id]:</div>
-                        <div class="value">
-                            <div class="fixed">*</div>
-                        </div>
-                        <div class="button" v-on:click="state.plate.device2 = ''">RESET</div>
-                        <div class="slider">
-                            <input class="text" v-model.lazy="state.plate.device2"/>
-                        </div>
-
                         <div class="label1">fade</div>
                         <div class="label2">(time)</div>
                         <div class="label3">[sec]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.plate.fadeTime)"
-                                v-on:change="(ev) => state.plate.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0, 4.0)"/>
+                                v-on:change="(ev) => state.plate.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 4.0)"/>
                         </div>
                         <div class="button" v-on:click="state.plate.fadeTime = 2.0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.plate.fadeTime"
-                                v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
+                                v-bind:min="0.1" v-bind:max="4.0" v-bind:step="0.10"
                                 show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
@@ -802,8 +801,7 @@
                 <tab id="hologram" name="Hologram">
                     <div class="desc">
                         The <b>Hologram</b> is the optional planar display which can be projected
-                        in the foreground. It can be given a particular video (content) source device
-                        as input, optionally a alpha-channel carrying video device, scaled in size, positioned in a radial way on the background canvas,
+                        in the foreground. It can be scaled in size, positioned in a radial way on the background canvas,
                         its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
                         and a chroma-key filter applied.
                     </div>
@@ -819,39 +817,17 @@
                             <toggle class="toggle" v-model="state.hologram.enable"></toggle>
                         </div>
 
-                        <div class="label1">video</div>
-                        <div class="label2">(device, content)</div>
-                        <div class="label3">[id]:</div>
-                        <div class="value">
-                            <div class="fixed">*</div>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.device = ''">RESET</div>
-                        <div class="slider">
-                            <input class="text" v-model.lazy="state.hologram.device"/>
-                        </div>
-
-                        <div class="label1">video</div>
-                        <div class="label2">(device, alpha)</div>
-                        <div class="label3">[id]:</div>
-                        <div class="value">
-                            <div class="fixed">*</div>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.device2 = ''">RESET</div>
-                        <div class="slider">
-                            <input class="text" v-model.lazy="state.hologram.device2"/>
-                        </div>
-
                         <div class="label1">fade</div>
                         <div class="label2">(time)</div>
                         <div class="label3">[sec]:</div>
                         <div class="value">
                             <input tabindex="8" v-bind:value="fieldExport(state.hologram.fadeTime)"
-                                v-on:change="(ev) => state.hologram.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0, 4.0)"/>
+                                v-on:change="(ev) => state.hologram.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 4.0)"/>
                         </div>
                         <div class="button" v-on:click="state.hologram.fadeTime = 2.0">RESET</div>
                         <div class="slider">
                             <slider class="slider" v-model="state.hologram.fadeTime"
-                                v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
+                                v-bind:min="0.1" v-bind:max="4.0" v-bind:step="0.10"
                                 show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                             ></slider>
                         </div>
@@ -2460,9 +2436,9 @@ export default defineComponent({
         },
 
         /*  export a field  */
-        fieldExport (n: number, digits = 2) {
+        fieldExport (n: number, digits = 2, nosign = false) {
             let txt = n.toFixed(digits)
-            if (!txt.match(/^-/))
+            if (!txt.match(/^-/) && !nosign)
                 txt = `+${txt}`
             return txt
         },

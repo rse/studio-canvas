@@ -73,6 +73,8 @@ export default class ShaderMaterial {
                 uniform float     chromaThreshold;
                 uniform float     chromaSmoothing;
                 uniform vec3      chromaCol;
+                uniform int       stack;
+                uniform int       stacks;
 
                 vec3 rgb4ycc (vec3 col) {
                     float Y  = 0.2989 * col.r + 0.5866 * col.g + 0.1145 * col.b;
@@ -94,19 +96,25 @@ export default class ShaderMaterial {
                 }
 
                 void main (void) {
+                    /*  determine current pixel coordinates  */
+                    vec2 coordRGB = vec2((float(stack) / float(stacks)) + (vUV.x / float(stacks)), vUV.y * 0.5);
+                    vec2 coordA   = vec2((float(stack) / float(stacks)) + (vUV.x / float(stacks)), 0.5 + vUV.y * 0.5);
+
                     /*  determine current pixel color  */
-                    vec4 sampleColVec4 = texture2D(textureSampler, vUV);
-                    vec3 sampleCol     = sampleColVec4.rgb;
-                    float sampleAlpha  = sampleColVec4.a;
+                    vec4  sampleColVec4   = texture2D(textureSampler, coordRGB);
+                    vec3  sampleCol       = sampleColVec4.rgb;
+                    vec4  sampleAlphaVec4 = texture2D(textureSampler, coordA);
+                    float sampleAlpha     = 1.0 - sampleAlphaVec4.r;
 
                     /*  determine position in real texture coordinates  */
-                    ivec2 size = textureSize(textureSampler, 0);
-                    vec2 pos = vec2(vUV.x * float(size.x), vUV.y * float(size.y));
+                    ivec2 ts  = textureSize(textureSampler, 0);
+                    vec2 size = vec2(float(ts.x) / float(stacks), float(ts.y) * 0.5);
+                    vec2 pos  = vec2(vUV.x * size.x, vUV.y * size.y);
 
                     /*  optionally apply border cropping  */
                     float cropping = (borderCrop > 0.0 && (
-                        pos.x < borderCrop || pos.x > (float(size.x) - borderCrop) ||
-                        pos.y < borderCrop || pos.y > (float(size.y) - borderCrop)   )) ? 0.0 : 1.0;
+                        pos.x < borderCrop || pos.x > (size.x - borderCrop) ||
+                        pos.y < borderCrop || pos.y > (size.y - borderCrop)   )) ? 0.0 : 1.0;
 
                     /*  optionally apply chroma-key  */
                     float chromaKey = 1.0;
@@ -126,13 +134,13 @@ export default class ShaderMaterial {
                     if (borderRadius > 0.0) {
                         float distance = max(max(max(
                             roundedCornerOutsideDistance(pos, vec2(-1.0,  1.0),
-                                vec2(0.0 + borderRadius, float(size.y) - borderRadius), borderRadius),
+                                vec2(0.0    + borderRadius, size.y - borderRadius), borderRadius),
                             roundedCornerOutsideDistance(pos, vec2( 1.0,  1.0),
-                                vec2(float(size.x) - borderRadius, float(size.y) - borderRadius), borderRadius)),
+                                vec2(size.x - borderRadius, size.y - borderRadius), borderRadius)),
                             roundedCornerOutsideDistance(pos, vec2( 1.0, -1.0),
-                                vec2(float(size.x) - borderRadius, 0.0 + borderRadius), borderRadius)),
+                                vec2(size.x - borderRadius, 0.0    + borderRadius), borderRadius)),
                             roundedCornerOutsideDistance(pos, vec2(-1.0, -1.0),
-                                vec2(0.0 + borderRadius, 0.0 + borderRadius), borderRadius));
+                                vec2(0.0    + borderRadius, 0.0    + borderRadius), borderRadius));
                         cornerBlend = cornerBlend - smoothstep(0.0f, borderRadiusSoftness, distance);
                     }
 
@@ -159,6 +167,8 @@ export default class ShaderMaterial {
                 "chromaEnable",
                 "chromaThreshold",
                 "chromaSmoothing",
+                "stack",
+                "stacks",
 
                 /*  custom application uniforms (hard-coded)  */
                 "chromaCol"
@@ -174,6 +184,8 @@ export default class ShaderMaterial {
         material.setFloat("chromaThreshold", 0.4)
         material.setFloat("chromaSmoothing", 0.1)
         material.setVector3("chromaCol", new BABYLON.Vector3(0.0, 1.0, 0.0))
+        material.setInt("stack", 0)
+        material.setInt("stacks", 1)
         return material
     }
 }
