@@ -12,6 +12,8 @@ Bugfixes
 - BUGFIX:
   OBS > Ultimatte: SDI out-of-sync -> black border
   Workaround: Front nicht für schnelle Dinge verwenden
+  See Also: https://forum.derivative.ca/t/alpha-matte-desync-on-video-device-out-top/437533/5
+  OBS has a "Keyed" option in Decklink output!
 
 - BUGFIX: 
   Bei Fade=0 bleibt mindestens die Plate bein Ausschalten stehen. Schaltet man Hologram ein, dann verschwindet sie.
