@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+2.1.1 (2024-09-09)
+------------------
+
+- WORKAROUND: increase fade-time of Monitor/Decal/Hologram/Plate from 0.1 to 0.2 seconds to workaround problems on disabling
+
 2.1.0 (2024-09-08)
 ------------------
 
