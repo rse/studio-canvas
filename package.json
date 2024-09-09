@@ -99,7 +99,7 @@
         "stylelint-stylus":                 "1.0.0",
         "postcss-html":                     "1.7.0",
         "stylus":                           "0.63.0",
-        "typescript":                       "5.5.4",
+        "typescript":                       "5.6.2",
         "vite":                             "5.4.3",
         "vue-tsc":                          "2.1.6",
         "delay-cli":                        "2.0.0",
