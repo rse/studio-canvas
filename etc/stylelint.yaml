@@ -21,3 +21,8 @@ rules:
     stylus/single-line-comment: null
     stylus/selector-list-comma: "always"
 
+    #   to get rid of deprecation warnings in "stylelint-stylus"
+    stylus/at-rule-name-space-after: null
+    stylus/selector-pseudo-class-case: null
+    stylus/no-eol-whitespace: null
+

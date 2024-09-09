@@ -7,6 +7,7 @@ ChangeLog
 
 - WORKAROUND: increase fade-time of Monitor/Decal/Hologram/Plate from 0.1 to 0.2 seconds to workaround problems on disabling
 - IMPROVEMENT: allow larger Decal sizes
+- CLEANUP: get rid of deprecation warnings in stylelint
 
 2.1.0 (2024-09-08)
 ------------------
