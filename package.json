@@ -18,7 +18,7 @@
     "browser":         "src/client/index.html",
     "main":            "src/client/index.html",
     "dependencies": {
-        "vue":                              "3.5.3",
+        "vue":                              "3.5.4",
         "vue-tippy":                        "6.4.4",
         "@vueform/slider":                  "2.1.10",
         "@vueform/toggle":                  "2.1.4",
@@ -36,7 +36,7 @@
         "@hapi/inert":                      "7.1.0",
         "hapi-plugin-header":               "1.1.8",
         "hapi-plugin-traffic":              "1.1.8",
-        "hapi-plugin-websocket":            "2.4.8",
+        "hapi-plugin-websocket":            "2.4.9",
         "hapi-plugin-ducky":                "1.1.9",
 
         "@types/node":                      "22.5.4",
@@ -100,7 +100,7 @@
         "postcss-html":                     "1.7.0",
         "stylus":                           "0.63.0",
         "typescript":                       "5.6.2",
-        "vite":                             "5.4.3",
+        "vite":                             "5.4.4",
         "vue-tsc":                          "2.1.6",
         "delay-cli":                        "2.0.0",
         "nps":                              "5.10.0",
@@ -110,7 +110,9 @@
     "upd": [
         "!eslint",
         "!htmllint",
-        "!chalk"
+        "!chalk",
+        "!@typescript-eslint/eslint-plugin",
+        "!@typescript-eslint/parser"
     ],
     "scripts": {
         "start": "nps -c etc/nps.yaml"
