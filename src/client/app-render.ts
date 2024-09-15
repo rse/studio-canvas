@@ -1254,7 +1254,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.plate.lift !== undefined)
                 this.plate.position.z = this.plateBase.positionZ + state.plate.lift
             if (state.plate.distance !== undefined)
-                this.plate.position.x = this.plateBase.positionX + state.plate.distance
+                this.plate.position.x = this.plateBase.positionX - state.plate.distance
             if (state.plate.fadeTime !== undefined && this.plateFade !== state.plate.fadeTime)
                 this.plateFade = state.plate.fadeTime
             if (state.plate.opacity !== undefined) {
@@ -1407,7 +1407,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.hologram.lift !== undefined)
                 this.hologram.position.z = this.hologramBase.positionZ + state.hologram.lift
             if (state.hologram.distance !== undefined)
-                this.hologram.position.x = this.hologramBase.positionX + state.hologram.distance
+                this.hologram.position.x = this.hologramBase.positionX - state.hologram.distance
             if (state.hologram.fadeTime !== undefined && this.hologramFade !== state.hologram.fadeTime)
                 this.hologramFade = state.hologram.fadeTime
             if (state.hologram.opacity !== undefined) {
