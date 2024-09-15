@@ -2,7 +2,7 @@
 ChangeLog
 =========
 
-2.1.2 (2024-09-xx)
+2.1.2 (2024-09-16)
 ------------------
 
 - UPDATE: update dependencies
