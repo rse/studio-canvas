@@ -5,11 +5,12 @@
 */
 
 :root
-    --color-std-bg-1: #000000
-    --color-std-bg-2: #0d0d0d
-    --color-std-bg-3: #1a1a1a
-    --color-std-bg-4: #272727
-    --color-std-bg-5: #343434
+    --color-std-bg-0: #000000
+    --color-std-bg-1: #1a1a1a
+    --color-std-bg-2: #242424
+    --color-std-bg-3: #2e2e2e
+    --color-std-bg-4: #383838
+    --color-std-bg-5: #424242
 
     --color-std-fg-0: #606060
     --color-std-fg-1: #808080
@@ -59,7 +60,7 @@ html
 
 body:not(:has(.app-render)),
 html:not(:has(.app-render))
-    background-color: var(--color-std-bg-1)
+    background-color: var(--color-std-bg-0)
 
 body:has(.app-render),
 html:has(.app-render)
@@ -111,22 +112,37 @@ html:has(.app-render)
     font-size: 12pt
 .tabs-component-panels
     border-radius: 4px
-    padding: 20px
-    width: calc(100% - 2 * 20px)
+    padding: 16px
+    width: calc(100% - 2 * 16px)
 
 .tabs-component.tabs-level-1 .tabs-component-tab
+    border-top-color: var(--color-std-bg-1)
+    background-color: var(--color-std-bg-1)
+    color: var(--color-std-fg-0)
+.tabs-component.tabs-level-1 .tabs-component-tab:hover
+    border-top-color: var(--color-std-bg-2)
+    background-color: var(--color-std-bg-2)
+    color: var(--color-std-fg-4)
+.tabs-component.tabs-level-1 .tabs-component-tab.is-active
+    border-top-color: var(--color-acc-bg-2)
+    background-color: var(--color-std-bg-2)
+    color: var(--color-acc-fg-4)
+.tabs-component.tabs-level-1 .tabs-component-panels
+    background-color: var(--color-std-bg-2)
+    color: var(--color-std-fg-3)
+
+.tabs-component.tabs-level-2 .tabs-component-tab
     border-top-color: var(--color-std-bg-3)
     background-color: var(--color-std-bg-3)
     color: var(--color-std-fg-1)
-.tabs-component.tabs-level-1 .tabs-component-tab:hover
+.tabs-component.tabs-level-2 .tabs-component-tab:hover
     border-top-color: var(--color-std-bg-4)
     background-color: var(--color-std-bg-4)
     color: var(--color-std-fg-5)
-.tabs-component.tabs-level-1 .tabs-component-tab.is-active
+.tabs-component.tabs-level-2 .tabs-component-tab.is-active
     border-top-color: var(--color-acc-bg-4)
     background-color: var(--color-std-bg-4)
     color: var(--color-acc-fg-5)
-.tabs-component.tabs-level-1 .tabs-component-panels
+.tabs-component.tabs-level-2 .tabs-component-panels
     background-color: var(--color-std-bg-4)
     color: var(--color-std-fg-4)
-

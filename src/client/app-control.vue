@@ -11,7 +11,7 @@
         <!--  HEADER  -->
         <div class="head">
             <img class="logo" src="../../res/app-icon.svg" alt="" />
-            STUDIO CANVAS CONTROL
+            <b>Studio Canvas</b> Control
             <div class="stats">
                 <span class="icon"><i class="fa fa-video"></i></span>
                 <span class="figure">{{ stats.peers.camera }}</span>
@@ -24,1518 +24,1534 @@
 
         <!--  BODY  -->
         <div class="body">
-            <tabs ref="tabs" v-bind:options="{ useUrlFragment: false }" v-bind:cache-lifetime="0" class="tabs-level-1" v-on:changed="tabChanged">
-                <!--  ==== PRESETS ====  -->
-                <tab id="presets" name="Presets">
-                    <div class="desc">
-                        The <b>Presets</b> can be used to load and save the entire &mdash; or just the partial &mdash;
-                        current scence control state from or to persistent preset slots.
-                        When loading a partial state from a preset slot, the partial state is merged
-                        onto the current state. First select either "all" or "none" plus a particular state group.
-                        Second, select the preset slot. Third, select the action to perform.
-                    </div>
-                    <div class="presets">
-                        <div class="actions3">
-                            <div class="button destructive" v-on:click="presetFiltersSelect(false)">NONE</div>
-                            <div class="button destructive" v-on:click="presetFiltersSelect(true)">ALL</div>
-                        </div>
-                        <div class="filter">
-                            <div class="button" v-bind:class="{ selected: preset.filters.canvas }"
-                                v-on:click="preset.filters.canvas = !preset.filters.canvas">
-                                Canvas
+            <tabs ref="tabs" v-bind:options="{ useUrlFragment: false }" v-bind:cache-lifetime="0" class="tabs-level-1" v-on:changed="tabChanged0">
+                <tab id="control" name="Control">
+                    <tabs ref="control" v-bind:options="{ useUrlFragment: false }" v-bind:cache-lifetime="0" class="tabs-level-2" v-on:changed="tabChanged1">
+                        <!--  ==== PRESETS ====  -->
+                        <tab id="presets" name="Presets">
+                            <div class="desc">
+                                The <b>Presets</b> can be used to load and save the entire &mdash; or just the partial &mdash;
+                                current scence control state from or to persistent preset slots.
+                                When loading a partial state from a preset slot, the partial state is merged
+                                onto the current state. First select either "all" or "none" plus a particular state group.
+                                Second, select the preset slot. Third, select the action to perform.
                             </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.decal }"
-                                v-on:click="preset.filters.decal = !preset.filters.decal">
-                                Decal
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.monitor }"
-                                v-on:click="preset.filters.monitor = !preset.filters.monitor">
-                                Monitor
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.plate }"
-                                v-on:click="preset.filters.plate = !preset.filters.plate">
-                                Plate
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.hologram }"
-                                v-on:click="preset.filters.hologram = !preset.filters.hologram">
-                                Hologram
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.lights }"
-                                v-on:click="preset.filters.lights = !preset.filters.lights">
-                                Lights
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.avatars }"
-                                v-on:click="preset.filters.avatars = !preset.filters.avatars">
-                                Avatars
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.references }"
-                                v-on:click="preset.filters.references = !preset.filters.references">
-                                References
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.CAM1 }"
-                                v-on:click="preset.filters.CAM1 = !preset.filters.CAM1">
-                                CAM1
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.CAM2 }"
-                                v-on:click="preset.filters.CAM2 = !preset.filters.CAM2">
-                                CAM2
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.CAM3 }"
-                                v-on:click="preset.filters.CAM3 = !preset.filters.CAM3">
-                                CAM3
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.CAM4 }"
-                                v-on:click="preset.filters.CAM4 = !preset.filters.CAM4">
-                                CAM4
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.filters.renderer }"
-                                v-on:click="preset.filters.renderer = !preset.filters.renderer">
-                                Renderer
-                            </div>
-                        </div>
-                        <div class="slots">
-                            <div class="button" v-bind:class="{ selected: preset.slot === 0 }"
-                                v-on:click="preset.slot = preset.slot !== 0 ? 0 : -1">
-                                1
-                                <div class="badge" v-bind:class="presetStatus2Class(0)">{{ preset.status[0] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 1 }"
-                                v-on:click="preset.slot = preset.slot !== 1 ? 1 : -1">
-                                2
-                                <div class="badge" v-bind:class="presetStatus2Class(1)">{{ preset.status[1] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 2 }"
-                                v-on:click="preset.slot = preset.slot !== 2 ? 2 : -1">
-                                3
-                                <div class="badge" v-bind:class="presetStatus2Class(2)">{{ preset.status[2] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 3 }"
-                                v-on:click="preset.slot = preset.slot !== 3 ? 3 : -1">
-                                4
-                                <div class="badge" v-bind:class="presetStatus2Class(3)">{{ preset.status[3] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 4 }"
-                                v-on:click="preset.slot = preset.slot !== 4 ? 4 : -1">
-                                5
-                                <div class="badge" v-bind:class="presetStatus2Class(4)">{{ preset.status[4] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 5 }"
-                                v-on:click="preset.slot = preset.slot !== 5 ? 5 : -1">
-                                6
-                                <div class="badge" v-bind:class="presetStatus2Class(5)">{{ preset.status[5] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 6 }"
-                                v-on:click="preset.slot = preset.slot !== 6 ? 6 : -1">
-                                7
-                                <div class="badge" v-bind:class="presetStatus2Class(6)">{{ preset.status[6] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 7 }"
-                                v-on:click="preset.slot = preset.slot !== 7 ? 7 : -1">
-                                8
-                                <div class="badge" v-bind:class="presetStatus2Class(7)">{{ preset.status[7] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 8 }"
-                                v-on:click="preset.slot = preset.slot !== 8 ? 8 : -1">
-                                9
-                                <div class="badge" v-bind:class="presetStatus2Class(8)">{{ preset.status[8] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 9 }"
-                                v-on:click="preset.slot = preset.slot !== 9 ? 9 : -1">
-                                10
-                                <div class="badge" v-bind:class="presetStatus2Class(9)">{{ preset.status[9] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 10 }"
-                                v-on:click="preset.slot = preset.slot !== 10 ? 10 : -1">
-                                11
-                                <div class="badge" v-bind:class="presetStatus2Class(10)">{{ preset.status[10] }}</div>
-                            </div>
-                            <div class="button" v-bind:class="{ selected: preset.slot === 11 }"
-                                v-on:click="preset.slot = preset.slot !== 11 ? 11 : -1">
-                                12
-                                <div class="badge" v-bind:class="presetStatus2Class(11)">{{ preset.status[11] }}</div>
-                            </div>
-                        </div>
-                        <div class="actions1">
-                            <div class="button destructive"
-                                v-bind:class="{ unselectable: preset.slot === -1 || preset.status[preset.slot] === 0 }"
-                                v-on:click="presetLoad">
-                                LOAD
-                            </div>
-                            <div class="button destructive"
-                                v-bind:class="{ unselectable: preset.slot === -1 || preset.status[preset.slot] === 0 }"
-                                v-on:click="presetClear">
-                                CLEAR
-                            </div>
-                        </div>
-                        <div class="actions2">
-                            <div class="button destructive"
-                                v-bind:class="{ unselectable: preset.slot === -1 }"
-                                v-on:click="presetSave">
-                                SAVE
-                            </div>
-                        </div>
-                    </div>
-                </tab>
-
-                <!--  ==== STREAMS ====  -->
-                <tab id="streams" name="Streams">
-                    <div class="desc">
-                        The <b>Streams</b> are the video streams which can be shown on
-                        the Monitor, Decal, Plate and Hologram. The content is received
-                        with a single virtual video device which had to carry N content stacks
-                        (from left to right) and each stack consists of the content RGB
-                        on top of content alpha with (black-to-white, 100-0% visibillity).
-                    </div>
-                    <div class="control">
-                        <div class="label1">video</div>
-                        <div class="label2">(device)</div>
-                        <div class="label3">[id]:</div>
-                        <div class="value">
-                            <div class="fixed">*</div>
-                        </div>
-                        <div class="button" v-on:click="state.streams.device = ''">RESET</div>
-                        <div class="slider">
-                            <input class="text" v-model.lazy="state.streams.device"/>
-                        </div>
-
-                        <div class="label1">size</div>
-                        <div class="label2">(width)</div>
-                        <div class="label3">[px]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.streams.width, 0, true)"
-                                v-on:change="(ev) => state.streams.width = fieldImport((ev.target! as HTMLInputElement).value, 0, 3840)"/>
-                        </div>
-                        <div class="button" v-on:click="state.streams.width = 1920">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.streams.width"
-                                v-bind:min="0.0" v-bind:max="3840" v-bind:step="40"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">size</div>
-                        <div class="label2">(height)</div>
-                        <div class="label3">[px]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.streams.height, 0, true)"
-                                v-on:change="(ev) => state.streams.height = fieldImport((ev.target! as HTMLInputElement).value, 0, 2160)"/>
-                        </div>
-                        <div class="button" v-on:click="state.streams.height = 1080">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.streams.height"
-                                v-bind:min="0.0" v-bind:max="2160" v-bind:step="40"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">fps</div>
-                        <div class="label2">(fps)</div>
-                        <div class="label3">[fps]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.streams.fps, 2, true)"
-                                v-on:change="(ev) => state.streams.fps = fieldImport((ev.target! as HTMLInputElement).value, 0, 60)"/>
-                        </div>
-                        <div class="button" v-on:click="state.streams.fps = 30.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.streams.fps"
-                                v-bind:min="0.0" v-bind:max="60.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-                    </div>
-                </tab>
-
-                <!--  ==== CANVAS ====  -->
-                <tab id="canvas" name="Canvas" class="canvas">
-                    <div class="desc">
-                        The <b>Canvas</b> is the background of the scene.
-                        It can be either based on a single image for rendering a static canvas,
-                        or it can be two images providing a dynamic canvas through a cross-fade effect (indicated
-                        by "FADE"). Some canvas are exclusively designed for particular events (indicated
-                        by "EXCL") and hence should be not reused for other events.
-                        All canvas images have to be exactly 10540 x 2250 pixels in size.
-                    </div>
-                    <div class="control">
-                        <div class="label1">Z-rotate</div>
-                        <div class="label2">(rotate right/left)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="5" v-bind:value="fieldExport(state.canvas.rotationZ)"
-                                v-on:change="(ev) => state.canvas.rotationZ = fieldImport((ev.target! as HTMLInputElement).value, -10, +10)"/>
-                        </div>
-                        <div class="button" v-on:click="state.canvas.rotationZ = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.canvas.rotationZ"
-                                v-bind:min="-10" v-bind:max="+10" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-                    </div>
-                    <div class="list" ref="list">
-                        <div
-                            v-for="(group, i) in imageList.map((e) => e.group).filter((v, i, a) => v !== '' && a.indexOf(v) === i)"
-                            class="list-group"
-                            v-bind:class="{ selected: openGroup === group, alt: i % 2 == 1 }"
-                            v-bind:key="group"
-                        >
-                            <div class="name"
-                                v-on:click="openGroup = openGroup !== group ? group : ''">
-                                <span class="icon">
-                                    <span v-show="openGroup !== group"><i class="fa fa-caret-right"></i></span>
-                                    <span v-show="openGroup === group"><i class="fa fa-caret-down" ></i></span>
-                                </span>
-                                <span>{{ group }}</span>
-                            </div>
-                            <div
-                                v-show="openGroup === group"
-                                v-for="(entry, j) in imageList.filter((e) => e.group === group)"
-                                class="list-entry"
-                                v-bind:class="{ selected: entry.id === state.canvas.id, alt: j % 2 == 1 }"
-                                v-bind:key="entry.id!"
-                                v-on:click="selectImage(entry.id!)"
-                            >
-                                <div class="name">{{ entry.name }}</div>
-                                <div class="tags">
-                                    <div v-show="entry.texture2" class="tag tag-fade">FADE</div>
-                                    <div v-show="entry.exclusive" class="tag tag-exclusive">EXCL</div>
+                            <div class="presets">
+                                <div class="actions3">
+                                    <div class="button destructive" v-on:click="presetFiltersSelect(false)">NONE</div>
+                                    <div class="button destructive" v-on:click="presetFiltersSelect(true)">ALL</div>
+                                </div>
+                                <div class="filter">
+                                    <div class="button" v-bind:class="{ selected: preset.filters.canvas }"
+                                        v-on:click="preset.filters.canvas = !preset.filters.canvas">
+                                        Canvas
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.decal }"
+                                        v-on:click="preset.filters.decal = !preset.filters.decal">
+                                        Decal
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.monitor }"
+                                        v-on:click="preset.filters.monitor = !preset.filters.monitor">
+                                        Monitor
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.plate }"
+                                        v-on:click="preset.filters.plate = !preset.filters.plate">
+                                        Plate
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.hologram }"
+                                        v-on:click="preset.filters.hologram = !preset.filters.hologram">
+                                        Hologram
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.lights }"
+                                        v-on:click="preset.filters.lights = !preset.filters.lights">
+                                        Lights
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.avatars }"
+                                        v-on:click="preset.filters.avatars = !preset.filters.avatars">
+                                        Avatars
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.references }"
+                                        v-on:click="preset.filters.references = !preset.filters.references">
+                                        References
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.CAM1 }"
+                                        v-on:click="preset.filters.CAM1 = !preset.filters.CAM1">
+                                        CAM1
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.CAM2 }"
+                                        v-on:click="preset.filters.CAM2 = !preset.filters.CAM2">
+                                        CAM2
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.CAM3 }"
+                                        v-on:click="preset.filters.CAM3 = !preset.filters.CAM3">
+                                        CAM3
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.CAM4 }"
+                                        v-on:click="preset.filters.CAM4 = !preset.filters.CAM4">
+                                        CAM4
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.renderer }"
+                                        v-on:click="preset.filters.renderer = !preset.filters.renderer">
+                                        Renderer
+                                    </div>
+                                </div>
+                                <div class="slots">
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 0 }"
+                                        v-on:click="preset.slot = preset.slot !== 0 ? 0 : -1">
+                                        1
+                                        <div class="badge" v-bind:class="presetStatus2Class(0)">{{ preset.status[0] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 1 }"
+                                        v-on:click="preset.slot = preset.slot !== 1 ? 1 : -1">
+                                        2
+                                        <div class="badge" v-bind:class="presetStatus2Class(1)">{{ preset.status[1] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 2 }"
+                                        v-on:click="preset.slot = preset.slot !== 2 ? 2 : -1">
+                                        3
+                                        <div class="badge" v-bind:class="presetStatus2Class(2)">{{ preset.status[2] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 3 }"
+                                        v-on:click="preset.slot = preset.slot !== 3 ? 3 : -1">
+                                        4
+                                        <div class="badge" v-bind:class="presetStatus2Class(3)">{{ preset.status[3] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 4 }"
+                                        v-on:click="preset.slot = preset.slot !== 4 ? 4 : -1">
+                                        5
+                                        <div class="badge" v-bind:class="presetStatus2Class(4)">{{ preset.status[4] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 5 }"
+                                        v-on:click="preset.slot = preset.slot !== 5 ? 5 : -1">
+                                        6
+                                        <div class="badge" v-bind:class="presetStatus2Class(5)">{{ preset.status[5] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 6 }"
+                                        v-on:click="preset.slot = preset.slot !== 6 ? 6 : -1">
+                                        7
+                                        <div class="badge" v-bind:class="presetStatus2Class(6)">{{ preset.status[6] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 7 }"
+                                        v-on:click="preset.slot = preset.slot !== 7 ? 7 : -1">
+                                        8
+                                        <div class="badge" v-bind:class="presetStatus2Class(7)">{{ preset.status[7] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 8 }"
+                                        v-on:click="preset.slot = preset.slot !== 8 ? 8 : -1">
+                                        9
+                                        <div class="badge" v-bind:class="presetStatus2Class(8)">{{ preset.status[8] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 9 }"
+                                        v-on:click="preset.slot = preset.slot !== 9 ? 9 : -1">
+                                        10
+                                        <div class="badge" v-bind:class="presetStatus2Class(9)">{{ preset.status[9] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 10 }"
+                                        v-on:click="preset.slot = preset.slot !== 10 ? 10 : -1">
+                                        11
+                                        <div class="badge" v-bind:class="presetStatus2Class(10)">{{ preset.status[10] }}</div>
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.slot === 11 }"
+                                        v-on:click="preset.slot = preset.slot !== 11 ? 11 : -1">
+                                        12
+                                        <div class="badge" v-bind:class="presetStatus2Class(11)">{{ preset.status[11] }}</div>
+                                    </div>
+                                </div>
+                                <div class="actions1">
+                                    <div class="button destructive"
+                                        v-bind:class="{ unselectable: preset.slot === -1 || preset.status[preset.slot] === 0 }"
+                                        v-on:click="presetLoad">
+                                        LOAD
+                                    </div>
+                                    <div class="button destructive"
+                                        v-bind:class="{ unselectable: preset.slot === -1 || preset.status[preset.slot] === 0 }"
+                                        v-on:click="presetClear">
+                                        CLEAR
+                                    </div>
+                                </div>
+                                <div class="actions2">
+                                    <div class="button destructive"
+                                        v-bind:class="{ unselectable: preset.slot === -1 }"
+                                        v-on:click="presetSave">
+                                        SAVE
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div
-                            v-for="(entry, i) in imageList.filter((e) => e.group === '')"
-                            class="list-entry"
-                            v-bind:class="{ selected: entry.id === state.canvas.id, alt: i % 2 == 1 }"
-                            v-bind:key="entry.id!"
-                            v-on:click="selectImage(entry.id!)"
-                        >
-                            <div class="name">{{ entry.name }}</div>
-                            <div class="tags">
-                                <div v-show="entry.texture2" class="tag tag-fade">FADE</div>
-                                <div v-show="entry.exclusive" class="tag tag-exclusive">EXCL</div>
+                        </tab>
+
+                        <!--  ==== Mixer ====  -->
+                        <tab id="mixer" name="Mixer" class="mixer">
+                            <div class="desc">
+                                The <b>Mixer</b> allows you to select a camera to be logically
+                                in preview and to logically cut a camera from preview to program.
+                                This allows you to ad-hoc adjust the configured FPS
+                                (see <b>Scene &rarr; Renderer</b>) onto all renderer instances during production in order
+                                to allow you to reduce the overall load all renderers cause on the
+                                underlying hardware.
                             </div>
-                        </div>
-                    </div>
-                    <div class="actions">
-                        <div class="button"
-                            v-bind:class="{ unselectable: state.canvas.texture2 === '' }"
-                            v-on:click="syncCanvas()">
-                            SYNC
-                        </div>
-                    </div>
-                </tab>
-
-                <!--  ==== DECAL ====  -->
-                <tab id="decal" name="Decal">
-                    <div class="desc">
-                        The <b>Decal</b> is the optional poster-style display which can be projected
-                        onto the background canvas. It can scaled in size, positioned in a radial way on the background canvas,
-                        its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
-                        and a chroma-key filter applied.
-                    </div>
-                    <div class="control">
-                        <div class="label1">enable</div>
-                        <div class="label2">(visible)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.decal.enable ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.decal.enable = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.decal.enable"></toggle>
-                        </div>
-
-                        <div class="label1">fade</div>
-                        <div class="label2">(time)</div>
-                        <div class="label3">[sec]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.decal.fadeTime)"
-                                v-on:change="(ev) => state.decal.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.decal.fadeTime = 2.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.decal.fadeTime"
-                                v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">scale</div>
-                        <div class="label2">(resize)</div>
-                        <div class="label3">[mult]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.decal.scale)"
-                                v-on:change="(ev) => state.decal.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 5.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.decal.scale = 1.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.decal.scale"
-                                v-bind:min="0.1" v-bind:max="5.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">rotate</div>
-                        <div class="label2">(pan left/right)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.decal.rotate)"
-                                v-on:change="(ev) => state.decal.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
-                        </div>
-                        <div class="button" v-on:click="state.decal.rotate = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.decal.rotate"
-                                v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">lift</div>
-                        <div class="label2">(tilt down/up)</div>
-                        <div class="label3">[m]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.decal.lift)"
-                                v-on:change="(ev) => state.decal.lift = fieldImport((ev.target! as HTMLInputElement).value, -15, +9)"/>
-                        </div>
-                        <div class="button" v-on:click="state.decal.lift = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.decal.lift"
-                                v-bind:min="-15" v-bind:max="+9" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">opacity</div>
-                        <div class="label2">(less/more)</div>
-                        <div class="label3">[percent]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.decal.opacity)"
-                                v-on:change="(ev) => state.decal.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.decal.opacity = 1.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.decal.opacity"
-                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">border</div>
-                        <div class="label2">(radius)</div>
-                        <div class="label3">[px]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.decal.borderRad)"
-                                v-on:change="(ev) => state.decal.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
-                        </div>
-                        <div class="button" v-on:click="state.decal.borderRad = 40">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.decal.borderRad"
-                                v-bind:min="0" v-bind:max="540" v-bind:step="10"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">border</div>
-                        <div class="label2">(cropping)</div>
-                        <div class="label3">[px]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.decal.borderCrop)"
-                                v-on:change="(ev) => state.decal.borderCrop = fieldImport((ev.target! as HTMLInputElement).value, 0, 50)"/>
-                        </div>
-                        <div class="button" v-on:click="state.decal.borderCrop = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.decal.borderCrop"
-                                v-bind:min="0" v-bind:max="50" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(enable)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.decal.chromaKey.enable ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.decal.chromaKey.enable = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.decal.chromaKey.enable"></toggle>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(threshold)</div>
-                        <div class="label3">[distance]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.decal.chromaKey.threshold)"
-                                v-on:change="(ev) => state.decal.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.decal.chromaKey.threshold = 0.4">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.decal.chromaKey.threshold"
-                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(smoothing)</div>
-                        <div class="label3">[distance]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.decal.chromaKey.smoothing)"
-                                v-on:change="(ev) => state.decal.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
-                        </div>
-                        <div class="button" v-on:click="state.decal.chromaKey.smoothing = 0.1">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.decal.chromaKey.smoothing"
-                                v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-                    </div>
-                </tab>
-
-                <!--  ==== MONITOR ====  -->
-                <tab id="monitor" name="Monitor">
-                    <div class="desc">
-                        The <b>Monitor</b> is the optional TV-style monitor which can be shown
-                        in front of the background canvas. It can be scaled in size, and positioned on in a
-                        radial way in front of the background canvas.
-                    </div>
-                    <div class="control">
-                        <div class="label1">enable</div>
-                        <div class="label2">(visible)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.monitor.enable ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.enable = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.monitor.enable"></toggle>
-                        </div>
-
-                        <div class="label1">fade</div>
-                        <div class="label2">(time)</div>
-                        <div class="label3">[sec]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.fadeTime)"
-                                v-on:change="(ev) => state.monitor.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.fadeTime = 2.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.monitor.fadeTime"
-                                v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">scale</div>
-                        <div class="label2">(resize)</div>
-                        <div class="label3">[mult]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.scale)"
-                                v-on:change="(ev) => state.monitor.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 2.2)"/>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.scale = 1.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.monitor.scale"
-                                v-bind:min="0.1" v-bind:max="2.2" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">rotate</div>
-                        <div class="label2">(pan left/right)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.rotate)"
-                                v-on:change="(ev) => state.monitor.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.rotate = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.monitor.rotate"
-                                v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">lift</div>
-                        <div class="label2">(shift down/up)</div>
-                        <div class="label3">[cm]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.lift)"
-                                v-on:change="(ev) => state.monitor.lift = fieldImport((ev.target! as HTMLInputElement).value, -150, +70)"/>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.lift = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.monitor.lift"
-                                v-bind:min="-150" v-bind:max="+70" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">distance</div>
-                        <div class="label2">(shift bwd/fwd)</div>
-                        <div class="label3">[m]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.distance)"
-                                v-on:change="(ev) => state.monitor.distance = fieldImport((ev.target! as HTMLInputElement).value, -1.5, +0.4)"/>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.distance = 0.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.monitor.distance"
-                                v-bind:min="-1.5" v-bind:max="+0.4" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(enable)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.monitor.chromaKey.enable ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.chromaKey.enable = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.monitor.chromaKey.enable"></toggle>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(threshold)</div>
-                        <div class="label3">[distance]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.chromaKey.threshold)"
-                                v-on:change="(ev) => state.monitor.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.chromaKey.threshold = 0.4">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.monitor.chromaKey.threshold"
-                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(smoothing)</div>
-                        <div class="label3">[distance]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.chromaKey.smoothing)"
-                                v-on:change="(ev) => state.monitor.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
-                        </div>
-                        <div class="button" v-on:click="state.monitor.chromaKey.smoothing = 0.1">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.monitor.chromaKey.smoothing"
-                                v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-                    </div>
-                </tab>
-
-                <!--  ==== PLATE ====  -->
-                <tab id="plate" name="Plate">
-                    <div class="desc">
-                        The <b>Plate</b> is the optional planar display which can be projected
-                        in the foreground, intended as the optical plate on the desk's front side.
-                        It can be given scaled in size, positioned in a radial way on the background canvas,
-                        its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
-                        and a chroma-key filter applied.
-                    </div>
-                    <div class="control">
-                        <div class="label1">enable</div>
-                        <div class="label2">(visible)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.plate.enable ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.plate.enable = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.plate.enable"></toggle>
-                        </div>
-
-                        <div class="label1">fade</div>
-                        <div class="label2">(time)</div>
-                        <div class="label3">[sec]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.plate.fadeTime)"
-                                v-on:change="(ev) => state.plate.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.plate.fadeTime = 2.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.plate.fadeTime"
-                                v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">scale</div>
-                        <div class="label2">(resize)</div>
-                        <div class="label3">[mult]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.plate.scale)"
-                                v-on:change="(ev) => state.plate.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 3.5)"/>
-                        </div>
-                        <div class="button" v-on:click="state.plate.scale = 1.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.plate.scale"
-                                v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">rotate</div>
-                        <div class="label2">(pan left/right)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.plate.rotate)"
-                                v-on:change="(ev) => state.plate.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
-                        </div>
-                        <div class="button" v-on:click="state.plate.rotate = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.plate.rotate"
-                                v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">lift</div>
-                        <div class="label2">(shift down/up)</div>
-                        <div class="label3">[m]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.plate.lift)"
-                                v-on:change="(ev) => state.plate.lift = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.plate.lift = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.plate.lift"
-                                v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">distance</div>
-                        <div class="label2">(shift bwd/fwd)</div>
-                        <div class="label3">[m]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.plate.distance)"
-                                v-on:change="(ev) => state.plate.distance = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.plate.distance = 0.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.plate.distance"
-                                v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">opacity</div>
-                        <div class="label2">(less/more)</div>
-                        <div class="label3">[percent]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.plate.opacity)"
-                                v-on:change="(ev) => state.plate.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.plate.opacity = 1.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.plate.opacity"
-                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">border</div>
-                        <div class="label2">(radius)</div>
-                        <div class="label3">[px]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.plate.borderRad)"
-                                v-on:change="(ev) => state.plate.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
-                        </div>
-                        <div class="button" v-on:click="state.plate.borderRad = 40">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.plate.borderRad"
-                                v-bind:min="0" v-bind:max="540" v-bind:step="10"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">border</div>
-                        <div class="label2">(cropping)</div>
-                        <div class="label3">[px]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.plate.borderCrop)"
-                                v-on:change="(ev) => state.plate.borderCrop = fieldImport((ev.target! as HTMLInputElement).value, 0, 50)"/>
-                        </div>
-                        <div class="button" v-on:click="state.plate.borderCrop = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.plate.borderCrop"
-                                v-bind:min="0" v-bind:max="50" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(enable)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.plate.chromaKey.enable ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.plate.chromaKey.enable = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.plate.chromaKey.enable"></toggle>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(threshold)</div>
-                        <div class="label3">[distance]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.plate.chromaKey.threshold)"
-                                v-on:change="(ev) => state.plate.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.plate.chromaKey.threshold = 0.4">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.plate.chromaKey.threshold"
-                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(smoothing)</div>
-                        <div class="label3">[distance]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.plate.chromaKey.smoothing)"
-                                v-on:change="(ev) => state.plate.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
-                        </div>
-                        <div class="button" v-on:click="state.plate.chromaKey.smoothing = 0.1">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.plate.chromaKey.smoothing"
-                                v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-                    </div>
-                </tab>
-
-                <!--  ==== HOLOGRAM ====  -->
-                <tab id="hologram" name="Hologram">
-                    <div class="desc">
-                        The <b>Hologram</b> is the optional planar display which can be projected
-                        in the foreground. It can be scaled in size, positioned in a radial way on the background canvas,
-                        its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
-                        and a chroma-key filter applied.
-                    </div>
-                    <div class="control">
-                        <div class="label1">enable</div>
-                        <div class="label2">(visible)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.hologram.enable ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.enable = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.hologram.enable"></toggle>
-                        </div>
-
-                        <div class="label1">fade</div>
-                        <div class="label2">(time)</div>
-                        <div class="label3">[sec]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.fadeTime)"
-                                v-on:change="(ev) => state.hologram.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.fadeTime = 2.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.hologram.fadeTime"
-                                v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">scale</div>
-                        <div class="label2">(resize)</div>
-                        <div class="label3">[mult]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.scale)"
-                                v-on:change="(ev) => state.hologram.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 3.5)"/>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.scale = 1.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.hologram.scale"
-                                v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">rotate</div>
-                        <div class="label2">(pan left/right)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.rotate)"
-                                v-on:change="(ev) => state.hologram.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.rotate = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.hologram.rotate"
-                                v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">lift</div>
-                        <div class="label2">(shift down/up)</div>
-                        <div class="label3">[m]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.lift)"
-                                v-on:change="(ev) => state.hologram.lift = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.lift = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.hologram.lift"
-                                v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">distance</div>
-                        <div class="label2">(shift bwd/fwd)</div>
-                        <div class="label3">[m]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.distance)"
-                                v-on:change="(ev) => state.hologram.distance = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.distance = 0.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.hologram.distance"
-                                v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">opacity</div>
-                        <div class="label2">(less/more)</div>
-                        <div class="label3">[percent]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.opacity)"
-                                v-on:change="(ev) => state.hologram.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.opacity = 1.0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.hologram.opacity"
-                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">border</div>
-                        <div class="label2">(radius)</div>
-                        <div class="label3">[px]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.borderRad)"
-                                v-on:change="(ev) => state.hologram.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.borderRad = 40">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.hologram.borderRad"
-                                v-bind:min="0" v-bind:max="540" v-bind:step="10"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">border</div>
-                        <div class="label2">(cropping)</div>
-                        <div class="label3">[px]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.borderCrop)"
-                                v-on:change="(ev) => state.hologram.borderCrop = fieldImport((ev.target! as HTMLInputElement).value, 0, 50)"/>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.borderCrop = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.hologram.borderCrop"
-                                v-bind:min="0" v-bind:max="50" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(enable)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.hologram.chromaKey.enable ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.chromaKey.enable = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.hologram.chromaKey.enable"></toggle>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(threshold)</div>
-                        <div class="label3">[distance]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.chromaKey.threshold)"
-                                v-on:change="(ev) => state.hologram.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.chromaKey.threshold = 0.4">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.hologram.chromaKey.threshold"
-                                v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">chromaKey</div>
-                        <div class="label2">(smoothing)</div>
-                        <div class="label3">[distance]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.hologram.chromaKey.smoothing)"
-                                v-on:change="(ev) => state.hologram.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
-                        </div>
-                        <div class="button" v-on:click="state.hologram.chromaKey.smoothing = 0.1">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.hologram.chromaKey.smoothing"
-                                v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-                    </div>
-                </tab>
-
-                <!--  ==== LIGHTS ====  -->
-                <tab id="lights" name="Lights">
-                    <div class="desc">
-                        The <b>Lights</b> are three optional, additional point lights in the scene,
-                        which can further light up the scene and especially produce a shadow of
-                        the monitor on the background canvas.
-                    </div>
-                    <div class="control">
-                        <div class="label1">intensity1</div>
-                        <div class="label2">(less/more)</div>
-                        <div class="label3">[lum]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.lights.intensity1, 0)"
-                                v-on:change="(ev) => state.lights.intensity1 = fieldImport((ev.target! as HTMLInputElement).value, 0, 600)"/>
-                        </div>
-                        <div class="button" v-on:click="state.lights.intensity1 = 300">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.lights.intensity1"
-                                v-bind:min="0" v-bind:max="600" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">intensity2</div>
-                        <div class="label2">(less/more)</div>
-                        <div class="label3">[lum]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.lights.intensity2, 0)"
-                                v-on:change="(ev) => state.lights.intensity2 = fieldImport((ev.target! as HTMLInputElement).value, 0, 600)"/>
-                        </div>
-                        <div class="button" v-on:click="state.lights.intensity2 = 300">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.lights.intensity2"
-                                v-bind:min="0" v-bind:max="600" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">intensity3</div>
-                        <div class="label2">(less/more)</div>
-                        <div class="label3">[lum]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.lights.intensity3, 0)"
-                                v-on:change="(ev) => state.lights.intensity3 = fieldImport((ev.target! as HTMLInputElement).value, 0, 600)"/>
-                        </div>
-                        <div class="button" v-on:click="state.lights.intensity3 = 300">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.lights.intensity3"
-                                v-bind:min="0" v-bind:max="600" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-                    </div>
-                </tab>
-
-                <!--  ==== AVATARS ====  -->
-                <tab name="Avatars">
-                    <div class="desc">
-                        The <b>Avatars</b> are the two optional 3D models of a latin woman (A1, <i>Sophia</i>) and a
-                        european man (A2, <i>Dennis</i>) which can be temporarily placed into the scene
-                        to help setting up the various virtual pan/tilt/zoom (PTZ) views of the scene.
-                        Their body height can be adjusted and they can be rotated onto the usual 9
-                        positions on the scene.
-                    </div>
-                    <div class="control">
-                        <div class="label1">A1 enable</div>
-                        <div class="label2">(visible)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.avatars.enable1 ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.avatars.enable1 = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.avatars.enable1"></toggle>
-                        </div>
-
-                        <div class="label1">A1 size</div>
-                        <div class="label2">(height)</div>
-                        <div class="label3">[cm]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.avatars.size1)"
-                                v-on:change="(ev) => state.avatars.size1 = fieldImport((ev.target! as HTMLInputElement).value, 160, 210)"/>
-                        </div>
-                        <div class="button" v-on:click="state.avatars.size1 = 185">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.avatars.size1"
-                                v-bind:min="160" v-bind:max="210" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">A1 rotate</div>
-                        <div class="label2">(pan left/right)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.avatars.rotate1)"
-                                v-on:change="(ev) => state.avatars.rotate1 = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
-                        </div>
-                        <div class="button" v-on:click="state.avatars.rotate1 = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.avatars.rotate1"
-                                v-bind:min="-90" v-bind:max="+90" v-bind:step="7"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">A2 enable</div>
-                        <div class="label2">(visible)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.avatars.enable2 ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.avatars.enable2 = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.avatars.enable2"></toggle>
-                        </div>
-
-                        <div class="label1">A2 size</div>
-                        <div class="label2">(height)</div>
-                        <div class="label3">[cm]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.avatars.size2)"
-                                v-on:change="(ev) => state.avatars.size2 = fieldImport((ev.target! as HTMLInputElement).value, 160, 210)"/>
-                        </div>
-                        <div class="button" v-on:click="state.avatars.size2 = 185">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.avatars.size2"
-                                v-bind:min="160" v-bind:max="210" v-bind:step="1"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">A2 rotate</div>
-                        <div class="label2">(pan left/right)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.avatars.rotate2)"
-                                v-on:change="(ev) => state.avatars.rotate2 = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
-                        </div>
-                        <div class="button" v-on:click="state.avatars.rotate2 = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="state.avatars.rotate2"
-                                v-bind:min="-90" v-bind:max="+90" v-bind:step="7"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-                    </div>
-                </tab>
-
-                <!--  ==== REFERENCES ====  -->
-                <tab name="References">
-                    <div class="desc">
-                        The <b>References</b> are the optional red balls in the scence
-                        which can help calibrating the virtual cameras against the physical
-                        camera viewpoint before an event. If calibrated correctly, the virtual balls
-                        in the scene should match as close as possible with the physical red markers
-                        on the stage.
-                    </div>
-                    <div class="control">
-                        <div class="label1">enable</div>
-                        <div class="label2">(visible)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.references.enable ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.references.enable = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.references.enable"></toggle>
-                        </div>
-                    </div>
-                </tab>
-
-                <!--  ==== CAM1/2/3/4 ====  -->
-                <tab v-for="cam in [ 'CAM1', 'CAM2', 'CAM3', 'CAM4' ]" v-bind:key="cam" v-bind:id="cam.toLowerCase()" v-bind:name="cam">
-                    <div class="desc">
-                        The <b>{{ cam }}</b> is a digital twin of the corresponding physical
-                        camera. It has to be calibrated to match as close
-                        as possible to the physical viewpoint of the camera in order
-                        to allow precise pan/tilt/zoom (PTZ) of both the physical camera via NDI
-                        and PTZ of the virtual camera via the FreeD information emitted by the physical
-                        camera.
-                    </div>
-                    <div class="control">
-                        <div class="label1">hull X-pos</div>
-                        <div class="label2">(shift bwd/fwd)</div>
-                        <div class="label3">[cm]:</div>
-                        <div class="value">
-                            <input tabindex="1" v-bind:value="fieldExport((state as any)[cam].hullPosition.x)"
-                                v-on:change="(ev) => (state as any)[cam].hullPosition.x = fieldImport((ev.target! as HTMLInputElement).value, -50, +50)"/>
-                        </div>
-                        <div class="button" v-on:click="(state as any)[cam].hullPosition.x = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="(state as any)[cam].hullPosition.x"
-                                v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">hull Y-pos</div>
-                        <div class="label2">(shift left/right)</div>
-                        <div class="label3">[cm]:</div>
-                        <div class="value">
-                            <input tabindex="2" v-bind:value="fieldExport((state as any)[cam].hullPosition.y)"
-                                v-on:change="(ev) => (state as any)[cam].hullPosition.y = fieldImport((ev.target! as HTMLInputElement).value, -50, +50)"/>
-                        </div>
-                        <div class="button" v-on:click="(state as any)[cam].hullPosition.y = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="(state as any)[cam].hullPosition.y"
-                                v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">hull Z-pos</div>
-                        <div class="label2">(shift down/up)</div>
-                        <div class="label3">[cm]:</div>
-                        <div class="value">
-                            <input tabindex="3" v-bind:value="fieldExport((state as any)[cam].hullPosition.z)"
-                                v-on:change="(ev) => (state as any)[cam].hullPosition.z = fieldImport((ev.target! as HTMLInputElement).value, -50, +50)"/>
-                        </div>
-                        <div class="button" v-on:click="(state as any)[cam].hullPosition.z = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="(state as any)[cam].hullPosition.z"
-                                v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">case X-rot</div>
-                        <div class="label2">(tilt down/up)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="4" v-bind:value="fieldExport((state as any)[cam].caseRotation.x)"
-                                v-on:change="(ev) => (state as any)[cam].caseRotation.x = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
-                        </div>
-                        <div class="button" v-on:click="(state as any)[cam].caseRotation.x = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="(state as any)[cam].caseRotation.x"
-                                v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">case Y-rot</div>
-                        <div class="label2">(pan left/right)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="5" v-bind:value="fieldExport((state as any)[cam].caseRotation.y)"
-                                v-on:change="(ev) => (state as any)[cam].caseRotation.y = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
-                        </div>
-                        <div class="button" v-on:click="(state as any)[cam].caseRotation.y = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="(state as any)[cam].caseRotation.y"
-                                v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">case Y-rot</div>
-                        <div class="label2">(pan left/right)</div>
-                        <div class="label3">[mult]:</div>
-                        <div class="value">
-                            <input tabindex="7" v-bind:value="fieldExport((state as any)[cam].caseRotation.ym)"
-                                v-on:change="(ev) => (state as any)[cam].caseRotation.ym = fieldImport((ev.target! as HTMLInputElement).value, 0, +2)"/>
-                        </div>
-                        <div class="button" v-on:click="(state as any)[cam].caseRotation.ym = 1">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="(state as any)[cam].caseRotation.ym"
-                                v-bind:min="0" v-bind:max="+2" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">case Z-rot</div>
-                        <div class="label2">(rotate left/right)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="6" v-bind:value="fieldExport((state as any)[cam].caseRotation.z)"
-                                v-on:change="(ev) => (state as any)[cam].caseRotation.z = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
-                        </div>
-                        <div class="button" v-on:click="(state as any)[cam].caseRotation.z = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="(state as any)[cam].caseRotation.z"
-                                v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">lens X-rot</div>
-                        <div class="label2">(tilt down/up)</div>
-                        <div class="label3">[deg]:</div>
-                        <div class="value">
-                            <input tabindex="4" v-bind:value="fieldExport((state as any)[cam].lensRotation.x)"
-                                v-on:change="(ev) => (state as any)[cam].lensRotation.x = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
-                        </div>
-                        <div class="button" v-on:click="(state as any)[cam].lensRotation.x = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="(state as any)[cam].lensRotation.x"
-                                v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">lens X-rot</div>
-                        <div class="label2">(tilt down/up)</div>
-                        <div class="label3">[mult]:</div>
-                        <div class="value">
-                            <input tabindex="7" v-bind:value="fieldExport((state as any)[cam].lensRotation.xm)"
-                                v-on:change="(ev) => (state as any)[cam].lensRotation.xm = fieldImport((ev.target! as HTMLInputElement).value, 0, +2)"/>
-                        </div>
-                        <div class="button" v-on:click="(state as any)[cam].lensRotation.xm = 1">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="(state as any)[cam].lensRotation.xm"
-                                v-bind:min="0" v-bind:max="+2" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <!--
-                        FIXME: currently unused!
-                        <div class="label1">FOV</div>
-                        <div class="label2">(zoom)</div>
-                        <div class="label3">[mult]:</div>
-                        <div class="value">
-                            <input tabindex="7" v-bind:value="fieldExport((state as any)[cam].fov.m)"
-                                v-on:change="(ev) => (state as any)[cam].fov.m = fieldImport((ev.target! as HTMLInputElement).value, 0, +4)"/>
-                        </div>
-                        <div class="button" v-on:click="(state as any)[cam].fov.m = 1">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-model="(state as any)[cam].fov.m"
-                                v-bind:min="0" v-bind:max="+4" v-bind:step="0.01"
-                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-                        -->
-                    </div>
-                </tab>
-
-                <!--  ==== Renderer ====  -->
-                <tab id="renderer" name="Renderer">
-                    <div class="desc">
-                        The <b>Renderer</b> allows you to configure the Frames per Second (FPS)
-                        of a scene renderer when it is in program, preview or neither of them (other).
-                        This in total allows you to reduce the overall load all renderers cause on the
-                        underlying hardware. Never use more FPS than absolutely necessary.
-                    </div>
-                    <div class="control">
-                        <div class="label1">Program</div>
-                        <div class="label2">(performance)</div>
-                        <div class="label3">[fps]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.renderer.program)"
-                                v-on:change="(ev) => state.renderer.program = saneFPS(state.renderer.program, fieldImport((ev.target! as HTMLInputElement).value, 0, 60))"/>
-                        </div>
-                        <div class="button" v-on:click="state.renderer.program = 30">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-bind:value="state.renderer.program"
-                                v-on:change="(val: number) => state.renderer.program = saneFPS(state.renderer.program, val)"
-                                v-bind:min="0" v-bind:max="60" v-bind:step="1"
-                                show-tooltip="drag" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">Preview</div>
-                        <div class="label2">(performance)</div>
-                        <div class="label3">[fps]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.renderer.preview)"
-                                v-on:change="(ev) => state.renderer.preview = saneFPS(state.renderer.preview, fieldImport((ev.target! as HTMLInputElement).value, 0, 60))"/>
-                        </div>
-                        <div class="button" v-on:click="state.renderer.preview = 15">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-bind:value="state.renderer.preview"
-                                v-on:change="(val: number) => state.renderer.preview = saneFPS(state.renderer.preview, val)"
-                                v-bind:min="0" v-bind:max="60" v-bind:step="1"
-                                show-tooltip="drag" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <div class="label1">Other</div>
-                        <div class="label2">(performance)</div>
-                        <div class="label3">[fps]:</div>
-                        <div class="value">
-                            <input tabindex="8" v-bind:value="fieldExport(state.renderer.other)"
-                                v-on:change="(ev) => state.renderer.other = saneFPS(state.renderer.other, fieldImport((ev.target! as HTMLInputElement).value, 0, 60))"/>
-                        </div>
-                        <div class="button" v-on:click="state.renderer.other = 0">RESET</div>
-                        <div class="slider">
-                            <slider class="slider" v-bind:value="state.renderer.other"
-                                v-on:change="(val: number) => state.renderer.other = saneFPS(state.renderer.other, val)"
-                                v-bind:min="0" v-bind:max="60" v-bind:step="1"
-                                show-tooltip="drag" v-bind:lazy="false"
-                            ></slider>
-                        </div>
-
-                        <!--
-                        FIXME: currently unused!
-                        <div class="label1">Overlay</div>
-                        <div class="label2">(visible)</div>
-                        <div class="label3">[flag]:</div>
-                        <div class="value">
-                            <div class="fixed">{{ state.renderer.overlay ? "YES" : "NO" }}</div>
-                        </div>
-                        <div class="button" v-on:click="state.renderer.overlay = false">RESET</div>
-                        <div class="slider">
-                            <toggle class="toggle" v-model="state.renderer.overlay"></toggle>
-                        </div>
-                        -->
-                    </div>
-                </tab>
-
-                <!--  ==== Mixer ====  -->
-                <tab id="mixer" name="Mixer" class="mixer">
-                    <div class="desc">
-                        The <b>Mixer</b> allows you to select a camera to be logically
-                        in preview and to logically cut a camera from preview to program.
-                        This allows you to ad-hoc adjust the configured FPS
-                        onto all renderer instances during production in order
-                        to allows you to reduce the overall load all renderers cause on the
-                        underlying hardware.
-                    </div>
-                    <div class="control">
-                        <div class="cams">
-                            <div class="button cam" v-on:click="changePreview('CAM1')"
-                                v-bind:class="{
-                                    unselectable: mixer.preview === 'CAM1' || mixer.program === 'CAM1',
-                                    preview: mixer.program === 'CAM1',
-                                    program: mixer.program === 'CAM1'
-                                }">
-                                CAM1
-                                <div class="badge" v-bind:class="mixerStatus2Class('CAM1')">
-                                    {{ mixer.program === 'CAM1' ? state.renderer.program :
-                                    (mixer.preview === 'CAM1' ? state.renderer.preview :
-                                    state.renderer.other) }}
+                            <div class="control">
+                                <div class="cams">
+                                    <div class="button cam" v-on:click="changePreview('CAM1')"
+                                        v-bind:class="{
+                                            unselectable: mixer.preview === 'CAM1' || mixer.program === 'CAM1',
+                                            preview: mixer.program === 'CAM1',
+                                            program: mixer.program === 'CAM1'
+                                        }">
+                                        CAM1
+                                        <div class="badge" v-bind:class="mixerStatus2Class('CAM1')">
+                                            {{ mixer.program === 'CAM1' ? state.renderer.program :
+                                            (mixer.preview === 'CAM1' ? state.renderer.preview :
+                                            state.renderer.other) }}
+                                        </div>
+                                    </div>
+                                    <div class="button cam" v-on:click="changePreview('CAM2')"
+                                        v-bind:class="{
+                                            unselectable: mixer.preview === 'CAM2' || mixer.program === 'CAM2',
+                                            preview: mixer.program === 'CAM2',
+                                            program: mixer.program === 'CAM2'
+                                        }">
+                                        CAM2
+                                        <div class="badge" v-bind:class="mixerStatus2Class('CAM2')">
+                                            {{ mixer.program === 'CAM2' ? state.renderer.program :
+                                            (mixer.preview === 'CAM2' ? state.renderer.preview :
+                                            state.renderer.other) }}
+                                        </div>
+                                    </div>
+                                    <div class="button cam" v-on:click="changePreview('CAM3')"
+                                        v-bind:class="{
+                                            unselectable: mixer.preview === 'CAM3' || mixer.program === 'CAM3',
+                                            preview: mixer.program === 'CAM3',
+                                            program: mixer.program === 'CAM3'
+                                        }">
+                                        CAM3
+                                        <div class="badge" v-bind:class="mixerStatus2Class('CAM3')">
+                                            {{ mixer.program === 'CAM3' ? state.renderer.program :
+                                            (mixer.preview === 'CAM3' ? state.renderer.preview :
+                                            state.renderer.other) }}
+                                        </div>
+                                    </div>
+                                    <div class="button cam" v-on:click="changePreview('CAM4')"
+                                        v-bind:class="{
+                                            unselectable: mixer.preview === 'CAM4' || mixer.program === 'CAM4',
+                                            preview: mixer.program === 'CAM4',
+                                            program: mixer.program === 'CAM4'
+                                        }">
+                                        CAM4
+                                        <div class="badge" v-bind:class="mixerStatus2Class('CAM4')">
+                                            {{ mixer.program === 'CAM4' ? state.renderer.program :
+                                            (mixer.preview === 'CAM4' ? state.renderer.preview :
+                                            state.renderer.other) }}
+                                        </div>
+                                    </div>
+                                    <div class="button cut" v-on:click="cutPreviewToProgram()">
+                                        CUT
+                                    </div>
                                 </div>
                             </div>
-                            <div class="button cam" v-on:click="changePreview('CAM2')"
-                                v-bind:class="{
-                                    unselectable: mixer.preview === 'CAM2' || mixer.program === 'CAM2',
-                                    preview: mixer.program === 'CAM2',
-                                    program: mixer.program === 'CAM2'
-                                }">
-                                CAM2
-                                <div class="badge" v-bind:class="mixerStatus2Class('CAM2')">
-                                    {{ mixer.program === 'CAM2' ? state.renderer.program :
-                                    (mixer.preview === 'CAM2' ? state.renderer.preview :
-                                    state.renderer.other) }}
-                                </div>
-                            </div>
-                            <div class="button cam" v-on:click="changePreview('CAM3')"
-                                v-bind:class="{
-                                    unselectable: mixer.preview === 'CAM3' || mixer.program === 'CAM3',
-                                    preview: mixer.program === 'CAM3',
-                                    program: mixer.program === 'CAM3'
-                                }">
-                                CAM3
-                                <div class="badge" v-bind:class="mixerStatus2Class('CAM3')">
-                                    {{ mixer.program === 'CAM3' ? state.renderer.program :
-                                    (mixer.preview === 'CAM3' ? state.renderer.preview :
-                                    state.renderer.other) }}
-                                </div>
-                            </div>
-                            <div class="button cam" v-on:click="changePreview('CAM4')"
-                                v-bind:class="{
-                                    unselectable: mixer.preview === 'CAM4' || mixer.program === 'CAM4',
-                                    preview: mixer.program === 'CAM4',
-                                    program: mixer.program === 'CAM4'
-                                }">
-                                CAM4
-                                <div class="badge" v-bind:class="mixerStatus2Class('CAM4')">
-                                    {{ mixer.program === 'CAM4' ? state.renderer.program :
-                                    (mixer.preview === 'CAM4' ? state.renderer.preview :
-                                    state.renderer.other) }}
-                                </div>
-                            </div>
-                            <div class="button cut" v-on:click="cutPreviewToProgram()">
-                                CUT
-                            </div>
-                        </div>
-                    </div>
-                </tab>
+                        </tab>
 
-                <!--  ==== PREVIEW ====  -->
-                <tab id="preview" name="Preview" class="preview">
-                    <div class="desc">
-                        The <b>Preview</b> is a rendering preview of the rendered camera view
-                        within the BabylonJS game engine. It is exactly the same content intended
-                        to be loaded into the vMix Browser input (or OBS Studio Browser source)
-                        and allows you to preview the scene in the browser here, too.
-                        The camera view can be optionally controlled
-                        by reflecting the emitted FreeD information from the physical camera,
-                        or being interactively adjusted by cursor keys.
-                    </div>
-                    <div class="preview-url" v-on:click="previewCopy()">
-                        {{ preview.url }}
-                    </div>
-                    <div class="preview-control">
-                        <div class="layer">
-                            <div class="button" v-on:click="preview.opts.layer = 'back'"
-                                v-bind:class="{ selected: preview.opts.layer === 'back' }">
-                                Back
+                        <!--  ==== PREVIEW ====  -->
+                        <tab id="preview" name="Preview" class="preview">
+                            <div class="desc">
+                                The <b>Preview</b> is a rendering preview of the rendered camera view
+                                within the BabylonJS game engine. It is exactly the same content intended
+                                to be loaded into the vMix Browser input (or OBS Studio Browser source)
+                                and allows you to preview the scene in the browser here, too.
+                                The camera view can be optionally controlled
+                                by reflecting the emitted FreeD information from the physical camera,
+                                or being interactively adjusted by cursor keys.
                             </div>
-                            <div class="button" v-on:click="preview.opts.layer = 'front'"
-                                v-bind:class="{ selected: preview.opts.layer === 'front' }">
-                                Front
+                            <div class="preview-url" v-on:click="previewCopy()">
+                                {{ preview.url }}
                             </div>
-                        </div>
-                        <div class="cams">
-                            <div class="button" v-on:click="preview.opts.cam = 'CAM1'"
-                                v-bind:class="{ selected: preview.opts.cam === 'CAM1' }">
-                                CAM1
+                            <div class="preview-control">
+                                <div class="layer">
+                                    <div class="button" v-on:click="preview.opts.layer = 'back'"
+                                        v-bind:class="{ selected: preview.opts.layer === 'back' }">
+                                        Back
+                                    </div>
+                                    <div class="button" v-on:click="preview.opts.layer = 'front'"
+                                        v-bind:class="{ selected: preview.opts.layer === 'front' }">
+                                        Front
+                                    </div>
+                                </div>
+                                <div class="cams">
+                                    <div class="button" v-on:click="preview.opts.cam = 'CAM1'"
+                                        v-bind:class="{ selected: preview.opts.cam === 'CAM1' }">
+                                        CAM1
+                                    </div>
+                                    <div class="button" v-on:click="preview.opts.cam = 'CAM2'"
+                                        v-bind:class="{ selected: preview.opts.cam === 'CAM2' }">
+                                        CAM2
+                                    </div>
+                                    <div class="button" v-on:click="preview.opts.cam = 'CAM3'"
+                                        v-bind:class="{ selected: preview.opts.cam === 'CAM3' }">
+                                        CAM3
+                                    </div>
+                                    <div class="button" v-on:click="preview.opts.cam = 'CAM4'"
+                                        v-bind:class="{ selected: preview.opts.cam === 'CAM4' }">
+                                        CAM4
+                                    </div>
+                                </div>
+                                <div class="flags">
+                                    <div class="flag">
+                                        <div class="fixed">Enable FreeD</div>
+                                        <toggle class="toggle" v-model="preview.opts.freed"></toggle>
+                                    </div>
+                                    <div class="flag">
+                                        <div class="fixed">Enable Keys</div>
+                                        <toggle class="toggle" v-model="preview.opts.keys"></toggle>
+                                    </div>
+                                </div>
+                                <div class="action">
+                                    <div class="button" v-on:click="previewOpen()">OPEN</div>
+                                    <div class="button" v-on:click="previewCopy()">COPY</div>
+                                </div>
                             </div>
-                            <div class="button" v-on:click="preview.opts.cam = 'CAM2'"
-                                v-bind:class="{ selected: preview.opts.cam === 'CAM2' }">
-                                CAM2
+                        </tab>
+                    </tabs>
+                </tab>
+                <tab id="scene" name="Scene">
+                    <tabs ref="scene" v-bind:options="{ useUrlFragment: false }" v-bind:cache-lifetime="0" class="tabs-level-2" v-on:changed="tabChanged1">
+                        <!--  ==== Renderer ====  -->
+                        <tab id="renderer" name="Renderer">
+                            <div class="desc">
+                                The <b>Renderer</b> allows you to configure the Frames per Second (FPS)
+                                of a scene renderer when it is in program, preview or neither of them (other).
+                                This in total allows you to reduce the overall load all renderers cause on the
+                                underlying hardware. Never use more FPS than absolutely necessary.
                             </div>
-                            <div class="button" v-on:click="preview.opts.cam = 'CAM3'"
-                                v-bind:class="{ selected: preview.opts.cam === 'CAM3' }">
-                                CAM3
+                            <div class="control">
+                                <div class="label1">Program</div>
+                                <div class="label2">(performance)</div>
+                                <div class="label3">[fps]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.renderer.program)"
+                                        v-on:change="(ev) => state.renderer.program = saneFPS(state.renderer.program, fieldImport((ev.target! as HTMLInputElement).value, 0, 60))"/>
+                                </div>
+                                <div class="button" v-on:click="state.renderer.program = 30">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-bind:value="state.renderer.program"
+                                        v-on:change="(val: number) => state.renderer.program = saneFPS(state.renderer.program, val)"
+                                        v-bind:min="0" v-bind:max="60" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">Preview</div>
+                                <div class="label2">(performance)</div>
+                                <div class="label3">[fps]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.renderer.preview)"
+                                        v-on:change="(ev) => state.renderer.preview = saneFPS(state.renderer.preview, fieldImport((ev.target! as HTMLInputElement).value, 0, 60))"/>
+                                </div>
+                                <div class="button" v-on:click="state.renderer.preview = 15">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-bind:value="state.renderer.preview"
+                                        v-on:change="(val: number) => state.renderer.preview = saneFPS(state.renderer.preview, val)"
+                                        v-bind:min="0" v-bind:max="60" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">Other</div>
+                                <div class="label2">(performance)</div>
+                                <div class="label3">[fps]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.renderer.other)"
+                                        v-on:change="(ev) => state.renderer.other = saneFPS(state.renderer.other, fieldImport((ev.target! as HTMLInputElement).value, 0, 60))"/>
+                                </div>
+                                <div class="button" v-on:click="state.renderer.other = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-bind:value="state.renderer.other"
+                                        v-on:change="(val: number) => state.renderer.other = saneFPS(state.renderer.other, val)"
+                                        v-bind:min="0" v-bind:max="60" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <!--
+                                FIXME: currently unused!
+                                <div class="label1">Overlay</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.renderer.overlay ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.renderer.overlay = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.renderer.overlay"></toggle>
+                                </div>
+                                -->
                             </div>
-                            <div class="button" v-on:click="preview.opts.cam = 'CAM4'"
-                                v-bind:class="{ selected: preview.opts.cam === 'CAM4' }">
-                                CAM4
+                        </tab>
+
+                        <!--  ==== STREAMS ====  -->
+                        <tab id="streams" name="Streams">
+                            <div class="desc">
+                                The <b>Streams</b> are the video streams which can be shown on
+                                the Monitor, Decal, Plate and Hologram. The content is received
+                                with a single virtual video device which had to carry N content stacks
+                                (from left to right) and each stack consists of the content RGB
+                                on top of content alpha with (black-to-white, 100-0% visibillity).
                             </div>
-                        </div>
-                        <div class="flags">
-                            <div class="flag">
-                                <div class="fixed">Enable FreeD</div>
-                                <toggle class="toggle" v-model="preview.opts.freed"></toggle>
+                            <div class="control">
+                                <div class="label1">video</div>
+                                <div class="label2">(device)</div>
+                                <div class="label3">[id]:</div>
+                                <div class="value">
+                                    <div class="fixed">*</div>
+                                </div>
+                                <div class="button" v-on:click="state.streams.device = ''">RESET</div>
+                                <div class="slider">
+                                    <input class="text" v-model.lazy="state.streams.device"/>
+                                </div>
+
+                                <div class="label1">size</div>
+                                <div class="label2">(width)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.streams.width, 0, true)"
+                                        v-on:change="(ev) => state.streams.width = fieldImport((ev.target! as HTMLInputElement).value, 0, 3840)"/>
+                                </div>
+                                <div class="button" v-on:click="state.streams.width = 1920">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.streams.width"
+                                        v-bind:min="0.0" v-bind:max="3840" v-bind:step="40"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">size</div>
+                                <div class="label2">(height)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.streams.height, 0, true)"
+                                        v-on:change="(ev) => state.streams.height = fieldImport((ev.target! as HTMLInputElement).value, 0, 2160)"/>
+                                </div>
+                                <div class="button" v-on:click="state.streams.height = 1080">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.streams.height"
+                                        v-bind:min="0.0" v-bind:max="2160" v-bind:step="40"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">fps</div>
+                                <div class="label2">(fps)</div>
+                                <div class="label3">[fps]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.streams.fps, 2, true)"
+                                        v-on:change="(ev) => state.streams.fps = fieldImport((ev.target! as HTMLInputElement).value, 0, 60)"/>
+                                </div>
+                                <div class="button" v-on:click="state.streams.fps = 30.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.streams.fps"
+                                        v-bind:min="0.0" v-bind:max="60.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
                             </div>
-                            <div class="flag">
-                                <div class="fixed">Enable Keys</div>
-                                <toggle class="toggle" v-model="preview.opts.keys"></toggle>
+                        </tab>
+                    </tabs>
+                </tab>
+                <tab id="displays" name="Displays">
+                    <tabs ref="displays" v-bind:options="{ useUrlFragment: false }" v-bind:cache-lifetime="0" class="tabs-level-2" v-on:changed="tabChanged1">
+                        <!--  ==== CANVAS ====  -->
+                        <tab id="canvas" name="Canvas" class="canvas">
+                            <div class="desc">
+                                The <b>Canvas</b> is the background of the scene.
+                                It can be either based on a single image for rendering a static canvas,
+                                or it can be two images providing a dynamic canvas through a cross-fade effect (indicated
+                                by "FADE"). Some canvas are exclusively designed for particular events (indicated
+                                by "EXCL") and hence should be not reused for other events.
+                                All canvas images have to be exactly 10540 x 2250 pixels in size.
                             </div>
-                        </div>
-                        <div class="action">
-                            <div class="button" v-on:click="previewOpen()">OPEN</div>
-                            <div class="button" v-on:click="previewCopy()">COPY</div>
-                        </div>
-                    </div>
+                            <div class="control">
+                                <div class="label1">Z-rotate</div>
+                                <div class="label2">(rotate right/left)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="5" v-bind:value="fieldExport(state.canvas.rotationZ)"
+                                        v-on:change="(ev) => state.canvas.rotationZ = fieldImport((ev.target! as HTMLInputElement).value, -10, +10)"/>
+                                </div>
+                                <div class="button" v-on:click="state.canvas.rotationZ = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.canvas.rotationZ"
+                                        v-bind:min="-10" v-bind:max="+10" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                            </div>
+                            <div class="list" ref="list">
+                                <div
+                                    v-for="(group, i) in imageList.map((e) => e.group).filter((v, i, a) => v !== '' && a.indexOf(v) === i)"
+                                    class="list-group"
+                                    v-bind:class="{ selected: openGroup === group, alt: i % 2 == 1 }"
+                                    v-bind:key="group"
+                                >
+                                    <div class="name"
+                                        v-on:click="openGroup = openGroup !== group ? group : ''">
+                                        <span class="icon">
+                                            <span v-show="openGroup !== group"><i class="fa fa-caret-right"></i></span>
+                                            <span v-show="openGroup === group"><i class="fa fa-caret-down" ></i></span>
+                                        </span>
+                                        <span>{{ group }}</span>
+                                    </div>
+                                    <div
+                                        v-show="openGroup === group"
+                                        v-for="(entry, j) in imageList.filter((e) => e.group === group)"
+                                        class="list-entry"
+                                        v-bind:class="{ selected: entry.id === state.canvas.id, alt: j % 2 == 1 }"
+                                        v-bind:key="entry.id!"
+                                        v-on:click="selectImage(entry.id!)"
+                                    >
+                                        <div class="name">{{ entry.name }}</div>
+                                        <div class="tags">
+                                            <div v-show="entry.texture2" class="tag tag-fade">FADE</div>
+                                            <div v-show="entry.exclusive" class="tag tag-exclusive">EXCL</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div
+                                    v-for="(entry, i) in imageList.filter((e) => e.group === '')"
+                                    class="list-entry"
+                                    v-bind:class="{ selected: entry.id === state.canvas.id, alt: i % 2 == 1 }"
+                                    v-bind:key="entry.id!"
+                                    v-on:click="selectImage(entry.id!)"
+                                >
+                                    <div class="name">{{ entry.name }}</div>
+                                    <div class="tags">
+                                        <div v-show="entry.texture2" class="tag tag-fade">FADE</div>
+                                        <div v-show="entry.exclusive" class="tag tag-exclusive">EXCL</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <div class="button"
+                                    v-bind:class="{ unselectable: state.canvas.texture2 === '' }"
+                                    v-on:click="syncCanvas()">
+                                    SYNC
+                                </div>
+                            </div>
+                        </tab>
+
+                        <!--  ==== DECAL ====  -->
+                        <tab id="decal" name="Decal">
+                            <div class="desc">
+                                The <b>Decal</b> is the optional poster-style display which can be projected
+                                onto the background canvas. It can scaled in size, positioned in a radial way on the background canvas,
+                                its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
+                                and a chroma-key filter applied.
+                            </div>
+                            <div class="control">
+                                <div class="label1">enable</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.decal.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.decal.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.decal.enable"></toggle>
+                                </div>
+
+                                <div class="label1">fade</div>
+                                <div class="label2">(time)</div>
+                                <div class="label3">[sec]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.decal.fadeTime)"
+                                        v-on:change="(ev) => state.decal.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.decal.fadeTime = 2.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.decal.fadeTime"
+                                        v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">scale</div>
+                                <div class="label2">(resize)</div>
+                                <div class="label3">[mult]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.decal.scale)"
+                                        v-on:change="(ev) => state.decal.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 5.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.decal.scale = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.decal.scale"
+                                        v-bind:min="0.1" v-bind:max="5.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">rotate</div>
+                                <div class="label2">(pan left/right)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.decal.rotate)"
+                                        v-on:change="(ev) => state.decal.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
+                                </div>
+                                <div class="button" v-on:click="state.decal.rotate = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.decal.rotate"
+                                        v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">lift</div>
+                                <div class="label2">(tilt down/up)</div>
+                                <div class="label3">[m]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.decal.lift)"
+                                        v-on:change="(ev) => state.decal.lift = fieldImport((ev.target! as HTMLInputElement).value, -15, +9)"/>
+                                </div>
+                                <div class="button" v-on:click="state.decal.lift = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.decal.lift"
+                                        v-bind:min="-15" v-bind:max="+9" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">opacity</div>
+                                <div class="label2">(less/more)</div>
+                                <div class="label3">[percent]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.decal.opacity)"
+                                        v-on:change="(ev) => state.decal.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.decal.opacity = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.decal.opacity"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">border</div>
+                                <div class="label2">(radius)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.decal.borderRad)"
+                                        v-on:change="(ev) => state.decal.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
+                                </div>
+                                <div class="button" v-on:click="state.decal.borderRad = 40">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.decal.borderRad"
+                                        v-bind:min="0" v-bind:max="540" v-bind:step="10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">border</div>
+                                <div class="label2">(cropping)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.decal.borderCrop)"
+                                        v-on:change="(ev) => state.decal.borderCrop = fieldImport((ev.target! as HTMLInputElement).value, 0, 50)"/>
+                                </div>
+                                <div class="button" v-on:click="state.decal.borderCrop = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.decal.borderCrop"
+                                        v-bind:min="0" v-bind:max="50" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(enable)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.decal.chromaKey.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.decal.chromaKey.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.decal.chromaKey.enable"></toggle>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(threshold)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.decal.chromaKey.threshold)"
+                                        v-on:change="(ev) => state.decal.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.decal.chromaKey.threshold = 0.4">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.decal.chromaKey.threshold"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(smoothing)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.decal.chromaKey.smoothing)"
+                                        v-on:change="(ev) => state.decal.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
+                                </div>
+                                <div class="button" v-on:click="state.decal.chromaKey.smoothing = 0.1">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.decal.chromaKey.smoothing"
+                                        v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                            </div>
+                        </tab>
+
+                        <!--  ==== MONITOR ====  -->
+                        <tab id="monitor" name="Monitor">
+                            <div class="desc">
+                                The <b>Monitor</b> is the optional TV-style monitor which can be shown
+                                in front of the background canvas. It can be scaled in size, and positioned on in a
+                                radial way in front of the background canvas.
+                            </div>
+                            <div class="control">
+                                <div class="label1">enable</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.monitor.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.monitor.enable"></toggle>
+                                </div>
+
+                                <div class="label1">fade</div>
+                                <div class="label2">(time)</div>
+                                <div class="label3">[sec]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.monitor.fadeTime)"
+                                        v-on:change="(ev) => state.monitor.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.fadeTime = 2.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.monitor.fadeTime"
+                                        v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">scale</div>
+                                <div class="label2">(resize)</div>
+                                <div class="label3">[mult]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.monitor.scale)"
+                                        v-on:change="(ev) => state.monitor.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 2.2)"/>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.scale = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.monitor.scale"
+                                        v-bind:min="0.1" v-bind:max="2.2" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">rotate</div>
+                                <div class="label3">(pan left/right)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.monitor.rotate)"
+                                        v-on:change="(ev) => state.monitor.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.rotate = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.monitor.rotate"
+                                        v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">lift</div>
+                                <div class="label2">(shift down/up)</div>
+                                <div class="label3">[cm]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.monitor.lift)"
+                                        v-on:change="(ev) => state.monitor.lift = fieldImport((ev.target! as HTMLInputElement).value, -150, +70)"/>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.lift = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.monitor.lift"
+                                        v-bind:min="-150" v-bind:max="+70" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">distance</div>
+                                <div class="label2">(shift bwd/fwd)</div>
+                                <div class="label3">[m]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.monitor.distance)"
+                                        v-on:change="(ev) => state.monitor.distance = fieldImport((ev.target! as HTMLInputElement).value, -1.5, +0.4)"/>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.distance = 0.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.monitor.distance"
+                                        v-bind:min="-1.5" v-bind:max="+0.4" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(enable)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.monitor.chromaKey.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.chromaKey.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.monitor.chromaKey.enable"></toggle>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(threshold)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.monitor.chromaKey.threshold)"
+                                        v-on:change="(ev) => state.monitor.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.chromaKey.threshold = 0.4">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.monitor.chromaKey.threshold"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(smoothing)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.monitor.chromaKey.smoothing)"
+                                        v-on:change="(ev) => state.monitor.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.chromaKey.smoothing = 0.1">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.monitor.chromaKey.smoothing"
+                                        v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                            </div>
+                        </tab>
+
+                        <!--  ==== PLATE ====  -->
+                        <tab id="plate" name="Plate">
+                            <div class="desc">
+                                The <b>Plate</b> is the optional planar display which can be projected
+                                in the foreground, intended as the optical plate on the desk's front side.
+                                It can be given scaled in size, positioned in a radial way on the background canvas,
+                                its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
+                                and a chroma-key filter applied.
+                            </div>
+                            <div class="control">
+                                <div class="label1">enable</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.plate.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.plate.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.plate.enable"></toggle>
+                                </div>
+
+                                <div class="label1">fade</div>
+                                <div class="label2">(time)</div>
+                                <div class="label3">[sec]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.plate.fadeTime)"
+                                        v-on:change="(ev) => state.plate.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.plate.fadeTime = 2.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.plate.fadeTime"
+                                        v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">scale</div>
+                                <div class="label2">(resize)</div>
+                                <div class="label3">[mult]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.plate.scale)"
+                                        v-on:change="(ev) => state.plate.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 3.5)"/>
+                                </div>
+                                <div class="button" v-on:click="state.plate.scale = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.plate.scale"
+                                        v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">rotate</div>
+                                <div class="label2">(pan left/right)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.plate.rotate)"
+                                        v-on:change="(ev) => state.plate.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
+                                </div>
+                                <div class="button" v-on:click="state.plate.rotate = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.plate.rotate"
+                                        v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">lift</div>
+                                <div class="label2">(shift down/up)</div>
+                                <div class="label3">[m]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.plate.lift)"
+                                        v-on:change="(ev) => state.plate.lift = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.plate.lift = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.plate.lift"
+                                        v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">distance</div>
+                                <div class="label2">(shift bwd/fwd)</div>
+                                <div class="label3">[m]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.plate.distance)"
+                                        v-on:change="(ev) => state.plate.distance = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.plate.distance = 0.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.plate.distance"
+                                        v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">opacity</div>
+                                <div class="label2">(less/more)</div>
+                                <div class="label3">[percent]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.plate.opacity)"
+                                        v-on:change="(ev) => state.plate.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.plate.opacity = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.plate.opacity"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">border</div>
+                                <div class="label2">(radius)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.plate.borderRad)"
+                                        v-on:change="(ev) => state.plate.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
+                                </div>
+                                <div class="button" v-on:click="state.plate.borderRad = 40">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.plate.borderRad"
+                                        v-bind:min="0" v-bind:max="540" v-bind:step="10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">border</div>
+                                <div class="label2">(cropping)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.plate.borderCrop)"
+                                        v-on:change="(ev) => state.plate.borderCrop = fieldImport((ev.target! as HTMLInputElement).value, 0, 50)"/>
+                                </div>
+                                <div class="button" v-on:click="state.plate.borderCrop = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.plate.borderCrop"
+                                        v-bind:min="0" v-bind:max="50" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(enable)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.plate.chromaKey.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.plate.chromaKey.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.plate.chromaKey.enable"></toggle>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(threshold)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.plate.chromaKey.threshold)"
+                                        v-on:change="(ev) => state.plate.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.plate.chromaKey.threshold = 0.4">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.plate.chromaKey.threshold"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(smoothing)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.plate.chromaKey.smoothing)"
+                                        v-on:change="(ev) => state.plate.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
+                                </div>
+                                <div class="button" v-on:click="state.plate.chromaKey.smoothing = 0.1">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.plate.chromaKey.smoothing"
+                                        v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                            </div>
+                        </tab>
+
+                        <!--  ==== HOLOGRAM ====  -->
+                        <tab id="hologram" name="Hologram">
+                            <div class="desc">
+                                The <b>Hologram</b> is the optional planar display which can be projected
+                                in the foreground. It can be scaled in size, positioned in a radial way on the background canvas,
+                                its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
+                                and a chroma-key filter applied.
+                            </div>
+                            <div class="control">
+                                <div class="label1">enable</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.hologram.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.hologram.enable"></toggle>
+                                </div>
+
+                                <div class="label1">fade</div>
+                                <div class="label2">(time)</div>
+                                <div class="label3">[sec]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.hologram.fadeTime)"
+                                        v-on:change="(ev) => state.hologram.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.fadeTime = 2.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.hologram.fadeTime"
+                                        v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">scale</div>
+                                <div class="label2">(resize)</div>
+                                <div class="label3">[mult]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.hologram.scale)"
+                                        v-on:change="(ev) => state.hologram.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 3.5)"/>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.scale = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.hologram.scale"
+                                        v-bind:min="0.1" v-bind:max="3.5" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">rotate</div>
+                                <div class="label2">(pan left/right)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.hologram.rotate)"
+                                    v-on:change="(ev) => state.hologram.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.rotate = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.hologram.rotate"
+                                        v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">lift</div>
+                                <div class="label2">(shift down/up)</div>
+                                <div class="label3">[m]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.hologram.lift)"
+                                        v-on:change="(ev) => state.hologram.lift = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.lift = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.hologram.lift"
+                                        v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">distance</div>
+                                <div class="label2">(shift bwd/fwd)</div>
+                                <div class="label3">[m]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.hologram.distance)"
+                                        v-on:change="(ev) => state.hologram.distance = fieldImport((ev.target! as HTMLInputElement).value, -2.0, +2.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.distance = 0.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.hologram.distance"
+                                        v-bind:min="-2.0" v-bind:max="+2.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">opacity</div>
+                                <div class="label2">(less/more)</div>
+                                <div class="label3">[percent]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.hologram.opacity)"
+                                        v-on:change="(ev) => state.hologram.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.opacity = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.hologram.opacity"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">border</div>
+                                <div class="label2">(radius)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.hologram.borderRad)"
+                                        v-on:change="(ev) => state.hologram.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.borderRad = 40">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.hologram.borderRad"
+                                        v-bind:min="0" v-bind:max="540" v-bind:step="10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">border</div>
+                                <div class="label2">(cropping)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.hologram.borderCrop)"
+                                        v-on:change="(ev) => state.hologram.borderCrop = fieldImport((ev.target! as HTMLInputElement).value, 0, 50)"/>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.borderCrop = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.hologram.borderCrop"
+                                        v-bind:min="0" v-bind:max="50" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(enable)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.hologram.chromaKey.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.chromaKey.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.hologram.chromaKey.enable"></toggle>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(threshold)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.hologram.chromaKey.threshold)"
+                                        v-on:change="(ev) => state.hologram.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.chromaKey.threshold = 0.4">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.hologram.chromaKey.threshold"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(smoothing)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.hologram.chromaKey.smoothing)"
+                                        v-on:change="(ev) => state.hologram.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.chromaKey.smoothing = 0.1">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.hologram.chromaKey.smoothing"
+                                        v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                            </div>
+                        </tab>
+                    </tabs>
+                </tab>
+                <tab id="ambient" name="Ambient">
+                    <tabs ref="ambient" v-bind:options="{ useUrlFragment: false }" v-bind:cache-lifetime="0" class="tabs-level-2" v-on:changed="tabChanged1">
+                        <!--  ==== LIGHTS ====  -->
+                        <tab id="lights" name="Lights">
+                            <div class="desc">
+                                The <b>Lights</b> are three optional, additional point lights in the scene,
+                                which can further light up the scene and especially produce a shadow of
+                                the monitor on the background canvas.
+                            </div>
+                            <div class="control">
+                                <div class="label1">intensity1</div>
+                                <div class="label2">(less/more)</div>
+                                <div class="label3">[lum]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.lights.intensity1, 0)"
+                                        v-on:change="(ev) => state.lights.intensity1 = fieldImport((ev.target! as HTMLInputElement).value, 0, 600)"/>
+                                </div>
+                                <div class="button" v-on:click="state.lights.intensity1 = 300">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.lights.intensity1"
+                                        v-bind:min="0" v-bind:max="600" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">intensity2</div>
+                                <div class="label2">(less/more)</div>
+                                <div class="label3">[lum]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.lights.intensity2, 0)"
+                                        v-on:change="(ev) => state.lights.intensity2 = fieldImport((ev.target! as HTMLInputElement).value, 0, 600)"/>
+                                </div>
+                                <div class="button" v-on:click="state.lights.intensity2 = 300">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.lights.intensity2"
+                                        v-bind:min="0" v-bind:max="600" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">intensity3</div>
+                                <div class="label2">(less/more)</div>
+                                <div class="label3">[lum]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.lights.intensity3, 0)"
+                                        v-on:change="(ev) => state.lights.intensity3 = fieldImport((ev.target! as HTMLInputElement).value, 0, 600)"/>
+                                </div>
+                                <div class="button" v-on:click="state.lights.intensity3 = 300">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.lights.intensity3"
+                                        v-bind:min="0" v-bind:max="600" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                            </div>
+                        </tab>
+
+                        <!--  ==== AVATARS ====  -->
+                        <tab name="Avatars">
+                            <div class="desc">
+                                The <b>Avatars</b> are the two optional 3D models of a latin woman (A1, <i>Sophia</i>) and a
+                                european man (A2, <i>Dennis</i>) which can be temporarily placed into the scene
+                                to help setting up the various virtual pan/tilt/zoom (PTZ) views of the scene.
+                                Their body height can be adjusted and they can be rotated onto the usual 9
+                                positions on the scene.
+                            </div>
+                            <div class="control">
+                                <div class="label1">A1 enable</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.avatars.enable1 ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.avatars.enable1 = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.avatars.enable1"></toggle>
+                                </div>
+
+                                <div class="label1">A1 size</div>
+                                <div class="label2">(height)</div>
+                                <div class="label3">[cm]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.avatars.size1)"
+                                        v-on:change="(ev) => state.avatars.size1 = fieldImport((ev.target! as HTMLInputElement).value, 160, 210)"/>
+                                </div>
+                                <div class="button" v-on:click="state.avatars.size1 = 185">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.avatars.size1"
+                                        v-bind:min="160" v-bind:max="210" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">A1 rotate</div>
+                                <div class="label2">(pan left/right)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.avatars.rotate1)"
+                                        v-on:change="(ev) => state.avatars.rotate1 = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
+                                </div>
+                                <div class="button" v-on:click="state.avatars.rotate1 = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.avatars.rotate1"
+                                        v-bind:min="-90" v-bind:max="+90" v-bind:step="7"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">A2 enable</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.avatars.enable2 ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.avatars.enable2 = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.avatars.enable2"></toggle>
+                                </div>
+
+                                <div class="label1">A2 size</div>
+                                <div class="label2">(height)</div>
+                                <div class="label3">[cm]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.avatars.size2)"
+                                        v-on:change="(ev) => state.avatars.size2 = fieldImport((ev.target! as HTMLInputElement).value, 160, 210)"/>
+                                </div>
+                                <div class="button" v-on:click="state.avatars.size2 = 185">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.avatars.size2"
+                                        v-bind:min="160" v-bind:max="210" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">A2 rotate</div>
+                                <div class="label2">(pan left/right)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.avatars.rotate2)"
+                                        v-on:change="(ev) => state.avatars.rotate2 = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
+                                </div>
+                                <div class="button" v-on:click="state.avatars.rotate2 = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.avatars.rotate2"
+                                        v-bind:min="-90" v-bind:max="+90" v-bind:step="7"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                            </div>
+                        </tab>
+
+                        <!--  ==== REFERENCES ====  -->
+                        <tab name="References">
+                            <div class="desc">
+                                The <b>References</b> are the optional red balls in the scence
+                                which can help calibrating the virtual cameras against the physical
+                                camera viewpoint before an event. If calibrated correctly, the virtual balls
+                                in the scene should match as close as possible with the physical red markers
+                                on the stage.
+                            </div>
+                            <div class="control">
+                                <div class="label1">enable</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.references.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.references.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.references.enable"></toggle>
+                                </div>
+                            </div>
+                        </tab>
+                    </tabs>
+                </tab>
+                <tab id="cameras" name="Cameras">
+                    <tabs ref="cameras" v-bind:options="{ useUrlFragment: false }" v-bind:cache-lifetime="0" class="tabs-level-2" v-on:changed="tabChanged1">
+                        <!--  ==== CAM1/2/3/4 ====  -->
+                        <tab v-for="cam in [ 'CAM1', 'CAM2', 'CAM3', 'CAM4' ]" v-bind:key="cam" v-bind:id="cam.toLowerCase()" v-bind:name="cam">
+                            <div class="desc">
+                                The <b>{{ cam }}</b> is a digital twin of the corresponding physical
+                                camera. It has to be calibrated to match as close
+                                as possible to the physical viewpoint of the camera in order
+                                to allow precise pan/tilt/zoom (PTZ) of both the physical camera via NDI
+                                and PTZ of the virtual camera via the FreeD information emitted by the physical
+                                camera.
+                            </div>
+                            <div class="control">
+                                <div class="label1">hull X-pos</div>
+                                <div class="label2">(shift bwd/fwd)</div>
+                                <div class="label3">[cm]:</div>
+                                <div class="value">
+                                    <input tabindex="1" v-bind:value="fieldExport((state as any)[cam].hullPosition.x)"
+                                        v-on:change="(ev) => (state as any)[cam].hullPosition.x = fieldImport((ev.target! as HTMLInputElement).value, -50, +50)"/>
+                                </div>
+                                <div class="button" v-on:click="(state as any)[cam].hullPosition.x = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="(state as any)[cam].hullPosition.x"
+                                        v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">hull Y-pos</div>
+                                <div class="label2">(shift left/right)</div>
+                                <div class="label3">[cm]:</div>
+                                <div class="value">
+                                    <input tabindex="2" v-bind:value="fieldExport((state as any)[cam].hullPosition.y)"
+                                        v-on:change="(ev) => (state as any)[cam].hullPosition.y = fieldImport((ev.target! as HTMLInputElement).value, -50, +50)"/>
+                                </div>
+                                <div class="button" v-on:click="(state as any)[cam].hullPosition.y = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="(state as any)[cam].hullPosition.y"
+                                        v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">hull Z-pos</div>
+                                <div class="label2">(shift down/up)</div>
+                                <div class="label3">[cm]:</div>
+                                <div class="value">
+                                    <input tabindex="3" v-bind:value="fieldExport((state as any)[cam].hullPosition.z)"
+                                        v-on:change="(ev) => (state as any)[cam].hullPosition.z = fieldImport((ev.target! as HTMLInputElement).value, -50, +50)"/>
+                                </div>
+                                <div class="button" v-on:click="(state as any)[cam].hullPosition.z = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="(state as any)[cam].hullPosition.z"
+                                        v-bind:min="-50" v-bind:max="+50" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">case X-rot</div>
+                                <div class="label2">(tilt down/up)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="4" v-bind:value="fieldExport((state as any)[cam].caseRotation.x)"
+                                        v-on:change="(ev) => (state as any)[cam].caseRotation.x = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
+                                </div>
+                                <div class="button" v-on:click="(state as any)[cam].caseRotation.x = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="(state as any)[cam].caseRotation.x"
+                                        v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">case Y-rot</div>
+                                <div class="label2">(pan left/right)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="5" v-bind:value="fieldExport((state as any)[cam].caseRotation.y)"
+                                        v-on:change="(ev) => (state as any)[cam].caseRotation.y = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
+                                </div>
+                                <div class="button" v-on:click="(state as any)[cam].caseRotation.y = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="(state as any)[cam].caseRotation.y"
+                                        v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">case Y-rot</div>
+                                <div class="label2">(pan left/right)</div>
+                                <div class="label3">[mult]:</div>
+                                <div class="value">
+                                    <input tabindex="7" v-bind:value="fieldExport((state as any)[cam].caseRotation.ym)"
+                                        v-on:change="(ev) => (state as any)[cam].caseRotation.ym = fieldImport((ev.target! as HTMLInputElement).value, 0, +2)"/>
+                                </div>
+                                <div class="button" v-on:click="(state as any)[cam].caseRotation.ym = 1">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="(state as any)[cam].caseRotation.ym"
+                                        v-bind:min="0" v-bind:max="+2" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">case Z-rot</div>
+                                <div class="label2">(rotate left/right)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="6" v-bind:value="fieldExport((state as any)[cam].caseRotation.z)"
+                                        v-on:change="(ev) => (state as any)[cam].caseRotation.z = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
+                                </div>
+                                <div class="button" v-on:click="(state as any)[cam].caseRotation.z = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="(state as any)[cam].caseRotation.z"
+                                        v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">lens X-rot</div>
+                                <div class="label2">(tilt down/up)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="4" v-bind:value="fieldExport((state as any)[cam].lensRotation.x)"
+                                        v-on:change="(ev) => (state as any)[cam].lensRotation.x = fieldImport((ev.target! as HTMLInputElement).value, -20, +20)"/>
+                                </div>
+                                <div class="button" v-on:click="(state as any)[cam].lensRotation.x = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="(state as any)[cam].lensRotation.x"
+                                        v-bind:min="-20" v-bind:max="+20" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">lens X-rot</div>
+                                <div class="label2">(tilt down/up)</div>
+                                <div class="label3">[mult]:</div>
+                                <div class="value">
+                                    <input tabindex="7" v-bind:value="fieldExport((state as any)[cam].lensRotation.xm)"
+                                        v-on:change="(ev) => (state as any)[cam].lensRotation.xm = fieldImport((ev.target! as HTMLInputElement).value, 0, +2)"/>
+                                </div>
+                                <div class="button" v-on:click="(state as any)[cam].lensRotation.xm = 1">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="(state as any)[cam].lensRotation.xm"
+                                        v-bind:min="0" v-bind:max="+2" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <!--
+                                FIXME: currently unused!
+                                <div class="label1">FOV</div>
+                                <div class="label2">(zoom)</div>
+                                <div class="label3">[mult]:</div>
+                                <div class="value">
+                                    <input tabindex="7" v-bind:value="fieldExport((state as any)[cam].fov.m)"
+                                        v-on:change="(ev) => (state as any)[cam].fov.m = fieldImport((ev.target! as HTMLInputElement).value, 0, +4)"/>
+                                </div>
+                                <div class="button" v-on:click="(state as any)[cam].fov.m = 1">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="(state as any)[cam].fov.m"
+                                        v-bind:min="0" v-bind:max="+4" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                                -->
+                            </div>
+                        </tab>
+                    </tabs>
                 </tab>
             </tabs>
         </div>
@@ -1589,7 +1605,7 @@
     justify-items: center
     align-items: center
     .head
-        background-color: var(--color-std-bg-3)
+        background-color: var(--color-std-bg-1)
         color: var(--color-std-fg-1)
         padding: 10px 40px
         width:  calc(100% - 2 * 40px)
@@ -1604,7 +1620,8 @@
             height: 20px
             margin-right: 10px
         .stats
-            border: 1px solid var(--color-std-bg-2)
+            border: 1px solid var(--color-std-bg-3)
+            background-color: var(--color-std-bg-2)
             position: absolute
             right: 40px
             top: 8px
@@ -1620,14 +1637,14 @@
                 margin-right: 16px
     .body
         flex-grow: 1
-        background-color: var(--color-std-bg-2)
+        background-color: var(--color-std-bg-0)
         color: var(--color-std-fg-5)
         padding: 10px 10px
         width:  calc(100% - 2 * 10px)
         height: calc(100% - 2 * 10px)
         overflow: hidden
     .foot
-        background-color: var(--color-std-bg-3)
+        background-color: var(--color-std-bg-1)
         color: var(--color-std-fg-1)
         padding: 13px 40px
         width:  calc(100% - 2 * 40px)
@@ -1654,8 +1671,8 @@
         .status
             flex-grow: 1
         .connection
-            background-color: var(--color-std-bg-3)
-            border: 1px solid var(--color-std-bg-2)
+            border: 1px solid var(--color-std-bg-3)
+            background-color: var(--color-std-bg-2)
             border-radius: 4px
             padding: 4px 8px 4px 8px
             display: flex
@@ -1720,15 +1737,13 @@
             gap: 10px 10px
         .actions1,
         .actions3
+            margin-right: 10px
             display: grid
             grid-template-columns: 100px
             grid-template-rows: 140px 140px
             justify-items: center
             align-items: center
             gap: 10px 10px
-        .actions1,
-        .actions3
-            margin-right: 10px
         .actions2
             display: grid
             grid-template-columns: 100px
@@ -1745,7 +1760,7 @@
             align-items: center
             gap: 13px 13px
         .button
-            background-color: var(--color-std-bg-3)
+            background-color: var(--color-std-bg-2)
             color: var(--color-std-fg-5)
             border-radius: 4px
             padding: 2px 8px 2px 8px
@@ -1763,7 +1778,7 @@
                 background-color: var(--color-acc-bg-5)
                 color: var(--color-acc-fg-5)
             &.destructive:hover
-                background-color: var(--color-sig-bg-3)
+                background-color: var(--color-sig-bg-2)
                 color: var(--color-sig-fg-5)
             .badge
                 position: absolute
@@ -1795,7 +1810,7 @@
             font-weight: bold
             line-height: 140px
             &.unselectable:hover
-                background-color: var(--color-std-bg-3)
+                background-color: var(--color-std-bg-2)
                 color: var(--color-std-fg-5)
                 cursor: default
         .actions2 .button
@@ -1803,7 +1818,7 @@
             font-weight: bold
             line-height: 290px
             &.unselectable:hover
-                background-color: var(--color-std-bg-3)
+                background-color: var(--color-std-bg-2)
                 color: var(--color-std-fg-5)
                 cursor: default
         .actions3 .button
@@ -1843,7 +1858,7 @@
                 gap: 10px 10px
                 margin-right: 20px
                 .flag
-                    background-color: var(--color-std-bg-3)
+                    background-color: var(--color-std-bg-2)
                     color: var(--color-std-fg-2)
                     display: grid
                     grid-template-columns: 100px 80px
@@ -1861,7 +1876,7 @@
                 align-items: center
                 gap: 10px 10px
             .button
-                background-color: var(--color-std-bg-1)
+                background-color: var(--color-std-bg-2)
                 color: var(--color-std-fg-1)
                 border-radius: 4px
                 padding: 2px 8px 2px 8px
@@ -1894,10 +1909,10 @@
         margin-top: 10px
         padding: 4px 4px 4px 4px
         border-radius: 4px
-        background-color: var(--color-std-bg-3)
-        height: 270px
-        min-height: 270px
-        max-height: 270px
+        background-color: var(--color-std-bg-2)
+        height: 320px
+        min-height: 320px
+        max-height: 320px
         .list-group
             cursor: pointer
             color: var(--color-std-fg-5)
@@ -1920,12 +1935,12 @@
         .list-entry
             cursor: pointer
             color: var(--color-std-fg-5)
-            background-color: var(--color-std-bg-4)
+            background-color: var(--color-std-bg-3)
             padding: 1px 10px 1px 10px
             display: flex
             flex-direction: row
             &.alt
-                background-color: var(--color-std-bg-5)
+                background-color: var(--color-std-bg-4)
             &.selected
                 color: var(--color-acc-fg-5)
                 background-color: var(--color-acc-bg-3)
@@ -2023,7 +2038,7 @@
                 padding: 2px 8px 2px 8px
                 text-align: center
         .button
-            background-color: var(--color-std-bg-1)
+            background-color: var(--color-std-bg-2)
             color: var(--color-std-fg-5)
             border-radius: 4px
             padding: 2px 8px 2px 8px
@@ -2033,8 +2048,8 @@
             font-weight: 200
             cursor: pointer
             &:hover
-                background-color: var(--color-std-fg-5)
-                color: var(--color-std-bg-1)
+                background-color: var(--color-acc-bg-4)
+                color: var(--color-acc-fg-5)
         input.text
             background-color: var(--color-acc-bg-3)
             color: var(--color-acc-fg-5)
@@ -2061,7 +2076,7 @@
             align-items: center
             gap: 10px 10px
             .button
-                background-color: var(--color-std-bg-3)
+                background-color: var(--color-std-bg-2)
                 color: var(--color-std-fg-5)
                 border-radius: 4px
                 padding: 2px 8px 2px 8px
@@ -2080,14 +2095,14 @@
                     background-color: var(--color-acc-bg-5)
                     color: var(--color-acc-fg-5)
                 &.unselectable:hover
-                    background-color: var(--color-std-bg-3)
+                    background-color: var(--color-std-bg-2)
                     color: var(--color-std-fg-5)
                     cursor: default
                 &.cut
                     line-height: 90px
                     font-weight: bold
                 &.cut:hover
-                    background-color: var(--color-sig-bg-3)
+                    background-color: var(--color-sig-bg-2)
                     color: var(--color-sig-fg-5)
                 .badge
                     position: absolute
@@ -2113,14 +2128,14 @@
                     color: var(--color-acc-fg-5)
     .slider
         width: 400px
-        --slider-bg: var(--color-std-bg-1)
+        --slider-bg: var(--color-std-bg-2)
         --slider-handle-bg: var(--color-std-fg-5)
         --slider-connect-bg: var(--color-acc-bg-5)
         --slider-height: 20px
         --slider-handle-width: 20px
         --slider-handle-height: 20px
         --slider-tooltip-bg: var(--color-std-fg-5)
-        --slider-tooltip-color: var(--color-std-bg-1)
+        --slider-tooltip-color: var(--color-std-bg-2)
         --slider-tooltip-font-size: 10pt
         --slider-tooltip-line-height: 12pt
         --slider-tooltip-font-weight: normal
@@ -2132,7 +2147,7 @@
         --toggle-height: 20px
         --toggle-border: 0
         --toggle-bg-on: var(--color-acc-bg-5)
-        --toggle-bg-off: var(--color-std-bg-1)
+        --toggle-bg-off: var(--color-std-bg-2)
         --toggle-ring-width: 0
         --toggle-handle-enabled: var(--color-std-fg-5)
 </style>
@@ -2198,7 +2213,8 @@ export default defineComponent({
         "toggle": Toggle
     },
     props: {
-        selectTab:  { type: String, default: "presets" },
+        selectTab0: { type: String, default: "control" },
+        selectTab1: { type: String, default: "presets" },
         serviceUrl: { type: String, default: "" },
         wsUrl:      { type: String, default: "" }
     },
@@ -2207,7 +2223,8 @@ export default defineComponent({
         imageList: [] as ImageEntry[],
         openGroup: "",
         ps: null as PerfectScrollbar | null,
-        tab: "",
+        tab0: "",
+        tab1: "",
         preset: {
             filters: {
                 canvas:     true,
@@ -2263,7 +2280,9 @@ export default defineComponent({
     }),
     async mounted () {
         /*  force particular tab to be selected  */
-        (this.$refs.tabs as any).selectTab(`#${this.selectTab}`)
+        (this.$refs.tabs as any).selectTab(`#${this.selectTab0}`)
+        if (this.$refs[this.selectTab0] !== undefined)
+            (this.$refs[this.selectTab0] as any).selectTab(`#${this.selectTab1}`)
 
         /*  establish server connection  */
         const ws = new RecWebSocket(this.wsUrl + "/control", [], {
@@ -2436,9 +2455,15 @@ export default defineComponent({
         },
 
         /*  update URL on tab changes  */
-        tabChanged (tab: any) {
-            this.tab = tab.tab.computedId
-            window.location.hash = `#/control/${tab.tab.computedId}`
+        tabChanged0 (tab: any) {
+            this.tab0 = tab.tab.computedId
+            if (this.$refs[this.tab0] !== undefined)
+                this.tab1 = (this.$refs[this.tab0] as any).activeTabHash.replace(/^#/, "")
+            window.location.hash = `#/control/${this.tab0}/${this.tab1}`
+        },
+        tabChanged1 (tab: any) {
+            this.tab1 = tab.tab.computedId
+            window.location.hash = `#/control/${this.tab0}/${this.tab1}`
         },
 
         /*  import a field  */

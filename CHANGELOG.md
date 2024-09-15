@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+2.2.0 (2024-09-16)
+------------------
+
+- IMPROVEMENT: use a nested tab experience for a more clean control UI
+
 2.1.2 (2024-09-16)
 ------------------
 
