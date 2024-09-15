@@ -90,7 +90,7 @@
 
         "nodemon":                          "3.1.4",
         "rimraf":                           "6.0.1",
-        "stmux":                            "1.8.9",
+        "stmux":                            "1.8.10",
         "stylelint":                        "16.9.0",
         "stylelint-config-html":            "1.1.0",
         "stylelint-config-recommended-vue": "1.5.0",
