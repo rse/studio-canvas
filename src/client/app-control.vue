@@ -184,7 +184,7 @@
                         or it can be two images providing a dynamic canvas through a cross-fade effect (indicated
                         by "FADE"). Some canvas are exclusively designed for particular events (indicated
                         by "EXCL") and hence should be not reused for other events.
-                        All canvas images have to be exactly 10540 x 3570 pixels in size.
+                        All canvas images have to be exactly 10540 x 2250 pixels in size.
                     </div>
                     <div class="control">
                         <div class="label1">Z-rotate</div>
