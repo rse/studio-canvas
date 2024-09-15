@@ -15,6 +15,9 @@ Improvements
 ------------
 
 - IMPROVEMENT:
+  add Pane, Pillar and Mask to Control UI
+
+- IMPROVEMENT:
   mehr Regler Distanz, weiter nach unten schieben, etc.
 
 - IMPROVEMENT:
