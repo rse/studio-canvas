@@ -9,6 +9,7 @@ ChangeLog
 - IMPROVEMENT: apply mesh smoothing to Wall in Blender for avoiding vertical bars
 - IMPROVEMENT: add distance control also to Monitor
 - BUGFIX: fix distance control for Plate and Hologram
+- BUGFIX: fix description of canvas size in control UI
 
 2.1.1 (2024-09-09)
 ------------------
