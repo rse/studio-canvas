@@ -402,6 +402,21 @@
                             ></slider>
                         </div>
 
+                        <div class="label1">distance</div>
+                        <div class="label2">(shift bwd/fwd)</div>
+                        <div class="label3">[m]:</div>
+                        <div class="value">
+                            <input tabindex="8" v-bind:value="fieldExport(state.monitor.distance)"
+                                v-on:change="(ev) => state.monitor.distance = fieldImport((ev.target! as HTMLInputElement).value, -1.5, +0.4)"/>
+                        </div>
+                        <div class="button" v-on:click="state.monitor.distance = 0.0">RESET</div>
+                        <div class="slider">
+                            <slider class="slider" v-model="state.monitor.distance"
+                                v-bind:min="-1.5" v-bind:max="+0.4" v-bind:step="0.01"
+                                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                            ></slider>
+                        </div>
+
                         <div class="label1">chromaKey</div>
                         <div class="label2">(enable)</div>
                         <div class="label3">[flag]:</div>

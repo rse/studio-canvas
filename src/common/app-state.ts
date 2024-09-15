@@ -30,6 +30,7 @@ export type StateType = {
         scale:      number,
         rotate:     number,
         lift:       number,
+        distance:   number,
         chromaKey:  {
             enable:     boolean,
             threshold:  number,
@@ -156,6 +157,7 @@ export const StateSchema = `{
         scale:      number,
         rotate:     number,
         lift:       number,
+        distance:   number,
         chromaKey:  {
             enable:     boolean,
             threshold:  number,
@@ -282,6 +284,7 @@ export const StateDefault: StateType = {
         scale:      1.0,
         rotate:     10,
         lift:       0,
+        distance:   0,
         chromaKey:  {
             enable:     false,
             threshold:  0.4,

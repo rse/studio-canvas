@@ -75,7 +75,8 @@ export default class CanvasRenderer extends EventEmitter {
     private monitorBase       = {
         scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationZ:     0, positionZ:     0
+        rotationZ:     0, positionZ:     0,
+        positionCaseX: 0, positionDisplayX: 0
     }
     private avatar1Scale      = { x: 0, y: 0, z: 0 }
     private avatar2Scale      = { x: 0, y: 0, z: 0 }
@@ -437,6 +438,8 @@ export default class CanvasRenderer extends EventEmitter {
         this.monitorBase.scaleDisplayZ = this.monitorDisplay.scaling.z
         this.monitorBase.rotationZ     = this.monitor.rotation.z
         this.monitorBase.positionZ     = this.monitor.position.z
+        this.monitorBase.positionCaseX    = this.monitorCase.position.x
+        this.monitorBase.positionDisplayX = this.monitorDisplay.position.x
 
         /*  apply glass material to monitor case  */
         const glass = new BABYLON.PBRMaterial("glass", this.scene)
@@ -957,6 +960,10 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.monitor.lift !== undefined)
                 this.monitor.position.z = this.monitorBase.positionZ + (state.monitor.lift / 100)
+            if (state.monitor.distance !== undefined) {
+                this.monitorCase.position.x    = this.monitorBase.positionCaseX    - state.monitor.distance
+                this.monitorDisplay.position.x = this.monitorBase.positionDisplayX - state.monitor.distance
+            }
             if (state.monitor.fadeTime !== undefined && this.monitorFade !== state.monitor.fadeTime)
                 this.monitorFade = state.monitor.fadeTime
             if (state.monitor.chromaKey !== undefined) {

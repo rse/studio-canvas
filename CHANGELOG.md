@@ -7,6 +7,7 @@ ChangeLog
 
 - UPDATE: update dependencies
 - IMPROVEMENT: apply mesh smoothing to Wall in Blender for avoiding vertical bars
+- IMPROVEMENT: add distance control also to Monitor
 
 2.1.1 (2024-09-09)
 ------------------
