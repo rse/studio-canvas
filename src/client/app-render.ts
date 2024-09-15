@@ -655,9 +655,14 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  determine particular device  */
         const label = this.videoStreamDevice
-        const device = label !== "" ?
-            devices.find((device) => device.kind === "videoinput" && device.label.substring(0, label.length) === label) :
-            undefined
+        if (label === "") {
+            this.emit("log", "INFO", "no video stream configured (using replacement content later)")
+            return
+        }
+        const device = devices.find((device) =>
+            device.kind === "videoinput"
+            && device.label.substring(0, label.length) === label
+        )
         if (device === undefined) {
             this.emit("log", "INFO", `failed to determine video stream (device: "${label}"): no such device (using replacement content later)`)
             return
