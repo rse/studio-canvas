@@ -69,8 +69,8 @@ export default class CanvasRenderer extends EventEmitter {
     private monitorChromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private videoStream:      MediaStream | null = null
     private videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
-    private videoStacks       = 2 /* FIXME: make configurable */
-    private videoStackMap     = { "monitor": 0, "decal": 1, "hologram": 0, "plate": 1 } as { [ id: string ]: number } /* FIXME: make configurable */
+    private videoStacks       = 2
+    private sourceMap         = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2" } as { [ id: string ]: string }
     private videoMeshMaterial = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
     private monitorBase       = {
         scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
@@ -754,7 +754,10 @@ export default class CanvasRenderer extends EventEmitter {
         material.setInt("chromaEnable", chromaKey?.enable ? 1 : 0)
         material.setFloat("chromaThreshold", chromaKey?.threshold ?? 0.4)
         material.setFloat("chromaSmoothing", chromaKey?.smoothing ?? 0.1)
-        material.setInt("stack", this.videoStackMap[id])
+        let stack = 0
+        if      (this.sourceMap[id] === "S1") stack = 0
+        else if (this.sourceMap[id] === "S2") stack = 1
+        material.setInt("stack", stack)
         material.setInt("stacks", this.videoStacks)
         material.zOffset = -200
         material.needAlphaBlending = () => true
@@ -945,6 +948,8 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.monitor !== undefined
             && this.monitor !== null && this.monitorCase !== null && this.monitorDisplay !== null
             && this.layer === "back") {
+            if (state.monitor.source !== undefined)
+                this.sourceMap.monitor = state.monitor.source
             if (state.monitor.scale !== undefined) {
                 this.monitorCase.scaling.x    = this.monitorBase.scaleCaseX    * state.monitor.scale
                 this.monitorCase.scaling.y    = this.monitorBase.scaleCaseY    * state.monitor.scale
@@ -1105,6 +1110,8 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.decal !== undefined && this.decal !== null && this.layer === "back") {
             if (state.decal.fadeTime !== undefined && this.decalFade !== state.decal.fadeTime)
                 this.decalFade = state.decal.fadeTime
+            if (state.decal.source !== undefined)
+                this.sourceMap.decal = state.decal.source
             if (state.decal.opacity !== undefined) {
                 this.decalOpacity = state.decal.opacity
                 if (this.decal.material instanceof BABYLON.ShaderMaterial) {
@@ -1241,6 +1248,8 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adjust plate  */
         if (state.plate !== undefined && this.plate !== null && this.plateDisplay !== null && this.layer === "front") {
+            if (state.plate.source !== undefined)
+                this.sourceMap.plate = state.plate.source
             if (state.plate.scale !== undefined) {
                 this.plateDisplay.scaling.x = this.plateBase.scaleDisplayX * state.plate.scale
                 this.plateDisplay.scaling.y = this.plateBase.scaleDisplayY * state.plate.scale
@@ -1394,6 +1403,8 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adjust hologram  */
         if (state.hologram !== undefined && this.hologram !== null && this.hologramDisplay !== null && this.layer === "front") {
+            if (state.hologram.source !== undefined)
+                this.sourceMap.hologram = state.hologram.source
             if (state.hologram.scale !== undefined) {
                 this.hologramDisplay.scaling.x = this.hologramBase.scaleDisplayX * state.hologram.scale
                 this.hologramDisplay.scaling.y = this.hologramBase.scaleDisplayY * state.hologram.scale

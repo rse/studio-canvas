@@ -26,6 +26,7 @@ export type StateType = {
     },
     monitor: {
         enable:     boolean,
+        source:     string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -39,6 +40,7 @@ export type StateType = {
     },
     decal: {
         enable:     boolean,
+        source:     string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -54,6 +56,7 @@ export type StateType = {
     },
     plate: {
         enable:     boolean,
+        source:     string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -70,6 +73,7 @@ export type StateType = {
     },
     hologram: {
         enable:     boolean,
+        source:     string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -153,6 +157,7 @@ export const StateSchema = `{
     },
     monitor: {
         enable:     boolean,
+        source:     string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -166,6 +171,7 @@ export const StateSchema = `{
     },
     decal: {
         enable:     boolean,
+        source:     string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -181,6 +187,7 @@ export const StateSchema = `{
     },
     plate: {
         enable:     boolean,
+        source:     string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -197,6 +204,7 @@ export const StateSchema = `{
     },
     hologram: {
         enable:     boolean,
+        source:     string,
         fadeTime:   number,
         scale:      number,
         rotate:     number,
@@ -280,6 +288,7 @@ export const StateDefault: StateType = {
     },
     monitor: {
         enable:     false,
+        source:     "S2",
         fadeTime:   2.0,
         scale:      1.0,
         rotate:     10,
@@ -293,6 +302,7 @@ export const StateDefault: StateType = {
     },
     decal: {
         enable:     false,
+        source:     "S1",
         fadeTime:   2.0,
         scale:      1.0,
         rotate:     -25,
@@ -308,6 +318,7 @@ export const StateDefault: StateType = {
     },
     plate: {
         enable:     false,
+        source:     "S1",
         fadeTime:   2.0,
         scale:      1.0,
         rotate:     -25,
@@ -324,6 +335,7 @@ export const StateDefault: StateType = {
     },
     hologram: {
         enable:     false,
+        source:     "S2",
         fadeTime:   2.0,
         scale:      1.0,
         rotate:     -25,

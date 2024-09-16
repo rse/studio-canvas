@@ -560,6 +560,18 @@
                                     <toggle class="toggle" v-model="state.decal.enable"></toggle>
                                 </div>
 
+                                <div class="label1">source</div>
+                                <div class="label2">(source)</div>
+                                <div class="label3">[id]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.decal.source }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.decal.source = 'S1'">RESET</div>
+                                <div class="radios">
+                                    <div class="button" v-bind:class="{ selected: state.decal.source === 'S1' }" v-on:click="state.decal.source = 'S1'">Stream 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.decal.source === 'S2' }" v-on:click="state.decal.source = 'S2'">Stream 2</div>
+                                </div>
+
                                 <div class="label1">fade</div>
                                 <div class="label2">(time)</div>
                                 <div class="label3">[sec]:</div>
@@ -727,6 +739,18 @@
                                     <toggle class="toggle" v-model="state.monitor.enable"></toggle>
                                 </div>
 
+                                <div class="label1">source</div>
+                                <div class="label2">(source)</div>
+                                <div class="label3">[id]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.monitor.source }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.source = 'S2'">RESET</div>
+                                <div class="radios">
+                                    <div class="button" v-bind:class="{ selected: state.monitor.source === 'S1' }" v-on:click="state.monitor.source = 'S1'">Stream 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.monitor.source === 'S2' }" v-on:click="state.monitor.source = 'S2'">Stream 2</div>
+                                </div>
+
                                 <div class="label1">fade</div>
                                 <div class="label2">(time)</div>
                                 <div class="label3">[sec]:</div>
@@ -864,6 +888,18 @@
                                 <div class="button" v-on:click="state.plate.enable = false">RESET</div>
                                 <div class="slider">
                                     <toggle class="toggle" v-model="state.plate.enable"></toggle>
+                                </div>
+
+                                <div class="label1">source</div>
+                                <div class="label2">(source)</div>
+                                <div class="label3">[id]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.plate.source }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.plate.source = 'S1'">RESET</div>
+                                <div class="radios">
+                                    <div class="button" v-bind:class="{ selected: state.plate.source === 'S1' }" v-on:click="state.plate.source = 'S1'">Stream 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.plate.source === 'S2' }" v-on:click="state.plate.source = 'S2'">Stream 2</div>
                                 </div>
 
                                 <div class="label1">fade</div>
@@ -1047,6 +1083,18 @@
                                 <div class="button" v-on:click="state.hologram.enable = false">RESET</div>
                                 <div class="slider">
                                     <toggle class="toggle" v-model="state.hologram.enable"></toggle>
+                                </div>
+
+                                <div class="label1">source</div>
+                                <div class="label2">(source)</div>
+                                <div class="label3">[id]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.hologram.source }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.hologram.source = 'S2'">RESET</div>
+                                <div class="radios">
+                                    <div class="button" v-bind:class="{ selected: state.hologram.source === 'S1' }" v-on:click="state.hologram.source = 'S1'">Stream 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.hologram.source === 'S2' }" v-on:click="state.hologram.source = 'S2'">Stream 2</div>
                                 </div>
 
                                 <div class="label1">fade</div>
@@ -2154,6 +2202,19 @@
         --toggle-bg-off: var(--color-std-bg-2)
         --toggle-ring-width: 0
         --toggle-handle-enabled: var(--color-std-fg-5)
+    .radios
+        display: flex
+        flex-direction: row
+        justify-items: center
+        align-items: center
+        .button
+            margin-right: 4px
+            &.selected
+                background-color: var(--color-acc-bg-3)
+                color: var(--color-acc-fg-5)
+            &:hover
+                background-color: var(--color-acc-bg-5)
+                color: var(--color-acc-fg-5)
 </style>
 
 <script setup lang="ts">
