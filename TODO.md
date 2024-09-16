@@ -18,13 +18,6 @@ Improvements
   add Pane, Pillar and Mask to Control UI
 
 - IMPROVEMENT:
-  mehr Regler Distanz, weiter nach unten schieben, etc.
-
-- IMPROVEMENT:
-  Streams Tab wird nicht gespeichert mit Presets
-  Workaround: nicht wirklich notwendig, weil sehr statisch
-
-- IMPROVEMENT:
   Zuordnung zu M/D/H/P dynamisch machen über Control UI
   Auch die 2 Stacks dynamisch machen
   Workaround: hard-coded in code
