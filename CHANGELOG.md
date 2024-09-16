@@ -6,6 +6,8 @@ ChangeLog
 ------------------
 
 - IMPROVEMENT: use a nested tab experience for a more clean control UI
+- IMPROVEMENT: store also Streams configuration in presets
+- BUGFIX: fix preset filters by adding Plate and Hologram
 
 2.1.2 (2024-09-16)
 ------------------

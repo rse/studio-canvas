@@ -42,6 +42,14 @@
                                     <div class="button destructive" v-on:click="presetFiltersSelect(true)">ALL</div>
                                 </div>
                                 <div class="filter">
+                                    <div class="button" v-bind:class="{ selected: preset.filters.renderer }"
+                                        v-on:click="preset.filters.renderer = !preset.filters.renderer">
+                                        Renderer
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.streams }"
+                                        v-on:click="preset.filters.streams = !preset.filters.streams">
+                                        Streams
+                                    </div>
                                     <div class="button" v-bind:class="{ selected: preset.filters.canvas }"
                                         v-on:click="preset.filters.canvas = !preset.filters.canvas">
                                         Canvas
@@ -89,10 +97,6 @@
                                     <div class="button" v-bind:class="{ selected: preset.filters.CAM4 }"
                                         v-on:click="preset.filters.CAM4 = !preset.filters.CAM4">
                                         CAM4
-                                    </div>
-                                    <div class="button" v-bind:class="{ selected: preset.filters.renderer }"
-                                        v-on:click="preset.filters.renderer = !preset.filters.renderer">
-                                        Renderer
                                     </div>
                                 </div>
                                 <div class="slots">
@@ -2176,19 +2180,24 @@ import { MixerState, MixerFPS } from "../common/app-mixer"
 
 <script lang="ts">
 export const StateFilterKeys = [
+    "renderer",
+    "streams",
     "canvas",
     "monitor",
     "decal",
+    "plate",
+    "hologram",
     "lights",
     "avatars",
     "references",
     "CAM1",
     "CAM2",
     "CAM3",
-    "CAM4",
-    "renderer"
+    "CAM4"
 ]
 export type StateFilterType = {
+    renderer:   boolean,
+    streams:    boolean,
     canvas:     boolean,
     monitor:    boolean,
     decal:      boolean,
@@ -2200,8 +2209,7 @@ export type StateFilterType = {
     CAM1:       boolean,
     CAM2:       boolean,
     CAM3:       boolean,
-    CAM4:       boolean,
-    renderer:   boolean
+    CAM4:       boolean
 }
 let statusTimer: ReturnType<typeof setTimeout> | null = null
 export default defineComponent({
@@ -2227,6 +2235,8 @@ export default defineComponent({
         tab1: "",
         preset: {
             filters: {
+                renderer:   true,
+                streams:    true,
                 canvas:     true,
                 monitor:    true,
                 decal:      true,
@@ -2238,11 +2248,10 @@ export default defineComponent({
                 CAM1:       true,
                 CAM2:       true,
                 CAM3:       true,
-                CAM4:       true,
-                renderer:   true
+                CAM4:       true
             } as StateFilterType,
             slot: -1,
-            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         state: StateDefault as StateType,
         watchState: true,
@@ -2568,9 +2577,9 @@ export default defineComponent({
             const clazz = {} as any
             if (this.preset.status[slot] === 0)
                 clazz.clear = true
-            else if (this.preset.status[slot] > 0 && this.preset.status[slot] < 13)
+            else if (this.preset.status[slot] > 0 && this.preset.status[slot] < 14)
                 clazz.partial = true
-            else if (this.preset.status[slot] === 13)
+            else if (this.preset.status[slot] === 14)
                 clazz.complete = true
             return clazz
         },
