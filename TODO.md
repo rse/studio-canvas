@@ -18,11 +18,6 @@ Improvements
   add Pane, Pillar and Mask to Control UI
 
 - IMPROVEMENT:
-  Zuordnung zu M/D/H/P dynamisch machen über Control UI
-  Auch die 2 Stacks dynamisch machen
-  Workaround: hard-coded in code
-
-- IMPROVEMENT:
   Studio-Canvas: Image, Image-Pair, Video-File, Video-Stream RGB und
   Video-Stream RGB+A unterstützen!
 
