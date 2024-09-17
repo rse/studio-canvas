@@ -15,7 +15,10 @@ Improvements
 ------------
 
 - IMPROVEMENT:
-  add Pane, Pillar and Mask to Control UI
+  add Pane and Pillar Control UI
+
+- IMPROVEMENT:
+  add Mask
 
 - IMPROVEMENT:
   Studio-Canvas: Image, Image-Pair, Video-File, Video-Stream RGB und
