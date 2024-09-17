@@ -66,6 +66,7 @@ export default class CanvasRenderer extends EventEmitter {
     private decalBorderCrop   = 0.0
     private decalChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private monitorFade       = 0
+    private monitorOpacity    = 1.0
     private monitorChromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private videoStream:      MediaStream | null = null
     private videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
@@ -950,6 +951,13 @@ export default class CanvasRenderer extends EventEmitter {
             && this.layer === "back") {
             if (state.monitor.source !== undefined)
                 this.sourceMap.monitor = state.monitor.source
+            if (state.monitor.opacity !== undefined) {
+                this.monitorOpacity = state.monitor.opacity
+                if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.monitorDisplay.material
+                    material.setFloat("opacity", this.monitorOpacity)
+                }
+            }
             if (state.monitor.scale !== undefined) {
                 this.monitorCase.scaling.x    = this.monitorBase.scaleCaseX    * state.monitor.scale
                 this.monitorCase.scaling.y    = this.monitorBase.scaleCaseY    * state.monitor.scale
@@ -997,7 +1005,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.monitor.enable !== undefined && this.monitor.isEnabled() !== state.monitor.enable) {
                 if (state.monitor.enable) {
                     await this.unapplyVideoMaterial(this.monitorDisplay!)
-                    await this.applyVideoMaterial("monitor", this.monitorDisplay!, 1.0, 0, 0, this.monitorChromaKey)
+                    await this.applyVideoMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
                     if (this.monitorFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling monitor (fading: start)")
                         const ease = new BABYLON.SineEase()

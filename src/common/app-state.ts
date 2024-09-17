@@ -32,6 +32,7 @@ export type StateType = {
         rotate:     number,
         lift:       number,
         distance:   number,
+        opacity:    number,
         chromaKey:  {
             enable:     boolean,
             threshold:  number,
@@ -163,6 +164,7 @@ export const StateSchema = `{
         rotate:     number,
         lift:       number,
         distance:   number,
+        opacity:    number,
         chromaKey:  {
             enable:     boolean,
             threshold:  number,
@@ -294,6 +296,7 @@ export const StateDefault: StateType = {
         rotate:     10,
         lift:       0,
         distance:   0,
+        opacity:    1.0,
         chromaKey:  {
             enable:     false,
             threshold:  0.4,

@@ -826,6 +826,21 @@
                                     ></slider>
                                 </div>
 
+                                <div class="label1">opacity</div>
+                                <div class="label2">(less/more)</div>
+                                <div class="label3">[percent]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.monitor.opacity)"
+                                        v-on:change="(ev) => state.monitor.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.monitor.opacity = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.monitor.opacity"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
                                 <div class="label1">chromaKey</div>
                                 <div class="label2">(enable)</div>
                                 <div class="label3">[flag]:</div>
