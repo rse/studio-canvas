@@ -445,7 +445,7 @@ export default class CanvasRenderer extends EventEmitter {
         /*  apply glass material to monitor case  */
         const glass = new BABYLON.PBRMaterial("glass", this.scene)
         glass.indexOfRefraction    = 1.52
-        glass.alpha                = 0.1
+        glass.alpha                = 0.20
         glass.directIntensity      = 1.0
         glass.environmentIntensity = 1.0
         glass.microSurface         = 1
