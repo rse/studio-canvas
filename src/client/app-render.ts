@@ -161,16 +161,6 @@ export default class CanvasRenderer extends EventEmitter {
     private hologram:        BABYLON.Nullable<BABYLON.TransformNode>  = null
     private hologramDisplay: BABYLON.Nullable<BABYLON.Mesh>           = null
 
-    /*  video stream device names  */
-    private deviceMonitor   = "dummy"
-    private deviceMonitor2  = "dummy"
-    private deviceDecal     = "dummy"
-    private deviceDecal2    = "dummy"
-    private devicePlate     = "dummy"
-    private devicePlate2    = "dummy"
-    private deviceHologram  = "dummy"
-    private deviceHologram2 = "dummy"
-
     /*  PTZ sub-module  */
     private ptz:     PTZ
     private ptzHull: PTZ
