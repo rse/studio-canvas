@@ -15,9 +15,6 @@ Improvements
 ------------
 
 - IMPROVEMENT:
-  add Pane and Pillar Control UI
-
-- IMPROVEMENT:
   add Mask
 
 - IMPROVEMENT:
