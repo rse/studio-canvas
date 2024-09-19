@@ -60,6 +60,8 @@ export default class RESTPreset {
                         if (state.decal      !== undefined) n++
                         if (state.plate      !== undefined) n++
                         if (state.hologram   !== undefined) n++
+                        if (state.pane       !== undefined) n++
+                        if (state.pillar     !== undefined) n++
                         if (state.lights     !== undefined) n++
                         if (state.avatars    !== undefined) n++
                         if (state.references !== undefined) n++

@@ -89,6 +89,36 @@ export type StateType = {
             smoothing:  number
         }
     },
+    pane: {
+        enable:     boolean,
+        source:     string,
+        fadeTime:   number,
+        scale:      number,
+        rotate:     number,
+        lift:       number,
+        distance:   number,
+        opacity:    number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
+    },
+    pillar: {
+        enable:     boolean,
+        source:     string,
+        fadeTime:   number,
+        scale:      number,
+        rotate:     number,
+        lift:       number,
+        distance:   number,
+        opacity:    number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
+    },
     lights: {
         intensity1: number,
         intensity2: number,
@@ -221,6 +251,36 @@ export const StateSchema = `{
             smoothing:  number
         }
     },
+    pane: {
+        enable:     boolean,
+        source:     string,
+        fadeTime:   number,
+        scale:      number,
+        rotate:     number,
+        lift:       number,
+        distance:   number,
+        opacity:    number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
+    },
+    pillar: {
+        enable:     boolean,
+        source:     string,
+        fadeTime:   number,
+        scale:      number,
+        rotate:     number,
+        lift:       number,
+        distance:   number,
+        opacity:    number,
+        chromaKey:  {
+            enable:     boolean,
+            threshold:  number,
+            smoothing:  number
+        }
+    },
     lights: {
         intensity1: number,
         intensity2: number,
@@ -347,6 +407,36 @@ export const StateDefault: StateType = {
         opacity:    1.0,
         borderRad:  40,
         borderCrop: 0,
+        chromaKey:  {
+            enable:     false,
+            threshold:  0.4,
+            smoothing:  0.1
+        }
+    },
+    pane: {
+        enable:     false,
+        source:     "S2",
+        fadeTime:   2.0,
+        scale:      1.0,
+        rotate:     10,
+        lift:       0,
+        distance:   0,
+        opacity:    1.0,
+        chromaKey:  {
+            enable:     false,
+            threshold:  0.4,
+            smoothing:  0.1
+        }
+    },
+    pillar: {
+        enable:     false,
+        source:     "S2",
+        fadeTime:   2.0,
+        scale:      1.0,
+        rotate:     10,
+        lift:       0,
+        distance:   0,
+        opacity:    1.0,
         chromaKey:  {
             enable:     false,
             threshold:  0.4,

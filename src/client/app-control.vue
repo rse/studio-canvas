@@ -70,6 +70,14 @@
                                         v-on:click="preset.filters.hologram = !preset.filters.hologram">
                                         Hologram
                                     </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.pane }"
+                                        v-on:click="preset.filters.pane = !preset.filters.pane">
+                                        Pane
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.pillar }"
+                                        v-on:click="preset.filters.pillar = !preset.filters.pillar">
+                                        Pillar
+                                    </div>
                                     <div class="button" v-bind:class="{ selected: preset.filters.lights }"
                                         v-on:click="preset.filters.lights = !preset.filters.lights">
                                         Lights
@@ -1274,6 +1282,336 @@
                                 </div>
                             </div>
                         </tab>
+
+                        <!--  ==== PANE ====  -->
+                        <tab id="pane" name="Pane">
+                            <div class="desc">
+                                The <b>Pane</b> is the optional glass which can be shown
+                                in the front of the scene. It can be scaled in size, and positioned on in a
+                                radial way in front of the scene. It is similar to <b>Monitor</b>
+                                but shown on the front instead of the back of the scene.
+                            </div>
+                            <div class="control">
+                                <div class="label1">enable</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.pane.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.pane.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.pane.enable"></toggle>
+                                </div>
+
+                                <div class="label1">source</div>
+                                <div class="label2">(source)</div>
+                                <div class="label3">[id]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.pane.source }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.pane.source = 'S2'">RESET</div>
+                                <div class="radios">
+                                    <div class="button" v-bind:class="{ selected: state.pane.source === 'S1' }" v-on:click="state.pane.source = 'S1'">Stream 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.pane.source === 'S2' }" v-on:click="state.pane.source = 'S2'">Stream 2</div>
+                                </div>
+
+                                <div class="label1">fade</div>
+                                <div class="label2">(time)</div>
+                                <div class="label3">[sec]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pane.fadeTime)"
+                                        v-on:change="(ev) => state.pane.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pane.fadeTime = 2.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pane.fadeTime"
+                                        v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">scale</div>
+                                <div class="label2">(resize)</div>
+                                <div class="label3">[mult]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pane.scale)"
+                                        v-on:change="(ev) => state.pane.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 2.2)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pane.scale = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pane.scale"
+                                        v-bind:min="0.1" v-bind:max="2.2" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">rotate</div>
+                                <div class="label3">(pan left/right)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pane.rotate)"
+                                        v-on:change="(ev) => state.pane.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pane.rotate = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pane.rotate"
+                                        v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">lift</div>
+                                <div class="label2">(shift down/up)</div>
+                                <div class="label3">[cm]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pane.lift)"
+                                        v-on:change="(ev) => state.pane.lift = fieldImport((ev.target! as HTMLInputElement).value, -150, +70)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pane.lift = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pane.lift"
+                                        v-bind:min="-150" v-bind:max="+70" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">distance</div>
+                                <div class="label2">(shift bwd/fwd)</div>
+                                <div class="label3">[m]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pane.distance)"
+                                        v-on:change="(ev) => state.pane.distance = fieldImport((ev.target! as HTMLInputElement).value, -1.5, +0.4)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pane.distance = 0.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pane.distance"
+                                        v-bind:min="-1.5" v-bind:max="+0.4" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">opacity</div>
+                                <div class="label2">(less/more)</div>
+                                <div class="label3">[percent]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pane.opacity)"
+                                        v-on:change="(ev) => state.pane.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pane.opacity = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pane.opacity"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(enable)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.pane.chromaKey.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.pane.chromaKey.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.pane.chromaKey.enable"></toggle>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(threshold)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pane.chromaKey.threshold)"
+                                        v-on:change="(ev) => state.pane.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pane.chromaKey.threshold = 0.4">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pane.chromaKey.threshold"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(smoothing)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pane.chromaKey.smoothing)"
+                                        v-on:change="(ev) => state.pane.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pane.chromaKey.smoothing = 0.1">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pane.chromaKey.smoothing"
+                                        v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                            </div>
+                        </tab>
+
+                        <!--  ==== PILLAR ====  -->
+                        <tab id="pillar" name="Pillar">
+                            <div class="desc">
+                                The <b>Pillar</b> is the optional pillar which can be shown
+                                in the front of the scene. It consists of a pillar case
+                                and an embedded TV-style display. It can be scaled in size, and
+                                positioned on in a radial way in front of the scene.
+                            </div>
+                            <div class="control">
+                                <div class="label1">enable</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.pillar.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.pillar.enable"></toggle>
+                                </div>
+
+                                <div class="label1">source</div>
+                                <div class="label2">(source)</div>
+                                <div class="label3">[id]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.pillar.source }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.source = 'S2'">RESET</div>
+                                <div class="radios">
+                                    <div class="button" v-bind:class="{ selected: state.pillar.source === 'S1' }" v-on:click="state.pillar.source = 'S1'">Stream 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.pillar.source === 'S2' }" v-on:click="state.pillar.source = 'S2'">Stream 2</div>
+                                </div>
+
+                                <div class="label1">fade</div>
+                                <div class="label2">(time)</div>
+                                <div class="label3">[sec]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pillar.fadeTime)"
+                                        v-on:change="(ev) => state.pillar.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.fadeTime = 2.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pillar.fadeTime"
+                                        v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">scale</div>
+                                <div class="label2">(resize)</div>
+                                <div class="label3">[mult]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pillar.scale)"
+                                        v-on:change="(ev) => state.pillar.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.1, 2.2)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.scale = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pillar.scale"
+                                        v-bind:min="0.1" v-bind:max="2.2" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">rotate</div>
+                                <div class="label3">(pan left/right)</div>
+                                <div class="label3">[deg]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pillar.rotate)"
+                                        v-on:change="(ev) => state.pillar.rotate = fieldImport((ev.target! as HTMLInputElement).value, -90, +90)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.rotate = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pillar.rotate"
+                                        v-bind:min="-90" v-bind:max="+90" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">lift</div>
+                                <div class="label2">(shift down/up)</div>
+                                <div class="label3">[cm]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pillar.lift)"
+                                        v-on:change="(ev) => state.pillar.lift = fieldImport((ev.target! as HTMLInputElement).value, -150, +70)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.lift = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pillar.lift"
+                                        v-bind:min="-150" v-bind:max="+70" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">distance</div>
+                                <div class="label2">(shift bwd/fwd)</div>
+                                <div class="label3">[m]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pillar.distance)"
+                                        v-on:change="(ev) => state.pillar.distance = fieldImport((ev.target! as HTMLInputElement).value, -1.5, +0.4)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.distance = 0.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pillar.distance"
+                                        v-bind:min="-1.5" v-bind:max="+0.4" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">opacity</div>
+                                <div class="label2">(less/more)</div>
+                                <div class="label3">[percent]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pillar.opacity)"
+                                        v-on:change="(ev) => state.pillar.opacity = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.opacity = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pillar.opacity"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(enable)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.pillar.chromaKey.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.chromaKey.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.pillar.chromaKey.enable"></toggle>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(threshold)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pillar.chromaKey.threshold)"
+                                        v-on:change="(ev) => state.pillar.chromaKey.threshold = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 1.0)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.chromaKey.threshold = 0.4">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pillar.chromaKey.threshold"
+                                        v-bind:min="0.0" v-bind:max="1.0" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">chromaKey</div>
+                                <div class="label2">(smoothing)</div>
+                                <div class="label3">[distance]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pillar.chromaKey.smoothing)"
+                                        v-on:change="(ev) => state.pillar.chromaKey.smoothing = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 0.5)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.chromaKey.smoothing = 0.1">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pillar.chromaKey.smoothing"
+                                        v-bind:min="0.0" v-bind:max="0.5" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                            </div>
+                        </tab>
                     </tabs>
                 </tab>
                 <tab id="ambient" name="Ambient">
@@ -2263,6 +2601,8 @@ export const StateFilterKeys = [
     "decal",
     "plate",
     "hologram",
+    "pane",
+    "pillar",
     "lights",
     "avatars",
     "references",
@@ -2279,6 +2619,8 @@ export type StateFilterType = {
     decal:      boolean,
     plate:      boolean,
     hologram:   boolean,
+    pane:       boolean,
+    pillar:     boolean,
     lights:     boolean,
     avatars:    boolean,
     references: boolean,
@@ -2318,6 +2660,8 @@ export default defineComponent({
                 decal:      true,
                 plate:      true,
                 hologram:   true,
+                pane:       true,
+                pillar:     true,
                 lights:     true,
                 avatars:    true,
                 references: true,
@@ -2327,7 +2671,7 @@ export default defineComponent({
                 CAM4:       true
             } as StateFilterType,
             slot: -1,
-            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         state: StateDefault as StateType,
         watchState: true,
@@ -2653,9 +2997,9 @@ export default defineComponent({
             const clazz = {} as any
             if (this.preset.status[slot] === 0)
                 clazz.clear = true
-            else if (this.preset.status[slot] > 0 && this.preset.status[slot] < 14)
+            else if (this.preset.status[slot] > 0 && this.preset.status[slot] < 16)
                 clazz.partial = true
-            else if (this.preset.status[slot] === 14)
+            else if (this.preset.status[slot] === 16)
                 clazz.complete = true
             return clazz
         },
