@@ -2190,10 +2190,10 @@
             margin-right: 20px
             display: grid
             grid-template-columns: 100px 100px
-            grid-template-rows: 30px 30px 30px 30px 30px 30px 30px
+            grid-template-rows: 30px 30px 30px 30px 30px 30px 30px 30px
             justify-items: center
             align-items: center
-            gap: 13px 13px
+            gap: 7px 7px
         .button
             background-color: var(--color-std-bg-2)
             color: var(--color-std-fg-5)
