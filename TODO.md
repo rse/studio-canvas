@@ -14,6 +14,11 @@ Bugfixes
 Improvements
 ------------
 
+- beim Umschalten von Source reapply Video stream
+
+- bei Monitor/Pane/Pillar auch Border unterstützen, nicht für Radius aber
+  vor allem für Border snipping
+
 - IMPROVEMENT:
   add Pane and Pillar Control UI
 
