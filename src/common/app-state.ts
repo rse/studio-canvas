@@ -113,6 +113,8 @@ export type StateType = {
         lift:       number,
         distance:   number,
         opacity:    number,
+        borderRad:  number,
+        borderCrop: number,
         chromaKey:  {
             enable:     boolean,
             threshold:  number,
@@ -275,6 +277,8 @@ export const StateSchema = `{
         lift:       number,
         distance:   number,
         opacity:    number,
+        borderRad:  number,
+        borderCrop: number,
         chromaKey:  {
             enable:     boolean,
             threshold:  number,
@@ -437,6 +441,8 @@ export const StateDefault: StateType = {
         lift:       0,
         distance:   0,
         opacity:    1.0,
+        borderRad:  40,
+        borderCrop: 0,
         chromaKey:  {
             enable:     false,
             threshold:  0.4,

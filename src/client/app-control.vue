@@ -1570,6 +1570,36 @@
                                     ></slider>
                                 </div>
 
+                                <div class="label1">border</div>
+                                <div class="label2">(radius)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pillar.borderRad)"
+                                        v-on:change="(ev) => state.pillar.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.borderRad = 40">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pillar.borderRad"
+                                        v-bind:min="0" v-bind:max="540" v-bind:step="10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">border</div>
+                                <div class="label2">(cropping)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.pillar.borderCrop)"
+                                        v-on:change="(ev) => state.pillar.borderCrop = fieldImport((ev.target! as HTMLInputElement).value, 0, 50)"/>
+                                </div>
+                                <div class="button" v-on:click="state.pillar.borderCrop = 0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.pillar.borderCrop"
+                                        v-bind:min="0" v-bind:max="50" v-bind:step="1"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
                                 <div class="label1">chromaKey</div>
                                 <div class="label2">(enable)</div>
                                 <div class="label3">[flag]:</div>

@@ -73,6 +73,8 @@ export default class CanvasRenderer extends EventEmitter {
     private paneChromaKey     = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private pillarFade        = 0
     private pillarOpacity     = 1.0
+    private pillarBorderRad   = 40.0
+    private pillarBorderCrop  = 0.0
     private pillarChromaKey   = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private videoStream:      MediaStream | null = null
     private videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
@@ -1842,6 +1844,20 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.pillar.fadeTime !== undefined && this.pillarFade !== state.pillar.fadeTime)
                 this.pillarFade = state.pillar.fadeTime
+            if (state.pillar.borderRad !== undefined) {
+                this.pillarBorderRad = state.pillar.borderRad
+                if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.pillarDisplay.material
+                    material.setFloat("borderRadius", this.pillarBorderRad)
+                }
+            }
+            if (state.pillar.borderCrop !== undefined) {
+                this.pillarBorderCrop = state.pillar.borderCrop
+                if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.pillarDisplay.material
+                    material.setFloat("borderCrop", this.pillarBorderCrop)
+                }
+            }
             if (state.pillar.chromaKey !== undefined) {
                 if (state.pillar.chromaKey.enable !== undefined && this.pillarChromaKey.enable !== state.pillar.chromaKey.enable) {
                     this.pillarChromaKey.enable = state.pillar.chromaKey.enable
