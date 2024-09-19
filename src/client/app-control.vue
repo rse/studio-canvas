@@ -30,11 +30,12 @@
                         <!--  ==== PRESETS ====  -->
                         <tab id="presets" name="Presets">
                             <div class="desc">
-                                The <b>Presets</b> can be used to load and save the entire &mdash; or just the partial &mdash;
-                                current scence control state from or to persistent preset slots.
+                                The <b>Presets</b> can be used to load and save the entire &mdash; or just the
+                                partial &mdash; current scence control state from or to persistent preset slots.
                                 When loading a partial state from a preset slot, the partial state is merged
-                                onto the current state. First select either "all" or "none" plus a particular state group.
-                                Second, select the preset slot. Third, select the action to perform.
+                                onto the current state. First, select either "all" or "none" plus a particular state
+                                group. Second, select the preset slot 1-12. Third, select the action "load", "clear"
+                                or "save" to perform.
                             </div>
                             <div class="presets">
                                 <div class="actions3">
@@ -195,11 +196,10 @@
                         <tab id="mixer" name="Mixer" class="mixer">
                             <div class="desc">
                                 The <b>Mixer</b> allows you to select a camera to be logically
-                                in preview and to logically cut a camera from preview to program.
-                                This allows you to ad-hoc adjust the configured FPS
-                                (see <b>Scene &rarr; Renderer</b>) onto all renderer instances during production in order
-                                to allow you to reduce the overall load all renderers cause on the
-                                underlying hardware.
+                                in preview and to logically cut this camera from preview into program.
+                                This allows you to ad-hoc adjust the configured FPS (see <b>Scene &rarr; Renderer</b>)
+                                onto all renderer instances during production in order to allow you to reduce the
+                                overall load all renderers cause on the underlying hardware.
                             </div>
                             <div class="control">
                                 <div class="cams">
@@ -267,11 +267,11 @@
                             <div class="desc">
                                 The <b>Preview</b> is a rendering preview of the rendered camera view
                                 within the BabylonJS game engine. It is exactly the same content intended
-                                to be loaded into the vMix Browser input (or OBS Studio Browser source)
+                                to be loaded into the vMix Browser input or OBS Studio Browser source
                                 and allows you to preview the scene in the browser here, too.
-                                The camera view can be optionally controlled
-                                by reflecting the emitted FreeD information from the physical camera,
-                                or being interactively adjusted by cursor keys.
+                                The camera view can be optionally controlled by reflecting the emitted
+                                FreeD information from the physical camera, or being interactively adjusted
+                                by cursor keys.
                             </div>
                             <div class="preview-url" v-on:click="previewCopy()">
                                 {{ preview.url }}
@@ -402,10 +402,10 @@
                         <tab id="streams" name="Streams">
                             <div class="desc">
                                 The <b>Streams</b> are the video streams which can be shown on
-                                the Monitor, Decal, Plate and Hologram. The content is received
-                                with a single virtual video device which had to carry N content stacks
-                                (from left to right) and each stack consists of the content RGB
-                                on top of content alpha with (black-to-white, 100-0% visibillity).
+                                the Decal, Monitor, Plate, Hologram, Pane and Pillar. The content is received
+                                as a single virtual video device which had to carry 2 content stacks
+                                (left and right) and each stack consists of the content RGB
+                                on top of content alpha (black-to-white, 100-0% visibillity).
                             </div>
                             <div class="control">
                                 <div class="label1">video</div>
@@ -475,9 +475,9 @@
                                 The <b>Canvas</b> is the background of the scene.
                                 It can be either based on a single image for rendering a static canvas,
                                 or it can be two images providing a dynamic canvas through a cross-fade effect (indicated
-                                by "FADE"). Some canvas are exclusively designed for particular events (indicated
-                                by "EXCL") and hence should be not reused for other events.
-                                All canvas images have to be exactly 10540 x 2250 pixels in size.
+                                by the tag "FADE"). Some canvas are exclusively designed for particular events (indicated
+                                by the tag "EXCL") and hence should be not reused for other events.
+                                All canvas images have to be exactly 10540x2250 pixels in size.
                             </div>
                             <div class="control">
                                 <div class="label1">Z-rotate</div>
