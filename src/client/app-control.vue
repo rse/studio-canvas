@@ -552,9 +552,10 @@
                         <tab id="decal" name="Decal">
                             <div class="desc">
                                 The <b>Decal</b> is the optional poster-style display which can be projected
-                                onto the background canvas. It can scaled in size, positioned in a radial way on the background canvas,
-                                its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
-                                and a chroma-key filter applied.
+                                onto the background canvas. It is rendered in the BACK layer. It can scaled in size,
+                                positioned in a radial way on the background canvas, its opacity controlled to mix with
+                                the canvas, a border radius applied, a border cropping applied, and a chroma-key filter
+                                applied.
                             </div>
                             <div class="control">
                                 <div class="label1">enable</div>
@@ -732,8 +733,10 @@
                         <tab id="monitor" name="Monitor">
                             <div class="desc">
                                 The <b>Monitor</b> is the optional TV-style monitor which can be shown
-                                in front of the background canvas. It can be scaled in size, and positioned on in a
-                                radial way in front of the background canvas.
+                                in front of the background canvas. It is rendered in the BACK layer.
+                                It can be scaled in size, positioned in a radial way in front of the background
+                                canvas, its opacity controlled to mix with the canvas, a border radius applied,
+                                a border cropping applied, and a chroma-key filter applied.
                             </div>
                             <div class="control">
                                 <div class="label1">enable</div>
@@ -896,7 +899,7 @@
                         <tab id="plate" name="Plate">
                             <div class="desc">
                                 The <b>Plate</b> is the optional planar display which can be projected
-                                in the foreground, intended as the optical plate on the desk's front side.
+                                into the room in the FRONT layer, intended as the optical plate on the desk's front side.
                                 It can be given scaled in size, positioned in a radial way on the background canvas,
                                 its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
                                 and a chroma-key filter applied.
@@ -1092,7 +1095,7 @@
                         <tab id="hologram" name="Hologram">
                             <div class="desc">
                                 The <b>Hologram</b> is the optional planar display which can be projected
-                                in the foreground. It can be scaled in size, positioned in a radial way on the background canvas,
+                                into the room in the FRONT layer. It can be scaled in size, positioned in a radial way on the background canvas,
                                 its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
                                 and a chroma-key filter applied.
                             </div>
@@ -1286,8 +1289,8 @@
                         <!--  ==== PANE ====  -->
                         <tab id="pane" name="Pane">
                             <div class="desc">
-                                The <b>Pane</b> is the optional glass which can be shown
-                                in the front of the scene. It can be scaled in size, and positioned on in a
+                                The <b>Pane</b> is the optional TV-style glass box which can be projected
+                                into the room in the FRONT layer. It can be scaled in size, and positioned on in a
                                 radial way in front of the scene. It is similar to <b>Monitor</b>
                                 but shown on the front instead of the back of the scene.
                             </div>
@@ -1451,10 +1454,12 @@
                         <!--  ==== PILLAR ====  -->
                         <tab id="pillar" name="Pillar">
                             <div class="desc">
-                                The <b>Pillar</b> is the optional pillar which can be shown
-                                in the front of the scene. It consists of a pillar case
-                                and an embedded TV-style display. It can be scaled in size, and
-                                positioned on in a radial way in front of the scene.
+                                The <b>Pillar</b> is the optional pillar with an embedded display,
+                                which can be projected into the room in the FRONT layer.
+                                It can be scaled in size, and positioned on in a radial way in front of the scene. It
+                                can be scaled in size, positioned in a radial way, the opacity of its display
+                                controlled, a border radius applied, a border cropping applied, and a chroma-key
+                                filter applied.
                             </div>
                             <div class="control">
                                 <div class="label1">enable</div>
