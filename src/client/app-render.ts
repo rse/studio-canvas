@@ -1026,8 +1026,11 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.monitor !== undefined
             && this.monitor !== null && this.monitorCase !== null && this.monitorDisplay !== null
             && this.layer === "back") {
-            if (state.monitor.source !== undefined)
+            if (state.monitor.source !== undefined && this.sourceMap.monitor !== state.monitor.source) {
                 this.sourceMap.monitor = state.monitor.source
+                await this.unapplyVideoMaterial(this.monitorDisplay!)
+                await this.applyVideoMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
+            }
             if (state.monitor.opacity !== undefined) {
                 this.monitorOpacity = state.monitor.opacity
                 if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
@@ -1195,8 +1198,11 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.decal !== undefined && this.decal !== null && this.layer === "back") {
             if (state.decal.fadeTime !== undefined && this.decalFade !== state.decal.fadeTime)
                 this.decalFade = state.decal.fadeTime
-            if (state.decal.source !== undefined)
+            if (state.decal.source !== undefined && this.sourceMap.decal !== state.decal.source) {
                 this.sourceMap.decal = state.decal.source
+                await this.unapplyVideoMaterial(this.decal!)
+                await this.applyVideoMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+            }
             if (state.decal.opacity !== undefined) {
                 this.decalOpacity = state.decal.opacity
                 if (this.decal.material instanceof BABYLON.ShaderMaterial) {
@@ -1333,8 +1339,11 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adjust plate  */
         if (state.plate !== undefined && this.plate !== null && this.plateDisplay !== null && this.layer === "front") {
-            if (state.plate.source !== undefined)
+            if (state.plate.source !== undefined && this.sourceMap.plate !== state.plate.source) {
                 this.sourceMap.plate = state.plate.source
+                await this.unapplyVideoMaterial(this.plateDisplay)
+                await this.applyVideoMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
+            }
             if (state.plate.scale !== undefined) {
                 this.plateDisplay.scaling.x = this.plateBase.scaleDisplayX * state.plate.scale
                 this.plateDisplay.scaling.y = this.plateBase.scaleDisplayY * state.plate.scale
@@ -1488,8 +1497,11 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adjust hologram  */
         if (state.hologram !== undefined && this.hologram !== null && this.hologramDisplay !== null && this.layer === "front") {
-            if (state.hologram.source !== undefined)
+            if (state.hologram.source !== undefined && this.sourceMap.hologram !== state.hologram.source) {
                 this.sourceMap.hologram = state.hologram.source
+                await this.unapplyVideoMaterial(this.hologramDisplay)
+                await this.applyVideoMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
+            }
             if (state.hologram.scale !== undefined) {
                 this.hologramDisplay.scaling.x = this.hologramBase.scaleDisplayX * state.hologram.scale
                 this.hologramDisplay.scaling.y = this.hologramBase.scaleDisplayY * state.hologram.scale
@@ -1645,8 +1657,11 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.pane !== undefined
             && this.pane !== null && this.paneCase !== null && this.paneDisplay !== null
             && this.layer === "front") {
-            if (state.pane.source !== undefined)
+            if (state.pane.source !== undefined && this.sourceMap.pane !== state.pane.source) {
                 this.sourceMap.pane = state.pane.source
+                await this.unapplyVideoMaterial(this.paneDisplay!)
+                await this.applyVideoMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
+            }
             if (state.pane.opacity !== undefined) {
                 this.paneOpacity = state.pane.opacity
                 if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
@@ -1814,8 +1829,11 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.pillar !== undefined
             && this.pillar !== null && this.pillarCase !== null && this.pillarDisplay !== null
             && this.layer === "front") {
-            if (state.pillar.source !== undefined)
+            if (state.pillar.source !== undefined && this.sourceMap.pillar !== state.pillar.source) {
                 this.sourceMap.pillar = state.pillar.source
+                await this.unapplyVideoMaterial(this.pillarDisplay!)
+                await this.applyVideoMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
+            }
             if (state.pillar.opacity !== undefined) {
                 this.pillarOpacity = state.pillar.opacity
                 if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {

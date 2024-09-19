@@ -14,8 +14,6 @@ Bugfixes
 Improvements
 ------------
 
-- beim Umschalten von Source reapply Video stream
-
 - IMPROVEMENT:
   add Pane and Pillar Control UI
 
