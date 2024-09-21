@@ -13,6 +13,7 @@ ChangeLog
 - IMPROVEMENT: add Pane and Pillar to control UI and rendering
 - IMPROVEMENT: add Mask as a new fullscreen element in the front layer
 - BUGFIX: fix preset filters by adding Plate and Hologram
+- UPDATE: update dependencies
 
 2.1.2 (2024-09-16)
 ------------------
