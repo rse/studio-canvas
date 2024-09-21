@@ -51,8 +51,9 @@
                                         v-on:click="preset.filters.streams = !preset.filters.streams">
                                         Streams
                                     </div>
-                                    <div class="button disabled" disabled="disabled">
-                                        Images
+                                    <div class="button" v-bind:class="{ selected: preset.filters.media }"
+                                        v-on:click="preset.filters.media = !preset.filters.media">
+                                        Media
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.filters.canvas }"
                                         v-on:click="preset.filters.canvas = !preset.filters.canvas">
@@ -2702,7 +2703,7 @@ import { MixerState, MixerFPS } from "../common/app-mixer"
 export const StateFilterKeys = [
     "renderer",
     "streams",
-    "images",
+    "media",
     "canvas",
     "monitor",
     "decal",
@@ -2722,7 +2723,7 @@ export const StateFilterKeys = [
 export type StateFilterType = {
     renderer:   boolean,
     streams:    boolean,
-    images:     boolean,
+    media:      boolean,
     canvas:     boolean,
     monitor:    boolean,
     decal:      boolean,
@@ -2765,7 +2766,7 @@ export default defineComponent({
             filters: {
                 renderer:   true,
                 streams:    true,
-                images:     true,
+                media:      true,
                 canvas:     true,
                 monitor:    true,
                 decal:      true,
