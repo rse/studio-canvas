@@ -18,7 +18,7 @@ import { StateType, StateTypePartial } from "../common/app-state"
 
 /*  utility type  */
 type ChromaKey = { enable: boolean, threshold: number, smoothing: number }
-type VideoStackId = "monitor" | "decal" | "hologram" | "plate" | "pane" | "pillar"
+type VideoStackId = "monitor" | "decal" | "hologram" | "plate" | "pane" | "pillar" | "mask"
 
 /*  the canvas rendering class  */
 export default class CanvasRenderer extends EventEmitter {
@@ -76,10 +76,11 @@ export default class CanvasRenderer extends EventEmitter {
     private pillarBorderRad   = 40.0
     private pillarBorderCrop  = 0.0
     private pillarChromaKey   = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
+    private maskBorderRad     = 0.0
     private videoStream:      MediaStream | null = null
     private videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
     private videoStacks       = 2
-    private sourceMap         = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2" } as { [ id: string ]: string }
+    private sourceMap         = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2", mask: "S2" } as { [ id: string ]: string }
     private videoMeshMaterial = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
     private monitorBase       = {
         scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
@@ -123,6 +124,9 @@ export default class CanvasRenderer extends EventEmitter {
     private hologramBase = {
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
         rotationZ:     0, positionZ:     0, positionX:     0
+    }
+    private maskBase = {
+        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0
     }
 
     /*  frames per second (FPS) control  */
@@ -186,6 +190,10 @@ export default class CanvasRenderer extends EventEmitter {
     private plateDisplay:    BABYLON.Nullable<BABYLON.Mesh>           = null
     private hologram:        BABYLON.Nullable<BABYLON.TransformNode>  = null
     private hologramDisplay: BABYLON.Nullable<BABYLON.Mesh>           = null
+    private mask:            BABYLON.Nullable<BABYLON.TransformNode>  = null
+    private maskDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
+    private maskBackground:  BABYLON.Nullable<BABYLON.Mesh>           = null
+    private maskCamLens:     BABYLON.Nullable<BABYLON.FreeCamera>     = null
 
     /*  PTZ sub-module  */
     private ptz:     PTZ
@@ -231,6 +239,9 @@ export default class CanvasRenderer extends EventEmitter {
         "Pillar":                       { back: false, front: true  },
         "Pillar-Case":                  { back: false, front: true  },
         "Pillar-Screen":                { back: false, front: true  },
+        "Mask":                         { back: false, front: true  },
+        "Mask-Background":              { back: false, front: true  },
+        "Mask-Display":                 { back: false, front: true  },
         "Dummy":                        { back: true,  front: true  }
     } as { [ name: string ]: { back: boolean, front: boolean }}
 
@@ -445,6 +456,23 @@ export default class CanvasRenderer extends EventEmitter {
         this.hologramBase.rotationZ     = this.hologram!.rotation.z
         this.hologramBase.positionZ     = this.hologram!.position.z
         this.hologramBase.positionX     = this.hologramDisplay!.position.x
+
+        /*  gather references to mask mesh nodes  */
+        this.mask           = this.scene.getNodeByName("Mask")            as BABYLON.Nullable<BABYLON.TransformNode>
+        this.maskDisplay    = this.scene.getMeshByName("Mask-Display")    as BABYLON.Nullable<BABYLON.Mesh>
+        this.maskBackground = this.scene.getMeshByName("Mask-Background") as BABYLON.Nullable<BABYLON.Mesh>
+        this.maskCamLens    = this.scene.getNodeByName("Mask-Cam-Lens")   as BABYLON.Nullable<BABYLON.FreeCamera>
+        if (this.mask === null || this.maskDisplay === null || this.maskBackground === null || this.maskCamLens === null)
+            throw new Error("cannot find mask mesh nodes")
+        if (this.layer === "front") {
+            this.maskDisplay.setEnabled(false)
+            this.maskBackground.setEnabled(false)
+        }
+
+        /*  initialize mask base values  */
+        this.maskBase.scaleDisplayX = this.maskDisplay!.scaling.x
+        this.maskBase.scaleDisplayY = this.maskDisplay!.scaling.y
+        this.maskBase.scaleDisplayZ = this.maskDisplay!.scaling.z
 
         /*  setup light shadow casting the display onto the wall  */
         const setupLight = (light: BABYLON.PointLight) => {
@@ -2007,6 +2035,70 @@ export default class CanvasRenderer extends EventEmitter {
                         this.pillar.setEnabled(false)
                         await this.unapplyVideoMaterial(this.pillarDisplay!)
                     }
+                }
+            }
+        }
+
+        /*  adjust mask  */
+        if (state.mask !== undefined && this.mask !== null && this.maskDisplay !== null && this.layer === "front") {
+            if (state.mask.source !== undefined && this.sourceMap.mask !== state.mask.source) {
+                this.sourceMap.mask = state.mask.source
+                await this.unapplyVideoMaterial(this.maskDisplay)
+                await this.applyVideoMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+            }
+            if (state.mask.scale !== undefined) {
+                this.maskDisplay.scaling.x = this.maskBase.scaleDisplayX * state.mask.scale
+                this.maskDisplay.scaling.y = this.maskBase.scaleDisplayY * state.mask.scale
+                this.maskDisplay.scaling.z = this.maskBase.scaleDisplayZ * state.mask.scale
+            }
+            if (state.mask.borderRad !== undefined) {
+                this.maskBorderRad = state.mask.borderRad
+                if (this.maskDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.maskDisplay.material
+                    material.setFloat("borderRadius", this.maskBorderRad)
+                }
+            }
+            if (state.mask.enable !== undefined && this.maskDisplay.isEnabled() !== state.mask.enable) {
+                if (state.mask.enable) {
+                    this.scene!.activeCamera = this.maskCamLens
+                    await this.unapplyVideoMaterial(this.maskDisplay)
+                    await this.applyVideoMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+                    this.emit("log", "INFO", "enabling mask")
+                    if (this.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.maskDisplay!.material
+                        material.setFloat("visibility", 1.0)
+                        this.maskDisplay!.visibility = 1.0
+                    }
+                    else
+                        this.maskDisplay!.visibility = 1.0
+                    this.maskBackground!.visibility = 1.0
+                    this.maskDisplay!.setEnabled(true)
+                    this.maskBackground!.setEnabled(true)
+                }
+                else if (!state.mask.enable) {
+                    /*  disable mask
+                        NOTICE: BabylonJS immediately stops rendering if it thinks there are no more
+                        visible meshes, so we have to first render it nearly invisible and then
+                        finally disable it  */
+                    this.emit("log", "INFO", "disabling mask")
+                    const setOnce = (value: number) => {
+                        if (this.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.maskDisplay!.material
+                            material.setFloat("visibility", value)
+                            this.maskDisplay!.visibility = value
+                        }
+                        else
+                            this.maskDisplay!.visibility = value
+                        this.maskBackground!.visibility = value
+                    }
+                    setOnce(0.000000001)
+                    this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                        setOnce(0)
+                        this.maskDisplay!.setEnabled(false)
+                        this.maskBackground!.setEnabled(false)
+                        this.scene!.activeCamera = this.cameraLens
+                        await this.unapplyVideoMaterial(this.maskDisplay!)
+                    })
                 }
             }
         }

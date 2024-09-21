@@ -51,6 +51,9 @@
                                         v-on:click="preset.filters.streams = !preset.filters.streams">
                                         Streams
                                     </div>
+                                    <div class="button disabled" disabled="disabled">
+                                        Images
+                                    </div>
                                     <div class="button" v-bind:class="{ selected: preset.filters.canvas }"
                                         v-on:click="preset.filters.canvas = !preset.filters.canvas">
                                         Canvas
@@ -78,6 +81,10 @@
                                     <div class="button" v-bind:class="{ selected: preset.filters.pillar }"
                                         v-on:click="preset.filters.pillar = !preset.filters.pillar">
                                         Pillar
+                                    </div>
+                                    <div class="button" v-bind:class="{ selected: preset.filters.mask }"
+                                        v-on:click="preset.filters.mask = !preset.filters.mask">
+                                        Mask
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.filters.lights }"
                                         v-on:click="preset.filters.lights = !preset.filters.lights">
@@ -1647,6 +1654,70 @@
                                 </div>
                             </div>
                         </tab>
+
+                        <!--  ==== MASK ====  -->
+                        <tab id="mask" name="Mask">
+                            <div class="desc">
+                                The <b>Mask</b> is the optional planar display which can be projected
+                                directly in front of the camera viewpoint in the FRONT layer. It is automatically
+                                positioned and scaled to fit into the viewpoint of the camera. It is
+                                intended to be used for short-term displaying fullscreen content.
+                            </div>
+                            <div class="control">
+                                <div class="label1">enable</div>
+                                <div class="label2">(visible)</div>
+                                <div class="label3">[flag]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.mask.enable ? "YES" : "NO" }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.mask.enable = false">RESET</div>
+                                <div class="slider">
+                                    <toggle class="toggle" v-model="state.mask.enable"></toggle>
+                                </div>
+
+                                <div class="label1">source</div>
+                                <div class="label2">(source)</div>
+                                <div class="label3">[id]:</div>
+                                <div class="value">
+                                    <div class="fixed">{{ state.mask.source }}</div>
+                                </div>
+                                <div class="button" v-on:click="state.mask.source = 'S2'">RESET</div>
+                                <div class="radios">
+                                    <div class="button" v-bind:class="{ selected: state.mask.source === 'S1' }" v-on:click="state.mask.source = 'S1'">Stream 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.mask.source === 'S2' }" v-on:click="state.mask.source = 'S2'">Stream 2</div>
+                                </div>
+
+                                <div class="label1">scale</div>
+                                <div class="label2">(resize)</div>
+                                <div class="label3">[mult]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.mask.scale)"
+                                        v-on:change="(ev) => state.mask.scale = fieldImport((ev.target! as HTMLInputElement).value, 0.8, 1.2)"/>
+                                </div>
+                                <div class="button" v-on:click="state.mask.scale = 1.0">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.mask.scale"
+                                        v-bind:min="0.8" v-bind:max="1.2" v-bind:step="0.01"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+
+                                <div class="label1">border</div>
+                                <div class="label2">(radius)</div>
+                                <div class="label3">[px]:</div>
+                                <div class="value">
+                                    <input tabindex="8" v-bind:value="fieldExport(state.mask.borderRad)"
+                                        v-on:change="(ev) => state.mask.borderRad = fieldImport((ev.target! as HTMLInputElement).value, 0, 540)"/>
+                                </div>
+                                <div class="button" v-on:click="state.mask.borderRad = 40">RESET</div>
+                                <div class="slider">
+                                    <slider class="slider" v-model="state.mask.borderRad"
+                                        v-bind:min="0" v-bind:max="540" v-bind:step="10"
+                                        show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+                                    ></slider>
+                                </div>
+                            </div>
+                        </tab>
                     </tabs>
                 </tab>
                 <tab id="ambient" name="Ambient">
@@ -2195,10 +2266,10 @@
             margin-right: 20px
             display: grid
             grid-template-columns: 100px 100px
-            grid-template-rows: 30px 30px 30px 30px 30px 30px 30px 30px
+            grid-template-rows: 27px 27px 27px 27px 27px 27px 27px 27px 27px
             justify-items: center
             align-items: center
-            gap: 7px 7px
+            gap: 6px 6px
         .button
             background-color: var(--color-std-bg-2)
             color: var(--color-std-fg-5)
@@ -2240,7 +2311,7 @@
                     color: var(--color-acc-fg-5)
         .filter .button
             font-weight: 200
-            line-height: 28px
+            line-height: 22px
         .slots .button
             font-size: 150%
             font-weight: bold
@@ -2631,6 +2702,7 @@ import { MixerState, MixerFPS } from "../common/app-mixer"
 export const StateFilterKeys = [
     "renderer",
     "streams",
+    "images",
     "canvas",
     "monitor",
     "decal",
@@ -2638,6 +2710,7 @@ export const StateFilterKeys = [
     "hologram",
     "pane",
     "pillar",
+    "mask",
     "lights",
     "avatars",
     "references",
@@ -2649,6 +2722,7 @@ export const StateFilterKeys = [
 export type StateFilterType = {
     renderer:   boolean,
     streams:    boolean,
+    images:     boolean,
     canvas:     boolean,
     monitor:    boolean,
     decal:      boolean,
@@ -2656,6 +2730,7 @@ export type StateFilterType = {
     hologram:   boolean,
     pane:       boolean,
     pillar:     boolean,
+    mask:       boolean,
     lights:     boolean,
     avatars:    boolean,
     references: boolean,
@@ -2690,6 +2765,7 @@ export default defineComponent({
             filters: {
                 renderer:   true,
                 streams:    true,
+                images:     true,
                 canvas:     true,
                 monitor:    true,
                 decal:      true,
@@ -2697,6 +2773,7 @@ export default defineComponent({
                 hologram:   true,
                 pane:       true,
                 pillar:     true,
+                mask:       true,
                 lights:     true,
                 avatars:    true,
                 references: true,
@@ -2706,7 +2783,7 @@ export default defineComponent({
                 CAM4:       true
             } as StateFilterType,
             slot: -1,
-            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
         },
         state: StateDefault as StateType,
         watchState: true,

@@ -62,6 +62,7 @@ export default class RESTPreset {
                         if (state.hologram   !== undefined) n++
                         if (state.pane       !== undefined) n++
                         if (state.pillar     !== undefined) n++
+                        if (state.mask       !== undefined) n++
                         if (state.lights     !== undefined) n++
                         if (state.avatars    !== undefined) n++
                         if (state.references !== undefined) n++

@@ -121,6 +121,12 @@ export type StateType = {
             smoothing:  number
         }
     },
+    mask: {
+        enable:     boolean,
+        source:     string,
+        scale:      number,
+        borderRad:  number
+    },
     lights: {
         intensity1: number,
         intensity2: number,
@@ -285,6 +291,12 @@ export const StateSchema = `{
             smoothing:  number
         }
     },
+    mask: {
+        enable:     boolean,
+        source:     string,
+        scale:      number,
+        borderRad:  number
+    },
     lights: {
         intensity1: number,
         intensity2: number,
@@ -448,6 +460,12 @@ export const StateDefault: StateType = {
             threshold:  0.4,
             smoothing:  0.1
         }
+    },
+    mask: {
+        enable:     false,
+        source:     "S2",
+        scale:      1.0,
+        borderRad:  0
     },
     lights: {
         intensity1: 300,

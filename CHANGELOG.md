@@ -11,6 +11,7 @@ ChangeLog
 - IMPROVEMENT: make Monitor content opacity controlable via control UI
 - IMPROVEMENT: make Monitor glass more visible by increasing alpha
 - IMPROVEMENT: add Pane and Pillar to control UI and rendering
+- IMPROVEMENT: add Mask as a new fullscreen element in the front layer
 - BUGFIX: fix preset filters by adding Plate and Hologram
 
 2.1.2 (2024-09-16)
