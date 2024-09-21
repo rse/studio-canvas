@@ -940,12 +940,12 @@
                                 <div class="label3">[sec]:</div>
                                 <div class="value">
                                     <input tabindex="8" v-bind:value="fieldExport(state.plate.fadeTime)"
-                                        v-on:change="(ev) => state.plate.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+                                        v-on:change="(ev) => state.plate.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 4.0)"/>
                                 </div>
                                 <div class="button" v-on:click="state.plate.fadeTime = 2.0">RESET</div>
                                 <div class="slider">
                                     <slider class="slider" v-model="state.plate.fadeTime"
-                                        v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
+                                        v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
                                         show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                                     ></slider>
                                 </div>
@@ -1135,12 +1135,12 @@
                                 <div class="label3">[sec]:</div>
                                 <div class="value">
                                     <input tabindex="8" v-bind:value="fieldExport(state.hologram.fadeTime)"
-                                        v-on:change="(ev) => state.hologram.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+                                        v-on:change="(ev) => state.hologram.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 4.0)"/>
                                 </div>
                                 <div class="button" v-on:click="state.hologram.fadeTime = 2.0">RESET</div>
                                 <div class="slider">
                                     <slider class="slider" v-model="state.hologram.fadeTime"
-                                        v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
+                                        v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
                                         show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                                     ></slider>
                                 </div>
@@ -1330,12 +1330,12 @@
                                 <div class="label3">[sec]:</div>
                                 <div class="value">
                                     <input tabindex="8" v-bind:value="fieldExport(state.pane.fadeTime)"
-                                        v-on:change="(ev) => state.pane.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+                                        v-on:change="(ev) => state.pane.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 4.0)"/>
                                 </div>
                                 <div class="button" v-on:click="state.pane.fadeTime = 2.0">RESET</div>
                                 <div class="slider">
                                     <slider class="slider" v-model="state.pane.fadeTime"
-                                        v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
+                                        v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
                                         show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                                     ></slider>
                                 </div>
@@ -1497,12 +1497,12 @@
                                 <div class="label3">[sec]:</div>
                                 <div class="value">
                                     <input tabindex="8" v-bind:value="fieldExport(state.pillar.fadeTime)"
-                                        v-on:change="(ev) => state.pillar.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+                                        v-on:change="(ev) => state.pillar.fadeTime = fieldImport((ev.target! as HTMLInputElement).value, 0.0, 4.0)"/>
                                 </div>
                                 <div class="button" v-on:click="state.pillar.fadeTime = 2.0">RESET</div>
                                 <div class="slider">
                                     <slider class="slider" v-model="state.pillar.fadeTime"
-                                        v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
+                                        v-bind:min="0.0" v-bind:max="4.0" v-bind:step="0.10"
                                         show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
                                     ></slider>
                                 </div>

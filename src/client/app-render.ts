@@ -1508,16 +1508,22 @@ export default class CanvasRenderer extends EventEmitter {
                         })
                     }
                     else {
-                        this.emit("log", "INFO", "disabling plate:" + this.fps)
-                        if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.plateDisplay!.material
-                            material.setFloat("visibility", 0.0)
-                            this.plateDisplay.visibility = 0.0
+                        this.emit("log", "INFO", "disabling plate")
+                        const setOnce = (value: number) => {
+                            if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.plateDisplay!.material
+                                material.setFloat("visibility", value)
+                                this.plateDisplay!.visibility = value
+                            }
+                            else
+                                this.plateDisplay!.visibility = value
                         }
-                        else
-                            this.plateDisplay.visibility = 0.0
-                        this.plateDisplay.setEnabled(false)
-                        await this.unapplyVideoMaterial(this.plateDisplay!)
+                        setOnce(0.000000001)
+                        this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                            setOnce(0)
+                            this.plateDisplay!.setEnabled(false)
+                            await this.unapplyVideoMaterial(this.plateDisplay!)
+                        })
                     }
                 }
             }
@@ -1667,15 +1673,21 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                     else {
                         this.emit("log", "INFO", "disabling hologram")
-                        if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.hologramDisplay!.material
-                            material.setFloat("visibility", 0.0)
-                            this.hologramDisplay!.visibility = 0.0
+                        const setOnce = (value: number) => {
+                            if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.hologramDisplay!.material
+                                material.setFloat("visibility", value)
+                                this.hologramDisplay!.visibility = value
+                            }
+                            else
+                                this.hologramDisplay!.visibility = value
                         }
-                        else
-                            this.hologramDisplay.visibility = 0.0
-                        this.hologramDisplay.setEnabled(false)
-                        await this.unapplyVideoMaterial(this.hologramDisplay!)
+                        setOnce(0.000000001)
+                        this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                            setOnce(0)
+                            this.hologramDisplay!.setEnabled(false)
+                            await this.unapplyVideoMaterial(this.hologramDisplay!)
+                        })
                     }
                 }
             }
@@ -1834,20 +1846,26 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                     else {
                         this.emit("log", "INFO", "disabling pane")
-                        if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.paneDisplay.material
-                            material.setFloat("visibility", 0.0)
-                            this.paneDisplay.visibility = 0.0
-                            this.paneCase.visibility = 0.0
+                        const setOnce = (value: number) => {
+                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.paneDisplay!.material
+                                material.setFloat("visibility", value)
+                                this.paneDisplay!.visibility = value
+                                this.paneCase!.visibility = value
+                            }
+                            else {
+                                this.paneDisplay!.visibility = value
+                                this.paneCase!.visibility = value
+                            }
                         }
-                        else {
-                            this.paneDisplay.visibility = 0.0
-                            this.paneCase.visibility = 0.0
-                        }
-                        this.paneCase.setEnabled(false)
-                        this.paneDisplay.setEnabled(false)
-                        this.pane.setEnabled(false)
-                        await this.unapplyVideoMaterial(this.paneDisplay!)
+                        setOnce(0.000000001)
+                        this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                            setOnce(0)
+                            this.paneCase!.setEnabled(false)
+                            this.paneDisplay!.setEnabled(false)
+                            this.pane!.setEnabled(false)
+                            await this.unapplyVideoMaterial(this.paneDisplay!)
+                        })
                     }
                 }
             }
@@ -2020,20 +2038,26 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                     else {
                         this.emit("log", "INFO", "disabling pillar")
-                        if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.pillarDisplay.material
-                            material.setFloat("visibility", 0.0)
-                            this.pillarDisplay.visibility = 0.0
-                            this.pillarCase.visibility = 0.0
+                        const setOnce = (value: number) => {
+                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.pillarDisplay!.material
+                                material.setFloat("visibility", value)
+                                this.pillarDisplay!.visibility = value
+                                this.pillarCase!.visibility = value
+                            }
+                            else {
+                                this.pillarDisplay!.visibility = value
+                                this.pillarCase!.visibility = value
+                            }
                         }
-                        else {
-                            this.pillarDisplay.visibility = 0.0
-                            this.pillarCase.visibility = 0.0
-                        }
-                        this.pillarCase.setEnabled(false)
-                        this.pillarDisplay.setEnabled(false)
-                        this.pillar.setEnabled(false)
-                        await this.unapplyVideoMaterial(this.pillarDisplay!)
+                        setOnce(0.000000001)
+                        this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                            setOnce(0)
+                            this.pillarCase!.setEnabled(false)
+                            this.pillarDisplay!.setEnabled(false)
+                            this.pillar!.setEnabled(false)
+                            await this.unapplyVideoMaterial(this.pillarDisplay!)
+                        })
                     }
                 }
             }
