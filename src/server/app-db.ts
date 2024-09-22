@@ -33,6 +33,7 @@ export default class DB {
                         resolve(result)
                     }
                     catch (err) {
+                        this.lock.unlock()
                         reject(err)
                     }
             }
