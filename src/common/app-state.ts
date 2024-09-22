@@ -16,6 +16,12 @@ export type StateType = {
         height:     number,
         fps:        number
     },
+    media: {
+        media1:     string,
+        media2:     string,
+        media3:     string,
+        media4:     string
+    },
     canvas: {
         id:         string
         texture1:   string,
@@ -186,6 +192,12 @@ export const StateSchema = `{
         height:     number,
         fps:        number
     },
+    media: {
+        media1:     string,
+        media2:     string,
+        media3:     string,
+        media4:     string
+    },
     canvas: {
         id:         string,
         texture1:   string,
@@ -355,6 +367,12 @@ export const StateDefault: StateType = {
         width:      1920,
         height:     1080,
         fps:        30
+    },
+    media: {
+        media1:     "",
+        media2:     "",
+        media3:     "",
+        media4:     ""
     },
     canvas: {
         id:         "hexagons",

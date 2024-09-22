@@ -55,6 +55,7 @@ export default class RESTPreset {
                         }
                         if (state.renderer   !== undefined) n++
                         if (state.streams    !== undefined) n++
+                        if (state.media      !== undefined) n++
                         if (state.canvas     !== undefined) n++
                         if (state.monitor    !== undefined) n++
                         if (state.decal      !== undefined) n++

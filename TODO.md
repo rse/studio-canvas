@@ -8,10 +8,6 @@ Bugfixes
 Improvements
 ------------
 
-- IMPROVEMENT:
-  Studio-Canvas: Image, Image-Pair, Video-File, Video-Stream RGB und
-  Video-Stream RGB+A unterstützen!
-
 Cleanups
 --------
 

@@ -473,6 +473,70 @@
                                 </div>
                             </div>
                         </tab>
+
+                        <!--  ==== MEDIA ====  -->
+                        <tab id="media" name="Media" class="media">
+                            <div class="desc">
+                                The <b>Media</b> are static images (in PNG, JPEG, or GIF format)
+                                and looping videos (in MP4 or WebM format), each 1920x1080 pixels in size
+                                and for PNG, GIF and WebM/VP8 optionally with a transparent background.
+                                Each media can be assigned to the logical media slots 1-4 and then selected
+                                for displaying on Decal, Monitor, Plate, Hologram, Pane, Pillar and Mask
+                                as an alternative to the regular video streams 1-2.
+                            </div>
+                            <div class="list" ref="list">
+                                <div
+                                    v-for="(group, i) in mediaList.map((e) => e.group).filter((v, i, a) => v !== '' && a.indexOf(v) === i)"
+                                    class="list-group"
+                                    v-bind:class="{ selected: mediaOpenGroup === group, alt: i % 2 == 1 }"
+                                    v-bind:key="group"
+                                >
+                                    <div class="name"
+                                        v-on:click="mediaOpenGroup = mediaOpenGroup !== group ? group : ''">
+                                        <span class="icon">
+                                            <span v-show="mediaOpenGroup !== group"><i class="fa fa-caret-right"></i></span>
+                                            <span v-show="mediaOpenGroup === group"><i class="fa fa-caret-down" ></i></span>
+                                        </span>
+                                        <span>{{ group }}</span>
+                                    </div>
+                                    <div
+                                        v-show="mediaOpenGroup === group"
+                                        v-for="(entry, j) in mediaList.filter((e) => e.group === group)"
+                                        class="list-entry"
+                                        v-bind:class="{ alt: j % 2 == 1 }"
+                                        v-bind:key="entry.id!"
+                                    >
+                                        <div class="name">{{ entry.name }}</div>
+                                        <div class="actions">
+                                            <div class="button" v-bind:class="{ selected: state.media.media1 === entry.texture }" v-on:click="selectMedia('media1', entry.texture)">Media 1</div>
+                                            <div class="button" v-bind:class="{ selected: state.media.media2 === entry.texture }" v-on:click="selectMedia('media2', entry.texture)">Media 2</div>
+                                            <div class="button" v-bind:class="{ selected: state.media.media3 === entry.texture }" v-on:click="selectMedia('media3', entry.texture)">Media 3</div>
+                                            <div class="button" v-bind:class="{ selected: state.media.media4 === entry.texture }" v-on:click="selectMedia('media4', entry.texture)">Media 4</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div
+                                    v-for="(entry, i) in mediaList.filter((e) => e.group === '')"
+                                    class="list-entry"
+                                    v-bind:class="{ alt: i % 2 == 1 }"
+                                    v-bind:key="entry.id!"
+                                >
+                                    <div class="name">{{ entry.name }}</div>
+                                    <div class="actions">
+                                        <div class="button" v-bind:class="{ selected: state.media.media1 === entry.texture }" v-on:click="selectMedia('media1', entry.texture)">Media 1</div>
+                                        <div class="button" v-bind:class="{ selected: state.media.media2 === entry.texture }" v-on:click="selectMedia('media2', entry.texture)">Media 2</div>
+                                        <div class="button" v-bind:class="{ selected: state.media.media3 === entry.texture }" v-on:click="selectMedia('media3', entry.texture)">Media 3</div>
+                                        <div class="button" v-bind:class="{ selected: state.media.media4 === entry.texture }" v-on:click="selectMedia('media4', entry.texture)">Media 4</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="actions">
+                                <div class="button"
+                                    v-on:click="mediaListFetch()">
+                                    RELOAD
+                                </div>
+                            </div>
+                        </tab>
                     </tabs>
                 </tab>
                 <tab id="displays" name="Displays">
@@ -549,6 +613,10 @@
                             </div>
                             <div class="actions">
                                 <div class="button"
+                                    v-on:click="imageListFetch()">
+                                    RELOAD
+                                </div>
+                                <div class="button"
                                     v-bind:class="{ unselectable: state.canvas.texture2 === '' }"
                                     v-on:click="syncCanvas()">
                                     SYNC
@@ -587,6 +655,10 @@
                                 <div class="radios">
                                     <div class="button" v-bind:class="{ selected: state.decal.source === 'S1' }" v-on:click="state.decal.source = 'S1'">Stream 1</div>
                                     <div class="button" v-bind:class="{ selected: state.decal.source === 'S2' }" v-on:click="state.decal.source = 'S2'">Stream 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.decal.source === 'M1' }" v-on:click="state.decal.source = 'M1'">Media 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.decal.source === 'M2' }" v-on:click="state.decal.source = 'M2'">Media 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.decal.source === 'M3' }" v-on:click="state.decal.source = 'M3'">Media 3</div>
+                                    <div class="button" v-bind:class="{ selected: state.decal.source === 'M4' }" v-on:click="state.decal.source = 'M4'">Media 4</div>
                                 </div>
 
                                 <div class="label1">fade</div>
@@ -768,6 +840,10 @@
                                 <div class="radios">
                                     <div class="button" v-bind:class="{ selected: state.monitor.source === 'S1' }" v-on:click="state.monitor.source = 'S1'">Stream 1</div>
                                     <div class="button" v-bind:class="{ selected: state.monitor.source === 'S2' }" v-on:click="state.monitor.source = 'S2'">Stream 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.monitor.source === 'M1' }" v-on:click="state.monitor.source = 'M1'">Media 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.monitor.source === 'M2' }" v-on:click="state.monitor.source = 'M2'">Media 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.monitor.source === 'M3' }" v-on:click="state.monitor.source = 'M3'">Media 3</div>
+                                    <div class="button" v-bind:class="{ selected: state.monitor.source === 'M4' }" v-on:click="state.monitor.source = 'M4'">Media 4</div>
                                 </div>
 
                                 <div class="label1">fade</div>
@@ -934,6 +1010,10 @@
                                 <div class="radios">
                                     <div class="button" v-bind:class="{ selected: state.plate.source === 'S1' }" v-on:click="state.plate.source = 'S1'">Stream 1</div>
                                     <div class="button" v-bind:class="{ selected: state.plate.source === 'S2' }" v-on:click="state.plate.source = 'S2'">Stream 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.plate.source === 'M1' }" v-on:click="state.plate.source = 'M1'">Media 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.plate.source === 'M2' }" v-on:click="state.plate.source = 'M2'">Media 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.plate.source === 'M3' }" v-on:click="state.plate.source = 'M3'">Media 3</div>
+                                    <div class="button" v-bind:class="{ selected: state.plate.source === 'M4' }" v-on:click="state.plate.source = 'M4'">Media 4</div>
                                 </div>
 
                                 <div class="label1">fade</div>
@@ -1129,6 +1209,10 @@
                                 <div class="radios">
                                     <div class="button" v-bind:class="{ selected: state.hologram.source === 'S1' }" v-on:click="state.hologram.source = 'S1'">Stream 1</div>
                                     <div class="button" v-bind:class="{ selected: state.hologram.source === 'S2' }" v-on:click="state.hologram.source = 'S2'">Stream 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.hologram.source === 'M1' }" v-on:click="state.hologram.source = 'M1'">Media 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.hologram.source === 'M2' }" v-on:click="state.hologram.source = 'M2'">Media 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.hologram.source === 'M3' }" v-on:click="state.hologram.source = 'M3'">Media 3</div>
+                                    <div class="button" v-bind:class="{ selected: state.hologram.source === 'M4' }" v-on:click="state.hologram.source = 'M4'">Media 4</div>
                                 </div>
 
                                 <div class="label1">fade</div>
@@ -1324,6 +1408,10 @@
                                 <div class="radios">
                                     <div class="button" v-bind:class="{ selected: state.pane.source === 'S1' }" v-on:click="state.pane.source = 'S1'">Stream 1</div>
                                     <div class="button" v-bind:class="{ selected: state.pane.source === 'S2' }" v-on:click="state.pane.source = 'S2'">Stream 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.pane.source === 'M1' }" v-on:click="state.pane.source = 'M1'">Media 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.pane.source === 'M2' }" v-on:click="state.pane.source = 'M2'">Media 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.pane.source === 'M3' }" v-on:click="state.pane.source = 'M3'">Media 3</div>
+                                    <div class="button" v-bind:class="{ selected: state.pane.source === 'M4' }" v-on:click="state.pane.source = 'M4'">Media 4</div>
                                 </div>
 
                                 <div class="label1">fade</div>
@@ -1491,6 +1579,10 @@
                                 <div class="radios">
                                     <div class="button" v-bind:class="{ selected: state.pillar.source === 'S1' }" v-on:click="state.pillar.source = 'S1'">Stream 1</div>
                                     <div class="button" v-bind:class="{ selected: state.pillar.source === 'S2' }" v-on:click="state.pillar.source = 'S2'">Stream 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.pillar.source === 'M1' }" v-on:click="state.pillar.source = 'M1'">Media 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.pillar.source === 'M2' }" v-on:click="state.pillar.source = 'M2'">Media 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.pillar.source === 'M3' }" v-on:click="state.pillar.source = 'M3'">Media 3</div>
+                                    <div class="button" v-bind:class="{ selected: state.pillar.source === 'M4' }" v-on:click="state.pillar.source = 'M4'">Media 4</div>
                                 </div>
 
                                 <div class="label1">fade</div>
@@ -1686,6 +1778,10 @@
                                 <div class="radios">
                                     <div class="button" v-bind:class="{ selected: state.mask.source === 'S1' }" v-on:click="state.mask.source = 'S1'">Stream 1</div>
                                     <div class="button" v-bind:class="{ selected: state.mask.source === 'S2' }" v-on:click="state.mask.source = 'S2'">Stream 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.mask.source === 'M1' }" v-on:click="state.mask.source = 'M1'">Media 1</div>
+                                    <div class="button" v-bind:class="{ selected: state.mask.source === 'M2' }" v-on:click="state.mask.source = 'M2'">Media 2</div>
+                                    <div class="button" v-bind:class="{ selected: state.mask.source === 'M3' }" v-on:click="state.mask.source = 'M3'">Media 3</div>
+                                    <div class="button" v-bind:class="{ selected: state.mask.source === 'M4' }" v-on:click="state.mask.source = 'M4'">Media 4</div>
                                 </div>
 
                                 <div class="label1">scale</div>
@@ -2225,6 +2321,7 @@
         flex-direction: column
         justify-items: flex-start
         align-items: flex-start
+        width: 100%
     .tabs-component-tab-a
         padding: 2px 4px 2px 4px
         font-size: 11pt
@@ -2482,10 +2579,34 @@
                     &.tag-exclusive
                         background-color: var(--color-sig-bg-2)
                         color: var(--color-sig-fg-5)
-    .canvas
+            .actions
+                display: flex
+                flex-direction: row
+                .button
+                    background-color: var(--color-std-bg-1)
+                    color: var(--color-std-fg-1)
+                    border-radius: 4px
+                    padding: 2px 8px 2px 8px
+                    text-align: center
+                    font-size: 12pt
+                    line-height: 22px
+                    width: 60px
+                    height: auto
+                    cursor: pointer
+                    margin-left: 4px
+                    &.selected
+                        background-color: var(--color-acc-bg-3)
+                        color: var(--color-acc-fg-5)
+                    &:hover
+                        background-color: var(--color-acc-bg-5)
+                        color: var(--color-acc-fg-5)
+    .canvas,
+    .media >
         .actions
             margin-top: 10px
-            .button
+            display: flex
+            flex-direction: row
+            > .button
                 background-color: var(--color-std-bg-1)
                 color: var(--color-std-fg-1)
                 border-radius: 4px
@@ -2496,6 +2617,7 @@
                 width: 100px
                 height: auto
                 cursor: pointer
+                margin-right: 4px
                 &:hover
                     background-color: var(--color-sig-bg-5)
                     color: var(--color-sig-fg-5)
@@ -2689,6 +2811,7 @@ import axios               from "axios"
 import PerfectScrollbar    from "perfect-scrollbar"
 import { Tabs, Tab }       from "vue3-tabs-component"
 import { ImageEntry }      from "../common/app-canvas"
+import { MediaEntry }      from "../common/app-media"
 import {
     StateType, StateTypePartial,
     StateSchema, StateSchemaPartial,
@@ -2759,6 +2882,8 @@ export default defineComponent({
         formatSliderValue: (v: number) => v.toFixed(2),
         imageList: [] as ImageEntry[],
         openGroup: "",
+        mediaList: [] as MediaEntry[],
+        mediaOpenGroup: "",
         ps: null as PerfectScrollbar | null,
         tab0: "",
         tab1: "",
@@ -2878,9 +3003,11 @@ export default defineComponent({
         })
 
         /*  initialize and enrich canvas list  */
-        this.imageList = await this.imageListFetch()
+        await this.imageListFetch()
+        await this.mediaListFetch()
         this.state.canvas.id = this.imageList[0]?.id ?? ""
         this.openGroup = this.imageList.find((e) => e.id === this.state.canvas.id)?.group ?? ""
+        this.mediaOpenGroup = this.mediaList[0]?.group ?? ""
         this.$watch("state.canvas.id", (id: string) => {
             this.openGroup = this.imageList.find((e) => e.id === id)?.group ?? ""
         })
@@ -2949,9 +3076,9 @@ export default defineComponent({
         },
 
         /*  fetch list of canvas images  */
-        async imageListFetch (): Promise<ImageEntry[]> {
+        async imageListFetch () {
             this.connection.recv = true
-            return axios({
+            const result = await (axios({
                 method:       "GET",
                 url:          `${this.serviceUrl}canvas`,
                 responseType: "json"
@@ -2959,7 +3086,8 @@ export default defineComponent({
                 return result.data.images
             }).finally(() => {
                 this.connection.recv = false
-            }) as Promise<ImageEntry[]>
+            }) as Promise<ImageEntry[]>)
+            this.imageList = result
         },
 
         /*  select canvas image  */
@@ -2983,6 +3111,29 @@ export default defineComponent({
             else
                 this.state.canvas.fadeWait  = 0
             await this.patchState([ "canvas.*" ])
+            this.watchState = true
+        },
+
+        /*  fetch list of media files  */
+        async mediaListFetch () {
+            this.connection.recv = true
+            const result = await (axios({
+                method:       "GET",
+                url:          `${this.serviceUrl}media`,
+                responseType: "json"
+            }).then((result: any) => {
+                return result.data.media
+            }).finally(() => {
+                this.connection.recv = false
+            }) as Promise<MediaEntry[]>)
+            this.mediaList = result
+        },
+
+        /*  select media file  */
+        async selectMedia (media: "media1" | "media2" | "media3" | "media4", texture: string) {
+            this.watchState = false
+            this.state.media[media] = texture
+            await this.patchState([ "media.*" ])
             this.watchState = true
         },
 
@@ -3110,9 +3261,9 @@ export default defineComponent({
             const clazz = {} as any
             if (this.preset.status[slot] === 0)
                 clazz.clear = true
-            else if (this.preset.status[slot] > 0 && this.preset.status[slot] < 16)
+            else if (this.preset.status[slot] > 0 && this.preset.status[slot] < 18)
                 clazz.partial = true
-            else if (this.preset.status[slot] === 16)
+            else if (this.preset.status[slot] === 18)
                 clazz.complete = true
             return clazz
         },

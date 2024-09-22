@@ -40,8 +40,8 @@ export default class ShaderMaterial {
         })
     }
 
-    /*  video stream (with optional opacity, chroma-key, border cropping, and border radius)  */
-    static videoStream (name: string, scene: BABYLON.Scene) {
+    /*  display stream (with optional opacity, chroma-key, border cropping, and border radius)  */
+    static displayStream (name: string, scene: BABYLON.Scene) {
         const material = new BABYLON.ShaderMaterial(name, scene, {
             vertexSource: `
                 precision highp float;
@@ -97,18 +97,26 @@ export default class ShaderMaterial {
 
                 void main (void) {
                     /*  determine current pixel coordinates  */
-                    vec2 coordRGB = vec2((float(stack) / float(stacks)) + (vUV.x / float(stacks)), vUV.y * 0.5);
-                    vec2 coordA   = vec2((float(stack) / float(stacks)) + (vUV.x / float(stacks)), 0.5 + vUV.y * 0.5);
+                    vec2 coordRGB;
+                    vec2 coordA;
+                    if (stacks > 0) {
+                        coordRGB = vec2((float(stack) / float(stacks)) + (vUV.x / float(stacks)), vUV.y * 0.5);
+                        coordA   = vec2((float(stack) / float(stacks)) + (vUV.x / float(stacks)), 0.5 + vUV.y * 0.5);
+                    }
+                    else {
+                        coordRGB = vUV;
+                        coordA   = vUV;
+                    }
 
                     /*  determine current pixel color  */
                     vec4  sampleColVec4   = texture2D(textureSampler, coordRGB);
                     vec3  sampleCol       = sampleColVec4.rgb;
                     vec4  sampleAlphaVec4 = texture2D(textureSampler, coordA);
-                    float sampleAlpha     = 1.0 - sampleAlphaVec4.r;
+                    float sampleAlpha     = stacks > 0 ? 1.0 - sampleAlphaVec4.r : sampleAlphaVec4.a;
 
                     /*  determine position in real texture coordinates  */
                     ivec2 ts  = textureSize(textureSampler, 0);
-                    vec2 size = vec2(float(ts.x) / float(stacks), float(ts.y) * 0.5);
+                    vec2 size = stacks > 0 ? vec2(float(ts.x) / float(stacks), float(ts.y) * 0.5) : vec2(float(ts.x), float(ts.y));
                     vec2 pos  = vec2(vUV.x * size.x, vUV.y * size.y);
 
                     /*  optionally apply border cropping  */

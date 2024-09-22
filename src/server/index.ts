@@ -14,6 +14,7 @@ import Log            from "./app-log"
 import FreeD          from "./app-freed"
 import REST           from "./app-rest"
 import RESTCanvas     from "./app-rest-canvas"
+import RESTMedia      from "./app-rest-media"
 import RESTState      from "./app-rest-state"
 import RESTPreset     from "./app-rest-preset"
 import RESTMixer      from "./app-rest-mixer"
@@ -38,6 +39,7 @@ import DB             from "./app-db"
         freed:      awilix.asClass(FreeD      ).setLifetime(awilix.Lifetime.SINGLETON),
         rest:       awilix.asClass(REST       ).setLifetime(awilix.Lifetime.SINGLETON),
         restCanvas: awilix.asClass(RESTCanvas ).setLifetime(awilix.Lifetime.SINGLETON),
+        restMedia:  awilix.asClass(RESTMedia  ).setLifetime(awilix.Lifetime.SINGLETON),
         restState:  awilix.asClass(RESTState  ).setLifetime(awilix.Lifetime.SINGLETON),
         restPreset: awilix.asClass(RESTPreset ).setLifetime(awilix.Lifetime.SINGLETON),
         restMixer:  awilix.asClass(RESTMixer  ).setLifetime(awilix.Lifetime.SINGLETON),
@@ -52,6 +54,7 @@ import DB             from "./app-db"
     await container.cradle.freed.init()
     await container.cradle.rest.init()
     await container.cradle.restCanvas.init()
+    await container.cradle.restMedia.init()
     await container.cradle.restState.init()
     await container.cradle.restPreset.init()
     await container.cradle.restMixer.init()

@@ -14,6 +14,7 @@ export default class Argv {
     public logLevel   = 0
     public logFile    = ""
     public canvasDir  = ""
+    public mediaDir   = ""
     public stateDir   = ""
     public httpAddr   = ""
     public httpPort   = 0
@@ -32,6 +33,7 @@ export default class Argv {
                 "Usage: $0 [-h] [-V] " +
                 "[-v <log-level>] [-l|--log-file <log-file>] " +
                 "[-c <canvas-dir>] " +
+                "[-m <media-dir>] " +
                 "[-s <state-dir>] " +
                 "[-a <http-addr>] [-p <http-port>] " +
                 "[-A <freed-addr>] [-P <freed-port>]" +
@@ -47,6 +49,8 @@ export default class Argv {
                 .describe("l", "file for verbose logging")
             .string("c").nargs("c", 1).alias("c", "canvas-dir").default("c", path.join(__dirname, "../../res/canvas"))
                 .describe("c", "directory of canvas image/config files")
+            .string("m").nargs("m", 1).alias("m", "media-dir").default("m", path.join(__dirname, "../../res/media"))
+                .describe("m", "directory of media image/video files")
             .string("s").nargs("s", 1).alias("s", "state-dir").default("s", path.join(__dirname, "../../var"))
                 .describe("s", "directory of state files")
             .string("a").nargs("a", 1).alias("a", "http-addr").default("a", "0.0.0.0")
@@ -71,6 +75,7 @@ export default class Argv {
         this.logLevel   = args.logLevel
         this.logFile    = args.logFile
         this.canvasDir  = args.canvasDir
+        this.mediaDir   = args.mediaDir
         this.stateDir   = args.stateDir
         this.httpAddr   = args.httpAddr
         this.httpPort   = args.httpPort

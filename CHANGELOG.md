@@ -12,6 +12,7 @@ ChangeLog
 - IMPROVEMENT: make Monitor glass more visible by increasing alpha
 - IMPROVEMENT: add Pane and Pillar to control UI and rendering
 - IMPROVEMENT: add Mask as a new fullscreen element in the front layer
+- IMPROVEMENT: add Media for loading image and video files into the Displays
 - BUGFIX: fix preset filters by adding Plate and Hologram
 - UPDATE: update dependencies
 
