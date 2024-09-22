@@ -40,8 +40,8 @@
                             </div>
                             <div class="presets">
                                 <div class="actions3">
-                                    <div class="button destructive" v-on:click="presetFiltersSelect(false)">NONE</div>
-                                    <div class="button destructive" v-on:click="presetFiltersSelect(true)">ALL</div>
+                                    <div class="button" v-on:click="presetFiltersSelect(false)">NONE</div>
+                                    <div class="button" v-on:click="presetFiltersSelect(true)">ALL</div>
                                 </div>
                                 <div class="filter">
                                     <div class="button" v-bind:class="{ selected: preset.filters.renderer }"
