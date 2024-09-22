@@ -9,7 +9,7 @@ export type MediaEntry = {
     name:       string
     group:      string
     texture:    string
-    exclusive?: boolean
+    type:       string
 }
 
 export const MediaSchema = `{
@@ -17,6 +17,6 @@ export const MediaSchema = `{
     name:       string,
     group?:     string,
     texture:    string,
-    exclusive?: boolean
+    type:       string
 }`
 

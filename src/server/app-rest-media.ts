@@ -49,11 +49,18 @@ export default class RESTMedia {
                         continue
                     let m: ReturnType<typeof file.match>
                     if ((m = file.match(/^(.+)\.(png|jpg|gif|mp4|webm)$/)) !== null) {
+                        let type = ""
+                        if      (m[2] === "png")  type = "Image/PNG"
+                        else if (m[2] === "jpg")  type = "Image/JPEG"
+                        else if (m[2] === "gif")  type = "Image/GIF"
+                        else if (m[2] === "mp4")  type = "Video/MP4"
+                        else if (m[2] === "webm") type = "Video/WebM"
                         result.media.push({
                             id:        m[1],
                             name:      id2name(m[1].replace(/^.+?\//, "")),
                             group:     m[1].replace(/^[^/]+$/, "").replace(/^(.+)\/.+$/, "$1"),
-                            texture:   `${mediaURL}/${m[1]}.${m[2]}`
+                            texture:   `${mediaURL}/${m[1]}.${m[2]}`,
+                            type
                         })
                     }
                 }

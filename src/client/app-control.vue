@@ -507,6 +507,9 @@
                                         v-bind:key="entry.id!"
                                     >
                                         <div class="name">{{ entry.name }}</div>
+                                        <div class="tags">
+                                            <div v-show="entry.type" class="tag tag-type">{{ entry.type }}</div>
+                                        </div>
                                         <div class="actions">
                                             <div class="button" v-bind:class="{ selected: state.media.media1 === entry.texture }" v-on:click="selectMedia('media1', entry.texture)">Media 1</div>
                                             <div class="button" v-bind:class="{ selected: state.media.media2 === entry.texture }" v-on:click="selectMedia('media2', entry.texture)">Media 2</div>
@@ -522,6 +525,9 @@
                                     v-bind:key="entry.id!"
                                 >
                                     <div class="name">{{ entry.name }}</div>
+                                    <div class="tags">
+                                        <div v-show="entry.type" class="tag tag-type">{{ entry.type }}</div>
+                                    </div>
                                     <div class="actions">
                                         <div class="button" v-bind:class="{ selected: state.media.media1 === entry.texture }" v-on:click="selectMedia('media1', entry.texture)">Media 1</div>
                                         <div class="button" v-bind:class="{ selected: state.media.media2 === entry.texture }" v-on:click="selectMedia('media2', entry.texture)">Media 2</div>
@@ -2573,6 +2579,11 @@
                     border-radius: 4px
                     margin-right: 4px
                     font-size: 75%
+                    &.tag-type
+                        color: var(--color-std-fg-2)
+                        border: 1px solid var(--color-std-bg-1)
+                        width: 80px
+                        margin-right: 20px
                     &.tag-fade
                         background-color: var(--color-acc-bg-2)
                         color: var(--color-acc-fg-5)
