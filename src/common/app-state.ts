@@ -369,15 +369,15 @@ export const StateDefault: StateType = {
         fps:        30
     },
     media: {
-        media1:     "/media/std/placeholder-1.webm",
-        media2:     "/media/std/placeholder-2.webm",
+        media1:     "/media/STD/placeholder-1.webm",
+        media2:     "/media/STD/placeholder-2.webm",
         media3:     "",
         media4:     ""
     },
     canvas: {
         id:         "hexagons",
-        texture1:   "/canvas/std/hexagons-1.jpg",
-        texture2:   "/canvas/std/hexagons-2.jpg",
+        texture1:   "/canvas/STD/hexagons-1.jpg",
+        texture2:   "/canvas/STD/hexagons-2.jpg",
         fadeTrans:  150,
         fadeWait:   10000,
         rotationZ:  0
