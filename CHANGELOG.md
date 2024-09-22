@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+2.2.1 (2024-09-16)
+------------------
+
+- CLEANUP: improve descriptions in control UI
+
 2.2.0 (2024-09-16)
 ------------------
 

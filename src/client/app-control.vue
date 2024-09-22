@@ -35,7 +35,8 @@
                                 When loading a partial state from a preset slot, the partial state is merged
                                 onto the current state. First, select either "all" or "none" plus a particular state
                                 group. Second, select the preset slot 1-12. Third, select the action "load", "clear"
-                                or "save" to perform.
+                                or "save" to perform. Optionally, "lock" or "unlock" a preset to prevent accidental
+                                destruction of important presets.
                             </div>
                             <div class="presets">
                                 <div class="actions3">
