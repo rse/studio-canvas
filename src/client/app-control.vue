@@ -2611,6 +2611,13 @@
                     &:hover
                         background-color: var(--color-acc-bg-5)
                         color: var(--color-acc-fg-5)
+    .media
+        .list
+            .list-entry
+                &:hover
+                    background-color: var(--color-std-bg-3)
+                &.alt:hover
+                    background-color: var(--color-std-bg-4)
     .canvas,
     .media >
         .actions
