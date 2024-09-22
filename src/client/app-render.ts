@@ -1004,7 +1004,7 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  ugly workaround for BabylonJS rendering issue: move the decal 2cm to the
             front (z-axis) of the wall in order to avoid rendering artifacts  */
-        this.decal.translate(new BABYLON.Vector3(0, 0, 1), -0.02, BABYLON.Space.LOCAL)
+        this.decal.translate(new BABYLON.Vector3(0, 0, 1), 0.02, BABYLON.Space.LOCAL)
 
         /*  take over material or create a fresh one  */
         let material = oldDecal?.material ?? null
