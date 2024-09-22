@@ -121,61 +121,85 @@
                                         v-on:click="preset.slot = preset.slot !== 0 ? 0 : -1">
                                         1
                                         <div class="badge" v-bind:class="presetStatus2Class(0)">{{ preset.status[0] }}</div>
+                                        <div class="lock" v-show="preset.locked[0]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 1 }"
                                         v-on:click="preset.slot = preset.slot !== 1 ? 1 : -1">
                                         2
                                         <div class="badge" v-bind:class="presetStatus2Class(1)">{{ preset.status[1] }}</div>
+                                        <div class="lock" v-show="preset.locked[1]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 2 }"
                                         v-on:click="preset.slot = preset.slot !== 2 ? 2 : -1">
                                         3
                                         <div class="badge" v-bind:class="presetStatus2Class(2)">{{ preset.status[2] }}</div>
+                                        <div class="lock" v-show="preset.locked[2]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 3 }"
                                         v-on:click="preset.slot = preset.slot !== 3 ? 3 : -1">
                                         4
                                         <div class="badge" v-bind:class="presetStatus2Class(3)">{{ preset.status[3] }}</div>
+                                        <div class="lock" v-show="preset.locked[3]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 4 }"
                                         v-on:click="preset.slot = preset.slot !== 4 ? 4 : -1">
                                         5
                                         <div class="badge" v-bind:class="presetStatus2Class(4)">{{ preset.status[4] }}</div>
+                                        <div class="lock" v-show="preset.locked[4]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 5 }"
                                         v-on:click="preset.slot = preset.slot !== 5 ? 5 : -1">
                                         6
                                         <div class="badge" v-bind:class="presetStatus2Class(5)">{{ preset.status[5] }}</div>
+                                        <div class="lock" v-show="preset.locked[5]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 6 }"
                                         v-on:click="preset.slot = preset.slot !== 6 ? 6 : -1">
                                         7
                                         <div class="badge" v-bind:class="presetStatus2Class(6)">{{ preset.status[6] }}</div>
+                                        <div class="lock" v-show="preset.locked[6]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 7 }"
                                         v-on:click="preset.slot = preset.slot !== 7 ? 7 : -1">
                                         8
                                         <div class="badge" v-bind:class="presetStatus2Class(7)">{{ preset.status[7] }}</div>
+                                        <div class="lock" v-show="preset.locked[7]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 8 }"
                                         v-on:click="preset.slot = preset.slot !== 8 ? 8 : -1">
                                         9
                                         <div class="badge" v-bind:class="presetStatus2Class(8)">{{ preset.status[8] }}</div>
+                                        <div class="lock" v-show="preset.locked[8]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 9 }"
                                         v-on:click="preset.slot = preset.slot !== 9 ? 9 : -1">
                                         10
                                         <div class="badge" v-bind:class="presetStatus2Class(9)">{{ preset.status[9] }}</div>
+                                        <div class="lock" v-show="preset.locked[9]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 10 }"
                                         v-on:click="preset.slot = preset.slot !== 10 ? 10 : -1">
                                         11
                                         <div class="badge" v-bind:class="presetStatus2Class(10)">{{ preset.status[10] }}</div>
+                                        <div class="lock" v-show="preset.locked[10]"><i class="fa fa-lock"></i></div>
                                     </div>
                                     <div class="button" v-bind:class="{ selected: preset.slot === 11 }"
                                         v-on:click="preset.slot = preset.slot !== 11 ? 11 : -1">
                                         12
                                         <div class="badge" v-bind:class="presetStatus2Class(11)">{{ preset.status[11] }}</div>
+                                        <div class="lock" v-show="preset.locked[11]"><i class="fa fa-lock"></i></div>
+                                    </div>
+                                </div>
+                                <div class="actions0">
+                                    <div class="button destructive"
+                                        v-bind:class="{ unselectable: preset.slot === -1 || preset.status[preset.slot] === 0 || preset.locked[preset.slot] }"
+                                        v-on:click="presetLock">
+                                        LOCK
+                                    </div>
+                                    <div class="button destructive"
+                                        v-bind:class="{ unselectable: preset.slot === -1 || !preset.locked[preset.slot] }"
+                                        v-on:click="presetUnlock">
+                                        UNLOCK
                                     </div>
                                 </div>
                                 <div class="actions1">
@@ -185,14 +209,14 @@
                                         LOAD
                                     </div>
                                     <div class="button destructive"
-                                        v-bind:class="{ unselectable: preset.slot === -1 || preset.status[preset.slot] === 0 }"
+                                        v-bind:class="{ unselectable: preset.slot === -1 || preset.status[preset.slot] === 0 || preset.locked[preset.slot] }"
                                         v-on:click="presetClear">
                                         CLEAR
                                     </div>
                                 </div>
                                 <div class="actions2">
                                     <div class="button destructive"
-                                        v-bind:class="{ unselectable: preset.slot === -1 }"
+                                        v-bind:class="{ unselectable: preset.slot === -1 || preset.locked[preset.slot] }"
                                         v-on:click="presetSave">
                                         SAVE
                                     </div>
@@ -2350,6 +2374,7 @@
             justify-items: center
             align-items: center
             gap: 10px 10px
+        .actions0,
         .actions1,
         .actions3
             margin-right: 10px
@@ -2413,6 +2438,18 @@
                 &.complete
                     background-color: var(--color-acc-bg-2)
                     color: var(--color-acc-fg-5)
+            .lock
+                position: absolute
+                left: -2px
+                top: -2px
+                line-height: 24px
+                width: 24px
+                height: 24px
+                border-radius: 12px
+                font-size: 14px
+                font-weight: normal
+                background-color: var(--color-sig-bg-2)
+                color: var(--color-sig-fg-5)
         .filter .button
             font-weight: 200
             line-height: 22px
@@ -2420,6 +2457,14 @@
             font-size: 150%
             font-weight: bold
             line-height: 65px
+        .actions0 .button
+            font-size: 120%
+            font-weight: bold
+            line-height: 140px
+            &.unselectable:hover
+                background-color: var(--color-std-bg-2)
+                color: var(--color-std-fg-5)
+                cursor: default
         .actions1 .button
             font-size: 120%
             font-weight: bold
@@ -2927,7 +2972,8 @@ export default defineComponent({
                 CAM4:       true
             } as StateFilterType,
             slot: -1,
-            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ]
+            status: [ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 ],
+            locked: [ false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false ]
         },
         state: StateDefault as StateType,
         watchState: true,
@@ -3263,15 +3309,16 @@ export default defineComponent({
         /*  load preset status  */
         async presetStatus () {
             this.connection.recv = true
-            const status = await axios({
+            const result = await axios({
                 method: "GET",
                 url:    `${this.serviceUrl}state/preset`
             }).then((response) => response.data).catch(() => null).finally(() => {
                 this.connection.recv = false
             })
-            if (status === null)
+            if (result === null)
                 throw new Error("failed to load preset status")
-            this.preset.status = status
+            this.preset.status = result.status
+            this.preset.locked = result.locked
         },
 
         /*  map preset status to CSS class name  */
@@ -3326,6 +3373,8 @@ export default defineComponent({
         async presetSave () {
             if (this.preset.slot === -1)
                 return
+            if (this.preset.locked[this.preset.slot])
+                return
             const filters = Object.keys(this.preset.filters)
                 .filter((key) => (this.preset.filters as any)[key])
                 .map((key) => `${key}.**`)
@@ -3351,6 +3400,8 @@ export default defineComponent({
         async presetClear () {
             if (this.preset.slot === -1)
                 return
+            if (this.preset.locked[this.preset.slot])
+                return
             if (this.preset.status[this.preset.slot] === 0)
                 return
             this.raiseStatus("info", `Clearing preset slot #${this.preset.slot + 1}...`, 1000)
@@ -3358,6 +3409,46 @@ export default defineComponent({
             await axios({
                 method: "DELETE",
                 url:    `${this.serviceUrl}state/preset/${this.preset.slot + 1}`
+            }).then((response) => response.data).catch(() => null).finally(() => {
+                this.connection.send = false
+            })
+            this.preset.slot = -1
+            await this.presetStatus()
+        },
+
+        /*  lock preset slot  */
+        async presetLock () {
+            if (this.preset.slot === -1)
+                return
+            if (this.preset.locked[this.preset.slot])
+                return
+            if (this.preset.status[this.preset.slot] === 0)
+                return
+            this.raiseStatus("info", `Locking preset slot #${this.preset.slot + 1}...`, 1000)
+            this.connection.send = true
+            await axios({
+                method: "GET",
+                url:    `${this.serviceUrl}state/preset/${this.preset.slot + 1}/lock`
+            }).then((response) => response.data).catch(() => null).finally(() => {
+                this.connection.send = false
+            })
+            this.preset.slot = -1
+            await this.presetStatus()
+        },
+
+        /*  unlock preset slot  */
+        async presetUnlock () {
+            if (this.preset.slot === -1)
+                return
+            if (!this.preset.locked[this.preset.slot])
+                return
+            if (this.preset.status[this.preset.slot] === 0)
+                return
+            this.raiseStatus("info", `Unlocking preset slot #${this.preset.slot + 1}...`, 1000)
+            this.connection.send = true
+            await axios({
+                method: "GET",
+                url:    `${this.serviceUrl}state/preset/${this.preset.slot + 1}/unlock`
             }).then((response) => response.data).catch(() => null).finally(() => {
                 this.connection.send = false
             })

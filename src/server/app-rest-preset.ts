@@ -23,7 +23,8 @@ import {
 } from "../common/app-state"
 
 export default class RESTPreset {
-    public presetsFile = ""
+    public presetsConf = ""
+    public presetsLock = ""
     constructor (
         private argv:      Argv,
         private rest:      REST,
@@ -33,7 +34,8 @@ export default class RESTPreset {
     ) {}
     async init () {
         /*  determine presets file  */
-        this.presetsFile = path.join(this.argv.stateDir, "canvas-preset-%s.yaml")
+        this.presetsConf = path.join(this.argv.stateDir, "canvas-preset-%s.yaml")
+        this.presetsLock = path.join(this.argv.stateDir, "canvas-preset-%s.lock")
 
         /*  load presets overview information  */
         this.rest.server!.route({
@@ -42,11 +44,12 @@ export default class RESTPreset {
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 return this.db.transaction(Transaction.READ, 4000, async () => {
                     /*  determine number of stored top-level entries  */
-                    const presets = [] as number[]
+                    const status = [] as number[]
+                    const locked = [] as boolean[]
                     for (let i = 1; i <= 12; i++) {
                         let n = 0
                         const state = {} as StateTypePartial
-                        const filename = util.format(this.presetsFile, i.toString())
+                        const filename = util.format(this.presetsConf, i.toString())
                         if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
                             const txt = await this.db.readFile(filename)
                             const obj = jsYAML.load(txt) as StateTypePartial
@@ -71,9 +74,12 @@ export default class RESTPreset {
                         if (state.CAM2       !== undefined) n++
                         if (state.CAM3       !== undefined) n++
                         if (state.CAM4       !== undefined) n++
-                        presets.push(n)
+                        status.push(n)
+                        const lockfile = util.format(this.presetsLock, i.toString())
+                        const isLocked = await (fs.promises.stat(lockfile).then(() => true).catch(() => false))
+                        locked.push(isLocked)
                     }
-                    return h.response(presets).code(200)
+                    return h.response({ status, locked }).code(200)
                 })
             }
         })
@@ -101,7 +107,7 @@ export default class RESTPreset {
 
                     /*  load preset  */
                     let preset = {}
-                    const filename = util.format(this.presetsFile, slot)
+                    const filename = util.format(this.presetsConf, slot)
                     if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
                         const txt = await this.db.readFile(filename)
                         const obj = jsYAML.load(txt) as StateTypePartial
@@ -132,7 +138,7 @@ export default class RESTPreset {
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 return this.db.transaction(Transaction.READ, 4000, async () => {
                     const slot = req.params.slot
-                    const filename = util.format(this.presetsFile, slot)
+                    const filename = util.format(this.presetsConf, slot)
                     const state = {}
                     if (await (fs.promises.stat(filename).then(() => true).catch(() => false))) {
                         const txt = await this.db.readFile(filename)
@@ -162,7 +168,10 @@ export default class RESTPreset {
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 return this.db.transaction(Transaction.WRITE, 4000, async () => {
                     const slot = req.params.slot
-                    const filename = util.format(this.presetsFile, slot)
+                    const lockfile = util.format(this.presetsLock, slot)
+                    if (await (fs.promises.stat(lockfile).then(() => true).catch(() => false)))
+                        throw new Error("cannot store preset -- preset is locked")
+                    const filename = util.format(this.presetsConf, slot)
                     const state = req.payload as StateTypePartial
                     const txt = jsYAML.dump(state, { indent: 4, quotingType: "\"" })
                     await this.db.writeFile(filename, txt)
@@ -178,11 +187,40 @@ export default class RESTPreset {
             handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 return this.db.transaction(Transaction.WRITE, 4000, async () => {
                     const slot = req.params.slot
-                    const filename = util.format(this.presetsFile, slot)
+                    const lockfile = util.format(this.presetsLock, slot)
+                    if (await (fs.promises.stat(lockfile).then(() => true).catch(() => false)))
+                        throw new Error("cannot clear preset -- preset is locked")
+                    const filename = util.format(this.presetsConf, slot)
                     if (await (fs.promises.stat(filename).then(() => true).catch(() => false)))
                         await fs.promises.unlink(filename)
                     return h.response().code(204)
                 })
+            }
+        })
+
+        /*  lock preset  */
+        this.rest.server!.route({
+            method: "GET",
+            path: "/state/preset/{slot}/lock",
+            handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
+                const slot = req.params.slot
+                const filename = util.format(this.presetsLock, slot)
+                if (!(await (fs.promises.stat(filename).then(() => true).catch(() => false))))
+                    await fs.promises.writeFile(filename, "", { encoding: null })
+                return h.response().code(204)
+            }
+        })
+
+        /*  unlock preset  */
+        this.rest.server!.route({
+            method: "GET",
+            path: "/state/preset/{slot}/unlock",
+            handler: async (req: HAPI.Request, h: HAPI.ResponseToolkit) => {
+                const slot = req.params.slot
+                const filename = util.format(this.presetsLock, slot)
+                if (await (fs.promises.stat(filename).then(() => true).catch(() => false)))
+                    await fs.promises.unlink(filename)
+                return h.response().code(204)
             }
         })
     }
