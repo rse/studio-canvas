@@ -29,8 +29,8 @@ ffmpeg \
     -framerate "$fps" -loop 1 -t "$total" -i "$image2" \
     -t "$total" \
     -filter_complex \
-        "[0:v][1:v]xfade=transition=fade:offset=$(($show / 2)):duration=$fade[v1]; \
-        [v1][0:v]xfade=transition=fade:offset=$(($show / 2 + $fade + $show)):duration=$fade[v]" \
+        "[0:v][1:v]xfade=transition=fade:offset=$(($show / 2)):duration=$fade,format=yuva420p[v1]; \
+        [v1][0:v]xfade=transition=fade:offset=$(($show / 2 + $fade + $show)):duration=$fade,format=yuva420p[v]" \
     -map "[v]" \
     -c:v libvpx \
     -an \
