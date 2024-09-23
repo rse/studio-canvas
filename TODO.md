@@ -20,9 +20,6 @@ Improvements
 - Wenn gar keine Medien überhaupt gemapped sind, hängt
   es mit 404 HTTP im Server!
 
-- Bei Mask versuchen die Lichtreflektion abzuschalten
-  videoMat.disableLighting = true;
-
 - Wenn kaputtes MP4, darf es ihn nicht raushauen
 
 - Sobald Alpha in den MediaX drin ist (egal ob WebM oder MP4 oder VP8 oder VP9)

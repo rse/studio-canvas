@@ -476,6 +476,14 @@ export default class CanvasRenderer extends EventEmitter {
         this.maskBase.scaleDisplayY = this.maskDisplay!.scaling.y
         this.maskBase.scaleDisplayZ = this.maskDisplay!.scaling.z
 
+        /*  force mask background to be entirely black  */
+        const material = this.maskBackground.material as BABYLON.PBRMaterial
+        material.albedoColor = new BABYLON.Color3(0.0, 0.0, 0.0)
+        material.albedoTexture?.dispose()
+        material.albedoTexture = null
+        material.unlit = true
+        material.disableLighting = true
+
         /*  setup light shadow casting the display onto the wall  */
         const setupLight = (light: BABYLON.PointLight) => {
             light.intensityMode = BABYLON.PointLight.INTENSITYMODE_LUMINOUSPOWER

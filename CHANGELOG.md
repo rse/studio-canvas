@@ -6,6 +6,8 @@ ChangeLog
 ------------------
 
 - BUGFIX: really dispose video media file resources
+- CLEANUP: remove light effects on background of Mask
+- UPDATE: update dependencies
 
 2.2.1 (2024-09-23)
 ------------------
