@@ -435,9 +435,9 @@
                         <!--  ==== STREAMS ====  -->
                         <tab id="streams" name="Streams">
                             <div class="desc">
-                                The <b>Streams</b> are the video streams which can be shown on
-                                the Decal, Monitor, Plate, Hologram, Pane and Pillar. The content is received
-                                as a single virtual video device which had to carry 2 content stacks
+                                The <b>Streams</b> are the video streams which can be displayed on
+                                the Decal, Monitor, Plate, Hologram, Pane, Pillar, and Mask. The content
+                                is received as a single virtual video device which had to carry 2 content stacks
                                 (left and right) and each stack consists of the content RGB
                                 on top of content alpha (black-to-white, 100-0% visibillity).
                             </div>
@@ -660,7 +660,7 @@
                         <tab id="decal" name="Decal">
                             <div class="desc">
                                 The <b>Decal</b> is the optional poster-style display which can be projected
-                                onto the background canvas. It is rendered in the BACK layer. It can scaled in size,
+                                onto the background canvas. It is rendered in the scene BACK layer. It can scaled in size,
                                 positioned in a radial way on the background canvas, its opacity controlled to mix with
                                 the canvas, a border radius applied, a border cropping applied, and a chroma-key filter
                                 applied.
@@ -845,7 +845,7 @@
                         <tab id="monitor" name="Monitor">
                             <div class="desc">
                                 The <b>Monitor</b> is the optional TV-style monitor which can be shown
-                                in front of the background canvas. It is rendered in the BACK layer.
+                                in front of the background canvas. It is rendered in the scene BACK layer.
                                 It can be scaled in size, positioned in a radial way in front of the background
                                 canvas, its opacity controlled to mix with the canvas, a border radius applied,
                                 a border cropping applied, and a chroma-key filter applied.
@@ -1015,7 +1015,7 @@
                         <tab id="plate" name="Plate">
                             <div class="desc">
                                 The <b>Plate</b> is the optional planar display which can be projected
-                                into the room in the FRONT layer, intended as the optical plate on the desk's front side.
+                                into the room in the scene FRONT layer, intended as the optical plate on the desk's front side.
                                 It can be given scaled in size, positioned in a radial way on the background canvas,
                                 its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
                                 and a chroma-key filter applied.
@@ -1215,7 +1215,7 @@
                         <tab id="hologram" name="Hologram">
                             <div class="desc">
                                 The <b>Hologram</b> is the optional planar display which can be projected
-                                into the room in the FRONT layer. It can be scaled in size, positioned in a radial way on the background canvas,
+                                into the room in the scene FRONT layer. It can be scaled in size, positioned in a radial way on the background canvas,
                                 its opacity controlled to mix with the canvas, a border radius applied, a border cropping applied,
                                 and a chroma-key filter applied.
                             </div>
@@ -1414,7 +1414,7 @@
                         <tab id="pane" name="Pane">
                             <div class="desc">
                                 The <b>Pane</b> is the optional TV-style glass box which can be projected
-                                into the room in the FRONT layer. It can be scaled in size, and positioned on in a
+                                into the room in the scene FRONT layer. It can be scaled in size, and positioned on in a
                                 radial way in front of the scene. It is similar to <b>Monitor</b>
                                 but shown on the front instead of the back of the scene.
                             </div>
@@ -1583,7 +1583,7 @@
                         <tab id="pillar" name="Pillar">
                             <div class="desc">
                                 The <b>Pillar</b> is the optional pillar with an embedded display,
-                                which can be projected into the room in the FRONT layer.
+                                which can be projected into the room in the scene FRONT layer.
                                 It can be scaled in size, and positioned on in a radial way in front of the scene. It
                                 can be scaled in size, positioned in a radial way, the opacity of its display
                                 controlled, a border radius applied, a border cropping applied, and a chroma-key
@@ -1784,7 +1784,7 @@
                         <tab id="mask" name="Mask">
                             <div class="desc">
                                 The <b>Mask</b> is the optional planar display which can be projected
-                                directly in front of the camera viewpoint in the FRONT layer. It is automatically
+                                directly in front of the camera viewpoint in the scene FRONT layer. It is automatically
                                 positioned and scaled to fit into the viewpoint of the camera. It is
                                 intended to be used for short-term displaying fullscreen content.
                             </div>
@@ -1854,9 +1854,9 @@
                         <!--  ==== LIGHTS ====  -->
                         <tab id="lights" name="Lights">
                             <div class="desc">
-                                The <b>Lights</b> are three optional, additional point lights in the scene,
+                                The <b>Lights</b> are the optional, additional point lights in the scene,
                                 which can further light up the scene and especially produce a shadow of
-                                the monitor on the background canvas.
+                                the Monitor, Pane and Pillar on the background canvas.
                             </div>
                             <div class="control">
                                 <div class="label1">intensity1</div>
@@ -2033,8 +2033,8 @@
                                 camera. It has to be calibrated to match as close
                                 as possible to the physical viewpoint of the camera in order
                                 to allow precise pan/tilt/zoom (PTZ) of both the physical camera via NDI
-                                and PTZ of the virtual camera via the FreeD information emitted by the physical
-                                camera.
+                                and PTZ of the virtual camera via the <i>FreeD</i> information emitted by
+                                the physical camera.
                             </div>
                             <div class="control">
                                 <div class="label1">hull X-pos</div>
