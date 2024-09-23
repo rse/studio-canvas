@@ -366,7 +366,9 @@
                                 The <b>Renderer</b> allows you to configure the Frames per Second (FPS)
                                 of a scene renderer when it is in program, preview or neither of them (other).
                                 This in total allows you to reduce the overall load all renderers cause on the
-                                underlying hardware. Never use more FPS than absolutely necessary.
+                                underlying hardware. Never use more FPS than absolutely necessary. For
+                                debugging purposes you can enable the overlay which tells you when
+                                a rendering engine is paused, in case it is not in preview or program.
                             </div>
                             <div class="control">
                                 <div class="label1">Program</div>
@@ -417,8 +419,6 @@
                                     ></slider>
                                 </div>
 
-                                <!--
-                                FIXME: currently unused!
                                 <div class="label1">Overlay</div>
                                 <div class="label2">(visible)</div>
                                 <div class="label3">[flag]:</div>
@@ -429,7 +429,6 @@
                                 <div class="slider">
                                     <toggle class="toggle" v-model="state.renderer.overlay"></toggle>
                                 </div>
-                                -->
                             </div>
                         </tab>
 

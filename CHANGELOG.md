@@ -7,6 +7,7 @@ ChangeLog
 
 - CLEANUP: improve descriptions in control UI
 - CLEANUP: improve control UI: NONE/ALL preset selection is non destructive
+- CLEANUP: reenable optional rendering pause overlay
 
 2.2.0 (2024-09-16)
 ------------------
