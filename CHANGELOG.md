@@ -2,7 +2,7 @@
 ChangeLog
 =========
 
-2.2.1 (2024-09-16)
+2.2.1 (2024-09-23)
 ------------------
 
 - CLEANUP: improve descriptions in control UI
@@ -10,7 +10,7 @@ ChangeLog
 - CLEANUP: reenable optional rendering pause overlay
 - UPDATE: update dependencies
 
-2.2.0 (2024-09-16)
+2.2.0 (2024-09-23)
 ------------------
 
 - IMPROVEMENT: use a nested tab experience for a more clean control UI
