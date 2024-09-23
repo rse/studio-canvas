@@ -31,12 +31,12 @@
                         <tab id="presets" name="Presets">
                             <div class="desc">
                                 The <b>Presets</b> can be used to load and save the entire &mdash; or just the
-                                partial &mdash; current scence control state from or to persistent preset slots.
+                                partial &mdash; current scence control state from or to persistent preset slots 1-12.
                                 When loading a partial state from a preset slot, the partial state is merged
                                 onto the current state. First, select either "all" or "none" plus a particular state
-                                group. Second, select the preset slot 1-12. Third, select the action "load", "clear"
-                                or "save" to perform. Optionally, "lock" or "unlock" a preset to prevent accidental
-                                destruction of important presets.
+                                group, corresponding to the other tabs in this control UI. Second, select the preset slot 1-12.
+                                Third, select the action "load", "clear" or "save" to perform. Optionally,
+                                "lock" or "unlock" a preset to prevent accidental destruction of important state.
                             </div>
                             <div class="presets">
                                 <div class="actions3">
@@ -232,7 +232,9 @@
                                 in preview and to logically cut this camera from preview into program.
                                 This allows you to ad-hoc adjust the configured FPS (see <b>Scene &rarr; Renderer</b>)
                                 onto all renderer instances during production in order to allow you to reduce the
-                                overall load all renderers cause on the underlying hardware.
+                                overall load all renderers cause on the underlying hardware. This is
+                                usually <i>not</i> manually controlled, but automatically controlled through
+                                a CUT button in <b>Companion</b> which both cuts here and in <b>vMix</b>.
                             </div>
                             <div class="control">
                                 <div class="cams">
@@ -299,11 +301,11 @@
                         <tab id="preview" name="Preview" class="preview">
                             <div class="desc">
                                 The <b>Preview</b> is a rendering preview of the rendered camera view
-                                within the BabylonJS game engine. It is exactly the same content intended
-                                to be loaded into the vMix Browser input or OBS Studio Browser source
+                                within the <b>BabylonJS</b> game engine. It is exactly the same content intended
+                                to be loaded into the <b>vMix</b> Browser input or <b>OBS Studio</b> Browser source
                                 and allows you to preview the scene in the browser here, too.
                                 The camera view can be optionally controlled by reflecting the emitted
-                                FreeD information from the physical camera, or being interactively adjusted
+                                <i>FreeD</i> information from the physical camera, or being interactively adjusted
                                 by cursor keys.
                             </div>
                             <div class="preview-url" v-on:click="previewCopy()">
