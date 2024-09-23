@@ -21,6 +21,7 @@ Improvements
   es mit 404 HTTP im Server!
 
 - Bei Mask versuchen die Lichtreflektion abzuschalten
+  videoMat.disableLighting = true;
 
 - Wenn kaputtes MP4, darf es ihn nicht raushauen
 
@@ -29,6 +30,8 @@ Improvements
 
 - Optimierung: nur Texturen rendern/aktivieren, die auch irgendwoe in Displays
   angezeigt werden.
+  videoMat.emissiveTexture = videoTexture
+  videoMat.opacityTexture = videoTexture
 
 Cleanups
 --------
