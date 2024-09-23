@@ -22,8 +22,8 @@
         "vue-tippy":                        "6.4.4",
         "@vueform/slider":                  "2.1.10",
         "@vueform/toggle":                  "2.1.4",
-        "@babylonjs/core":                  "7.26.2",
-        "@babylonjs/loaders":               "7.26.2",
+        "@babylonjs/core":                  "7.26.3",
+        "@babylonjs/loaders":               "7.26.3",
         "typopro-web":                      "4.2.7",
         "@fortawesome/fontawesome-free":    "6.6.0",
         "axios":                            "1.7.7",
@@ -39,7 +39,7 @@
         "hapi-plugin-websocket":            "2.4.9",
         "hapi-plugin-ducky":                "1.1.9",
 
-        "@types/node":                      "22.5.5",
+        "@types/node":                      "22.6.1",
         "@types/hapi__inert":               "5.2.10",
         "@types/js-yaml":                   "4.0.9",
         "@types/urijs":                     "1.19.25",
@@ -75,8 +75,8 @@
     },
     "devDependencies": {
         "@rollup/plugin-yaml":              "4.1.2",
-        "@typescript-eslint/eslint-plugin": "8.6.0",
-        "@typescript-eslint/parser":        "8.6.0",
+        "@typescript-eslint/eslint-plugin": "8.7.0",
+        "@typescript-eslint/parser":        "8.7.0",
         "@vitejs/plugin-vue":               "5.1.4",
 
         "@vue/eslint-config-typescript":    "13.0.0",
