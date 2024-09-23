@@ -111,8 +111,13 @@ export default class ShaderMaterial {
                     /*  determine current pixel color  */
                     vec4  sampleColVec4   = texture2D(textureSampler, coordRGB);
                     vec3  sampleCol       = sampleColVec4.rgb;
-                    vec4  sampleAlphaVec4 = texture2D(textureSampler, coordA);
-                    float sampleAlpha     = stacks > 0 ? 1.0 - sampleAlphaVec4.r : sampleAlphaVec4.a;
+
+                    /*  determine current pixel alpha  */
+                    float sampleAlpha     = sampleColVec4.a;
+                    if (stacks > 0) {
+                        vec4 sampleAlphaVec4 = texture2D(textureSampler, coordA);
+                        sampleAlpha = 1.0 - sampleAlphaVec4.r
+                    }
 
                     /*  determine position in real texture coordinates  */
                     ivec2 ts  = textureSize(textureSampler, 0);
