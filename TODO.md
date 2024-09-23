@@ -20,8 +20,6 @@ Improvements
 
 - Videos wenn nicht looped auf black enden
 
-- Disabled Buttons etwas "grauer" (text reicht)
-
 - Bei Canvas-Wechsel eventuell ein Fading (Smoother)
   statt dem aktiellen Hard-Cut
 

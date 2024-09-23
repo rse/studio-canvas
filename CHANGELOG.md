@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - BUGFIX: really dispose video media file resources
+- IMPROVEMENT: show unselectable button on preset tab in grey
 - CLEANUP: remove light effects on background of Mask
 - UPDATE: update dependencies
 

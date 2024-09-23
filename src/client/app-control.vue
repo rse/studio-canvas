@@ -40,8 +40,8 @@
                             </div>
                             <div class="presets">
                                 <div class="actions3">
-                                    <div class="button" v-on:click="presetFiltersSelect(false)">NONE</div>
-                                    <div class="button" v-on:click="presetFiltersSelect(true)">ALL</div>
+                                    <div class="button" v-bind:class="{ unselectable: presetFiltersSelectedNone() }" v-on:click="presetFiltersSelect(false)">NONE</div>
+                                    <div class="button" v-bind:class="{ unselectable: presetFiltersSelectedAll()  }" v-on:click="presetFiltersSelect(true)">ALL</div>
                                 </div>
                                 <div class="filter">
                                     <div class="button" v-bind:class="{ selected: preset.filters.renderer }"
@@ -2463,28 +2463,36 @@
             font-size: 120%
             font-weight: bold
             line-height: 140px
+            &.unselectable,
             &.unselectable:hover
                 background-color: var(--color-std-bg-2)
-                color: var(--color-std-fg-5)
+                color: var(--color-std-fg-1)
                 cursor: default
         .actions1 .button
             font-size: 120%
             font-weight: bold
             line-height: 140px
+            &.unselectable,
             &.unselectable:hover
                 background-color: var(--color-std-bg-2)
-                color: var(--color-std-fg-5)
+                color: var(--color-std-fg-1)
                 cursor: default
         .actions2 .button
             font-size: 120%
             font-weight: bold
             line-height: 290px
+            &.unselectable,
             &.unselectable:hover
                 background-color: var(--color-std-bg-2)
-                color: var(--color-std-fg-5)
+                color: var(--color-std-fg-1)
                 cursor: default
         .actions3 .button
             line-height: 140px
+            &.unselectable,
+            &.unselectable:hover
+                background-color: var(--color-std-bg-2)
+                color: var(--color-std-fg-1)
+                cursor: default
     .preview
         .preview-control
             margin-top: 20px
@@ -3339,6 +3347,30 @@ export default defineComponent({
         presetFiltersSelect (enable: boolean) {
             for (const key of Object.keys(this.preset.filters))
                 (this.preset.filters as any)[key] = enable
+        },
+
+        /*  determine whether all preset filters are selected  */
+        presetFiltersSelectedAll () {
+            let selectedAll = true
+            for (const key of Object.keys(this.preset.filters)) {
+                if (!(this.preset.filters as any)[key]) {
+                    selectedAll = false
+                    break
+                }
+            }
+            return selectedAll
+        },
+
+        /*  determine whether none preset filters are selected  */
+        presetFiltersSelectedNone () {
+            let selectedNone = true
+            for (const key of Object.keys(this.preset.filters)) {
+                if ((this.preset.filters as any)[key]) {
+                    selectedNone = false
+                    break
+                }
+            }
+            return selectedNone
         },
 
         /*  load preset slot  */
