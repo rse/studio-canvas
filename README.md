@@ -67,7 +67,7 @@ Usage (Production)
   https://127.0.0.1:12345/
 
 - Use the client component (renderer mode) in OBS Studio or vMix browser sources:<br/>
-  https://127.0.0.1:12345/#/render/CAM2?ptzFreeD=true
+  https://127.0.0.1:12345/#/render/back/CAM2?ptzFreeD=true
 
 Usage (Development)
 -------------------
@@ -91,7 +91,7 @@ Usage (Development)
   https://127.0.0.1:12345/
 
 - Open the client component (renderer mode) in Google Chrome:<br/>
-  https://127.0.0.1:12345/#/render/CAM2?ptzFreeD=true
+  https://127.0.0.1:12345/#/render/back/CAM2?ptzFreeD=true
 
 Architecture
 ------------
