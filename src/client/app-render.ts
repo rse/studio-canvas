@@ -841,7 +841,7 @@ export default class CanvasRenderer extends EventEmitter {
             this.emit("log", "INFO", `loading media slot "${id}" with video media (source: ${url})`)
             texture = new BABYLON.VideoTexture(
                 url, url, this.scene, false, true,
-                BABYLON.VideoTexture.TRILINEAR_SAMPLINGMODE,
+                BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
                 { autoPlay: true, autoUpdateTexture: true, loop: true })
         }
         else
@@ -928,8 +928,8 @@ export default class CanvasRenderer extends EventEmitter {
         else if (this.displaySourceMap[id].match(/^M/))
             material.setInt("stacks", 0)
         material.zOffset = -200
-        material.needAlphaBlending = () => true
-        material.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
+        /* material.needAlphaBlending = () => true */
+        /* material.transparencyMode = BABYLON.Material.MATERIAL_ALPHATEST */
 
         /*  apply material to mesh  */
         mesh.material = material
