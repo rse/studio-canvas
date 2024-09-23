@@ -75,8 +75,8 @@
     },
     "devDependencies": {
         "@rollup/plugin-yaml":              "4.1.2",
-        "@typescript-eslint/eslint-plugin": "7.17.0",
-        "@typescript-eslint/parser":        "7.17.0",
+        "@typescript-eslint/eslint-plugin": "8.6.0",
+        "@typescript-eslint/parser":        "8.6.0",
         "@vitejs/plugin-vue":               "5.1.4",
 
         "@vue/eslint-config-typescript":    "13.0.0",
@@ -110,9 +110,7 @@
     "upd": [
         "!eslint",
         "!htmllint",
-        "!chalk",
-        "!@typescript-eslint/eslint-plugin",
-        "!@typescript-eslint/parser"
+        "!chalk"
     ],
     "scripts": {
         "start": "nps -c etc/nps.yaml"
