@@ -116,7 +116,7 @@ export default class ShaderMaterial {
                     float sampleAlpha     = sampleColVec4.a;
                     if (stacks > 0) {
                         vec4 sampleAlphaVec4 = texture2D(textureSampler, coordA);
-                        sampleAlpha = 1.0 - sampleAlphaVec4.r
+                        sampleAlpha = 1.0 - sampleAlphaVec4.r;
                     }
 
                     /*  determine position in real texture coordinates  */
