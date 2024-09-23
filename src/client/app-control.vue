@@ -534,6 +534,7 @@
                                     >
                                         <div class="name">{{ entry.name }}</div>
                                         <div class="tags">
+                                            <div v-show="entry.loop" class="tag tag-loop">LOOP</div>
                                             <div v-show="entry.type" class="tag tag-type">{{ entry.type }}</div>
                                         </div>
                                         <div class="actions">
@@ -552,6 +553,7 @@
                                 >
                                     <div class="name">{{ entry.name }}</div>
                                     <div class="tags">
+                                        <div v-show="entry.loop" class="tag tag-loop">LOOP</div>
                                         <div v-show="entry.type" class="tag tag-type">{{ entry.type }}</div>
                                     </div>
                                     <div class="actions">
@@ -2622,9 +2624,8 @@
             &.selected:hover
                 background-color: var(--color-acc-bg-3)
             .name
-                width: 100%
+                flex-grow: 1
             .tags
-                width: 120px
                 display: flex
                 flex-direction: row
                 .tag
@@ -2634,6 +2635,12 @@
                     border-radius: 4px
                     margin-right: 4px
                     font-size: 75%
+                    &.tag-loop
+                        color: var(--color-std-fg-2)
+                        border: 1px solid var(--color-std-bg-1)
+                        width: 50px
+                        min-width: 50px
+                        margin-right: 8px
                     &.tag-type
                         color: var(--color-std-fg-2)
                         border: 1px solid var(--color-std-bg-1)

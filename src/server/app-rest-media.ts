@@ -55,12 +55,14 @@ export default class RESTMedia {
                         else if (m[2] === "gif")  type = "Image/GIF"
                         else if (m[2] === "mp4")  type = "Video/MP4"
                         else if (m[2] === "webm") type = "Video/WebM"
+                        const loop = (m[1].match(/-loop$/) !== null)
                         result.media.push({
                             id:        m[1],
                             name:      id2name(m[1].replace(/^.+?\//, "")),
                             group:     m[1].replace(/^[^/]+$/, "").replace(/^(.+)\/.+$/, "$1"),
                             texture:   `${mediaURL}/${m[1]}.${m[2]}`,
-                            type
+                            type,
+                            loop
                         })
                     }
                 }

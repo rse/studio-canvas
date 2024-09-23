@@ -847,10 +847,11 @@ export default class CanvasRenderer extends EventEmitter {
         }
         else if (url.match(/.+\.(?:mp4|webm)$/)) {
             this.emit("log", "INFO", `loading media slot "${id}" with video media (source: ${url})`)
+            const loop = (url.match(/.+-loop\.(?:mp4|webm)$/) !== null)
             texture = new BABYLON.VideoTexture(
                 url, url, this.scene, false, true,
                 BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
-                { autoPlay: true, autoUpdateTexture: true, loop: true })
+                { autoPlay: true, autoUpdateTexture: true, loop })
         }
         else
             throw new Error("invalid file extension")

@@ -10,6 +10,7 @@ export type MediaEntry = {
     group:      string
     texture:    string
     type:       string
+    loop:       boolean
 }
 
 export const MediaSchema = `{
@@ -17,6 +18,7 @@ export const MediaSchema = `{
     name:       string,
     group?:     string,
     texture:    string,
-    type:       string
+    type:       string,
+    loop:       boolean
 }`
 

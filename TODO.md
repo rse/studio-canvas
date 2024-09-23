@@ -16,10 +16,6 @@ Bugfixes
 Improvements
 ------------
 
-- Videos sollen loopen nur optional
-
-- Videos wenn nicht looped auf black enden
-
 - Bei Canvas-Wechsel eventuell ein Fading (Smoother)
   statt dem aktiellen Hard-Cut
 
