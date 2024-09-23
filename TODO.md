@@ -32,8 +32,19 @@ Improvements
   angezeigt werden.
   videoMat = new BABYLON.StandardMaterial("video material", scene);
   var videoTexture = new BABYLON.VideoTexture("s", ["https://dynamicgamesdeveloper.github.io/Video/Bear.webm"], scene);
-  videoMat.emissiveTexture = videoTexture
+  A: videoMat.material.emissiveColor = new BABYLON.Color3(1, 1, 1);
+  B: videoMat.emissiveTexture = videoTexture
   videoMat.opacityTexture = videoTexture
+
+- Videos wirklich loswerden:
+  const videoEl = videoDome.videoTexture.video
+  videoTexture.dispose()
+  while (videoEl.firstChild)
+      videoEl.removeChild(videoEl.lastChild);
+  videoEl.src = ""
+  videoEl.removeAttribute("src")
+  videoEl.load()
+  videoEl.remove()
 
 Cleanups
 --------
