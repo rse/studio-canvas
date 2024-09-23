@@ -36,16 +36,6 @@ Improvements
   B: videoMat.emissiveTexture = videoTexture
   videoMat.opacityTexture = videoTexture
 
-- Videos wirklich loswerden:
-  const videoEl = videoDome.videoTexture.video
-  videoTexture.dispose()
-  while (videoEl.firstChild)
-      videoEl.removeChild(videoEl.lastChild);
-  videoEl.src = ""
-  videoEl.removeAttribute("src")
-  videoEl.load()
-  videoEl.remove()
-
 Cleanups
 --------
 

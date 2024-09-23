@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+2.2.1 (2024-09-24)
+------------------
+
+- BUGFIX: really dispose video media file resources
+
 2.2.1 (2024-09-23)
 ------------------
 

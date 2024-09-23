@@ -858,7 +858,21 @@ export default class CanvasRenderer extends EventEmitter {
         this.emit("log", "INFO", `unloading media slot "${id}"`)
         const texture = this.displayMediaTexture.get(id)
         if (texture !== undefined) {
-            texture.dispose()
+            if (texture instanceof BABYLON.VideoTexture) {
+                /*  dispose video texture  */
+                const video = texture.video
+                texture.dispose()
+                while (video.firstChild)
+                    video.removeChild(video.lastChild!)
+                video.src = ""
+                video.removeAttribute("src")
+                video.load()
+                video.remove()
+            }
+            else {
+                /*  dispose image texture  */
+                texture.dispose()
+            }
             this.displayMediaTexture.delete(id)
         }
     }
