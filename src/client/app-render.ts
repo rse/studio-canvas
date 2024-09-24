@@ -839,8 +839,8 @@ export default class CanvasRenderer extends EventEmitter {
     }
 
     /*  load media texture  */
-    async loadMediaTexture (url: string): Promise<BABYLON.Texture> {
-        let texture: BABYLON.Texture
+    async loadMediaTexture (url: string): Promise<BABYLON.Nullable<BABYLON.Texture>> {
+        let texture: BABYLON.Nullable<BABYLON.Texture> = null
         if (this.displayTextureByURL.has(url)) {
             /*  provide existing texture  */
             texture = this.displayTextureByURL.get(url)!
@@ -852,28 +852,46 @@ export default class CanvasRenderer extends EventEmitter {
             if (url.match(/.+\.(?:png|jpg|gif)$/)) {
                 /*  provide texture based on image media  */
                 this.emit("log", "INFO", `loading image media "${url}"`)
-                texture = new BABYLON.Texture(url, this.scene, false, false)
-                this.displayTextureByURL.set(url, texture)
-                this.displayTextureInfo.set(texture, { type: "image", url, refs: 1 })
+                await new Promise((resolve, reject) => {
+                    texture = new BABYLON.Texture(
+                        url, this.scene, false, false,
+                        BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
+                        null,
+                        (msg, ex) => {
+                            this.emit("log", "ERROR", `failed to load image media "${url}": ${msg}`)
+                            reject(ex)
+                        }
+                    )
+                    BABYLON.Texture.WhenAllReady([ texture ], () => {
+                        resolve(true)
+                    })
+                })
+                this.displayTextureByURL.set(url, texture!)
+                this.displayTextureInfo.set(texture!, { type: "image", url, refs: 1 })
             }
             else if (url.match(/.+\.(?:mp4|webm)$/)) {
                 /*  provide texture based on video media  */
                 this.emit("log", "INFO", `loading video media "${url}"`)
                 const loop = (url.match(/.+-loop\.(?:mp4|webm)$/) !== null)
-                texture = new BABYLON.VideoTexture(
-                    url, url, this.scene, false, true,
-                    BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
-                    { autoPlay: true, autoUpdateTexture: true, loop })
-                this.displayTextureByURL.set(url, texture)
-                this.displayTextureInfo.set(texture, { type: "video", url, refs: 1 })
+                await new Promise((resolve, reject) => {
+                    texture = new BABYLON.VideoTexture(
+                        url, url, this.scene, false, true,
+                        BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
+                        { autoPlay: true, autoUpdateTexture: true, loop },
+                        (msg, ex) => {
+                            this.emit("log", "ERROR", `failed to load video media "${url}": ${msg}`)
+                            reject(ex)
+                        }
+                    )
+                    BABYLON.Texture.WhenAllReady([ texture ], () => {
+                        resolve(true)
+                    })
+                })
+                this.displayTextureByURL.set(url, texture!)
+                this.displayTextureInfo.set(texture!, { type: "video", url, refs: 1 })
             }
             else
-                throw new Error("invalid file extension")
-
-            /*  ensure texture is really available  */
-            await new Promise((resolve) => {
-                BABYLON.Texture.WhenAllReady([ texture ], () => { resolve(true) })
-            })
+                throw new Error("invalid media filename (neither PNG, JPG, GIF, MP4 or WebM)")
         }
         return texture
     }

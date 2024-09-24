@@ -8,22 +8,11 @@ Bugfixes
 - Sobald Alpha in den MediaX drin ist (egal ob WebM oder MP4 oder VP8 oder VP9)
   geht der Load dramatisch höher.
 
-- Wenn gar keine Medien überhaupt gemapped sind, hängt
-  es mit 404 HTTP im Server!
-
-- Wenn kaputtes MP4, darf es ihn nicht raushauen
-
 Improvements
 ------------
 
 - Bei Canvas-Wechsel eventuell ein Fading (Smoother)
   statt dem aktiellen Hard-Cut
-
-- videoMat = new BABYLON.StandardMaterial("video material", scene);
-  var videoTexture = new BABYLON.VideoTexture("s", ["https://dynamicgamesdeveloper.github.io/Video/Bear.webm"], scene);
-  A: videoMat.material.emissiveColor = new BABYLON.Color3(1, 1, 1);
-  B: videoMat.emissiveTexture = videoTexture
-  videoMat.opacityTexture = videoTexture
 
 Cleanups
 --------
