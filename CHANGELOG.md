@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - BUGFIX: really dispose video media file resources
+- BUGFIX: make media loading more robust
 - IMPROVEMENT: show unselectable button on preset tab in grey
 - IMPROVEMENT: support non-looping videos
 - IMPROVEMENT: optimize loading/unloading of media textures
