@@ -945,6 +945,7 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  short-circuit processing in case texture is not available  */
         if (texture === null) {
+            this.emit("log", "WARNING", `failed to gather texture for "${id}" -- setting replacement texture`)
             const material = mesh.material as BABYLON.PBRMaterial
             material.albedoColor = new BABYLON.Color3(1.0, 0.0, 0.0)
             material.albedoTexture?.dispose()
