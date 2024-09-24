@@ -10,6 +10,7 @@ ChangeLog
 - IMPROVEMENT: show unselectable button on preset tab in grey
 - IMPROVEMENT: support non-looping videos
 - IMPROVEMENT: optimize loading/unloading of media textures
+- IMPROVEMENT: optimize shader processing
 - CLEANUP: remove light effects on background of Mask
 - UPDATE: update dependencies
 

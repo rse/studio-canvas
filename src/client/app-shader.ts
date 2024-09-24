@@ -113,21 +113,11 @@ export default class ShaderMaterial {
                     vec3  sampleCol       = sampleColVec4.rgb;
 
                     /*  determine current pixel alpha  */
-                    float sampleAlpha     = sampleColVec4.a;
+                    float sampleAlpha = sampleColVec4.a;
                     if (stacks > 0) {
                         vec4 sampleAlphaVec4 = texture2D(textureSampler, coordA);
                         sampleAlpha = 1.0 - sampleAlphaVec4.r;
                     }
-
-                    /*  determine position in real texture coordinates  */
-                    ivec2 ts  = textureSize(textureSampler, 0);
-                    vec2 size = stacks > 0 ? vec2(float(ts.x) / float(stacks), float(ts.y) * 0.5) : vec2(float(ts.x), float(ts.y));
-                    vec2 pos  = vec2(vUV.x * size.x, vUV.y * size.y);
-
-                    /*  optionally apply border cropping  */
-                    float cropping = (borderCrop > 0.0 && (
-                        pos.x < borderCrop || pos.x > (size.x - borderCrop) ||
-                        pos.y < borderCrop || pos.y > (size.y - borderCrop)   )) ? 0.0 : 1.0;
 
                     /*  optionally apply chroma-key  */
                     float chromaKey = 1.0;
@@ -142,23 +132,37 @@ export default class ShaderMaterial {
                             sampleCol.g = 0.0;
                     }
 
-                    /*  optionally apply rounded corners  */
+                    /*  optional border cropping and rounded corners support  */
+                    float cropping    = 1.0;
                     float cornerBlend = 1.0;
-                    if (borderRadius > 0.0) {
-                        float distance = max(max(max(
-                            roundedCornerOutsideDistance(pos, vec2(-1.0,  1.0),
-                                vec2(0.0    + borderRadius, size.y - borderRadius), borderRadius),
-                            roundedCornerOutsideDistance(pos, vec2( 1.0,  1.0),
-                                vec2(size.x - borderRadius, size.y - borderRadius), borderRadius)),
-                            roundedCornerOutsideDistance(pos, vec2( 1.0, -1.0),
-                                vec2(size.x - borderRadius, 0.0    + borderRadius), borderRadius)),
-                            roundedCornerOutsideDistance(pos, vec2(-1.0, -1.0),
-                                vec2(0.0    + borderRadius, 0.0    + borderRadius), borderRadius));
-                        cornerBlend = cornerBlend - smoothstep(0.0f, borderRadiusSoftness, distance);
+                    if (borderCrop > 0.0 || borderRadius > 0.0) {
+                        /*  determine position in real texture coordinates  */
+                        ivec2 ts  = textureSize(textureSampler, 0);
+                        vec2 size = stacks > 0 ? vec2(float(ts.x) / float(stacks), float(ts.y) * 0.5) : vec2(float(ts.x), float(ts.y));
+                        vec2 pos  = vec2(vUV.x * size.x, vUV.y * size.y);
+
+                        /*  optionally apply border cropping  */
+                        cropping = (borderCrop > 0.0 && (
+                            pos.x < borderCrop || pos.x > (size.x - borderCrop) ||
+                            pos.y < borderCrop || pos.y > (size.y - borderCrop)   )) ? 0.0 : 1.0;
+
+                        /*  optionally apply rounded corners  */
+                        if (borderRadius > 0.0) {
+                            float distance = max(max(max(
+                                roundedCornerOutsideDistance(pos, vec2(-1.0,  1.0),
+                                    vec2(0.0    + borderRadius, size.y - borderRadius), borderRadius),
+                                roundedCornerOutsideDistance(pos, vec2( 1.0,  1.0),
+                                    vec2(size.x - borderRadius, size.y - borderRadius), borderRadius)),
+                                roundedCornerOutsideDistance(pos, vec2( 1.0, -1.0),
+                                    vec2(size.x - borderRadius, 0.0    + borderRadius), borderRadius)),
+                                roundedCornerOutsideDistance(pos, vec2(-1.0, -1.0),
+                                    vec2(0.0    + borderRadius, 0.0    + borderRadius), borderRadius));
+                            cornerBlend = cornerBlend - smoothstep(0.0f, borderRadiusSoftness, distance);
+                        }
                     }
 
                     /*  calculate and apply final color value  */
-                    sampleAlpha *= visibility * opacity * cropping * chromaKey * cornerBlend;
+                    sampleAlpha *= visibility * opacity * chromaKey * cropping * cornerBlend;
                     gl_FragColor = vec4(sampleCol, sampleAlpha);
                 }
             `
