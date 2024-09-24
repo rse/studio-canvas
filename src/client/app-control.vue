@@ -508,7 +508,8 @@
                                 and for PNG, GIF and WebM/VP8 optionally with a transparent background.
                                 Each media can be assigned to the logical media slots 1-4 and then selected
                                 for displaying on Decal, Monitor, Plate, Hologram, Pane, Pillar and Mask
-                                as an alternative to the regular video streams 1-2.
+                                as an alternative to the regular video streams 1-2. Looping videos have
+                                to use an underlying filename <code>*-loop.{mp4,webm}</code>.
                             </div>
                             <div class="list" ref="list">
                                 <div
