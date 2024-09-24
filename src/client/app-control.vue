@@ -3214,7 +3214,10 @@ export default defineComponent({
         /*  select media file  */
         async selectMedia (media: "media1" | "media2" | "media3" | "media4", texture: string) {
             this.watchState = false
-            this.state.media[media] = texture
+            if (this.state.media[media] !== texture)
+                this.state.media[media] = texture
+            else
+                this.state.media[media] = ""
             await this.patchState([ "media.*" ])
             this.watchState = true
         },
