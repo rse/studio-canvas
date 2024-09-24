@@ -8,6 +8,7 @@ ChangeLog
 - BUGFIX: really dispose video media file resources
 - IMPROVEMENT: show unselectable button on preset tab in grey
 - IMPROVEMENT: support non-looping videos
+- IMPROVEMENT: optimize loading/unloading of media textures
 - CLEANUP: remove light effects on background of Mask
 - UPDATE: update dependencies
 

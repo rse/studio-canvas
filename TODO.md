@@ -19,9 +19,7 @@ Improvements
 - Bei Canvas-Wechsel eventuell ein Fading (Smoother)
   statt dem aktiellen Hard-Cut
 
-- Optimierung: nur Texturen rendern/aktivieren, die auch irgendwoe in Displays
-  angezeigt werden.
-  videoMat = new BABYLON.StandardMaterial("video material", scene);
+- videoMat = new BABYLON.StandardMaterial("video material", scene);
   var videoTexture = new BABYLON.VideoTexture("s", ["https://dynamicgamesdeveloper.github.io/Video/Bear.webm"], scene);
   A: videoMat.material.emissiveColor = new BABYLON.Color3(1, 1, 1);
   B: videoMat.emissiveTexture = videoTexture
