@@ -871,10 +871,10 @@ export default class CanvasRenderer extends EventEmitter {
                 this.displayTextureByURL.set(url, texture!)
                 this.displayTextureInfo.set(texture!, { type: "image", url, refs: 1 })
             }
-            else if (url.match(/.+\.(?:mp4|webm)$/)) {
+            else if (url.match(/.+\.(?:smp4|mp4|swebm|webm)$/)) {
                 /*  provide texture based on video media  */
                 this.emit("log", "INFO", `loading video media "${url}"`)
-                const loop = (url.match(/.+-loop\.(?:mp4|webm)$/) !== null)
+                const loop = (url.match(/.+-loop\.(?:smp4|mp4|swebm|webm)$/) !== null)
                 await new Promise((resolve, reject) => {
                     texture = new BABYLON.VideoTexture(
                         url, url, this.scene, false, true,
@@ -958,6 +958,8 @@ export default class CanvasRenderer extends EventEmitter {
 
     /*  apply video stream onto mesh  */
     async applyDisplayMaterial (id: VideoStackId, mesh: BABYLON.Mesh, opacity: number, borderRad: number, borderCrop: number, chromaKey: ChromaKey | null) {
+        this.emit("log", "INFO", `apply texture material to display "${id}"`)
+
         /*  optionally unload previously loaded material  */
         if (mesh.material instanceof BABYLON.ShaderMaterial && this.displayMeshMaterial.has(mesh)) {
             mesh.material.dispose()
@@ -1011,6 +1013,11 @@ export default class CanvasRenderer extends EventEmitter {
             else if (this.displaySourceMap[id] === "S2") stack = 1
             material.setInt("stack", stack)
             material.setInt("stacks", this.videoStacks)
+        }
+        else if (this.displayMediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.displaySourceMap[id].match(/^M/)) {
+            material.setInt("stack", 0)
+            material.setInt("stacks", 1)
+            material.setInt("stackAlphaInvert", 0)
         }
         else if (this.displaySourceMap[id].match(/^M/))
             material.setInt("stacks", 0)
@@ -1177,7 +1184,7 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  adjust media  */
-        const modifiedMedia = {} as { [ id: string ]: boolean }
+        const modifiedMedia  = {} as { [ id: string ]: boolean }
         if (state.media !== undefined) {
             /*  adjust medias  */
             if (this.displayMediaURL.get("media1") !== state.media!.media1) {
@@ -1197,32 +1204,53 @@ export default class CanvasRenderer extends EventEmitter {
                 modifiedMedia.media4 = true
             }
 
-            /*  adjust media receivers  */
-            if (this.layer === "back" && this.monitorDisplay !== null && modifiedMedia[this.mapMediaId(this.displaySourceMap.monitor)]) {
-                await this.unapplyDisplayMaterial(this.monitorDisplay)
-                await this.applyDisplayMaterial("monitor", this.monitorDisplay, this.monitorOpacity, 0, 0, this.monitorChromaKey)
-            }
-            if (this.layer === "back" && this.decal !== null && modifiedMedia[this.mapMediaId(this.displaySourceMap.decal)]) {
+            /*  update already active media receivers  */
+            if (this.layer === "back"
+                && this.decal !== null
+                && modifiedMedia[this.mapMediaId(this.displaySourceMap.decal)]
+                && this.decal.isEnabled()) {
                 await this.unapplyDisplayMaterial(this.decal)
                 await this.applyDisplayMaterial("decal", this.decal, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
             }
-            if (this.layer === "front" && this.plateDisplay !== null && modifiedMedia[this.mapMediaId(this.displaySourceMap.plate)]) {
+            if (this.layer === "back"
+                && this.monitorDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.displaySourceMap.monitor)]
+                && this.monitorDisplay.isEnabled()) {
+                await this.unapplyDisplayMaterial(this.monitorDisplay)
+                await this.applyDisplayMaterial("monitor", this.monitorDisplay, this.monitorOpacity, 0, 0, this.monitorChromaKey)
+            }
+            if (this.layer === "front"
+                && this.plateDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.displaySourceMap.plate)]
+                && this.plateDisplay.isEnabled()) {
                 await this.unapplyDisplayMaterial(this.plateDisplay)
                 await this.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
             }
-            if (this.layer === "front" && this.hologramDisplay !== null && modifiedMedia[this.mapMediaId(this.displaySourceMap.hologram)]) {
+            if (this.layer === "front"
+                && this.hologramDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.displaySourceMap.hologram)]
+                && this.hologramDisplay.isEnabled()) {
                 await this.unapplyDisplayMaterial(this.hologramDisplay)
                 await this.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
             }
-            if (this.layer === "front" && this.paneDisplay !== null && modifiedMedia[this.mapMediaId(this.displaySourceMap.pane)]) {
+            if (this.layer === "front"
+                && this.paneDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.displaySourceMap.pane)]
+                && this.paneDisplay.isEnabled()) {
                 await this.unapplyDisplayMaterial(this.paneDisplay)
                 await this.applyDisplayMaterial("pane", this.paneDisplay, this.paneOpacity, 0, 0, this.paneChromaKey)
             }
-            if (this.layer === "front" && this.pillarDisplay !== null && modifiedMedia[this.mapMediaId(this.displaySourceMap.pillar)]) {
+            if (this.layer === "front"
+                && this.pillarDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.displaySourceMap.pillar)]
+                && this.pillarDisplay.isEnabled()) {
                 await this.unapplyDisplayMaterial(this.pillarDisplay)
                 await this.applyDisplayMaterial("pillar", this.pillarDisplay, this.pillarOpacity, 0, 0, this.pillarChromaKey)
             }
-            if (this.layer === "front" && this.maskDisplay !== null && modifiedMedia[this.mapMediaId(this.displaySourceMap.mask)]) {
+            if (this.layer === "front"
+                && this.maskDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.displaySourceMap.mask)]
+                && this.maskDisplay.isEnabled()) {
                 await this.unapplyDisplayMaterial(this.maskDisplay)
                 await this.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
             }
@@ -1264,9 +1292,9 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.monitor !== undefined
             && this.monitor !== null && this.monitorCase !== null && this.monitorDisplay !== null
             && this.layer === "back") {
-            if (state.monitor.source !== undefined && (this.displaySourceMap.monitor !== state.monitor.source || modifiedMedia[this.mapMediaId(state.monitor.source)])) {
+            if (state.monitor.source !== undefined && this.displaySourceMap.monitor !== state.monitor.source) {
                 this.displaySourceMap.monitor = state.monitor.source
-                if (!modifiedMedia[this.mapMediaId(state.monitor.source)]) {
+                if (this.monitorDisplay.isEnabled()) {
                     await this.unapplyDisplayMaterial(this.monitorDisplay!)
                     await this.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
                 }
@@ -1322,7 +1350,7 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                 }
             }
-            if (state.monitor.enable !== undefined && this.monitor.isEnabled() !== state.monitor.enable) {
+            if (state.monitor.enable !== undefined && this.monitorDisplay.isEnabled() !== state.monitor.enable) {
                 if (state.monitor.enable) {
                     await this.unapplyDisplayMaterial(this.monitorDisplay!)
                     await this.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
@@ -1438,9 +1466,9 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.decal !== undefined && this.decal !== null && this.layer === "back") {
             if (state.decal.fadeTime !== undefined && this.decalFade !== state.decal.fadeTime)
                 this.decalFade = state.decal.fadeTime
-            if (state.decal.source !== undefined && (this.displaySourceMap.decal !== state.decal.source || modifiedMedia[this.mapMediaId(state.decal.source)])) {
+            if (state.decal.source !== undefined && this.displaySourceMap.decal !== state.decal.source) {
                 this.displaySourceMap.decal = state.decal.source
-                if (!modifiedMedia[this.mapMediaId(state.decal.source)]) {
+                if (this.decal.isEnabled()) {
                     await this.unapplyDisplayMaterial(this.decal!)
                     await this.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
                 }
@@ -1581,9 +1609,9 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adjust plate  */
         if (state.plate !== undefined && this.plate !== null && this.plateDisplay !== null && this.layer === "front") {
-            if (state.plate.source !== undefined && (this.displaySourceMap.plate !== state.plate.source || modifiedMedia[this.mapMediaId(state.plate.source)])) {
+            if (state.plate.source !== undefined && this.displaySourceMap.plate !== state.plate.source) {
                 this.displaySourceMap.plate = state.plate.source
-                if (!modifiedMedia[this.mapMediaId(state.plate.source)]) {
+                if (this.plateDisplay.isEnabled()) {
                     await this.unapplyDisplayMaterial(this.plateDisplay)
                     await this.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
                 }
@@ -1747,9 +1775,9 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adjust hologram  */
         if (state.hologram !== undefined && this.hologram !== null && this.hologramDisplay !== null && this.layer === "front") {
-            if (state.hologram.source !== undefined && (this.displaySourceMap.hologram !== state.hologram.source || modifiedMedia[this.mapMediaId(state.hologram.source)])) {
+            if (state.hologram.source !== undefined && this.displaySourceMap.hologram !== state.hologram.source) {
                 this.displaySourceMap.hologram = state.hologram.source
-                if (!modifiedMedia[this.mapMediaId(state.hologram.source)]) {
+                if (this.hologramDisplay.isEnabled()) {
                     await this.unapplyDisplayMaterial(this.hologramDisplay)
                     await this.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
                 }
@@ -1915,9 +1943,9 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.pane !== undefined
             && this.pane !== null && this.paneCase !== null && this.paneDisplay !== null
             && this.layer === "front") {
-            if (state.pane.source !== undefined && (this.displaySourceMap.pane !== state.pane.source || modifiedMedia[this.mapMediaId(state.pane.source)])) {
+            if (state.pane.source !== undefined && this.displaySourceMap.pane !== state.pane.source) {
                 this.displaySourceMap.pane = state.pane.source
-                if (!modifiedMedia[this.mapMediaId(state.pane.source)]) {
+                if (this.paneDisplay.isEnabled()) {
                     await this.unapplyDisplayMaterial(this.paneDisplay!)
                     await this.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
                 }
@@ -2095,9 +2123,9 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.pillar !== undefined
             && this.pillar !== null && this.pillarCase !== null && this.pillarDisplay !== null
             && this.layer === "front") {
-            if (state.pillar.source !== undefined && (this.displaySourceMap.pillar !== state.pillar.source || modifiedMedia[this.mapMediaId(state.pillar.source)])) {
+            if (state.pillar.source !== undefined && this.displaySourceMap.pillar !== state.pillar.source) {
                 this.displaySourceMap.pillar = state.pillar.source
-                if (!modifiedMedia[this.mapMediaId(state.pillar.source)]) {
+                if (this.pillarDisplay.isEnabled()) {
                     await this.unapplyDisplayMaterial(this.pillarDisplay!)
                     await this.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
                 }
@@ -2289,7 +2317,7 @@ export default class CanvasRenderer extends EventEmitter {
         if (state.mask !== undefined && this.mask !== null && this.maskDisplay !== null && this.layer === "front") {
             if (state.mask.source !== undefined && (this.displaySourceMap.mask !== state.mask.source || modifiedMedia[this.mapMediaId(state.mask.source)] )) {
                 this.displaySourceMap.mask = state.mask.source
-                if (!modifiedMedia[this.mapMediaId(state.mask.source)]) {
+                if (this.maskDisplay.isEnabled()) {
                     await this.unapplyDisplayMaterial(this.maskDisplay)
                     await this.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
                 }

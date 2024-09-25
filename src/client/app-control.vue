@@ -535,8 +535,9 @@
                                     >
                                         <div class="name">{{ entry.name }}</div>
                                         <div class="tags">
-                                            <div v-show="entry.loop" class="tag tag-loop">LOOP</div>
-                                            <div v-show="entry.type" class="tag tag-type">{{ entry.type }}</div>
+                                            <div v-show="entry.loop"  class="tag tag-loop">LOOP</div>
+                                            <div v-show="entry.stack" class="tag tag-stack">STACK</div>
+                                            <div v-show="entry.type"  class="tag tag-type">{{ entry.type }}</div>
                                         </div>
                                         <div class="actions">
                                             <div class="button" v-bind:class="{ selected: state.media.media1 === entry.texture }" v-on:click="selectMedia('media1', entry.texture)">Media 1</div>
@@ -554,8 +555,9 @@
                                 >
                                     <div class="name">{{ entry.name }}</div>
                                     <div class="tags">
-                                        <div v-show="entry.loop" class="tag tag-loop">LOOP</div>
-                                        <div v-show="entry.type" class="tag tag-type">{{ entry.type }}</div>
+                                        <div v-show="entry.loop"  class="tag tag-loop">LOOP</div>
+                                        <div v-show="entry.stack" class="tag tag-stack">STACK</div>
+                                        <div v-show="entry.type"  class="tag tag-type">{{ entry.type }}</div>
                                     </div>
                                     <div class="actions">
                                         <div class="button" v-bind:class="{ selected: state.media.media1 === entry.texture }" v-on:click="selectMedia('media1', entry.texture)">Media 1</div>
@@ -2636,7 +2638,8 @@
                     border-radius: 4px
                     margin-right: 4px
                     font-size: 75%
-                    &.tag-loop
+                    &.tag-loop,
+                    &.tag-stack
                         color: var(--color-std-fg-2)
                         border: 1px solid var(--color-std-bg-1)
                         width: 50px

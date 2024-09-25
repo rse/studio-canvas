@@ -11,6 +11,7 @@ ChangeLog
 - IMPROVEMENT: support non-looping videos
 - IMPROVEMENT: optimize loading/unloading of media textures
 - IMPROVEMENT: optimize shader processing
+- IMPROVEMENT: support stacked MP4/WebM video media files
 - CLEANUP: remove light effects on background of Mask
 - UPDATE: update dependencies
 
