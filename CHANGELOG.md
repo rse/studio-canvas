@@ -5,8 +5,9 @@ ChangeLog
 2.2.4 (2024-09-26)
 ------------------
 
-- CLEANUP: cleanup video conversion scripts
 - IMPROVEMENT: switch placeholder images in sWebM/sMP4 format to more efficient H.264
+- CLEANUP: cleanup video conversion scripts
+- CLEANUP: log also unapply of display material
 
 2.2.3 (2024-09-25)
 ------------------
