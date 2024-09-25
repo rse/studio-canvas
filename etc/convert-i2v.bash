@@ -19,15 +19,23 @@ video="$5"
 transition="${6-fade}" # fade|slideleft|dissolve|pixelize
 
 total=$((2 * $show + 2 * $fade))
+
+crf="23"
+bitrate="4000k"
 fps="30"
 
 codec=""; pixfmt=""; fmt=""; stacked=no
 case "$video" in
-    *.webm  ) codec="libvpx";     pixfmt="yuva420p"; fmt="webm"; stacked=no  ;; # Video/WebM/VP8 RGBA  1920x1080
-    *.swebm ) codec="libvpx";     pixfmt="yuv420p";  fmt="webm"; stacked=yes ;; # Video/WebM/VP8 RGB+A 1920x2160
-    *.mp4   ) codec="libaom-av1"; pixfmt="yuv420p";  fmt="mp4";  stacked=no  ;; # Video/MP4/AV1  RGB   1920x1080
-    *.smp4  ) codec="libaom-av1"; pixfmt="yuv420p";  fmt="mp4";  stacked=yes ;; # Video/MP4/AV1  RGB+A 1920x2160
+    *.webm  ) codec="libvpx";  pixfmt="yuva420p"; fmt="webm"; stacked=no  ;; # Video/WebM/VP8  RGBA  1920x1080
+    *.swebm ) codec="libvpx";  pixfmt="yuv420p";  fmt="webm"; stacked=yes ;; # Video/WebM/VP8  RGB+A 1920x2160
+    *.mp4   ) codec="libx264"; pixfmt="yuv420p";  fmt="mp4";  stacked=no  ;; # Video/MP4H.264  RGB   1920x1080
+    *.smp4  ) codec="libx264"; pixfmt="yuv420p";  fmt="mp4";  stacked=yes ;; # Video/MP4/H.264 RGB+A 1920x2160
     *       ) echo "$0: ERROR: unknown output file extension"; exit 1 ;;
+esac
+options=""
+case "$codec" in
+    libvpx  ) options="-auto-alt-ref 0"  ;;
+    libx264 ) options="-tune fastdecode" ;;
 esac
 
 echo "++ converting images to 1920x1080 video"
@@ -56,11 +64,9 @@ ffmpeg \
     -c:v $codec \
     -an \
     -pix_fmt $pixfmt \
-    -deadline realtime \
-    -cpu-used 4 \
-    -crf 23 \
-    -b:v 4000k \
-    -auto-alt-ref 0 \
+    -crf $crf \
+    -b:v $bitrate \
+    $options \
     -f $fmt \
     -y \
     "$video"
