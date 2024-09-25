@@ -2642,8 +2642,8 @@
                     &.tag-stack
                         color: var(--color-std-fg-2)
                         border: 1px solid var(--color-std-bg-1)
-                        width: 50px
-                        min-width: 50px
+                        width: 40px
+                        min-width: 40px
                         margin-right: 8px
                     &.tag-type
                         color: var(--color-std-fg-2)

@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+2.2.4 (2024-09-26)
+------------------
+
+- CLEANUP: cleanup video conversion scripts
+
 2.2.3 (2024-09-25)
 ------------------
 
