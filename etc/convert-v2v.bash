@@ -38,6 +38,8 @@ ffmpeg \
     -pix_fmt $pixfmt \
     -crf 23 \
     -b:v 4000k \
+    -deadline realtime \
+    -cpu-used 4 \
     -auto-alt-ref 0 \
     -f $fmt \
     -y \

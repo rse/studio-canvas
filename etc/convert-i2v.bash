@@ -56,9 +56,10 @@ ffmpeg \
     -c:v $codec \
     -an \
     -pix_fmt $pixfmt \
+    -deadline realtime \
+    -cpu-used 4 \
     -crf 23 \
     -b:v 4000k \
-    -cpu-used 8 \
     -auto-alt-ref 0 \
     -f $fmt \
     -y \
