@@ -28,7 +28,7 @@ codec=""; pixfmt=""; fmt=""; stacked=no
 case "$video" in
     *.webm  ) codec="libvpx";  pixfmt="yuva420p"; fmt="webm"; stacked=no  ;; # Video/WebM/VP8  RGBA  1920x1080
     *.swebm ) codec="libvpx";  pixfmt="yuv420p";  fmt="webm"; stacked=yes ;; # Video/WebM/VP8  RGB+A 1920x2160
-    *.mp4   ) codec="libx264"; pixfmt="yuv420p";  fmt="mp4";  stacked=no  ;; # Video/MP4H.264  RGB   1920x1080
+    *.mp4   ) codec="libx264"; pixfmt="yuv420p";  fmt="mp4";  stacked=no  ;; # Video/MP4/H.264 RGB   1920x1080
     *.smp4  ) codec="libx264"; pixfmt="yuv420p";  fmt="mp4";  stacked=yes ;; # Video/MP4/H.264 RGB+A 1920x2160
     *       ) echo "$0: ERROR: unknown output file extension"; exit 1 ;;
 esac
