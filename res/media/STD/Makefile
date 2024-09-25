@@ -1,5 +1,5 @@
 
-I2V = bash ../../../etc/convert-i2v.bash 
+I2V = bash ../../../etc/convert-i2v.bash
 OPT = 4 1
 
 all:
