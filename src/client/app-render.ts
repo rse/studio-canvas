@@ -1030,7 +1030,9 @@ export default class CanvasRenderer extends EventEmitter {
     }
 
     /*  unapply video stream from mesh  */
-    async unapplyDisplayMaterial (mesh: BABYLON.Mesh) {
+    async unapplyDisplayMaterial (id: VideoStackId, mesh: BABYLON.Mesh) {
+        this.emit("log", "INFO", `unapply texture material from display "${id}"`)
+
         /*  dispose material texture  */
         if (mesh.material) {
             const texture = this.displayMaterial2Texture.get(mesh.material)
@@ -1209,49 +1211,49 @@ export default class CanvasRenderer extends EventEmitter {
                 && this.decal !== null
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.decal)]
                 && this.decal.isEnabled()) {
-                await this.unapplyDisplayMaterial(this.decal)
+                await this.unapplyDisplayMaterial("decal", this.decal)
                 await this.applyDisplayMaterial("decal", this.decal, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
             }
             if (this.layer === "back"
                 && this.monitorDisplay !== null
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.monitor)]
                 && this.monitorDisplay.isEnabled()) {
-                await this.unapplyDisplayMaterial(this.monitorDisplay)
+                await this.unapplyDisplayMaterial("monitor", this.monitorDisplay)
                 await this.applyDisplayMaterial("monitor", this.monitorDisplay, this.monitorOpacity, 0, 0, this.monitorChromaKey)
             }
             if (this.layer === "front"
                 && this.plateDisplay !== null
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.plate)]
                 && this.plateDisplay.isEnabled()) {
-                await this.unapplyDisplayMaterial(this.plateDisplay)
+                await this.unapplyDisplayMaterial("plate", this.plateDisplay)
                 await this.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
             }
             if (this.layer === "front"
                 && this.hologramDisplay !== null
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.hologram)]
                 && this.hologramDisplay.isEnabled()) {
-                await this.unapplyDisplayMaterial(this.hologramDisplay)
+                await this.unapplyDisplayMaterial("hologram", this.hologramDisplay)
                 await this.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
             }
             if (this.layer === "front"
                 && this.paneDisplay !== null
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.pane)]
                 && this.paneDisplay.isEnabled()) {
-                await this.unapplyDisplayMaterial(this.paneDisplay)
+                await this.unapplyDisplayMaterial("pane", this.paneDisplay)
                 await this.applyDisplayMaterial("pane", this.paneDisplay, this.paneOpacity, 0, 0, this.paneChromaKey)
             }
             if (this.layer === "front"
                 && this.pillarDisplay !== null
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.pillar)]
                 && this.pillarDisplay.isEnabled()) {
-                await this.unapplyDisplayMaterial(this.pillarDisplay)
+                await this.unapplyDisplayMaterial("pillar", this.pillarDisplay)
                 await this.applyDisplayMaterial("pillar", this.pillarDisplay, this.pillarOpacity, 0, 0, this.pillarChromaKey)
             }
             if (this.layer === "front"
                 && this.maskDisplay !== null
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.mask)]
                 && this.maskDisplay.isEnabled()) {
-                await this.unapplyDisplayMaterial(this.maskDisplay)
+                await this.unapplyDisplayMaterial("mask", this.maskDisplay)
                 await this.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
             }
         }
@@ -1295,7 +1297,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.monitor.source !== undefined && this.displaySourceMap.monitor !== state.monitor.source) {
                 this.displaySourceMap.monitor = state.monitor.source
                 if (this.monitorDisplay.isEnabled()) {
-                    await this.unapplyDisplayMaterial(this.monitorDisplay!)
+                    await this.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
                     await this.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
                 }
             }
@@ -1352,7 +1354,7 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.monitor.enable !== undefined && this.monitorDisplay.isEnabled() !== state.monitor.enable) {
                 if (state.monitor.enable) {
-                    await this.unapplyDisplayMaterial(this.monitorDisplay!)
+                    await this.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
                     await this.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
                     if (this.monitorFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling monitor (fading: start)")
@@ -1438,7 +1440,7 @@ export default class CanvasRenderer extends EventEmitter {
                             this.monitorCase!.setEnabled(false)
                             this.monitorDisplay!.setEnabled(false)
                             this.monitor!.setEnabled(false)
-                            await this.unapplyDisplayMaterial(this.monitorDisplay!)
+                            await this.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
                         })
                     }
                     else {
@@ -1456,7 +1458,7 @@ export default class CanvasRenderer extends EventEmitter {
                         this.monitorCase.setEnabled(false)
                         this.monitorDisplay.setEnabled(false)
                         this.monitor.setEnabled(false)
-                        await this.unapplyDisplayMaterial(this.monitorDisplay!)
+                        await this.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
                     }
                 }
             }
@@ -1469,7 +1471,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.decal.source !== undefined && this.displaySourceMap.decal !== state.decal.source) {
                 this.displaySourceMap.decal = state.decal.source
                 if (this.decal.isEnabled()) {
-                    await this.unapplyDisplayMaterial(this.decal!)
+                    await this.unapplyDisplayMaterial("decal", this.decal!)
                     await this.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
                 }
             }
@@ -1534,14 +1536,14 @@ export default class CanvasRenderer extends EventEmitter {
                 if (changed) {
                     await this.stop()
                     await this.decalGenerate()
-                    await this.unapplyDisplayMaterial(this.decal!)
+                    await this.unapplyDisplayMaterial("decal", this.decal!)
                     await this.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
                     await this.start()
                 }
             }
             if (state.decal.enable !== undefined && this.decal.isEnabled() !== state.decal.enable) {
                 if (state.decal.enable) {
-                    await this.unapplyDisplayMaterial(this.decal!)
+                    await this.unapplyDisplayMaterial("decal", this.decal!)
                     await this.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
                     if (this.decalFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling decal (fading: start)")
@@ -1594,14 +1596,14 @@ export default class CanvasRenderer extends EventEmitter {
                             else
                                 this.decal!.visibility = 0
                             this.decal!.setEnabled(false)
-                            await this.unapplyDisplayMaterial(this.decal!)
+                            await this.unapplyDisplayMaterial("decal", this.decal!)
                         })
                     }
                     else {
                         this.emit("log", "INFO", "disabling decal")
                         this.decal.visibility = 0
                         this.decal.setEnabled(false)
-                        await this.unapplyDisplayMaterial(this.decal!)
+                        await this.unapplyDisplayMaterial("decal", this.decal!)
                     }
                 }
             }
@@ -1612,7 +1614,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.plate.source !== undefined && this.displaySourceMap.plate !== state.plate.source) {
                 this.displaySourceMap.plate = state.plate.source
                 if (this.plateDisplay.isEnabled()) {
-                    await this.unapplyDisplayMaterial(this.plateDisplay)
+                    await this.unapplyDisplayMaterial("plate", this.plateDisplay)
                     await this.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
                 }
             }
@@ -1678,7 +1680,7 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.plate.enable !== undefined && this.plateDisplay.isEnabled() !== state.plate.enable) {
                 if (state.plate.enable) {
-                    await this.unapplyDisplayMaterial(this.plateDisplay)
+                    await this.unapplyDisplayMaterial("plate", this.plateDisplay)
                     await this.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
                     if (this.plateFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling plate (fading: start)")
@@ -1748,7 +1750,7 @@ export default class CanvasRenderer extends EventEmitter {
                             else
                                 this.plateDisplay!.visibility = 0.0
                             this.plateDisplay!.setEnabled(false)
-                            await this.unapplyDisplayMaterial(this.plateDisplay!)
+                            await this.unapplyDisplayMaterial("plate", this.plateDisplay!)
                         })
                     }
                     else {
@@ -1766,7 +1768,7 @@ export default class CanvasRenderer extends EventEmitter {
                         this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
                             this.plateDisplay!.setEnabled(false)
-                            await this.unapplyDisplayMaterial(this.plateDisplay!)
+                            await this.unapplyDisplayMaterial("plate", this.plateDisplay!)
                         })
                     }
                 }
@@ -1778,7 +1780,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.hologram.source !== undefined && this.displaySourceMap.hologram !== state.hologram.source) {
                 this.displaySourceMap.hologram = state.hologram.source
                 if (this.hologramDisplay.isEnabled()) {
-                    await this.unapplyDisplayMaterial(this.hologramDisplay)
+                    await this.unapplyDisplayMaterial("plate", this.hologramDisplay)
                     await this.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
                 }
             }
@@ -1844,7 +1846,7 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.hologram.enable !== undefined && this.hologramDisplay.isEnabled() !== state.hologram.enable) {
                 if (state.hologram.enable) {
-                    await this.unapplyDisplayMaterial(this.hologramDisplay)
+                    await this.unapplyDisplayMaterial("hologram", this.hologramDisplay)
                     await this.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
                     if (this.hologramFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling hologram (fading: start)")
@@ -1914,7 +1916,7 @@ export default class CanvasRenderer extends EventEmitter {
                             else
                                 this.hologramDisplay!.visibility = 0.0
                             this.hologramDisplay!.setEnabled(false)
-                            await this.unapplyDisplayMaterial(this.hologramDisplay!)
+                            await this.unapplyDisplayMaterial("hologram", this.hologramDisplay!)
                         })
                     }
                     else {
@@ -1932,7 +1934,7 @@ export default class CanvasRenderer extends EventEmitter {
                         this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
                             this.hologramDisplay!.setEnabled(false)
-                            await this.unapplyDisplayMaterial(this.hologramDisplay!)
+                            await this.unapplyDisplayMaterial("hologram", this.hologramDisplay!)
                         })
                     }
                 }
@@ -1946,7 +1948,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.pane.source !== undefined && this.displaySourceMap.pane !== state.pane.source) {
                 this.displaySourceMap.pane = state.pane.source
                 if (this.paneDisplay.isEnabled()) {
-                    await this.unapplyDisplayMaterial(this.paneDisplay!)
+                    await this.unapplyDisplayMaterial("pane", this.paneDisplay!)
                     await this.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
                 }
             }
@@ -2003,7 +2005,7 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.pane.enable !== undefined && this.pane.isEnabled() !== state.pane.enable) {
                 if (state.pane.enable) {
-                    await this.unapplyDisplayMaterial(this.paneDisplay!)
+                    await this.unapplyDisplayMaterial("pane", this.paneDisplay!)
                     await this.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
                     if (this.paneFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling pane (fading: start)")
@@ -2089,7 +2091,7 @@ export default class CanvasRenderer extends EventEmitter {
                             this.paneCase!.setEnabled(false)
                             this.paneDisplay!.setEnabled(false)
                             this.pane!.setEnabled(false)
-                            await this.unapplyDisplayMaterial(this.paneDisplay!)
+                            await this.unapplyDisplayMaterial("pane", this.paneDisplay!)
                         })
                     }
                     else {
@@ -2112,7 +2114,7 @@ export default class CanvasRenderer extends EventEmitter {
                             this.paneCase!.setEnabled(false)
                             this.paneDisplay!.setEnabled(false)
                             this.pane!.setEnabled(false)
-                            await this.unapplyDisplayMaterial(this.paneDisplay!)
+                            await this.unapplyDisplayMaterial("pane", this.paneDisplay!)
                         })
                     }
                 }
@@ -2126,7 +2128,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.pillar.source !== undefined && this.displaySourceMap.pillar !== state.pillar.source) {
                 this.displaySourceMap.pillar = state.pillar.source
                 if (this.pillarDisplay.isEnabled()) {
-                    await this.unapplyDisplayMaterial(this.pillarDisplay!)
+                    await this.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
                     await this.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
                 }
             }
@@ -2197,7 +2199,7 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (state.pillar.enable !== undefined && this.pillar.isEnabled() !== state.pillar.enable) {
                 if (state.pillar.enable) {
-                    await this.unapplyDisplayMaterial(this.pillarDisplay!)
+                    await this.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
                     await this.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
                     if (this.pillarFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "enabling pillar (fading: start)")
@@ -2283,7 +2285,7 @@ export default class CanvasRenderer extends EventEmitter {
                             this.pillarCase!.setEnabled(false)
                             this.pillarDisplay!.setEnabled(false)
                             this.pillar!.setEnabled(false)
-                            await this.unapplyDisplayMaterial(this.pillarDisplay!)
+                            await this.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
                         })
                     }
                     else {
@@ -2306,7 +2308,7 @@ export default class CanvasRenderer extends EventEmitter {
                             this.pillarCase!.setEnabled(false)
                             this.pillarDisplay!.setEnabled(false)
                             this.pillar!.setEnabled(false)
-                            await this.unapplyDisplayMaterial(this.pillarDisplay!)
+                            await this.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
                         })
                     }
                 }
@@ -2318,7 +2320,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.mask.source !== undefined && (this.displaySourceMap.mask !== state.mask.source || modifiedMedia[this.mapMediaId(state.mask.source)] )) {
                 this.displaySourceMap.mask = state.mask.source
                 if (this.maskDisplay.isEnabled()) {
-                    await this.unapplyDisplayMaterial(this.maskDisplay)
+                    await this.unapplyDisplayMaterial("mask", this.maskDisplay)
                     await this.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
                 }
             }
@@ -2337,7 +2339,7 @@ export default class CanvasRenderer extends EventEmitter {
             if (state.mask.enable !== undefined && this.maskDisplay.isEnabled() !== state.mask.enable) {
                 if (state.mask.enable) {
                     this.scene!.activeCamera = this.maskCamLens
-                    await this.unapplyDisplayMaterial(this.maskDisplay)
+                    await this.unapplyDisplayMaterial("mask", this.maskDisplay)
                     await this.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
                     this.emit("log", "INFO", "enabling mask")
                     if (this.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
@@ -2373,7 +2375,7 @@ export default class CanvasRenderer extends EventEmitter {
                         this.maskDisplay!.setEnabled(false)
                         this.maskBackground!.setEnabled(false)
                         this.scene!.activeCamera = this.cameraLens
-                        await this.unapplyDisplayMaterial(this.maskDisplay!)
+                        await this.unapplyDisplayMaterial("mask", this.maskDisplay!)
                     })
                 }
             }
