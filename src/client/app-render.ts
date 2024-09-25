@@ -859,6 +859,8 @@ export default class CanvasRenderer extends EventEmitter {
                         null,
                         (msg, ex) => {
                             this.emit("log", "ERROR", `failed to load image media "${url}": ${msg}`)
+                            if (texture)
+                                texture.dispose()
                             reject(ex)
                         }
                     )
@@ -877,9 +879,21 @@ export default class CanvasRenderer extends EventEmitter {
                     texture = new BABYLON.VideoTexture(
                         url, url, this.scene, false, true,
                         BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
-                        { autoPlay: true, autoUpdateTexture: true, loop },
+                        { autoPlay: true, muted: true, autoUpdateTexture: true, loop },
                         (msg, ex) => {
                             this.emit("log", "ERROR", `failed to load video media "${url}": ${msg}`)
+                            if (texture) {
+                                texture.dispose()
+                                const video = (texture as BABYLON.VideoTexture).video
+                                if (video) {
+                                    while (video.firstChild)
+                                        video.removeChild(video.lastChild!)
+                                    video.src = ""
+                                    video.removeAttribute("src")
+                                    video.load()
+                                    video.remove()
+                                }
+                            }
                             reject(ex)
                         }
                     )
@@ -918,12 +932,14 @@ export default class CanvasRenderer extends EventEmitter {
             /*  dispose video texture  */
             const video = texture.video
             texture.dispose()
-            while (video.firstChild)
-                video.removeChild(video.lastChild!)
-            video.src = ""
-            video.removeAttribute("src")
-            video.load()
-            video.remove()
+            if (video) {
+                while (video.firstChild)
+                    video.removeChild(video.lastChild!)
+                video.src = ""
+                video.removeAttribute("src")
+                video.load()
+                video.remove()
+            }
         }
         else {
             /*  dispose image texture  */
