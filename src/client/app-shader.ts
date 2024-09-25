@@ -75,6 +75,7 @@ export default class ShaderMaterial {
                 uniform vec3      chromaCol;
                 uniform int       stack;
                 uniform int       stacks;
+                uniform int       stackAlphaInvert;
 
                 vec3 rgb4ycc (vec3 col) {
                     float Y  = 0.2989 * col.r + 0.5866 * col.g + 0.1145 * col.b;
@@ -116,7 +117,9 @@ export default class ShaderMaterial {
                     float sampleAlpha = sampleColVec4.a;
                     if (stacks > 0) {
                         vec4 sampleAlphaVec4 = texture2D(textureSampler, coordA);
-                        sampleAlpha = 1.0 - sampleAlphaVec4.r;
+                        sampleAlpha = sampleAlphaVec4.r;
+                        if (stackAlphaInvert == 1)
+                            sampleAlpha = 1.0 - sampleAlpha;
                     }
 
                     /*  optionally apply chroma-key  */
@@ -186,6 +189,7 @@ export default class ShaderMaterial {
                 "chromaSmoothing",
                 "stack",
                 "stacks",
+                "stackAlphaInvert",
 
                 /*  custom application uniforms (hard-coded)  */
                 "chromaCol"
@@ -203,6 +207,7 @@ export default class ShaderMaterial {
         material.setVector3("chromaCol", new BABYLON.Vector3(0.0, 1.0, 0.0))
         material.setInt("stack", 0)
         material.setInt("stacks", 1)
+        material.setInt("stackAlphaInvert", 1)
         return material
     }
 }
