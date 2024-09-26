@@ -8,6 +8,7 @@ ChangeLog
 - IMPROVEMENT: switch placeholder images in sWebM/sMP4 format to more efficient H.264
 - CLEANUP: cleanup video conversion scripts
 - CLEANUP: log also unapply of display material
+- UPDATE: update dependencies
 
 2.2.3 (2024-09-25)
 ------------------
