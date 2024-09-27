@@ -35,7 +35,7 @@ esac
 options=""
 case "$codec" in
     libvpx  ) options="-auto-alt-ref 0"  ;;
-    libx264 ) options="-tune fastdecode" ;;
+    libx264 ) options="-preset medium -vprofile main -tune fastdecode -movflags +faststart" ;;
 esac
 
 echo "++ converting images to 1920x1080 video"

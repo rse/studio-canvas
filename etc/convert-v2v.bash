@@ -30,7 +30,7 @@ options1=""
 options2=""
 case "$codec" in
     libvpx  ) options2="-auto-alt-ref 0"  ;;
-    libx264 ) options2="-tune fastdecode" ;;
+    libx264 ) options2="-preset medium -vprofile main -tune fastdecode -movflags +faststart" ;;
 esac
 case "$input" in
     *.webm  ) options1="-vcodec libvpx" ;; # force yuva420p on input for alphaextract
