@@ -5,9 +5,6 @@ TODO
 Bugfixes
 --------
 
-- Sobald Alpha in den MediaX drin ist (egal ob WebM oder MP4 oder VP8 oder VP9)
-  geht der Load dramatisch höher.
-
 Improvements
 ------------
 
