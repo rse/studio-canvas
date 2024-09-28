@@ -18,7 +18,7 @@
     "browser":         "src/client/index.html",
     "main":            "src/client/index.html",
     "dependencies": {
-        "vue":                              "3.5.9",
+        "vue":                              "3.5.10",
         "vue-tippy":                        "6.4.4",
         "@vueform/slider":                  "2.1.10",
         "@vueform/toggle":                  "2.1.4",
@@ -39,7 +39,7 @@
         "hapi-plugin-websocket":            "2.4.9",
         "hapi-plugin-ducky":                "1.1.9",
 
-        "@types/node":                      "22.7.3",
+        "@types/node":                      "22.7.4",
         "@types/hapi__inert":               "5.2.10",
         "@types/js-yaml":                   "4.0.9",
         "@types/urijs":                     "1.19.25",
