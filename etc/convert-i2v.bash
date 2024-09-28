@@ -16,7 +16,7 @@ fade="$2"
 image1="$3"
 image2="$4"
 video="$5"
-transition="${6-fade}" # fade|slideleft|dissolve|pixelize
+transition="${6-fade}" # fade|slideleft|smoothleft|circleopen|dissolve|pixelize
 
 total=$((2 * $show + 2 * $fade))
 
