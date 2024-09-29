@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - IMPROVEMENT: switch placeholder images in sWebM/sMP4 format to more efficient H.264
+- BUGFIX: reapply display materials without flickering
 - CLEANUP: cleanup video conversion scripts
 - CLEANUP: log also unapply of display material
 - UPDATE: update dependencies
