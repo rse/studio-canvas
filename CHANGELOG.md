@@ -2,7 +2,7 @@
 ChangeLog
 =========
 
-2.2.4 (2024-09-26)
+2.2.4 (2024-09-29)
 ------------------
 
 - IMPROVEMENT: switch placeholder images in sWebM/sMP4 format to more efficient H.264
