@@ -1,6 +1,6 @@
 #!/bin/sh
 node \
-   dst/server/index.js \
+   dst/server/index.mjs \
    -a 0.0.0.0 -p 12345 \
    -A 0.0.0.0 -P 5555  \
    -C 10.0.0.10:CAM1 \

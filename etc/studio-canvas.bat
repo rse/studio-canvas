@@ -1,7 +1,7 @@
 @echo off
 title Studio-Canvas-Server
 "c:\Program Files\nodejs\node.exe" ^
-    .\dst\server\index.js ^
+    .\dst\server\index.mjs ^
     -v 2 ^
     -a 0.0.0.0 -p 12345 ^
     -A 0.0.0.0 -P 5555 ^
