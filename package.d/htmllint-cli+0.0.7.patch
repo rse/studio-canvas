@@ -1,0 +1,20 @@
+diff --git a/node_modules/htmllint-cli/bin/cli.js b/node_modules/htmllint-cli/bin/cli.js
+index 69b1f34..d28644e 100755
+--- a/node_modules/htmllint-cli/bin/cli.js
++++ b/node_modules/htmllint-cli/bin/cli.js
+@@ -52,15 +52,7 @@ app.launch({
+         var acceptedRange = cliPackage.dependencies.htmllint,
+             localVersion = env.modulePackage.version;
+ 
+-        if (semver.satisfies(localVersion, acceptedRange)) {
+             htmllintPath = env.modulePath;
+-        } else {
+-            console.log(
+-                chalk.red('local htmllint version is not supported:'),
+-                chalk.magenta(localVersion, '!=', acceptedRange)
+-            );
+-            console.log('using builtin version of htmllint');
+-        }
+     }
+ 
+     var htmllint = require(htmllintPath);

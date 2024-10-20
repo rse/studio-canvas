@@ -5,6 +5,13 @@
 ##
 
 scripts:
+    #   make and apply patches
+    patch-make: >
+                            npm shrinkwrap &&
+                            patch-package --patch-dir package.d "@typescript-eslint/typescript-estree" htmllint-cli &&
+                            shx rm -f npm-shrinkwrap.json
+    patch-apply:            patch-package --patch-dir package.d
+
     #   multiview-style development dashboard
     dev: >
                             stmux -w always -m beep -e "built.in.+ms" --
@@ -18,7 +25,7 @@ scripts:
     lint:                   npm start lint-tsc lint-vue-tsc lint-eslint lint-stylelint lint-htmllint
     lint-tsc:               tsc --project etc/tsc-server.json --noEmit
     lint-vue-tsc:           vue-tsc --project etc/tsc-client.json --noEmit
-    lint-eslint:            eslint --config etc/eslint.yaml --ext ts,vue src/**/*.vue src/**/*.ts
+    lint-eslint:            eslint --config etc/eslint.mjs src/**/*.vue src/**/*.ts
     lint-stylelint:         stylelint --config etc/stylelint.yaml src/**/*.styl src/**/*.vue
     lint-htmllint:          htmllint --rc etc/htmllint.json src/**/*.html
 
