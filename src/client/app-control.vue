@@ -10,7 +10,7 @@
     <div class="app-control">
         <!--  HEADER  -->
         <div class="head">
-            <img class="logo" src="../../res/app-icon.svg" alt="" />
+            <img class="logo" src="../../res/app-icon.svg?url" alt="" />
             <b>Studio Canvas</b> Control
             <div class="stats">
                 <span class="icon"><i class="fa fa-video"></i></span>

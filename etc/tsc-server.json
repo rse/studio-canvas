@@ -1,9 +1,9 @@
 {
     "compilerOptions": {
 		"outDir":                  "../dst",
-        "target":                  "esnext",
-        "module":                  "nodenext",
-        "moduleResolution":        "nodenext",
+        "target":                  "ESNext",
+        "module":                  "ESNext",
+        "moduleResolution":        "Bundler",
         "useDefineForClassFields": true,
         "composite":               false,
         "strict":                  true,
@@ -12,13 +12,14 @@
         "esModuleInterop":         true,
         "lib":                     [ "ESNext" ],
         "skipLibCheck":            true,
-        "noEmit":                  false,
+        "noEmit":                  true,
         "types":                   [],
         "rootDir":                 "../src"
     },
 	"include": [
         "../src/server/**/*.d.ts",
 		"../src/server/**/*.ts",
+		"../src/common/**/*.d.ts",
 		"../src/common/**/*.ts",
 		"../package.json"
     ]

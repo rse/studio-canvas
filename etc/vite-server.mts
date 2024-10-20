@@ -4,27 +4,44 @@
 **  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
 */
 
-import * as Vite  from "vite"
-import YAMLPlugin from "@rollup/plugin-yaml"
+import path               from "node:path"
+import * as Vite          from "vite"
+import YAMLPlugin         from "@rollup/plugin-yaml"
+import { viteStaticCopy } from "vite-plugin-static-copy"
+import { node }           from "@liuli-util/vite-plugin-node"
 
 export default Vite.defineConfig(({ command, mode }) => ({
+    logLevel: "info",
     appType: "custom",
     base: "",
-    root: "src/server",
+    root: "",
     plugins: [
-        YAMLPlugin()
+        node({
+            entry:  "src/server/index.ts",
+            outDir: "dst/server",
+            shims:  true
+        }),
+        YAMLPlugin(),
+        viteStaticCopy({
+            structured: false,
+            targets: [
+                { src: "dst/server/index.js", dest: "", rename: (fn, ext, p) => "index.mjs" },
+                ...(mode === "development" ? [
+                    { src: "dst/server/index.js.map", dest: "", rename: (fn, ext, p) => "index.mjs.map" }
+                ] : [])
+            ]
+        })
     ],
-    resolve: {
-        alias: {
-            "./runtimeConfig": "./runtimeConfig.browser"
-        }
-    },
     build: {
-        sourcemap:              (mode === "development"),
-        outDir:                 "../../dst/server",
+        target:                 "node20",
+        outDir:                 "dst/server",
+        assetsDir:              "",
         emptyOutDir:            (mode === "production"),
         chunkSizeWarningLimit:  5000,
         assetsInlineLimit:      0,
+        sourcemap:              (mode === "development"),
+        minify:                 false,
+        reportCompressedSize:   (mode === "production"),
         rollupOptions: {
             input: "src/server/index.ts",
             output: {

@@ -2,6 +2,12 @@
 ChangeLog
 =========
 
+2.3.0 (2024-10-20)
+------------------
+
+- CLEANUP: finally upgrade to ESLint 9 and a Vite-based server build
+- UPDATE: update dependencies
+
 2.2.4 (2024-09-29)
 ------------------
 

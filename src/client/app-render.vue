@@ -14,7 +14,7 @@
         </div>
         <div v-show="overlayShow" class="overlay">
             <div class="box">
-                <img class="logo" src="../../res/app-icon.svg" alt=""/>
+                <img class="logo" src="../../res/app-icon.svg?url" alt=""/>
                 <div class="name"><span class="name1">Studio</span> <span class="name2">Canvas</span></div>
                 <div class="vers">{{ pkg.version }} ({{ pkg["x-date"] }})</div>
             </div>

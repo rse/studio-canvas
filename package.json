@@ -18,12 +18,12 @@
     "browser":         "src/client/index.html",
     "main":            "src/client/index.html",
     "dependencies": {
-        "vue":                              "3.5.10",
-        "vue-tippy":                        "6.4.4",
+        "vue":                              "3.5.12",
+        "vue-tippy":                        "6.5.0",
         "@vueform/slider":                  "2.1.10",
         "@vueform/toggle":                  "2.1.4",
-        "@babylonjs/core":                  "7.27.0",
-        "@babylonjs/loaders":               "7.27.0",
+        "@babylonjs/core":                  "7.30.0",
+        "@babylonjs/loaders":               "7.30.0",
         "typopro-web":                      "4.2.7",
         "@fortawesome/fontawesome-free":    "6.6.0",
         "axios":                            "1.7.7",
@@ -39,7 +39,7 @@
         "hapi-plugin-websocket":            "2.4.9",
         "hapi-plugin-ducky":                "1.1.9",
 
-        "@types/node":                      "22.7.4",
+        "@types/node":                      "22.7.7",
         "@types/hapi__inert":               "5.2.10",
         "@types/js-yaml":                   "4.0.9",
         "@types/urijs":                     "1.19.25",
@@ -49,11 +49,10 @@
         "@types/throttle-debounce":         "5.0.2",
         "@types/object-path":               "0.11.4",
         "@types/minimatch":                 "5.1.2",
-        "@types/source-map-support":        "0.5.10",
         "@types/locks":                     "0.2.3",
         "@types/write-file-atomic":         "4.0.3",
 
-        "chalk":                            "4.1.2",
+        "chalk":                            "5.3.0",
         "minimatch":                        "10.0.1",
         "glob-promise":                     "6.0.7",
         "eventemitter2":                    "6.4.9",
@@ -71,48 +70,51 @@
         "write-file-atomic":                "6.0.0",
         "locks":                            "0.2.2",
         "latching":                         "1.1.2",
-        "awilix":                           "11.0.0"
+        "awilix":                           "12.0.2"
     },
     "devDependencies": {
-        "@rollup/plugin-yaml":              "4.1.2",
-        "@typescript-eslint/eslint-plugin": "8.7.0",
-        "@typescript-eslint/parser":        "8.7.0",
+        "vite":                             "5.4.9",
+        "@typescript-eslint/eslint-plugin": "8.10.0",
+        "@typescript-eslint/parser":        "8.10.0",
         "@vitejs/plugin-vue":               "5.1.4",
+        "@rollup/plugin-yaml":              "4.1.2",
+        "vite-plugin-node-polyfills":       "0.22.0",
+        "vite-plugin-static-copy":          "2.0.0",
+        "vite-svg-loader":                  "5.1.0",
+        "@liuli-util/vite-plugin-node":     "0.9.0",
 
-        "@vue/eslint-config-typescript":    "13.0.0",
-        "eslint":                           "8.57.0",
-        "eslint-config-standard":           "17.1.0",
-        "eslint-plugin-import":             "2.30.0",
-        "eslint-plugin-vue":                "9.28.0",
+        "@vue/eslint-config-typescript":    "14.1.1",
+        "vue-eslint-parser":                "9.4.3",
+        "eslint":                           "9.13.0",
+        "@eslint/js":                       "9.13.0",
+        "@types/eslint__js":                "8.42.3",
+        "neostandard":                      "0.11.6",
+        "eslint-plugin-import":             "2.31.0",
+        "eslint-plugin-vue":                "9.29.0",
 
-        "htmllint":                         "0.7.2",
+        "htmllint":                         "0.8.0",
         "htmllint-cli":                     "0.0.7",
 
+        "patch-package":                    "8.0.0",
         "nodemon":                          "3.1.7",
         "rimraf":                           "6.0.1",
         "stmux":                            "1.8.10",
-        "stylelint":                        "16.9.0",
+        "stylelint":                        "16.10.0",
         "stylelint-config-html":            "1.1.0",
         "stylelint-config-recommended-vue": "1.5.0",
         "stylelint-config-standard":        "36.0.1",
         "stylelint-config-standard-vue":    "1.0.0",
         "stylelint-stylus":                 "1.0.0",
         "postcss-html":                     "1.7.0",
-        "stylus":                           "0.63.0",
-        "typescript":                       "5.6.2",
-        "vite":                             "5.4.8",
+        "stylus":                           "0.64.0",
+        "typescript":                       "5.6.3",
         "vue-tsc":                          "2.1.6",
         "delay-cli":                        "2.0.0",
         "nps":                              "5.10.0",
-        "cross-env":                        "7.0.3",
-        "source-map-support":               "0.5.21"
+        "cross-env":                        "7.0.3"
     },
-    "upd": [
-        "!eslint",
-        "!htmllint",
-        "!chalk"
-    ],
     "scripts": {
-        "start": "nps -c etc/nps.yaml"
+        "postinstall": "npm start patch-apply",
+        "start":       "nps -c etc/nps.yaml"
     }
 }
