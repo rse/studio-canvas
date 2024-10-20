@@ -27,8 +27,8 @@ export default class Argv {
     async init () {
         /*  command-line option parsing  */
         // @ts-ignore
-        const args = yargs
-            /* eslint indent: off */
+        const args = yargs()
+            /* eslint @stylistic/indent: off */
             .usage(
                 "Usage: $0 [-h] [-V] " +
                 "[-v <log-level>] [-l|--log-file <log-file>] " +

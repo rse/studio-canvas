@@ -4,18 +4,14 @@
 **  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
 */
 
-import path           from "node:path"
-import fs             from "node:fs"
 import glob           from "glob-promise"
-import jsYAML         from "js-yaml"
-import ducky          from "ducky"
 import * as HAPI      from "@hapi/hapi"
 
 import Argv           from "./app-argv"
 import Log            from "./app-log"
 import REST           from "./app-rest"
 import RESTWS         from "./app-rest-ws"
-import { MediaEntry, MediaSchema } from "../common/app-media"
+import { MediaEntry } from "../common/app-media"
 
 export default class RESTMedia {
     constructor (

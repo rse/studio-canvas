@@ -14,7 +14,7 @@ import ShaderMaterial from "./app-shader"
 import PTZ            from "./app-ptz"
 import { MixerState } from "../common/app-mixer"
 import { FreeDState } from "../common/app-freed"
-import { StateType, StateTypePartial } from "../common/app-state"
+import { StateTypePartial } from "../common/app-state"
 
 /*  utility type  */
 type ChromaKey = { enable: boolean, threshold: number, smoothing: number }
@@ -247,7 +247,7 @@ export default class CanvasRenderer extends EventEmitter {
         "Mask-Background":              { back: false, front: true  },
         "Mask-Display":                 { back: false, front: true  },
         "Dummy":                        { back: true,  front: true  }
-    } as { [ name: string ]: { back: boolean, front: boolean }}
+    } as { [ name: string ]: { back: boolean, front: boolean } }
 
     /*  initially establish rendering engine and scene  */
     async establish (canvas: HTMLCanvasElement) {

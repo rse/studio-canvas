@@ -98,7 +98,7 @@ export default class RESTWS extends Latching {
             },
             handler: (request: HAPI.Request, h: HAPI.ResponseToolkit) => {
                 /*  on WebSocket message transfer  */
-                const { ctx, ws } = request.websocket()
+                const { ctx } = request.websocket()
                 if (typeof request.payload !== "object" || request.payload === null)
                     return Boom.badRequest("invalid request")
                 if (!ducky.validate(request.payload, "{ cmd: string, arg?: string }"))

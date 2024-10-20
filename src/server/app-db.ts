@@ -9,6 +9,7 @@ import fs              from "node:fs"
 import locks           from "locks"
 import writeFileAtomic from "write-file-atomic"
 
+/* eslint no-unused-vars: off */
 export enum Transaction { READ, WRITE }
 
 export default class DB {
