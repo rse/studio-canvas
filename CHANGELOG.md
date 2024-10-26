@@ -2,6 +2,12 @@
 ChangeLog
 =========
 
+2.3.1 (2024-10-26)
+------------------
+
+- IMPROVEMENT: align alpha handling for STREAM 1/2 to current setup
+- UPDATE: update dependencies
+
 2.3.0 (2024-10-20)
 ------------------
 

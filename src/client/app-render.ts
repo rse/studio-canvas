@@ -1000,6 +1000,7 @@ export default class CanvasRenderer extends EventEmitter {
             else if (this.displaySourceMap[id] === "S2") stack = 1
             material.setInt("stack", stack)
             material.setInt("stacks", this.videoStacks)
+            material.setInt("stackAlphaInvert", 0)
         }
         else if (this.displayMediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.displaySourceMap[id].match(/^M/)) {
             material.setInt("stack", 0)
