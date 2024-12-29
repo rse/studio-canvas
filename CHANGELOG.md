@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+2.4.0 (2024-12-29)
+------------------
+
+- IMPROVEMENT: added support for Sony ILME FR-7 camera and switched CAM2 to this type
+
 2.3.1 (2024-10-26)
 ------------------
 

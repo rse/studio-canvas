@@ -5,7 +5,7 @@
 */
 
 /*  the Babylon PTZ state class  */
-type PTZCamType = "birddog" | "panasonic"
+type PTZCamType = "birddog" | "panasonic" | "sony"
 export default class PTZ {
     constructor (private camType: PTZCamType) {}
 
@@ -25,6 +25,14 @@ export default class PTZ {
             posZDelta:   0
         },
         "panasonic": {
+            posXOrigin:  0,
+            posXDelta:   0,
+            posYOrigin:  0,
+            posYDelta:   0,
+            posZOrigin:  0,
+            posZDelta:   0
+        },
+        "sony": {
             posXOrigin:  0,
             posXDelta:   0,
             posYOrigin:  0,
@@ -84,6 +92,15 @@ export default class PTZ {
             panDelta:  0,
             panMinDeg: -175,
             panMaxDeg: 175,
+            panTotal:  this.deg2rad(360),
+            panStep:   this.deg2rad(1),
+            panMult:   1
+        },
+        "sony": {
+            panOrigin: 0,
+            panDelta:  0,
+            panMinDeg: -170,
+            panMaxDeg: 170,
             panTotal:  this.deg2rad(360),
             panStep:   this.deg2rad(1),
             panMult:   1
@@ -151,6 +168,15 @@ export default class PTZ {
             tiltTotal:  this.deg2rad(360),
             tiltStep:   this.deg2rad(1),
             tiltMult:   1
+        },
+        "sony": {
+            tiltOrigin: 0,
+            tiltDelta:  0,
+            tiltMinDeg: -30,
+            tiltMaxDeg: 195,
+            tiltTotal:  this.deg2rad(360),
+            tiltStep:   this.deg2rad(1),
+            tiltMult:   1
         }
     }
 
@@ -207,6 +233,14 @@ export default class PTZ {
             rotateStep:    this.deg2rad(0.5)
         },
         "panasonic": {
+            rotateOrigin:  0,
+            rotateDelta:   0,
+            rotateMinDeg:  -30,
+            rotateMaxDeg:  30,
+            rotateTotal:   this.deg2rad(360),
+            rotateStep:    this.deg2rad(0.5)
+        },
+        "sony": {
             rotateOrigin:  0,
             rotateDelta:   0,
             rotateMinDeg:  -30,
@@ -318,6 +352,10 @@ export default class PTZ {
             focalLenMin:    4.12,
             focalLenMax:    98.9,
             zoomCurve:      {
+                /*  Non-linear Zoom of Panasonic AW-UE100 (real).
+                    NOTICE: These particular mapping functions were determined by a polynomial fitting through measured points,
+                    because the AW-UE100 zoom lenses (like many zoom lenses) are actually complex zoom lense systems where some
+                    lenses move in a parabolic arc and hence cause the zoom to act in a non-linear fashion.  */
                 zoom2size (x: number) {
                     const y =
                         (+3.1543) * Math.pow(x, 5) +
@@ -337,6 +375,31 @@ export default class PTZ {
                         (+4.0947) *          y     +
                         (-0.0131)
                     return Math.max(0.0, Math.min(1.0, x))
+                }
+            }
+        },
+        "sony": {
+            fovMinDeg:      18,
+            fovMaxDeg:      75,
+            fovMin:         this.deg2rad(18),
+            fovMax:         this.deg2rad(75),
+            fovMult:        1, /* FIXME: unused until polynomial adjustment is implemented  */
+            zoomMin:        35.06591796875,
+            zoomMax:        149.263916015625,
+            zoomLevels:     80, /* at least  */
+            zoomStep:       (this.deg2rad(75) - this.deg2rad(18)) / 80,
+            sensorSize:     35,
+            sensorWidth:    35.6,
+            focalLenMin:    28,
+            focalLenMax:    135,
+            zoomCurve:      {
+                /*  Linear Zoom of Sony ILME FR-7 + Sony SELP28135G (real).
+                    NOTICE: The SELP28135G is really a linear optical system. */
+                zoom2size (x: number) {
+                    return Math.max(0.0, Math.min(1.0, x))
+                },
+                size2zoom (y: number) {
+                    return Math.max(0.0, Math.min(1.0, y))
                 }
             }
         }
