@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - IMPROVEMENT: added support for Sony ILME FR-7 camera and switched CAM2 to this type
+- UPDATE: update dependencies
 
 2.3.1 (2024-10-26)
 ------------------

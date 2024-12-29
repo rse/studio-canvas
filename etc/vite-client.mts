@@ -32,7 +32,7 @@ export default Vite.defineConfig(({ command, mode }) => ({
         outDir:                 "../../dst/client",
         assetsDir:              "",
         emptyOutDir:            (mode === "production"),
-        chunkSizeWarningLimit:  7000,
+        chunkSizeWarningLimit:  8000,
         assetsInlineLimit:      0,
         sourcemap:              (mode === "development"),
         minify:                 (mode === "production"),
