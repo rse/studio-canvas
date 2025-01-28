@@ -2,6 +2,14 @@
 ChangeLog
 =========
 
+2.4.1 (2025-01-28)
+------------------
+
+- IMPROVEMENT: updated Blender model to reflect studio
+- IMPROVEMENT: switched CAM3 to Sony model
+- WORKAROUND: downgrade BabylonJS from 7.42.0 to 7.31.0 (the last version we knew worked fine)
+- UPDATE: update dependencies
+
 2.4.0 (2024-12-29)
 ------------------
 
