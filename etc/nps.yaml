@@ -16,7 +16,7 @@ scripts:
     dev: >
                             stmux -w always -m beep -e "built.in.+ms" --
                             [ -s 40% "npm start lint-watch" :
-                            -s 20% "npm start build-client-dev-watch" :
+                            -s 20% "npm start build-client-dev-man" :
                             -s 20% "npm start build-server-dev-watch" :
                             -s 20% "npm start server-delay server-dev" ]
 
