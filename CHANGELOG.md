@@ -6,6 +6,8 @@ ChangeLog
 ------------------
 
 - CLEANUP: cleanup NPS configuration
+- BUGFIX: fix calculated "frames total" for manual animation
+- BUGFIX: fix call of BabylonJS standard animation
 - UPDATE: update dependencies
 
 2.4.1 (2025-01-28)

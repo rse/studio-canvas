@@ -1146,7 +1146,7 @@ export default class CanvasRenderer extends EventEmitter {
         return new Promise((resolve) => {
             const ease = new BABYLON.SineEase()
             ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-            const frames = (1000 / fps) * duration
+            const frames = (60 / fps) * fps * duration
             let frame = 0
             const step = () => {
                 callback(from + (to - from) * ease.ease(frame / frames))
@@ -1349,9 +1349,9 @@ export default class CanvasRenderer extends EventEmitter {
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.fps === 0 ? 1 : this.fps)
-                        const fpsTotal = (1000 / fps) * this.monitorFade
+                        const framesTotal = this.monitorFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.monitorCase,
-                            "visibility", fps, fpsTotal, 0, 1, 0, ease)!
+                            "visibility", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
                         if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.monitorDisplay.material
                             material.setFloat("visibility", 0.0)
@@ -1395,9 +1395,9 @@ export default class CanvasRenderer extends EventEmitter {
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.fps === 0 ? 1 : this.fps)
-                        const fpsTotal = (1000 / fps) * this.monitorFade
+                        const framesTotal = this.monitorFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.monitorCase,
-                            "visibility", fps, fpsTotal, 1, 0, 0, ease)!
+                            "visibility", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
                         if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.monitorDisplay.material
                             material.setFloat("visibility", 1.0)
@@ -1987,9 +1987,9 @@ export default class CanvasRenderer extends EventEmitter {
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.fps === 0 ? 1 : this.fps)
-                        const fpsTotal = (1000 / fps) * this.paneFade
+                        const framesTotal = this.paneFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.paneCase,
-                            "visibility", fps, fpsTotal, 0, 1, 0, ease)!
+                            "visibility", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
                         if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.paneDisplay.material
                             material.setFloat("visibility", 0.0)
@@ -2033,9 +2033,9 @@ export default class CanvasRenderer extends EventEmitter {
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.fps === 0 ? 1 : this.fps)
-                        const fpsTotal = (1000 / fps) * this.paneFade
+                        const framesTotal = this.paneFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.paneCase,
-                            "visibility", fps, fpsTotal, 1, 0, 0, ease)!
+                            "visibility", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
                         if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.paneDisplay.material
                             material.setFloat("visibility", 1.0)
@@ -2178,9 +2178,9 @@ export default class CanvasRenderer extends EventEmitter {
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.fps === 0 ? 1 : this.fps)
-                        const fpsTotal = (1000 / fps) * this.pillarFade
+                        const framesTotal = this.pillarFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.pillarCase,
-                            "visibility", fps, fpsTotal, 0, 1, 0, ease)!
+                            "visibility", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
                         if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.pillarDisplay.material
                             material.setFloat("visibility", 0.0)
@@ -2224,9 +2224,9 @@ export default class CanvasRenderer extends EventEmitter {
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.fps === 0 ? 1 : this.fps)
-                        const fpsTotal = (1000 / fps) * this.pillarFade
+                        const framesTotal = this.pillarFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.pillarCase,
-                            "visibility", fps, fpsTotal, 1, 0, 0, ease)!
+                            "visibility", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
                         if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.pillarDisplay.material
                             material.setFloat("visibility", 1.0)
