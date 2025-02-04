@@ -53,10 +53,10 @@ export default class CanvasRenderer extends EventEmitter {
     private ptzKeys           = false
     private layer:            string
     private cameraName:       string
-    private texture1URL       = ""
-    private texture2URL       = ""
-    private fadeTrans         = 2  * 1000
-    private fadeWait          = 10 * 1000
+    private canvasTexture1URL = ""
+    private canvasTexture2URL = ""
+    private canvasFadeTrans   = 2  * 1000
+    private canvasFadeWait    = 10 * 1000
     private decalRotate       = 0.0
     private decalLift         = 0.0
     private decalScale        = 1.0
@@ -185,10 +185,10 @@ export default class CanvasRenderer extends EventEmitter {
     private light1:          BABYLON.Nullable<BABYLON.PointLight>     = null
     private light2:          BABYLON.Nullable<BABYLON.PointLight>     = null
     private light3:          BABYLON.Nullable<BABYLON.PointLight>     = null
-    private material:        BABYLON.Nullable<BABYLON.NodeMaterial>   = null
-    private texture1:        BABYLON.Nullable<BABYLON.Texture>        = null
-    private texture2:        BABYLON.Nullable<BABYLON.Texture>        = null
-    private texture3:        BABYLON.Nullable<BABYLON.Texture>        = null
+    private canvasMaterial:  BABYLON.Nullable<BABYLON.NodeMaterial>   = null
+    private canvasTexture1:  BABYLON.Nullable<BABYLON.Texture>        = null
+    private canvasTexture2:  BABYLON.Nullable<BABYLON.Texture>        = null
+    private canvasTexture3:  BABYLON.Nullable<BABYLON.Texture>        = null
     private wallRotBase:     BABYLON.Nullable<BABYLON.Quaternion>     = null
     private plate:           BABYLON.Nullable<BABYLON.TransformNode>  = null
     private plateDisplay:    BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -622,97 +622,97 @@ export default class CanvasRenderer extends EventEmitter {
     }
 
     /*  load canvas/wall texture(s)  */
-    async loadWall () {
+    async canvasLoad () {
         /*  sanity check situation  */
-        if (this.texture1URL === "")
+        if (this.canvasTexture1URL === "")
             return
 
         /*  apply static (one image) or dynamic (two images) texture to wall  */
-        this.texture1 = new BABYLON.Texture(this.texture1URL, this.scene, false, false)
-        this.texture2 = this.texture2URL !== "" ? new BABYLON.Texture(this.texture2URL, this.scene, false, false) : null
+        this.canvasTexture1 = new BABYLON.Texture(this.canvasTexture1URL, this.scene, false, false)
+        this.canvasTexture2 = this.canvasTexture2URL !== "" ? new BABYLON.Texture(this.canvasTexture2URL, this.scene, false, false) : null
         const wall = this.scene!.getMaterialByName("Wall") as BABYLON.Nullable<BABYLON.PBRMaterial>
         if (wall === null)
             throw new Error("cannot find Wall object")
-        if (this.texture2 === null) {
+        if (this.canvasTexture2 === null) {
             /*  single image texture  */
             await new Promise((resolve) => {
-                BABYLON.Texture.WhenAllReady([ this.texture1! ], () => { resolve(true) })
+                BABYLON.Texture.WhenAllReady([ this.canvasTexture1! ], () => { resolve(true) })
             })
-            wall.albedoTexture = this.texture1
+            wall.albedoTexture = this.canvasTexture1
         }
         else {
             /*  ==== two image cross-fade texture ====  */
 
             /*  await textures  */
             await new Promise((resolve) => {
-                BABYLON.Texture.WhenAllReady([ this.texture1!, this.texture2! ], () => { resolve(true) })
+                BABYLON.Texture.WhenAllReady([ this.canvasTexture1!, this.canvasTexture2! ], () => { resolve(true) })
             })
 
             /*  load externally defined node material  */
-            this.material = await BABYLON.NodeMaterial.ParseFromFileAsync("material",
+            this.canvasMaterial = await BABYLON.NodeMaterial.ParseFromFileAsync("material",
                 "/res/canvas-material.json", this.scene!)
 
             /*  apply texture #1  */
-            const textureBlock1 = this.material.getBlockByPredicate((input) =>
+            const textureBlock1 = this.canvasMaterial.getBlockByPredicate((input) =>
                 input.name === "Texture1") as BABYLON.Nullable<BABYLON.TextureBlock>
             if (textureBlock1 === null)
                 throw new Error("no such texture block named 'Texture1' found")
-            textureBlock1.texture = this.texture1
+            textureBlock1.texture = this.canvasTexture1
 
             /*  apply texture #2  */
-            const textureBlock2 = this.material.getBlockByPredicate((input) =>
+            const textureBlock2 = this.canvasMaterial.getBlockByPredicate((input) =>
                 input.name === "Texture2") as BABYLON.Nullable<BABYLON.TextureBlock>
             if (textureBlock2 === null)
                 throw new Error("no such texture block named 'Texture2' found")
-            textureBlock2.texture = this.texture2
+            textureBlock2.texture = this.canvasTexture2
 
             /*  build material from textures  */
-            this.material.build(false)
+            this.canvasMaterial.build(false)
 
             /*  freeze material to optimize internal shader overhead  */
-            this.material.freeze()
+            this.canvasMaterial.freeze()
 
             /*  create and apply composed texture  */
-            this.texture3 = this.material.createProceduralTexture(
+            this.canvasTexture3 = this.canvasMaterial.createProceduralTexture(
                 { width: this.wallWidth, height: this.wallHeight }, this.scene!)
-            wall.albedoTexture = this.texture3
+            wall.albedoTexture = this.canvasTexture3
 
             /*  perform cross-fadings between textures  */
-            this.texFade = this.material.getBlockByName("TextureFade") as
+            this.texFade = this.canvasMaterial.getBlockByName("TextureFade") as
                 BABYLON.Nullable<BABYLON.InputBlock>
             if (this.texFade === null)
                 throw new Error("no such input block named 'TextureFade' found")
-            await this.startWallFader()
+            await this.canvasFaderStart()
         }
     }
 
     /*  unload canvas/wall texture(s)  */
-    async unloadWall () {
+    async canvasUnload () {
         const wall = this.scene!.getMaterialByName("Wall") as BABYLON.Nullable<BABYLON.PBRMaterial>
         if (wall === null)
             throw new Error("cannot find Wall object")
         wall.albedoTexture = null
-        await this.stopWallFader()
-        if (this.material !== null) {
-            const textureBlock1 = this.material.getBlockByPredicate((input) =>
+        await this.canvasFaderStop()
+        if (this.canvasMaterial !== null) {
+            const textureBlock1 = this.canvasMaterial.getBlockByPredicate((input) =>
                 input.name === "Texture1") as BABYLON.Nullable<BABYLON.TextureBlock>
             textureBlock1!.texture = null
-            this.texture1?.dispose()
-            this.texture1 = null
-            const textureBlock2 = this.material.getBlockByPredicate((input) =>
+            this.canvasTexture1?.dispose()
+            this.canvasTexture1 = null
+            const textureBlock2 = this.canvasMaterial.getBlockByPredicate((input) =>
                 input.name === "Texture2") as BABYLON.Nullable<BABYLON.TextureBlock>
             textureBlock2!.texture = null
-            this.texture2?.dispose()
-            this.texture2 = null
-            this.texture3?.dispose()
-            this.texture3 = null
-            this.material.dispose(true, true)
-            this.material = null
+            this.canvasTexture2?.dispose()
+            this.canvasTexture2 = null
+            this.canvasTexture3?.dispose()
+            this.canvasTexture3 = null
+            this.canvasMaterial.dispose(true, true)
+            this.canvasMaterial = null
         }
     }
 
     /*  start wall fader  */
-    async startWallFader () {
+    async canvasFaderStart () {
         if (this.texFade === null)
             return
         let fade        = 0
@@ -721,21 +721,21 @@ export default class CanvasRenderer extends EventEmitter {
         const fader = () => {
             this.fadeTimer = null
             const fadeInterval = 1000 / (this.fps === 0 ? 1 : this.fps)
-            const fadeStep = 1.0 / (this.fadeTrans / fadeInterval)
+            const fadeStep = 1.0 / (this.canvasFadeTrans / fadeInterval)
             fade = fade + (fadeSign * fadeStep)
             let wait = fadeInterval
             if (fade > 1.0) {
                 fade = 1.0
                 fadeSign = -1
-                wait = this.fadeWait
+                wait = this.canvasFadeWait
             }
             else if (fade < 0.0) {
                 fade = 0.0
                 fadeSign = +1
-                wait = this.fadeWait
+                wait = this.canvasFadeWait
             }
             this.texFade!.value = fade
-            if (this.texture2URL !== "")
+            if (this.canvasTexture2URL !== "")
                 this.fadeTimer = setTimeout(fader, wait)
         }
         if (this.fadeTimer !== null)
@@ -744,7 +744,7 @@ export default class CanvasRenderer extends EventEmitter {
     }
 
     /*  stop wall fader  */
-    async stopWallFader () {
+    async canvasFaderStop () {
         if (this.fadeTimer !== null) {
             clearTimeout(this.fadeTimer)
             await new Promise((resolve, reject) => {
@@ -1137,8 +1137,8 @@ export default class CanvasRenderer extends EventEmitter {
     /*  sync renderer  */
     async reflectSyncTime (timestamp: number) {
         this.syncTime = timestamp
-        await this.stopWallFader()
-        await this.startWallFader()
+        await this.canvasFaderStop()
+        await this.canvasFaderStart()
     }
 
     /*  perform a value animation manually  */
@@ -1252,20 +1252,20 @@ export default class CanvasRenderer extends EventEmitter {
         /*  adjust canvas  */
         if (state.canvas !== undefined && this.layer === "back") {
             let changed = false
-            if (state.canvas.texture1 !== undefined && this.texture1URL !== state.canvas.texture1) {
-                this.texture1URL = state.canvas.texture1
+            if (state.canvas.texture1 !== undefined && this.canvasTexture1URL !== state.canvas.texture1) {
+                this.canvasTexture1URL = state.canvas.texture1
                 changed = true
             }
-            if (state.canvas.texture2 !== undefined && this.texture2URL !== state.canvas.texture2) {
-                this.texture2URL = state.canvas.texture2
+            if (state.canvas.texture2 !== undefined && this.canvasTexture2URL !== state.canvas.texture2) {
+                this.canvasTexture2URL = state.canvas.texture2
                 changed = true
             }
-            if (state.canvas.fadeTrans !== undefined && this.fadeTrans !== state.canvas.fadeTrans) {
-                this.fadeTrans = state.canvas.fadeTrans
+            if (state.canvas.fadeTrans !== undefined && this.canvasFadeTrans !== state.canvas.fadeTrans) {
+                this.canvasFadeTrans = state.canvas.fadeTrans
                 changed = true
             }
-            if (state.canvas.fadeWait !== undefined && this.fadeWait !== state.canvas.fadeWait) {
-                this.fadeWait = state.canvas.fadeWait
+            if (state.canvas.fadeWait !== undefined && this.canvasFadeWait !== state.canvas.fadeWait) {
+                this.canvasFadeWait = state.canvas.fadeWait
                 changed = true
             }
             if (state.canvas.rotationZ !== undefined) {
@@ -1275,8 +1275,8 @@ export default class CanvasRenderer extends EventEmitter {
             }
             if (changed) {
                 await this.stop()
-                await this.unloadWall()
-                await this.loadWall()
+                await this.canvasUnload()
+                await this.canvasLoad()
                 await this.start()
             }
         }
