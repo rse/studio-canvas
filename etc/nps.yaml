@@ -34,8 +34,9 @@ scripts:
     build-dev:              npm start build-client-dev build-server-dev
     build-client:           vite --config etc/vite-client.mts build --mode production
     build-client-dev:       vite --config etc/vite-client.mts build --mode development
+    build-client-dev-man:   nodemon --exec "npm start build-client-dev" --watch src --ext html,styl,js,ts,vue
     build-client-dev-watch: >
-                            cross-env NODE_OPTIONS="--max-old-space-size=4096"
+                            cross-env
                             vite --config etc/vite-client.mts build --mode development --watch
     build-server:           vite --config etc/vite-server.mts build --mode production
     build-server-dev:       vite --config etc/vite-server.mts build --mode development
