@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - CLEANUP: cleanup NPS configuration
+- UPDATE: update dependencies
 
 2.4.1 (2025-01-28)
 ------------------
