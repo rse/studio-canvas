@@ -28,6 +28,7 @@ export type StateType = {
         texture2?:  string,
         fadeTrans?: number,
         fadeWait?:  number,
+        fadeSwitch: number,
         rotationZ:  number
     },
     monitor: {
@@ -204,6 +205,7 @@ export const StateSchema = `{
         texture2:   string,
         fadeTrans:  number,
         fadeWait:   number,
+        fadeSwitch: number,
         rotationZ:  number
     },
     monitor: {
@@ -380,6 +382,7 @@ export const StateDefault: StateType = {
         texture2:   "/canvas/STD/hexagons-2.jpg",
         fadeTrans:  150,
         fadeWait:   10000,
+        fadeSwitch: 2.0,
         rotationZ:  0
     },
     monitor: {
