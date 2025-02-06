@@ -45,7 +45,9 @@ export default [
             globals: {
                 ...globals.browser,
                 ...globals.node,
-                ...globals.commonjs
+                ...globals.commonjs,
+                ...globals.worker,
+                ...globals.serviceworker
             }
         },
         rules: {
