@@ -16,7 +16,7 @@ scripts:
     dev: >
                             stmux -w always -m beep -e "built.in.+ms" --
                             [ -s 40% "npm start lint-watch" :
-                            -s 20% "npm start build-client-dev-man" :
+                            -s 20% "npm start build-client-dev-watch" :
                             -s 20% "npm start build-server-dev-watch" :
                             -s 20% "npm start server-delay server-dev" ]
 
@@ -34,9 +34,8 @@ scripts:
     build-dev:              npm start build-client-dev build-server-dev
     build-client:           vite --config etc/vite-client.mts build --mode production
     build-client-dev:       vite --config etc/vite-client.mts build --mode development
-    build-client-dev-man:   nodemon --exec "npm start build-client-dev" --watch src --ext html,styl,js,ts,vue
     build-client-dev-watch: >
-                            cross-env
+                            cross-env NODE_OPTIONS="--max-old-space-size=8192"
                             vite --config etc/vite-client.mts build --mode development --watch
     build-server:           vite --config etc/vite-server.mts build --mode production
     build-server-dev:       vite --config etc/vite-server.mts build --mode development
