@@ -22,8 +22,8 @@
         "vue-tippy":                        "6.6.0",
         "@vueform/slider":                  "2.1.10",
         "@vueform/toggle":                  "2.1.4",
-        "@babylonjs/core":                  "7.47.2",
-        "@babylonjs/loaders":               "7.47.2",
+        "@babylonjs/core":                  "7.47.3",
+        "@babylonjs/loaders":               "7.47.3",
         "typopro-web":                      "4.2.7",
         "@fortawesome/fontawesome-free":    "6.7.2",
         "axios":                            "1.7.9",
@@ -74,7 +74,7 @@
         "awilix":                           "12.0.4"
     },
     "devDependencies": {
-        "vite":                             "6.0.11",
+        "vite":                             "6.1.0",
         "@typescript-eslint/eslint-plugin": "8.23.0",
         "@typescript-eslint/parser":        "8.23.0",
         "@vitejs/plugin-vue":               "5.2.1",
@@ -89,7 +89,7 @@
         "eslint":                           "9.19.0",
         "@eslint/js":                       "9.19.0",
         "@types/eslint__js":                "8.42.3",
-        "neostandard":                      "0.12.0",
+        "neostandard":                      "0.12.1",
         "eslint-plugin-import":             "2.31.0",
         "eslint-plugin-vue":                "9.32.0",
 
