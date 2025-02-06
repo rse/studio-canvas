@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - UPDATE: update dependencies
+- CLEANUP: replaced deprecated API call
 
 2.4.2 (2025-02-04)
 ------------------
