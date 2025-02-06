@@ -117,9 +117,6 @@ export default class CanvasRenderer extends EventEmitter {
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
         rotationZ:     0, positionZ:     0, positionX:     0
     }
-    private hologramRotate       = 0.0
-    private hologramLift         = 0.0
-    private hologramScale        = 1.0
     private hologramFade         = 0
     private hologramOpacity      = 1.0
     private hologramBorderRad    = 40.0
