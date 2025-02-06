@@ -7,6 +7,7 @@ ChangeLog
 
 - UPDATE: update dependencies
 - CLEANUP: replaced deprecated API call
+- CLEANUP: remove unused variables
 
 2.4.2 (2025-02-04)
 ------------------
