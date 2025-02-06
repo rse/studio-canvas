@@ -398,7 +398,7 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  on-the-fly generate wall video decal  */
         if (this.layer === "back")
-            this.decalGenerate()
+            await this.decalGenerate()
 
         /*  gather references to monitor mesh nodes  */
         this.monitor        = this.scene.getNodeByName("Monitor")        as BABYLON.Nullable<BABYLON.TransformNode>
