@@ -7,6 +7,7 @@ ChangeLog
 
 - IMPROVEMENT: switch Pillar from FRONT to BACK layer again
 - IMPROVEMENT: add FreeD information to control UI for each camera
+- IMPROVEMENT: in the control UI, indicate with the RESET button whether the value is a default one
 
 2.4.3 (2025-02-07)
 ------------------
