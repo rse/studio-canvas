@@ -649,8 +649,9 @@ export default class CanvasRenderer extends EventEmitter {
         /*  initialize canvas mode  */
         this.canvasMode = 0
 
-        /*  dispose regular textures  */
-        await this.canvasDisposeTextures(this.canvasMode)
+        /*  dispose all regular textures  */
+        await this.canvasDisposeTextures(0)
+        await this.canvasDisposeTextures(1)
 
         /*  reset the mode switching fader  */
         const modeTexFade = material.getBlockByName("ModeTextureFade") as
@@ -691,8 +692,9 @@ export default class CanvasRenderer extends EventEmitter {
         /*  unfreeze material  */
         this.canvasMaterial?.unfreeze()
 
-        /*  dispose regular textures  */
-        await this.canvasDisposeTextures(this.canvasMode)
+        /*  dispose all regular textures  */
+        await this.canvasDisposeTextures(0)
+        await this.canvasDisposeTextures(1)
 
         /*  dispose procedural texture  */
         this.canvasTexture?.dispose()
@@ -719,7 +721,7 @@ export default class CanvasRenderer extends EventEmitter {
         /*  reset textures  */
         await this.canvasDisposeTextures(this.canvasMode)
 
-        /*  determine new texture(s)  */
+        /*  load new texture(s)  */
         this.emit("log", "INFO", "canvas reconfigure (load textures)")
         const createTexture = async (url: string, canvas: HTMLCanvasElement) => {
             /*  fetch image from URL and decode PNG/JPEG format  */

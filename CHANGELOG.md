@@ -2,13 +2,14 @@
 ChangeLog
 =========
 
-2.4.3 (2025-02-06)
+2.4.3 (2025-02-07)
 ------------------
 
 - IMPROVEMENT: revamped the Canvas rendering to support fading between two configurations
 - UPDATE: update dependencies
 - CLEANUP: replaced deprecated API call
 - CLEANUP: remove unused variables
+- CLEANUP: cleanup code
 
 2.4.2 (2025-02-04)
 ------------------
