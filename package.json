@@ -52,7 +52,6 @@
         "@types/locks":                     "0.2.3",
         "@types/write-file-atomic":         "4.0.3",
 
-        "stmux":                            "1.8.10",
         "chalk":                            "5.4.1",
         "minimatch":                        "10.0.1",
         "glob-promise":                     "6.0.7",

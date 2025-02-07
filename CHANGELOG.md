@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+2.4.4 (2025-02-07)
+------------------
+
+- IMPROVEMENT: add FreeD information to control UI for each camera
+
 2.4.3 (2025-02-07)
 ------------------
 

@@ -2056,6 +2056,20 @@
                                 and PTZ of the virtual camera via the <i>FreeD</i> information emitted by
                                 the physical camera.
                             </div>
+                            <div class="freed">
+                                <div class="freed-box">
+                                    <div class="label">PAN</div>
+                                    <div class="value">{{ (camState.get(cam)?.pan ?? 0).toFixed(2) }}</div>
+                                </div>
+                                <div class="freed-box">
+                                    <div class="label">TILT</div>
+                                    <div class="value">{{ (camState.get(cam)?.tilt ?? 0).toFixed(2) }}</div>
+                                </div>
+                                <div class="freed-box">
+                                    <div class="label">ZOOM</div>
+                                    <div class="value">{{ (camState.get(cam)?.zoom ?? 0).toFixed(2) }}</div>
+                                </div>
+                            </div>
                             <div class="control">
                                 <div class="label1">hull X-pos</div>
                                 <div class="label2">(shift bwd/fwd)</div>
@@ -2799,6 +2813,33 @@
             &:hover
                 background-color: var(--color-acc-bg-5)
                 color: var(--color-acc-fg-5)
+    .freed
+        display: flex
+        flex-direction: row
+        align-items: center
+        justify-content: center
+        .freed-box
+            width: 100px
+            margin-right: 10px
+            margin-bottom: 20px
+            display: flex
+            flex-direction: column
+            align-items: center
+            justify-content: center
+            background-color: var(--color-std-bg-1)
+            color: var(--color-std-fg-3)
+            border-radius: 4px
+            .label
+                width: 100%
+                padding: 2px 0 2px 0
+                font-weight: 200
+                background-color: var(--color-std-bg-2)
+                text-align: center
+            .value
+                padding: 4px 0 4px 0
+                font-weight: bold
+                font-size: 125%
+                color: var(--color-std-fg-5)
     .mixer
         .cams
             margin-right: 20px
@@ -2907,10 +2948,12 @@ import Ducky               from "ducky"
 import Slider              from "@vueform/slider"
 import Toggle              from "@vueform/toggle"
 import axios               from "axios"
+import moment              from "moment"
 import PerfectScrollbar    from "perfect-scrollbar"
 import { Tabs, Tab }       from "vue3-tabs-component"
 import { ImageEntry }      from "../common/app-canvas"
 import { MediaEntry }      from "../common/app-media"
+import { FreeDState }      from "../common/app-freed"
 import {
     StateType, StateTypePartial,
     StateSchema, StateSchemaPartial,
@@ -2919,6 +2962,7 @@ import {
     StateUtil
 } from "../common/app-state"
 import { MixerState, MixerFPS } from "../common/app-mixer"
+import FreeD from "../server/app-freed"
 </script>
 
 <script lang="ts">
@@ -3012,6 +3056,7 @@ export default defineComponent({
             locked: [ false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false, false ]
         },
         state: StateDefault as StateType,
+        camState: new Map<string, FreeDState>(),
         watchState: true,
         preview: {
             opts: {
@@ -3052,6 +3097,7 @@ export default defineComponent({
             (this.$refs[this.selectTab0] as any).selectTab(`#${this.selectTab1}`)
 
         /*  establish server connection  */
+        this.log("INFO", "establish WebSocket server connection")
         const ws = new RecWebSocket(this.wsUrl + "/control", [], {
             reconnectionDelayGrowFactor: 1.3,
             maxReconnectionDelay:        4000,
@@ -3059,8 +3105,15 @@ export default defineComponent({
             connectionTimeout:           4000,
             minUptime:                   5000
         })
+        let opened = 0
         ws.addEventListener("open", (ev) => {
+            if (opened++ > 0)
+                this.log("INFO", "re-established WebSocket server connection")
             this.connection.online = true
+            ws.send(JSON.stringify({ cmd: "SUBSCRIBE", arg: "CAM1" }))
+            ws.send(JSON.stringify({ cmd: "SUBSCRIBE", arg: "CAM2" }))
+            ws.send(JSON.stringify({ cmd: "SUBSCRIBE", arg: "CAM3" }))
+            ws.send(JSON.stringify({ cmd: "SUBSCRIBE", arg: "CAM4" }))
         })
         ws.addEventListener("close", (ev) => {
             this.connection.online = false
@@ -3082,7 +3135,12 @@ export default defineComponent({
                 this.raiseStatus("warning", "invalid WebSocket message received", 1000)
                 return
             }
-            if (data.cmd === "STATE") {
+            if (data.cmd === "PTZ") {
+                const cam   = data.arg.cam   as string
+                const state = data.arg.state as FreeDState
+                this.camState.set(cam, state)
+            }
+            else if (data.cmd === "STATE") {
                 const state = data.arg.state as StateTypePartial
                 const errors = [] as Array<string>
                 if (!Ducky.validate(state, StateSchemaPartial, errors))
@@ -3162,7 +3220,12 @@ export default defineComponent({
         }, { immediate: true, deep: true })
     },
     methods: {
-        /*  raise a temporaily visible status message in the footer  */
+        log (level: string, msg: string) {
+            const timestamp = moment().format("YYYY-MM-DD hh:mm:ss.SSS")
+            console.log(`${timestamp} [${level}]: ${msg}`)
+        },
+
+        /*  raise a temporarily visible status message in the footer  */
         raiseStatus (kind: string, msg: string, duration = 4000) {
             this.status.kind = kind
             this.status.msg  = msg
