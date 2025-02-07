@@ -1168,7 +1168,7 @@
                             <div class="desc">
                                 The <b>Pillar</b> is the optional pillar with an embedded display,
                                 which can be projected into the room in the scene BACK layer.
-                                It can be scaled in size, and positioned on in a radial way in front of the scene. It
+                                It can be scaled in size, and positioned in a radial way in front of the scene. It
                                 can be scaled in size, positioned in a radial way, the opacity of its display
                                 controlled, a border radius applied, a border cropping applied, and a chroma-key
                                 filter applied.
@@ -1923,7 +1923,7 @@
                         <tab id="pane" name="Pane">
                             <div class="desc">
                                 The <b>Pane</b> is the optional TV-style glass box which can be projected
-                                into the room in the scene FRONT layer. It can be scaled in size, and positioned on in a
+                                into the room in the scene FRONT layer. It can be scaled in size, and positioned in a
                                 radial way in front of the scene. It is similar to <b>Monitor</b>
                                 but shown on the front instead of the back of the scene.
                             </div>
