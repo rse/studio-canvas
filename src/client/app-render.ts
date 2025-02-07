@@ -248,14 +248,14 @@ export default class CanvasRenderer extends EventEmitter {
         "Monitor":                      { back: true,  front: false },
         "Monitor-Case":                 { back: true,  front: false },
         "Monitor-Screen":               { back: true,  front: false },
+        "Pillar":                       { back: true,  front: false },
+        "Pillar-Case":                  { back: true,  front: false },
+        "Pillar-Screen":                { back: true,  front: false },
         "Plate":                        { back: false, front: true  },
         "Hologram":                     { back: false, front: true  },
         "Pane":                         { back: false, front: true  },
         "Pane-Case":                    { back: false, front: true  },
         "Pane-Screen":                  { back: false, front: true  },
-        "Pillar":                       { back: false, front: true  },
-        "Pillar-Case":                  { back: false, front: true  },
-        "Pillar-Screen":                { back: false, front: true  },
         "Mask":                         { back: false, front: true  },
         "Mask-Background":              { back: false, front: true  },
         "Mask-Display":                 { back: false, front: true  },
@@ -444,7 +444,7 @@ export default class CanvasRenderer extends EventEmitter {
         this.pillarDisplay = this.scene.getMeshByName("Pillar-Screen") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.pillar === null || this.pillarCase === null || this.pillarDisplay === null)
             throw new Error("cannot find pillar mesh nodes")
-        if (this.layer === "front")
+        if (this.layer === "back")
             this.pillar.setEnabled(false)
 
         /*  gather references to plate mesh nodes  */
@@ -1437,6 +1437,11 @@ export default class CanvasRenderer extends EventEmitter {
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.monitor)]
                 && this.monitorDisplay.isEnabled())
                 await this.applyDisplayMaterial("monitor", this.monitorDisplay, this.monitorOpacity, 0, 0, this.monitorChromaKey)
+            if (this.layer === "back"
+                && this.pillarDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.displaySourceMap.pillar)]
+                && this.pillarDisplay.isEnabled())
+                await this.applyDisplayMaterial("pillar", this.pillarDisplay, this.pillarOpacity, 0, 0, this.pillarChromaKey)
             if (this.layer === "front"
                 && this.plateDisplay !== null
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.plate)]
@@ -1452,11 +1457,6 @@ export default class CanvasRenderer extends EventEmitter {
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.pane)]
                 && this.paneDisplay.isEnabled())
                 await this.applyDisplayMaterial("pane", this.paneDisplay, this.paneOpacity, 0, 0, this.paneChromaKey)
-            if (this.layer === "front"
-                && this.pillarDisplay !== null
-                && modifiedMedia[this.mapMediaId(this.displaySourceMap.pillar)]
-                && this.pillarDisplay.isEnabled())
-                await this.applyDisplayMaterial("pillar", this.pillarDisplay, this.pillarOpacity, 0, 0, this.pillarChromaKey)
             if (this.layer === "front"
                 && this.maskDisplay !== null
                 && modifiedMedia[this.mapMediaId(this.displaySourceMap.mask)]
@@ -2318,7 +2318,7 @@ export default class CanvasRenderer extends EventEmitter {
         /*  adjust pillar  */
         if (state.pillar !== undefined
             && this.pillar !== null && this.pillarCase !== null && this.pillarDisplay !== null
-            && this.layer === "front") {
+            && this.layer === "back") {
             if (state.pillar.source !== undefined && this.displaySourceMap.pillar !== state.pillar.source) {
                 this.displaySourceMap.pillar = state.pillar.source
                 if (this.pillarDisplay.isEnabled())
