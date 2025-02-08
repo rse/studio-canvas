@@ -3209,7 +3209,7 @@
                 outline: none
                 border-radius: 4px
                 border: 0
-                background-color: var(--color-acc-bg-1)
+                background-color: var(--color-acc-bg-2)
                 color: var(--color-acc-fg-1)
                 padding: 2px 8px 2px 8px
                 text-align: center
@@ -3224,6 +3224,8 @@
             font-weight: 200
             cursor: pointer
             &.reset
+                margin-left: 10px
+                margin-right: 10px
                 background-color: var(--color-std-bg-2)
                 color: var(--color-std-fg-5)
                 &:hover
