@@ -8,6 +8,7 @@ ChangeLog
 - IMPROVEMENT: switch Pillar from FRONT to BACK layer again
 - IMPROVEMENT: in the control UI, indicate with the RESET button whether the value is a default one
 - IMPROVEMENT: lift Pillar by default upwards
+- IMPROVEMENT: scale pillar as a whole to not move the display on the pillar case
 
 2.4.4 (2025-02-07)
 ------------------

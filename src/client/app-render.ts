@@ -112,8 +112,7 @@ export default class CanvasRenderer extends EventEmitter {
         positionCaseX: 0, positionDisplayX: 0
     }
     private pillarBase        = {
-        scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
-        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
+        scaleX:        0, scaleY:        0, scaleZ:        0,
         rotationZ:     0, positionZ:     0,
         positionCaseX: 0, positionDisplayX: 0
     }
@@ -555,12 +554,9 @@ export default class CanvasRenderer extends EventEmitter {
         this.paneBase.positionDisplayX    = this.paneDisplay.position.x
 
         /*  initialize pillar base values  */
-        this.pillarBase.scaleCaseX        = this.pillarCase.scaling.x
-        this.pillarBase.scaleCaseY        = this.pillarCase.scaling.y
-        this.pillarBase.scaleCaseZ        = this.pillarCase.scaling.z
-        this.pillarBase.scaleDisplayX     = this.pillarDisplay.scaling.x
-        this.pillarBase.scaleDisplayY     = this.pillarDisplay.scaling.y
-        this.pillarBase.scaleDisplayZ     = this.pillarDisplay.scaling.z
+        this.pillarBase.scaleX            = this.pillar.scaling.x
+        this.pillarBase.scaleY            = this.pillar.scaling.y
+        this.pillarBase.scaleZ            = this.pillar.scaling.z
         this.pillarBase.rotationZ         = this.pillar.rotation.z
         this.pillarBase.positionZ         = this.pillar.position.z
         this.pillarBase.positionCaseX     = this.pillarCase.position.x
@@ -2332,12 +2328,9 @@ export default class CanvasRenderer extends EventEmitter {
                 }
             }
             if (state.pillar.scale !== undefined) {
-                this.pillarCase.scaling.x    = this.pillarBase.scaleCaseX    * state.pillar.scale
-                this.pillarCase.scaling.y    = this.pillarBase.scaleCaseY    * state.pillar.scale
-                this.pillarCase.scaling.z    = this.pillarBase.scaleCaseZ    * state.pillar.scale
-                this.pillarDisplay.scaling.x = this.pillarBase.scaleDisplayX * state.pillar.scale
-                this.pillarDisplay.scaling.y = this.pillarBase.scaleDisplayY * state.pillar.scale
-                this.pillarDisplay.scaling.z = this.pillarBase.scaleDisplayZ * state.pillar.scale
+                this.pillar.scaling.x    = this.pillarBase.scaleX * state.pillar.scale
+                this.pillar.scaling.y    = this.pillarBase.scaleY * state.pillar.scale
+                this.pillar.scaling.z    = this.pillarBase.scaleZ * state.pillar.scale
             }
             if (state.pillar.rotate !== undefined) {
                 this.pillar.rotationQuaternion = BABYLON.Quaternion.Identity()
