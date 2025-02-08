@@ -2820,6 +2820,7 @@
         padding: 2px 4px 2px 4px
         font-size: 11pt
     .desc
+        width: 90%
         font-weight: 200
         color: var(--color-std-fg-3)
         margin-bottom: 20px
