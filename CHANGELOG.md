@@ -2,7 +2,7 @@
 ChangeLog
 =========
 
-2.4.5 (2025-02-07)
+2.4.5 (2025-02-08)
 ------------------
 
 - IMPROVEMENT: switch Pillar from FRONT to BACK layer again
