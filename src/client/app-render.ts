@@ -2391,8 +2391,15 @@ export default class CanvasRenderer extends EventEmitter {
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.fps === 0 ? 1 : this.fps)
                         const framesTotal = this.pillarFade * fps
+                        this.pillarCase.material!.alpha = 0
+                        this.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
+                        this.pillarCase.material!.backFaceCulling = true
+                        this.pillarCase.material!.forceDepthWrite = true
+                        this.pillarCase.receiveShadows = true
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.pillarCase,
-                            "visibility", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
+                            "material.alpha", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease, () => {
+                                this.pillarCase!.material!.transparencyMode = BABYLON.Material.MATERIAL_OPAQUE
+                            })!
                         if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.pillarDisplay.material
                             material.setFloat("visibility", 0.0)
@@ -2429,6 +2436,8 @@ export default class CanvasRenderer extends EventEmitter {
                 else if (!state.pillar.enable) {
                     if (this.pillarFade > 0 && this.fps > 0) {
                         this.emit("log", "INFO", "disabling pillar (fading: start)")
+                        this.pillarCase.material!.alpha = 1
+                        this.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
                         this.pillarCase.visibility = 1
                         this.pillarCase.setEnabled(true)
                         this.pillarDisplay.visibility = 1
@@ -2438,7 +2447,7 @@ export default class CanvasRenderer extends EventEmitter {
                         const fps = (this.fps === 0 ? 1 : this.fps)
                         const framesTotal = this.pillarFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.pillarCase,
-                            "visibility", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
+                            "material.alpha", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
                         if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.pillarDisplay.material
                             material.setFloat("visibility", 1.0)
