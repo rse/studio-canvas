@@ -701,6 +701,54 @@ export default class CanvasRenderer extends EventEmitter {
         this.canvasMaterial = null
     }
 
+    async createTexture (url: string, canvas: HTMLCanvasElement) {
+        /*  fetch image from URL and decode PNG/JPEG format  */
+        const imageBitmap = await (new Promise((resolve, reject) => {
+            this.imageLoader.addEventListener("message",
+                (event: MessageEvent<{ data: ImageBitmap } | { error: string }>) => {
+                    const data = event.data
+                    if ("error" in data)
+                        reject(new Error(`Error from "ImageLoader" worker: ${data.error}`))
+                    else
+                        resolve(data.data)
+                }, { once: true }
+            )
+            this.imageLoader.postMessage({ url })
+        }) as Promise<ImageBitmap>)
+
+        /*  give UI thread a chance to continue rendering  */
+        await new Promise((resolve) => setTimeout(resolve, 10))
+
+        /*  draw bitmap into canvas
+            (NOTICE: this is a 40ms CPU burst)  */
+        const ctx = canvas.getContext("2d")!
+        canvas.width  = imageBitmap.width
+        canvas.height = imageBitmap.height
+        ctx.drawImage(imageBitmap, 0, 0)
+
+        /*  give UI thread a chance to continue rendering  */
+        await new Promise((resolve) => setTimeout(resolve, 10))
+
+        /*  create dynamic texture from canvas
+            (NOTICE: this is a 10ms CPU burst)  */
+        const texture = new BABYLON.DynamicTexture("canvas", canvas, {
+            scene:        this.scene,
+            format:       BABYLON.Engine.TEXTUREFORMAT_RGBA,
+            samplingMode: BABYLON.Texture.LINEAR_LINEAR,
+            invertY:      false
+        })
+        texture.update(false, false, true)
+
+        /*  give UI thread a chance to continue rendering  */
+        await new Promise((resolve) => setTimeout(resolve, 10))
+
+        /*  cleanup  */
+        canvas.width  = 1
+        canvas.height = 1
+        ctx.clearRect(0, 0, 1, 1)
+        return texture!
+    }
+
     /*  reconfigure canvas/wall texture(s)  */
     async canvasReconfigure () {
         /*  sanity check situation  */
@@ -719,62 +767,15 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  load new texture(s)  */
         this.emit("log", "INFO", "canvas reconfigure (load textures)")
-        const createTexture = async (url: string, canvas: HTMLCanvasElement) => {
-            /*  fetch image from URL and decode PNG/JPEG format  */
-            const imageBitmap = await (new Promise((resolve, reject) => {
-                this.imageLoader.addEventListener("message",
-                    (event: MessageEvent<{ data: ImageBitmap } | { error: string }>) => {
-                        const data = event.data
-                        if ("error" in data)
-                            reject(new Error(`Error from "ImageLoader" worker: ${data.error}`))
-                        else
-                            resolve(data.data)
-                    }, { once: true }
-                )
-                this.imageLoader.postMessage({ url })
-            }) as Promise<ImageBitmap>)
-
-            /*  give UI thread a chance to continue rendering  */
-            await new Promise((resolve) => setTimeout(resolve, 10))
-
-            /*  draw bitmap into canvas
-                (NOTICE: this is a 40ms CPU burst)  */
-            const ctx = canvas.getContext("2d")!
-            canvas.width  = imageBitmap.width
-            canvas.height = imageBitmap.height
-            ctx.drawImage(imageBitmap, 0, 0)
-
-            /*  give UI thread a chance to continue rendering  */
-            await new Promise((resolve) => setTimeout(resolve, 10))
-
-            /*  create dynamic texture from canvas
-                (NOTICE: this is a 10ms CPU burst)  */
-            const texture = new BABYLON.DynamicTexture("canvas", canvas, {
-                scene:        this.scene,
-                format:       BABYLON.Engine.TEXTUREFORMAT_RGBA,
-                samplingMode: BABYLON.Texture.LINEAR_LINEAR,
-                invertY:      false
-            })
-            texture.update(false, false, true)
-
-            /*  give UI thread a chance to continue rendering  */
-            await new Promise((resolve) => setTimeout(resolve, 10))
-
-            /*  cleanup  */
-            canvas.width  = 1
-            canvas.height = 1
-            ctx.clearRect(0, 0, 1, 1)
-            return texture!
-        }
         const canvas = document.createElement("canvas")
         this.canvasState[this.canvasMode].canvas1 = canvas
         this.canvasState[this.canvasMode].texture1 =
-            await createTexture(this.canvasConfig[this.canvasMode].texture1, canvas)
+            await this.createTexture(this.canvasConfig[this.canvasMode].texture1, canvas)
         if (this.canvasConfig[this.canvasMode].texture2 !== "") {
             const canvas = document.createElement("canvas")
             this.canvasState[this.canvasMode].canvas2 = canvas
             this.canvasState[this.canvasMode].texture2 =
-                await createTexture(this.canvasConfig[this.canvasMode].texture2, canvas)
+                await this.createTexture(this.canvasConfig[this.canvasMode].texture2, canvas)
         }
         else {
             this.canvasState[this.canvasMode].canvas2  = null
@@ -914,9 +915,10 @@ export default class CanvasRenderer extends EventEmitter {
             throw new Error("no such input block named 'ModeTextureFade' found")
         await new Promise((resolve, reject) => {
             let fade        = modeTexFade.value
-            let fadeSign    = fade === 0.0 ? +1 : -1
+            const fadeSign  = fade === 0.0 ? +1 : -1
             const fadeTrans = this.fadeSwitch * 1000
             const fader = () => {
+                /*  reset timer (to not confuse stopping below)  */
                 this.modeTimer = null
 
                 /*  apply next fading step  */
@@ -924,11 +926,11 @@ export default class CanvasRenderer extends EventEmitter {
                 const fadeStep = 1.0 / (fadeTrans / fadeInterval)
                 fade = fade + (fadeSign * fadeStep)
                 let wait = fadeInterval
-                if      (fade > 1.0) { fade = 1.0; fadeSign = -1; wait = 0 }
-                else if (fade < 0.0) { fade = 0.0; fadeSign = +1; wait = 0 }
+                if (fade > 1.0 || fade < 0.0)
+                    wait = 0
                 modeTexFade.value = fade
 
-                /*  wait for next iteration  */
+                /*  wait for next iteration or stop processing  */
                 if (wait > 0)
                     this.modeTimer = setTimeout(fader, wait)
                 else
@@ -951,18 +953,26 @@ export default class CanvasRenderer extends EventEmitter {
         this.canvasMode = (this.canvasMode + 1) % 2
 
         /*  reconfigure the new textures  */
-        await this.canvasReconfigure()
+        await this.canvasReconfigure().then(async () => {
+            /*  (re-)start the optional fader  */
+            await this.canvasFaderStart()
 
-        /*  (re-)start the optional fader  */
-        await this.canvasFaderStart()
+            /*  fade to new mode  */
+            await this.canvasModeFade()
 
-        /*  fade to new mode  */
-        await this.canvasModeFade()
+            /*  dispose old textures  */
+            await this.canvasDisposeTextures((this.canvasMode + 1) % 2)
 
-        /*  dispose old textures  */
-        await this.canvasDisposeTextures((this.canvasMode + 1) % 2)
+            this.emit("log", "INFO", "switching canvas (end)")
+        }).catch(async () => {
+            /*  switch back to previous mode  */
+            this.canvasMode = (this.canvasMode + 1) % 2
 
-        this.emit("log", "INFO", "switching canvas (end)")
+            /*  (re-)start the optional fader  */
+            await this.canvasFaderStart()
+
+            this.emit("log", "INFO", "switching canvas (end, FAILED)")
+        })
     }
 
     /*  load video stream  */
