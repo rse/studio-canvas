@@ -5,15 +5,17 @@
 */
 
 /*  import external dependencies  */
-import EventEmitter   from "eventemitter2"
-import * as BABYLON   from "@babylonjs/core"
-import                     "@babylonjs/loaders/glTF"
+import EventEmitter         from "eventemitter2"
+import * as BABYLON         from "@babylonjs/core"
+import                           "@babylonjs/loaders/glTF"
 
-/*  import internal dependencies  */
-import ShaderMaterial from "./app-render-shader"
-import PTZ            from "./app-render-ptz"
-import { MixerState } from "../common/app-mixer"
-import { FreeDState } from "../common/app-freed"
+/*  import internal dependencies (client-side)  */
+import ShaderMaterial       from "./app-render-shader"
+import PTZ                  from "./app-render-ptz"
+
+/*  import internal dependencies (shared)  */
+import { MixerState }       from "../common/app-mixer"
+import { FreeDState }       from "../common/app-freed"
 import { StateTypePartial } from "../common/app-state"
 
 /*  utility type  */
