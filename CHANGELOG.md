@@ -5,6 +5,7 @@ ChangeLog
 2.5.0 (2025-02-15)
 ------------------
 
+- REFACTORING: split control UI into manageable code chunks
 - CLEANUP: cleanup code by factoring out inner function
 - CLEANUP: simplifying fade timer logic
 - CLEANUP: adding a failure case for the canvas reconfiguration

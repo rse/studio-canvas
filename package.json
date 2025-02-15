@@ -1,8 +1,8 @@
 {
     "private":         true,
     "name":            "Studio-Canvas",
-    "version":         "2.4.6",
-    "x-date":          "2025-02-09",
+    "version":         "2.5.0",
+    "x-date":          "2025-02-15",
     "homepage":        "https://github.com/rse/studio-canvas",
     "description":     "Real-Time Virtual Studio Canvas Rendering",
     "author": {
