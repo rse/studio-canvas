@@ -2,6 +2,13 @@
 ChangeLog
 =========
 
+2.5.0 (2025-02-15)
+------------------
+
+- CLEANUP: cleanup code by factoring out inner function
+- CLEANUP: simplifying fade timer logic
+- CLEANUP: adding a failure case for the canvas reconfiguration
+
 2.4.6 (2025-02-09)
 ------------------
 
