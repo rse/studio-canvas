@@ -10,6 +10,8 @@ import * as BABYLON         from "@babylonjs/core"
 import                           "@babylonjs/loaders/glTF"
 
 /*  import internal dependencies (client-side)  */
+import State, { type ChromaKey } from "./app-render-state"
+import Config, { type CameraName } from "./app-render-config"
 import ShaderMaterial       from "./app-render-shader"
 import PTZ                  from "./app-render-ptz"
 
@@ -18,339 +20,123 @@ import { MixerState }       from "../common/app-mixer"
 import { FreeDState }       from "../common/app-freed"
 import { StateTypePartial } from "../common/app-state"
 
-/*  utility type  */
-type ChromaKey = { enable: boolean, threshold: number, smoothing: number }
 type VideoStackId = "monitor" | "decal" | "hologram" | "plate" | "pane" | "pillar" | "mask"
-type CanvasConfig = {
-    texture1:  string,
-    texture2:  string,
-    fadeTrans: number,
-    fadeWait:  number
-}
-type CanvasState = {
-    canvas1:  HTMLCanvasElement | null
-    canvas2:  HTMLCanvasElement | null
-    texture1: BABYLON.Nullable<BABYLON.Texture>
-    texture2: BABYLON.Nullable<BABYLON.Texture>
-}
 
-/*  the canvas rendering class  */
 export default class CanvasRenderer extends EventEmitter {
+    private state
+
     /*  (re-)configure camera (by name) and options (by URL)  */
     constructor (params: { layer: string, cameraName: string, ptzFreeD: boolean, ptzKeys: boolean }) {
         super()
-        this.cameraName  = params.cameraName
-        this.layer       = params.layer
-        this.ptzFreeD    = params.ptzFreeD
-        this.ptzKeys     = params.ptzKeys
-        this.flippedCam  = this.flippedCams.includes(params.cameraName)
+        this.state = new State()
+
+        this.state.cameraName  = params.cameraName
+        this.state.layer       = params.layer
+        this.state.ptzFreeD    = params.ptzFreeD
+        this.state.ptzKeys     = params.ptzKeys
+        this.state.flippedCam  = Config.flippedCams.includes(params.cameraName)
 
         /*  mapping of camera to type  */
-        const camNameToTypeMap = {
-            CAM1: "birddog",
-            CAM2: "sony",
-            CAM3: "sony",
-            CAM4: "birddog"
-        }
-        const cameraType = camNameToTypeMap[this.cameraName as "CAM1" | "CAM2" | "CAM3" | "CAM4"] as "birddog" | "panasonic" | "sony"
+        const cameraType = Config.camNameToTypeMap.get(
+            this.state.cameraName as CameraName)
+        if (!cameraType)
+            throw new Error("invalid camera")
 
         /*  instantiate PTZ  */
-        this.ptz     = new PTZ(cameraType)
-        this.ptzHull = new PTZ(cameraType)
-        this.ptzCase = new PTZ(cameraType)
-        this.ptzLens = new PTZ(cameraType)
+        this.state.ptz     = new PTZ(cameraType)
+        this.state.ptzHull = new PTZ(cameraType)
+        this.state.ptzCase = new PTZ(cameraType)
+        this.state.ptzLens = new PTZ(cameraType)
+
+        /*  worker for off-loading image loading and decoding  */
+        this.state.imageLoader = new Worker(new URL("./app-render-worker.js", import.meta.url))
     }
-
-    /*  internal parameter state  */
-    private established       = false
-    private ptzFreeD          = false
-    private ptzKeys           = false
-    private layer:            string
-    private cameraName:       string
-    private canvasMode        = 0
-    private canvasConfig      = [
-        { texture1: "", texture2: "", fadeTrans: 2 * 1000, fadeWait: 10 * 1000 },
-        { texture1: "", texture2: "", fadeTrans: 2 * 1000, fadeWait: 10 * 1000 }
-    ] as CanvasConfig[]
-    private decalRotate       = 0.0
-    private decalLift         = 0.0
-    private decalScale        = 1.0
-    private decalFade         = 0
-    private decalOpacity      = 1.0
-    private decalBorderRad    = 40.0
-    private decalBorderCrop   = 0.0
-    private decalChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    private monitorFade       = 0
-    private monitorOpacity    = 1.0
-    private monitorChromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    private paneFade          = 0
-    private paneOpacity       = 1.0
-    private paneChromaKey     = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    private pillarFade        = 0
-    private pillarOpacity     = 1.0
-    private pillarBorderRad   = 40.0
-    private pillarBorderCrop  = 0.0
-    private pillarChromaKey   = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    private maskBorderRad     = 0.0
-    private videoStream:      MediaStream | null = null
-    private videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
-    private videoStacks       = 2
-    private displaySourceMap    = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2", mask: "S2" } as { [ id: string ]: string }
-    private displayMeshMaterial = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
-    private displayMediaURL     = new Map<string, string>()
-    private displayMaterial2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
-    private displayTextureByURL = new Map<string, BABYLON.Texture>()
-    private displayTextureInfo  = new Map<BABYLON.Texture, { type: string, url: string, refs: number }>()
-    private monitorBase       = {
-        scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
-        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationZ:     0, positionZ:     0,
-        positionCaseX: 0, positionDisplayX: 0
-    }
-    private paneBase          = {
-        scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
-        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationZ:     0, positionZ:     0,
-        positionCaseX: 0, positionDisplayX: 0
-    }
-    private pillarBase        = {
-        scaleX:        0, scaleY:        0, scaleZ:        0,
-        rotationZ:     0, positionZ:     0,
-        positionCaseX: 0, positionDisplayX: 0
-    }
-    private avatar1Scale      = { x: 0, y: 0, z: 0 }
-    private avatar2Scale      = { x: 0, y: 0, z: 0 }
-    private flippedCams       = [ "" ]
-    private flippedCam        = false
-    private plateFade         = 0
-    private plateOpacity      = 1.0
-    private plateBorderRad    = 40.0
-    private plateBorderCrop   = 0.0
-    private plateChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    private plateBase = {
-        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationZ:     0, positionZ:     0, positionX:     0
-    }
-    private hologramFade         = 0
-    private hologramOpacity      = 1.0
-    private hologramBorderRad    = 40.0
-    private hologramBorderCrop   = 0.0
-    private hologramChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    private hologramBase = {
-        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationZ:     0, positionZ:     0, positionX:     0
-    }
-    private maskBase = {
-        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0
-    }
-
-    /*  frames per second (FPS) control  */
-    private fps = 30
-    private fpsFactor = {
-        1: 60, 2: 30, 3: 20, 4: 15, 5: 12, 6: 10, 10: 6, 12: 5, 15: 4, 20: 3, 30: 2, 60: 1
-    } as { [ fps: number ]: number }
-    private fpsProgram = 30
-    private fpsPreview = 30
-    private fpsOther   = 30
-
-    /*  current camera mixer state  */
-    private mixerProgram = ""
-    private mixerPreview = ""
-
-    /*  latest sync time  */
-    private syncTime = 0
-
-    /*  effectively constant values of canvas/wall  */
-    private wallWidth   = 10540
-    private wallHeight  = 3570
-
-    /*  effectively constant values of video stream  */
-    private videoStreamDevice = ""
-    private videoStreamWidth  = 0
-    private videoStreamHeight = 0
-    private videoStreamFPS    = 0
-
-    /*  rendering object references  */
-    private engine:          BABYLON.Nullable<BABYLON.Engine>         = null
-    private scene:           BABYLON.Nullable<BABYLON.Scene>          = null
-    private optimizer:       BABYLON.Nullable<BABYLON.SceneOptimizer> = null
-    private cameraHull:      BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private cameraCase:      BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private cameraLens:      BABYLON.Nullable<BABYLON.FreeCamera>     = null
-    private monitor:         BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private monitorCase:     BABYLON.Nullable<BABYLON.Mesh>           = null
-    private monitorDisplay:  BABYLON.Nullable<BABYLON.Mesh>           = null
-    private pane:            BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private paneCase:        BABYLON.Nullable<BABYLON.Mesh>           = null
-    private paneDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
-    private pillar:          BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private pillarCase:      BABYLON.Nullable<BABYLON.Mesh>           = null
-    private pillarDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
-    private avatar1:         BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private avatar1Model:    BABYLON.Nullable<BABYLON.Mesh>           = null
-    private avatar2:         BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private avatar2Model:    BABYLON.Nullable<BABYLON.Mesh>           = null
-    private references:      BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private wall:            BABYLON.Nullable<BABYLON.Mesh>           = null
-    private decal:           BABYLON.Nullable<BABYLON.Mesh>           = null
-    private light1:          BABYLON.Nullable<BABYLON.PointLight>     = null
-    private light2:          BABYLON.Nullable<BABYLON.PointLight>     = null
-    private light3:          BABYLON.Nullable<BABYLON.PointLight>     = null
-    private canvasMaterial:  BABYLON.Nullable<BABYLON.NodeMaterial>   = null
-    private canvasTexture:   BABYLON.Nullable<BABYLON.Texture>        = null
-    private canvasState = [
-        { texture1: null, texture2: null },
-        { texture1: null, texture2: null }
-    ] as CanvasState[]
-    private wallRotBase:     BABYLON.Nullable<BABYLON.Quaternion>     = null
-    private plate:           BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private plateDisplay:    BABYLON.Nullable<BABYLON.Mesh>           = null
-    private hologram:        BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private hologramDisplay: BABYLON.Nullable<BABYLON.Mesh>           = null
-    private mask:            BABYLON.Nullable<BABYLON.TransformNode>  = null
-    private maskDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
-    private maskBackground:  BABYLON.Nullable<BABYLON.Mesh>           = null
-    private maskCamLens:     BABYLON.Nullable<BABYLON.FreeCamera>     = null
-
-    /*  PTZ sub-module  */
-    private ptz:     PTZ
-    private ptzHull: PTZ
-    private ptzCase: PTZ
-    private ptzLens: PTZ
-
-    /*  FreeD state  */
-    private state: FreeDState | null = null
-
-    /*  cross-fade timer  */
-    private fadeTimer: ReturnType<typeof setTimeout> | null = null
-    private modeTimer: ReturnType<typeof setTimeout> | null = null
-    private fadeSwitch = 2.0
-
-    /*  scene nodes relevant for layer-specific rendering  */
-    private layerNodes = {
-        "Floor":                        { back: true,  front: false },
-        "Control-Room-Wall-East":       { back: true,  front: false },
-        "Control-Room-Wall-North":      { back: true,  front: false },
-        "Control-Room-Wall-South":      { back: true,  front: false },
-        "Control-Room-Wall-West":       { back: true,  front: false },
-        "Stage-Room-Pillar":            { back: true,  front: false },
-        "Stage-Wall-East":              { back: true,  front: false },
-        "Stage-Wall-North":             { back: true,  front: false },
-        "Stage-Wall-South":             { back: true,  front: false },
-        "Stage-Wall-West":              { back: true,  front: false },
-        "Stage-Wall-West_primitive0":   { back: true,  front: false },
-        "Stage-Wall-West_primitive1":   { back: true,  front: false },
-        "Wall":                         { back: true,  front: false },
-        "Avatar1":                      { back: true,  front: false },
-        "Avatar2":                      { back: true,  front: false },
-        "Reference":                    { back: true,  front: false },
-        "DecalRay-Begin":               { back: true,  front: false },
-        "DecalRay-End":                 { back: true,  front: false },
-        "Monitor":                      { back: true,  front: false },
-        "Monitor-Case":                 { back: true,  front: false },
-        "Monitor-Screen":               { back: true,  front: false },
-        "Pillar":                       { back: true,  front: false },
-        "Pillar-Case":                  { back: true,  front: false },
-        "Pillar-Screen":                { back: true,  front: false },
-        "Plate":                        { back: false, front: true  },
-        "Hologram":                     { back: false, front: true  },
-        "Pane":                         { back: false, front: true  },
-        "Pane-Case":                    { back: false, front: true  },
-        "Pane-Screen":                  { back: false, front: true  },
-        "Mask":                         { back: false, front: true  },
-        "Mask-Background":              { back: false, front: true  },
-        "Mask-Display":                 { back: false, front: true  },
-        "Dummy":                        { back: true,  front: true  }
-    } as { [ name: string ]: { back: boolean, front: boolean } }
-
-    /*  worker for off-loading image loading and decoding  */
-    private imageLoader = new Worker(new URL("./app-render-worker.js", import.meta.url))
 
     /*  initially establish rendering engine and scene  */
     async establish (canvas: HTMLCanvasElement) {
         /*  establish rendering engine on canvas element  */
-        this.engine = new BABYLON.Engine(canvas, true, {
+        this.state.engine = new BABYLON.Engine(canvas, true, {
             useExactSrgbConversions: true,
             doNotHandleContextLost:  true
         })
-        if (this.engine === null)
+        if (this.state.engine === null)
             throw new Error("cannot establish Babylon engine")
         window.addEventListener("resize", () => {
-            this.engine!.resize()
+            this.state.engine!.resize()
         })
 
         /*  load the Blender glTF scene export  */
         this.emit("log", "INFO", "loading Studio Canvas scene")
         BABYLON.SceneLoader.ShowLoadingScreen = false
-        this.scene = await BABYLON.SceneLoader.LoadAsync("/res/", "canvas-scene.glb", this.engine)
-        if (this.scene === null)
+        this.state.scene = await BABYLON.SceneLoader.LoadAsync("/res/", "canvas-scene.glb", this.state.engine)
+        if (this.state.scene === null)
             throw new Error("failed to create scene")
         await new Promise((resolve, reject) => {
-            this.scene!.executeWhenReady(() => {
+            this.state.scene!.executeWhenReady(() => {
                 resolve(true)
             })
         })
 
         /*  create studio environment for correct texture image colors  */
-        if (this.layer === "back") {
+        if (this.state.layer === "back") {
             this.emit("log", "INFO", "loading opaque environment")
-            this.scene.createDefaultEnvironment({
+            this.state.scene.createDefaultEnvironment({
                 environmentTexture: "/res/canvas-scene.env",
                 skyboxColor: new BABYLON.Color3(0.5, 0.5, 0.5)
             })
         }
-        else if (this.layer === "front") {
+        else if (this.state.layer === "front") {
             this.emit("log", "INFO", "creating transparent environment")
-            this.scene.createDefaultEnvironment({
+            this.state.scene.createDefaultEnvironment({
                 environmentTexture: "/res/canvas-scene.env",
                 createGround: false,
                 createSkybox: false
             })
-            this.scene.clearColor = new BABYLON.Color4(0.5, 0.5, 0.5, 0)
+            this.state.scene.clearColor = new BABYLON.Color4(0.5, 0.5, 0.5, 0)
         }
 
         /*  use particular camera of scene  */
-        this.cameraHull = this.scene.getNodeByName(this.cameraName + "-Hull") as BABYLON.Nullable<BABYLON.TransformNode>
-        if (this.cameraHull === null)
+        this.state.cameraHull = this.state.scene.getNodeByName(this.state.cameraName + "-Hull") as BABYLON.Nullable<BABYLON.TransformNode>
+        if (this.state.cameraHull === null)
             throw new Error("cannot find camera hull")
-        this.cameraCase = this.scene.getNodeByName(this.cameraName + "-Case") as BABYLON.Nullable<BABYLON.TransformNode>
-        if (this.cameraCase === null)
+        this.state.cameraCase = this.state.scene.getNodeByName(this.state.cameraName + "-Case") as BABYLON.Nullable<BABYLON.TransformNode>
+        if (this.state.cameraCase === null)
             throw new Error("cannot find camera case")
-        this.cameraLens = this.scene.getCameraByName(this.cameraName + "-Lens") as BABYLON.FreeCamera
-        if (this.cameraLens === null)
+        this.state.cameraLens = this.state.scene.getCameraByName(this.state.cameraName + "-Lens") as BABYLON.FreeCamera
+        if (this.state.cameraLens === null)
             throw new Error("cannot find camera device")
 
         /*  initialize camera  */
-        this.scene.activeCamera = this.cameraLens
-        this.cameraLens.fovMode = BABYLON.FreeCamera.FOVMODE_HORIZONTAL_FIXED
-        this.cameraCase.rotationQuaternion = null
+        this.state.scene.activeCamera = this.state.cameraLens
+        this.state.cameraLens.fovMode = BABYLON.FreeCamera.FOVMODE_HORIZONTAL_FIXED
+        this.state.cameraCase.rotationQuaternion = null
 
         /*  initialize camera pan/tilt center position  */
-        this.ptzHull.posXOrigin   = this.cameraHull.position.x
-        this.ptzHull.posYOrigin   = this.cameraHull.position.y
-        this.ptzHull.posZOrigin   = this.cameraHull.position.z
-        this.ptzCase.tiltOrigin   = this.cameraCase.rotation.x
-        this.ptzCase.panOrigin    = this.cameraCase.rotation.y
-        this.ptzCase.rotateOrigin = this.cameraCase.rotation.z
-        this.ptzLens.tiltOrigin   = this.cameraLens.rotation.x
+        this.state.ptzHull!.posXOrigin   = this.state.cameraHull.position.x
+        this.state.ptzHull!.posYOrigin   = this.state.cameraHull.position.y
+        this.state.ptzHull!.posZOrigin   = this.state.cameraHull.position.z
+        this.state.ptzCase!.tiltOrigin   = this.state.cameraCase.rotation.x
+        this.state.ptzCase!.panOrigin    = this.state.cameraCase.rotation.y
+        this.state.ptzCase!.rotateOrigin = this.state.cameraCase.rotation.z
+        this.state.ptzLens!.tiltOrigin   = this.state.cameraLens.rotation.x
 
         /*  go to camera home position  */
-        this.cameraHull!.position.x = this.ptzHull.posXP2V(0)
-        this.cameraHull!.position.y = this.ptzHull.posYP2V(0)
-        this.cameraHull!.position.z = this.ptzHull.posZP2V(0)
-        this.cameraCase!.rotation.x = this.ptzCase.tiltP2V(0)
-        this.cameraCase!.rotation.y = this.ptzCase.panP2V(0)
-        this.cameraCase!.rotation.z = this.ptzCase.rotateP2V(0)
-        this.cameraLens!.rotation.x = this.ptzLens.tiltP2V(0)
-        this.cameraLens!.fov        = this.ptzLens.zoomP2V(0)
+        this.state.cameraHull!.position.x = this.state.ptzHull!.posXP2V(0)
+        this.state.cameraHull!.position.y = this.state.ptzHull!.posYP2V(0)
+        this.state.cameraHull!.position.z = this.state.ptzHull!.posZP2V(0)
+        this.state.cameraCase!.rotation.x = this.state.ptzCase!.tiltP2V(0)
+        this.state.cameraCase!.rotation.y = this.state.ptzCase!.panP2V(0)
+        this.state.cameraCase!.rotation.z = this.state.ptzCase!.rotateP2V(0)
+        this.state.cameraLens!.rotation.x = this.state.ptzLens!.tiltP2V(0)
+        this.state.cameraLens!.fov        = this.state.ptzLens!.zoomP2V(0)
 
         /*  apply latest PTZ (if already available)  */
-        if (this.state !== null && this.ptzFreeD)
-            this.reflectFreeDState(this.state)
+        if (this.state.state !== null && this.state.ptzFreeD)
+            this.reflectFreeDState(this.state.state)
 
         /*  allow keyboard to manually adjust camera  */
-        if (this.ptzKeys) {
-            this.scene.onKeyboardObservable.add((kbInfo) => {
+        if (this.state.ptzKeys) {
+            this.state.scene.onKeyboardObservable.add((kbInfo) => {
                 if (kbInfo.type !== BABYLON.KeyboardEventTypes.KEYDOWN)
                     return
                 this.reactOnKeyEvent(kbInfo.event.key)
@@ -358,147 +144,147 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  manually optimize engine  */
-        this.engine.enableOfflineSupport = false
+        this.state.engine.enableOfflineSupport = false
 
         /*  manually optimize scene  */
-        this.scene.skipPointerMovePicking = true
-        this.scene.autoClear = false
-        this.scene.autoClearDepthAndStencil = false
+        this.state.scene.skipPointerMovePicking = true
+        this.state.scene.autoClear = false
+        this.state.scene.autoClearDepthAndStencil = false
 
         /*  automatically optimize scene  */
-        const options = new BABYLON.SceneOptimizerOptions(this.fps, 2000)
+        const options = new BABYLON.SceneOptimizerOptions(this.state.fps, 2000)
         options.addOptimization(new BABYLON.HardwareScalingOptimization(0, 1))
-        this.optimizer = new BABYLON.SceneOptimizer(this.scene, options)
+        this.state.optimizer = new BABYLON.SceneOptimizer(this.state.scene, options)
 
         /*  gather reference to avatar 1  */
-        this.avatar1 = this.scene.getNodeByName("Avatar1") as BABYLON.Nullable<BABYLON.TransformNode>
-        this.avatar1Model = this.scene.getNodeByName("Avatar1-Model") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.avatar1 === null)
+        this.state.avatar1 = this.state.scene.getNodeByName("Avatar1") as BABYLON.Nullable<BABYLON.TransformNode>
+        this.state.avatar1Model = this.state.scene.getNodeByName("Avatar1-Model") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.state.avatar1 === null)
             throw new Error("cannot find node 'Avatar1'")
-        if (this.avatar1Model === null)
+        if (this.state.avatar1Model === null)
             throw new Error("cannot find node 'Avatar1-Model'")
-        this.avatar1.setEnabled(false)
-        this.avatar1Scale.x = this.avatar1Model.scaling.x
-        this.avatar1Scale.y = this.avatar1Model.scaling.y
-        this.avatar1Scale.z = this.avatar1Model.scaling.z
+        this.state.avatar1.setEnabled(false)
+        this.state.avatar1Scale.x = this.state.avatar1Model.scaling.x
+        this.state.avatar1Scale.y = this.state.avatar1Model.scaling.y
+        this.state.avatar1Scale.z = this.state.avatar1Model.scaling.z
 
         /*  gather reference to avatar 2  */
-        this.avatar2 = this.scene.getNodeByName("Avatar2") as BABYLON.Nullable<BABYLON.TransformNode>
-        this.avatar2Model = this.scene.getNodeByName("Avatar2-Model") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.avatar2 === null)
+        this.state.avatar2 = this.state.scene.getNodeByName("Avatar2") as BABYLON.Nullable<BABYLON.TransformNode>
+        this.state.avatar2Model = this.state.scene.getNodeByName("Avatar2-Model") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.state.avatar2 === null)
             throw new Error("cannot find node 'Avatar2'")
-        if (this.avatar2Model === null)
+        if (this.state.avatar2Model === null)
             throw new Error("cannot find node 'Avatar2-Model'")
-        this.avatar2.setEnabled(false)
-        this.avatar2Scale.x = this.avatar2Model.scaling.x
-        this.avatar2Scale.y = this.avatar2Model.scaling.y
-        this.avatar2Scale.z = this.avatar2Model.scaling.z
+        this.state.avatar2.setEnabled(false)
+        this.state.avatar2Scale.x = this.state.avatar2Model.scaling.x
+        this.state.avatar2Scale.y = this.state.avatar2Model.scaling.y
+        this.state.avatar2Scale.z = this.state.avatar2Model.scaling.z
 
         /*  gather reference to reference points  */
-        this.references = this.scene.getNodeByName("Reference") as BABYLON.Nullable<BABYLON.TransformNode>
-        if (this.references === null)
+        this.state.references = this.state.scene.getNodeByName("Reference") as BABYLON.Nullable<BABYLON.TransformNode>
+        if (this.state.references === null)
             throw new Error("cannot find node 'References'")
-        this.references.setEnabled(true)
+        this.state.references.setEnabled(true)
 
         /*  gather references to spotlight  */
-        this.light1 = this.scene.getLightByName("Light-1") as BABYLON.Nullable<BABYLON.PointLight>
-        this.light2 = this.scene.getLightByName("Light-2") as BABYLON.Nullable<BABYLON.PointLight>
-        this.light3 = this.scene.getLightByName("Light-3") as BABYLON.Nullable<BABYLON.PointLight>
-        if (this.light1 === null || this.light2 === null || this.light3 === null)
+        this.state.light1 = this.state.scene.getLightByName("Light-1") as BABYLON.Nullable<BABYLON.PointLight>
+        this.state.light2 = this.state.scene.getLightByName("Light-2") as BABYLON.Nullable<BABYLON.PointLight>
+        this.state.light3 = this.state.scene.getLightByName("Light-3") as BABYLON.Nullable<BABYLON.PointLight>
+        if (this.state.light1 === null || this.state.light2 === null || this.state.light3 === null)
             throw new Error("cannot find lights nodes")
 
         /*  gather reference to wall  */
-        this.wall = this.scene.getMeshByName("Wall") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.wall === null)
+        this.state.wall = this.state.scene.getMeshByName("Wall") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.state.wall === null)
             throw new Error("cannot find wall node")
-        this.wallRotBase = this.wall.rotationQuaternion
+        this.state.wallRotBase = this.state.wall.rotationQuaternion
 
         /*  on-the-fly load wall canvas  */
-        if (this.layer === "back")
+        if (this.state.layer === "back")
             await this.canvasLoad()
 
         /*  on-the-fly generate wall video decal  */
-        if (this.layer === "back")
+        if (this.state.layer === "back")
             await this.decalGenerate()
 
         /*  gather references to monitor mesh nodes  */
-        this.monitor        = this.scene.getNodeByName("Monitor")        as BABYLON.Nullable<BABYLON.TransformNode>
-        this.monitorCase    = this.scene.getMeshByName("Monitor-Case")   as BABYLON.Nullable<BABYLON.Mesh>
-        this.monitorDisplay = this.scene.getMeshByName("Monitor-Screen") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.monitor === null || this.monitorCase === null || this.monitorDisplay === null)
+        this.state.monitor        = this.state.scene.getNodeByName("Monitor")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.state.monitorCase    = this.state.scene.getMeshByName("Monitor-Case")   as BABYLON.Nullable<BABYLON.Mesh>
+        this.state.monitorDisplay = this.state.scene.getMeshByName("Monitor-Screen") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.state.monitor === null || this.state.monitorCase === null || this.state.monitorDisplay === null)
             throw new Error("cannot find monitor mesh nodes")
-        if (this.layer === "back")
-            this.monitor.setEnabled(false)
+        if (this.state.layer === "back")
+            this.state.monitor.setEnabled(false)
 
         /*  gather references to pane mesh nodes  */
-        this.pane        = this.scene.getNodeByName("Pane")        as BABYLON.Nullable<BABYLON.TransformNode>
-        this.paneCase    = this.scene.getMeshByName("Pane-Case")   as BABYLON.Nullable<BABYLON.Mesh>
-        this.paneDisplay = this.scene.getMeshByName("Pane-Screen") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.pane === null || this.paneCase === null || this.paneDisplay === null)
+        this.state.pane        = this.state.scene.getNodeByName("Pane")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.state.paneCase    = this.state.scene.getMeshByName("Pane-Case")   as BABYLON.Nullable<BABYLON.Mesh>
+        this.state.paneDisplay = this.state.scene.getMeshByName("Pane-Screen") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.state.pane === null || this.state.paneCase === null || this.state.paneDisplay === null)
             throw new Error("cannot find pane mesh nodes")
-        if (this.layer === "front")
-            this.pane.setEnabled(false)
+        if (this.state.layer === "front")
+            this.state.pane.setEnabled(false)
 
         /*  gather references to pillar mesh nodes  */
-        this.pillar        = this.scene.getNodeByName("Pillar")        as BABYLON.Nullable<BABYLON.TransformNode>
-        this.pillarCase    = this.scene.getMeshByName("Pillar-Case")   as BABYLON.Nullable<BABYLON.Mesh>
-        this.pillarDisplay = this.scene.getMeshByName("Pillar-Screen") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.pillar === null || this.pillarCase === null || this.pillarDisplay === null)
+        this.state.pillar        = this.state.scene.getNodeByName("Pillar")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.state.pillarCase    = this.state.scene.getMeshByName("Pillar-Case")   as BABYLON.Nullable<BABYLON.Mesh>
+        this.state.pillarDisplay = this.state.scene.getMeshByName("Pillar-Screen") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.state.pillar === null || this.state.pillarCase === null || this.state.pillarDisplay === null)
             throw new Error("cannot find pillar mesh nodes")
-        if (this.layer === "back")
-            this.pillar.setEnabled(false)
+        if (this.state.layer === "back")
+            this.state.pillar.setEnabled(false)
 
         /*  gather references to plate mesh nodes  */
-        this.plate        = this.scene.getNodeByName("Plate")         as BABYLON.Nullable<BABYLON.TransformNode>
-        this.plateDisplay = this.scene.getMeshByName("Plate-Display") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.plate === null || this.plateDisplay === null)
+        this.state.plate        = this.state.scene.getNodeByName("Plate")         as BABYLON.Nullable<BABYLON.TransformNode>
+        this.state.plateDisplay = this.state.scene.getMeshByName("Plate-Display") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.state.plate === null || this.state.plateDisplay === null)
             throw new Error("cannot find plate mesh nodes")
-        if (this.layer === "front")
-            this.plateDisplay.setEnabled(false)
+        if (this.state.layer === "front")
+            this.state.plateDisplay.setEnabled(false)
 
         /*  initialize plate base values  */
-        this.plateBase.scaleDisplayX = this.plateDisplay!.scaling.x
-        this.plateBase.scaleDisplayY = this.plateDisplay!.scaling.y
-        this.plateBase.scaleDisplayZ = this.plateDisplay!.scaling.z
-        this.plateBase.rotationZ     = this.plate!.rotation.z
-        this.plateBase.positionZ     = this.plate!.position.z
-        this.plateBase.positionX     = this.plateDisplay!.position.x
+        this.state.plateBase.scaleDisplayX = this.state.plateDisplay!.scaling.x
+        this.state.plateBase.scaleDisplayY = this.state.plateDisplay!.scaling.y
+        this.state.plateBase.scaleDisplayZ = this.state.plateDisplay!.scaling.z
+        this.state.plateBase.rotationZ     = this.state.plate!.rotation.z
+        this.state.plateBase.positionZ     = this.state.plate!.position.z
+        this.state.plateBase.positionX     = this.state.plateDisplay!.position.x
 
         /*  gather references to hologram mesh nodes  */
-        this.hologram        = this.scene.getNodeByName("Hologram")         as BABYLON.Nullable<BABYLON.TransformNode>
-        this.hologramDisplay = this.scene.getMeshByName("Hologram-Display") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.hologram === null || this.hologramDisplay === null)
+        this.state.hologram        = this.state.scene.getNodeByName("Hologram")         as BABYLON.Nullable<BABYLON.TransformNode>
+        this.state.hologramDisplay = this.state.scene.getMeshByName("Hologram-Display") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.state.hologram === null || this.state.hologramDisplay === null)
             throw new Error("cannot find hologram mesh nodes")
-        if (this.layer === "front")
-            this.hologramDisplay.setEnabled(false)
+        if (this.state.layer === "front")
+            this.state.hologramDisplay.setEnabled(false)
 
         /*  initialize plate base values  */
-        this.hologramBase.scaleDisplayX = this.hologramDisplay!.scaling.x
-        this.hologramBase.scaleDisplayY = this.hologramDisplay!.scaling.y
-        this.hologramBase.scaleDisplayZ = this.hologramDisplay!.scaling.z
-        this.hologramBase.rotationZ     = this.hologram!.rotation.z
-        this.hologramBase.positionZ     = this.hologram!.position.z
-        this.hologramBase.positionX     = this.hologramDisplay!.position.x
+        this.state.hologramBase.scaleDisplayX = this.state.hologramDisplay!.scaling.x
+        this.state.hologramBase.scaleDisplayY = this.state.hologramDisplay!.scaling.y
+        this.state.hologramBase.scaleDisplayZ = this.state.hologramDisplay!.scaling.z
+        this.state.hologramBase.rotationZ     = this.state.hologram!.rotation.z
+        this.state.hologramBase.positionZ     = this.state.hologram!.position.z
+        this.state.hologramBase.positionX     = this.state.hologramDisplay!.position.x
 
         /*  gather references to mask mesh nodes  */
-        this.mask           = this.scene.getNodeByName("Mask")            as BABYLON.Nullable<BABYLON.TransformNode>
-        this.maskDisplay    = this.scene.getMeshByName("Mask-Display")    as BABYLON.Nullable<BABYLON.Mesh>
-        this.maskBackground = this.scene.getMeshByName("Mask-Background") as BABYLON.Nullable<BABYLON.Mesh>
-        this.maskCamLens    = this.scene.getNodeByName("Mask-Cam-Lens")   as BABYLON.Nullable<BABYLON.FreeCamera>
-        if (this.mask === null || this.maskDisplay === null || this.maskBackground === null || this.maskCamLens === null)
+        this.state.mask           = this.state.scene.getNodeByName("Mask")            as BABYLON.Nullable<BABYLON.TransformNode>
+        this.state.maskDisplay    = this.state.scene.getMeshByName("Mask-Display")    as BABYLON.Nullable<BABYLON.Mesh>
+        this.state.maskBackground = this.state.scene.getMeshByName("Mask-Background") as BABYLON.Nullable<BABYLON.Mesh>
+        this.state.maskCamLens    = this.state.scene.getNodeByName("Mask-Cam-Lens")   as BABYLON.Nullable<BABYLON.FreeCamera>
+        if (this.state.mask === null || this.state.maskDisplay === null || this.state.maskBackground === null || this.state.maskCamLens === null)
             throw new Error("cannot find mask mesh nodes")
-        if (this.layer === "front") {
-            this.maskDisplay.setEnabled(false)
-            this.maskBackground.setEnabled(false)
+        if (this.state.layer === "front") {
+            this.state.maskDisplay.setEnabled(false)
+            this.state.maskBackground.setEnabled(false)
         }
 
         /*  initialize mask base values  */
-        this.maskBase.scaleDisplayX = this.maskDisplay!.scaling.x
-        this.maskBase.scaleDisplayY = this.maskDisplay!.scaling.y
-        this.maskBase.scaleDisplayZ = this.maskDisplay!.scaling.z
+        this.state.maskBase.scaleDisplayX = this.state.maskDisplay!.scaling.x
+        this.state.maskBase.scaleDisplayY = this.state.maskDisplay!.scaling.y
+        this.state.maskBase.scaleDisplayZ = this.state.maskDisplay!.scaling.z
 
         /*  force mask background to be entirely black  */
-        const material = this.maskBackground.material as BABYLON.PBRMaterial
+        const material = this.state.maskBackground.material as BABYLON.PBRMaterial
         material.albedoColor = new BABYLON.Color3(0.0, 0.0, 0.0)
         material.albedoTexture?.dispose()
         material.albedoTexture = null
@@ -519,53 +305,53 @@ export default class CanvasRenderer extends EventEmitter {
             sg.useCloseExponentialShadowMap     = false
             sg.useBlurCloseExponentialShadowMap = false
             sg.usePercentageCloserFiltering     = true
-            sg.addShadowCaster(this.monitorDisplay!)
-            sg.addShadowCaster(this.monitorCase!)
-            sg.addShadowCaster(this.paneCase!)
-            sg.addShadowCaster(this.paneDisplay!)
-            sg.addShadowCaster(this.pillarCase!)
-            sg.addShadowCaster(this.pillarDisplay!)
+            sg.addShadowCaster(this.state.monitorDisplay!)
+            sg.addShadowCaster(this.state.monitorCase!)
+            sg.addShadowCaster(this.state.paneCase!)
+            sg.addShadowCaster(this.state.paneDisplay!)
+            sg.addShadowCaster(this.state.pillarCase!)
+            sg.addShadowCaster(this.state.pillarDisplay!)
         }
-        setupLight(this.light1)
-        setupLight(this.light2)
-        setupLight(this.light3)
-        this.wall.receiveShadows = true
+        setupLight(this.state.light1)
+        setupLight(this.state.light2)
+        setupLight(this.state.light3)
+        this.state.wall.receiveShadows = true
 
         /*  initialize monitor base values  */
-        this.monitorBase.scaleCaseX       = this.monitorCase.scaling.x
-        this.monitorBase.scaleCaseY       = this.monitorCase.scaling.y
-        this.monitorBase.scaleCaseZ       = this.monitorCase.scaling.z
-        this.monitorBase.scaleDisplayX    = this.monitorDisplay.scaling.x
-        this.monitorBase.scaleDisplayY    = this.monitorDisplay.scaling.y
-        this.monitorBase.scaleDisplayZ    = this.monitorDisplay.scaling.z
-        this.monitorBase.rotationZ        = this.monitor.rotation.z
-        this.monitorBase.positionZ        = this.monitor.position.z
-        this.monitorBase.positionCaseX    = this.monitorCase.position.x
-        this.monitorBase.positionDisplayX = this.monitorDisplay.position.x
+        this.state.monitorBase.scaleCaseX       = this.state.monitorCase.scaling.x
+        this.state.monitorBase.scaleCaseY       = this.state.monitorCase.scaling.y
+        this.state.monitorBase.scaleCaseZ       = this.state.monitorCase.scaling.z
+        this.state.monitorBase.scaleDisplayX    = this.state.monitorDisplay.scaling.x
+        this.state.monitorBase.scaleDisplayY    = this.state.monitorDisplay.scaling.y
+        this.state.monitorBase.scaleDisplayZ    = this.state.monitorDisplay.scaling.z
+        this.state.monitorBase.rotationZ        = this.state.monitor.rotation.z
+        this.state.monitorBase.positionZ        = this.state.monitor.position.z
+        this.state.monitorBase.positionCaseX    = this.state.monitorCase.position.x
+        this.state.monitorBase.positionDisplayX = this.state.monitorDisplay.position.x
 
         /*  initialize pane base values  */
-        this.paneBase.scaleCaseX          = this.paneCase.scaling.x
-        this.paneBase.scaleCaseY          = this.paneCase.scaling.y
-        this.paneBase.scaleCaseZ          = this.paneCase.scaling.z
-        this.paneBase.scaleDisplayX       = this.paneDisplay.scaling.x
-        this.paneBase.scaleDisplayY       = this.paneDisplay.scaling.y
-        this.paneBase.scaleDisplayZ       = this.paneDisplay.scaling.z
-        this.paneBase.rotationZ           = this.pane.rotation.z
-        this.paneBase.positionZ           = this.pane.position.z
-        this.paneBase.positionCaseX       = this.paneCase.position.x
-        this.paneBase.positionDisplayX    = this.paneDisplay.position.x
+        this.state.paneBase.scaleCaseX          = this.state.paneCase.scaling.x
+        this.state.paneBase.scaleCaseY          = this.state.paneCase.scaling.y
+        this.state.paneBase.scaleCaseZ          = this.state.paneCase.scaling.z
+        this.state.paneBase.scaleDisplayX       = this.state.paneDisplay.scaling.x
+        this.state.paneBase.scaleDisplayY       = this.state.paneDisplay.scaling.y
+        this.state.paneBase.scaleDisplayZ       = this.state.paneDisplay.scaling.z
+        this.state.paneBase.rotationZ           = this.state.pane.rotation.z
+        this.state.paneBase.positionZ           = this.state.pane.position.z
+        this.state.paneBase.positionCaseX       = this.state.paneCase.position.x
+        this.state.paneBase.positionDisplayX    = this.state.paneDisplay.position.x
 
         /*  initialize pillar base values  */
-        this.pillarBase.scaleX            = this.pillar.scaling.x
-        this.pillarBase.scaleY            = this.pillar.scaling.y
-        this.pillarBase.scaleZ            = this.pillar.scaling.z
-        this.pillarBase.rotationZ         = this.pillar.rotation.z
-        this.pillarBase.positionZ         = this.pillar.position.z
-        this.pillarBase.positionCaseX     = this.pillarCase.position.x
-        this.pillarBase.positionDisplayX  = this.pillarDisplay.position.x
+        this.state.pillarBase.scaleX            = this.state.pillar.scaling.x
+        this.state.pillarBase.scaleY            = this.state.pillar.scaling.y
+        this.state.pillarBase.scaleZ            = this.state.pillar.scaling.z
+        this.state.pillarBase.rotationZ         = this.state.pillar.rotation.z
+        this.state.pillarBase.positionZ         = this.state.pillar.position.z
+        this.state.pillarBase.positionCaseX     = this.state.pillarCase.position.x
+        this.state.pillarBase.positionDisplayX  = this.state.pillarDisplay.position.x
 
         /*  apply glass material to monitor case  */
-        const glass1 = new BABYLON.PBRMaterial("glass1", this.scene)
+        const glass1 = new BABYLON.PBRMaterial("glass1", this.state.scene)
         glass1.indexOfRefraction    = 1.52
         glass1.alpha                = 0.20
         glass1.directIntensity      = 1.0
@@ -573,10 +359,10 @@ export default class CanvasRenderer extends EventEmitter {
         glass1.microSurface         = 1
         glass1.reflectivityColor    = new BABYLON.Color3(0.1, 0.1, 0.1)
         glass1.albedoColor          = new BABYLON.Color3(1.0, 1.0, 1.0)
-        this.monitorCase.material   = glass1
+        this.state.monitorCase.material = glass1
 
         /*  apply glass material to pane case  */
-        const glass2 = new BABYLON.PBRMaterial("glass2", this.scene)
+        const glass2 = new BABYLON.PBRMaterial("glass2", this.state.scene)
         glass2.indexOfRefraction    = 1.52
         glass2.alpha                = 0.20
         glass2.directIntensity      = 1.0
@@ -584,13 +370,13 @@ export default class CanvasRenderer extends EventEmitter {
         glass2.microSurface         = 1
         glass2.reflectivityColor    = new BABYLON.Color3(0.1, 0.1, 0.1)
         glass2.albedoColor          = new BABYLON.Color3(1.0, 1.0, 1.0)
-        this.paneCase.material      = glass2
+        this.state.paneCase.material = glass2
 
         /*  determine all layer-specific nodes which should be disabled  */
-        for (const node of this.scene.getNodes()) {
-            if (this.layerNodes[node.name] !== undefined) {
-                if (  (this.layer === "back"  && !this.layerNodes[node.name].back)
-                   || (this.layer === "front" && !this.layerNodes[node.name].front)) {
+        for (const node of this.state.scene.getNodes()) {
+            if (Config.layerNodes[node.name] !== undefined) {
+                if (  (this.state.layer === "back"  && !Config.layerNodes[node.name].back)
+                   || (this.state.layer === "front" && !Config.layerNodes[node.name].front)) {
                     node.setEnabled(false)
                     node.dispose()
                 }
@@ -598,54 +384,53 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  manually optimize scene  */
-        this.scene.cleanCachedTextureBuffer()
+        this.state.scene.cleanCachedTextureBuffer()
 
         /*  indicate established state  */
-        this.established = true
+        this.state.established = true
     }
 
     /*  render the scene once  */
-    private renderCount = 0
     private renderOnce = () => {
-        if (this.fps === 0)
+        if (this.state.fps === 0)
             return
-        if ((this.renderCount++ % this.fpsFactor[this.fps]) !== 0)
+        if ((this.state.renderCount++ % Config.fpsFactor[this.state.fps]) !== 0)
             return
-        if (this.scene === null)
+        if (this.state.scene === null)
             return
-        this.scene.render()
+        this.state.scene.render()
     }
 
     /*  start/stop renderer  */
     async start () {
         /*  start render loop and scene optimizer  */
-        if (this.engine !== null)
-            this.engine.runRenderLoop(this.renderOnce)
-        if (this.optimizer !== null)
-            this.optimizer.start()
+        if (this.state.engine !== null)
+            this.state.engine.runRenderLoop(this.renderOnce)
+        if (this.state.optimizer !== null)
+            this.state.optimizer.start()
     }
     async stop () {
         /*  stop scene optimizer and render loop  */
-        if (this.optimizer !== null)
-            this.optimizer.stop()
-        if (this.engine !== null)
-            this.engine.stopRenderLoop(this.renderOnce)
+        if (this.state.optimizer !== null)
+            this.state.optimizer.stop()
+        if (this.state.engine !== null)
+            this.state.engine.stopRenderLoop(this.renderOnce)
 
         /*  give still active render loop iteration time to complete  */
         await new Promise((resolve, reject) => {
-            setTimeout(() => resolve(true), 2 * (1000 / (this.fps === 0 ? 1 : this.fps)))
+            setTimeout(() => resolve(true), 2 * (1000 / (this.state.fps === 0 ? 1 : this.state.fps)))
         })
     }
 
     /*  load canvas/wall  */
     async canvasLoad () {
         /*  load externally defined node material  */
-        const material = this.canvasMaterial =
+        const material = this.state.canvasMaterial =
             await BABYLON.NodeMaterial.ParseFromFileAsync("material",
-                "/res/canvas-material.json", this.scene!)
+                "/res/canvas-material.json", this.state.scene!)
 
         /*  initialize canvas mode  */
-        this.canvasMode = 0
+        this.state.canvasMode = 0
 
         /*  dispose all regular textures  */
         await this.canvasDisposeTextures(0)
@@ -663,13 +448,13 @@ export default class CanvasRenderer extends EventEmitter {
         material.freeze()
 
         /*  create composed texture and apply onto wall  */
-        this.canvasTexture = material.createProceduralTexture(
-            { width: this.wallWidth, height: this.wallHeight }, this.scene!)
-        const wall = this.scene!.getMaterialByName("Wall") as
+        this.state.canvasTexture = material.createProceduralTexture(
+            { width: Config.wall.width, height: Config.wall.height }, this.state.scene!)
+        const wall = this.state.scene!.getMaterialByName("Wall") as
             BABYLON.Nullable<BABYLON.PBRMaterial>
         if (wall === null)
             throw new Error("cannot find Wall object")
-        wall.albedoTexture = this.canvasTexture
+        wall.albedoTexture = this.state.canvasTexture
 
         /*  start optional texture fader  */
         await this.canvasFaderStart()
@@ -681,32 +466,32 @@ export default class CanvasRenderer extends EventEmitter {
         await this.canvasFaderStop()
 
         /*  dispose wall texture  */
-        const wall = this.scene!.getMaterialByName("Wall") as
+        const wall = this.state.scene!.getMaterialByName("Wall") as
             BABYLON.Nullable<BABYLON.PBRMaterial>
         if (wall === null)
             throw new Error("cannot find Wall object")
         wall.albedoTexture = null
 
         /*  unfreeze material  */
-        this.canvasMaterial?.unfreeze()
+        this.state.canvasMaterial?.unfreeze()
 
         /*  dispose all regular textures  */
         await this.canvasDisposeTextures(0)
         await this.canvasDisposeTextures(1)
 
         /*  dispose procedural texture  */
-        this.canvasTexture?.dispose()
-        this.canvasTexture = null
+        this.state.canvasTexture?.dispose()
+        this.state.canvasTexture = null
 
         /*  dispose material  */
-        this.canvasMaterial?.dispose(true, true)
-        this.canvasMaterial = null
+        this.state.canvasMaterial?.dispose(true, true)
+        this.state.canvasMaterial = null
     }
 
     async createTexture (url: string, canvas: HTMLCanvasElement) {
         /*  fetch image from URL and decode PNG/JPEG format  */
         const imageBitmap = await (new Promise((resolve, reject) => {
-            this.imageLoader.addEventListener("message",
+            this.state.imageLoader!.addEventListener("message",
                 (event: MessageEvent<{ data: ImageBitmap } | { error: string }>) => {
                     const data = event.data
                     if ("error" in data)
@@ -715,7 +500,7 @@ export default class CanvasRenderer extends EventEmitter {
                         resolve(data.data)
                 }, { once: true }
             )
-            this.imageLoader.postMessage({ url })
+            this.state.imageLoader!.postMessage({ url })
         }) as Promise<ImageBitmap>)
 
         /*  give UI thread a chance to continue rendering  */
@@ -734,7 +519,7 @@ export default class CanvasRenderer extends EventEmitter {
         /*  create dynamic texture from canvas
             (NOTICE: this is a 10ms CPU burst)  */
         const texture = new BABYLON.DynamicTexture("canvas", canvas, {
-            scene:        this.scene,
+            scene:        this.state.scene,
             format:       BABYLON.Engine.TEXTUREFORMAT_RGBA,
             samplingMode: BABYLON.Texture.LINEAR_LINEAR,
             invertY:      false
@@ -754,42 +539,42 @@ export default class CanvasRenderer extends EventEmitter {
     /*  reconfigure canvas/wall texture(s)  */
     async canvasReconfigure () {
         /*  sanity check situation  */
-        if (this.canvasConfig[this.canvasMode].texture1 === "")
+        if (this.state.canvasConfig[this.state.canvasMode].texture1 === "")
             return
         this.emit("log", "INFO", "canvas reconfigure (begin)")
 
         /*  determine id of canvas mode  */
-        const mode = this.canvasMode === 0 ? "A" : "B"
+        const mode = this.state.canvasMode === 0 ? "A" : "B"
 
         /*  determine material  */
-        const material = this.canvasMaterial!
+        const material = this.state.canvasMaterial!
 
         /*  reset textures  */
-        await this.canvasDisposeTextures(this.canvasMode)
+        await this.canvasDisposeTextures(this.state.canvasMode)
 
         /*  load new texture(s)  */
         this.emit("log", "INFO", "canvas reconfigure (load textures)")
         const canvas = document.createElement("canvas")
-        this.canvasState[this.canvasMode].canvas1 = canvas
-        this.canvasState[this.canvasMode].texture1 =
-            await this.createTexture(this.canvasConfig[this.canvasMode].texture1, canvas)
-        if (this.canvasConfig[this.canvasMode].texture2 !== "") {
+        this.state.canvasState[this.state.canvasMode].canvas1 = canvas
+        this.state.canvasState[this.state.canvasMode].texture1 =
+            await this.createTexture(this.state.canvasConfig[this.state.canvasMode].texture1, canvas)
+        if (this.state.canvasConfig[this.state.canvasMode].texture2 !== "") {
             const canvas = document.createElement("canvas")
-            this.canvasState[this.canvasMode].canvas2 = canvas
-            this.canvasState[this.canvasMode].texture2 =
-                await this.createTexture(this.canvasConfig[this.canvasMode].texture2, canvas)
+            this.state.canvasState[this.state.canvasMode].canvas2 = canvas
+            this.state.canvasState[this.state.canvasMode].texture2 =
+                await this.createTexture(this.state.canvasConfig[this.state.canvasMode].texture2, canvas)
         }
         else {
-            this.canvasState[this.canvasMode].canvas2  = null
-            this.canvasState[this.canvasMode].texture2 = null
+            this.state.canvasState[this.state.canvasMode].canvas2  = null
+            this.state.canvasState[this.state.canvasMode].texture2 = null
         }
 
         /*  await texture(s) to be loaded  */
         const p = [] as BABYLON.Texture[]
-        if (this.canvasState[this.canvasMode].texture1 !== null)
-            p.push(this.canvasState[this.canvasMode].texture1!)
-        if (this.canvasState[this.canvasMode].texture2 !== null)
-            p.push(this.canvasState[this.canvasMode].texture2!)
+        if (this.state.canvasState[this.state.canvasMode].texture1 !== null)
+            p.push(this.state.canvasState[this.state.canvasMode].texture1!)
+        if (this.state.canvasState[this.state.canvasMode].texture2 !== null)
+            p.push(this.state.canvasState[this.state.canvasMode].texture2!)
         await new Promise((resolve) => {
             BABYLON.Texture.WhenAllReady(p, () => { resolve(true) })
         })
@@ -808,15 +593,15 @@ export default class CanvasRenderer extends EventEmitter {
         material.unfreeze()
 
         /*  apply new textures  */
-        textureBlock1.texture = this.canvasState[this.canvasMode].texture1
-        textureBlock2.texture = this.canvasState[this.canvasMode].texture2
+        textureBlock1.texture = this.state.canvasState[this.state.canvasMode].texture1
+        textureBlock2.texture = this.state.canvasState[this.state.canvasMode].texture2
 
         /*  apply texture fading duration  */
         const texFade = material.getBlockByName(`Mode${mode}TextureFade`) as
             BABYLON.Nullable<BABYLON.InputBlock>
         if (texFade === null)
             throw new Error(`no such input block named 'Mode${mode}TextureFade' found`)
-        texFade.value = this.canvasConfig[this.canvasMode].fadeTrans
+        texFade.value = this.state.canvasConfig[this.state.canvasMode].fadeTrans
 
         /*  re-freeze material  */
         material.markDirty(true)
@@ -827,7 +612,7 @@ export default class CanvasRenderer extends EventEmitter {
     /*  dispose canvas textures  */
     async canvasDisposeTextures (modeNum: number) {
         /*  determine material  */
-        const material = this.canvasMaterial!
+        const material = this.state.canvasMaterial!
 
         /*  unfreeze material  */
         material.unfreeze()
@@ -839,17 +624,17 @@ export default class CanvasRenderer extends EventEmitter {
         const textureBlock1 = material.getBlockByPredicate((input) =>
             input.name === `Mode${modeStr}Texture1`) as BABYLON.Nullable<BABYLON.TextureBlock>
         textureBlock1!.texture = null
-        this.canvasState[modeNum].texture1?.dispose()
-        this.canvasState[modeNum].texture1 = null
-        this.canvasState[modeNum].canvas1 = null
+        this.state.canvasState[modeNum].texture1?.dispose()
+        this.state.canvasState[modeNum].texture1 = null
+        this.state.canvasState[modeNum].canvas1 = null
 
         /*  dispose texture 2  */
         const textureBlock2 = material.getBlockByPredicate((input) =>
             input.name === `Mode${modeStr}Texture2`) as BABYLON.Nullable<BABYLON.TextureBlock>
         textureBlock2!.texture = null
-        this.canvasState[modeNum].texture2?.dispose()
-        this.canvasState[modeNum].texture2 = null
-        this.canvasState[modeNum].canvas2 = null
+        this.state.canvasState[modeNum].texture2?.dispose()
+        this.state.canvasState[modeNum].texture2 = null
+        this.state.canvasState[modeNum].canvas2 = null
 
         /*  re-freeze material  */
         material.markDirty(true)
@@ -859,8 +644,8 @@ export default class CanvasRenderer extends EventEmitter {
     /*  start canvas/wall fader  */
     async canvasFaderStart () {
         /*  activate optional cross-fading between textures  */
-        const mode = this.canvasMode === 0 ? "A" : "B"
-        const material = this.canvasMaterial!
+        const mode = this.state.canvasMode === 0 ? "A" : "B"
+        const material = this.state.canvasMaterial!
         const texFade = material.getBlockByName(`Mode${mode}TextureFade`) as
             BABYLON.Nullable<BABYLON.InputBlock>
         if (texFade === null)
@@ -868,20 +653,20 @@ export default class CanvasRenderer extends EventEmitter {
         texFade.value = 0.0
 
         /*  stop processing immediately if no fading is necessary  */
-        if (this.canvasState[this.canvasMode].texture2 === null)
+        if (this.state.canvasState[this.state.canvasMode].texture2 === null)
             return
 
         /*  enter processing loop  */
         let fade        = 0
         let fadeSign    = +1
-        const fadeTrans = this.canvasConfig[this.canvasMode].fadeTrans
-        const fadeWait  = this.canvasConfig[this.canvasMode].fadeWait
+        const fadeTrans = this.state.canvasConfig[this.state.canvasMode].fadeTrans
+        const fadeWait  = this.state.canvasConfig[this.state.canvasMode].fadeWait
         const fader = () => {
             /*  reset timer (to not confuse stopping below)  */
-            this.fadeTimer = null
+            this.state.fadeTimer = null
 
             /*  apply next fading step  */
-            const fadeInterval = 1000 / (this.fps === 0 ? 1 : this.fps)
+            const fadeInterval = 1000 / (this.state.fps === 0 ? 1 : this.state.fps)
             const fadeStep = 1.0 / (fadeTrans / fadeInterval)
             fade = fade + (fadeSign * fadeStep)
             let wait = fadeInterval
@@ -890,27 +675,27 @@ export default class CanvasRenderer extends EventEmitter {
             texFade.value = fade
 
             /*  wait for next iteration  */
-            this.fadeTimer = setTimeout(fader, wait)
+            this.state.fadeTimer = setTimeout(fader, wait)
         }
-        if (this.fadeTimer !== null)
-            clearTimeout(this.fadeTimer)
-        this.fadeTimer = setTimeout(fader, 0)
+        if (this.state.fadeTimer !== null)
+            clearTimeout(this.state.fadeTimer)
+        this.state.fadeTimer = setTimeout(fader, 0)
     }
 
     /*  stop canvas/wall fader  */
     async canvasFaderStop () {
-        if (this.fadeTimer !== null) {
-            clearTimeout(this.fadeTimer)
+        if (this.state.fadeTimer !== null) {
+            clearTimeout(this.state.fadeTimer)
             await new Promise((resolve, reject) => {
-                setTimeout(() => resolve(true), 2 * (1000 / (this.fps === 0 ? 1 : this.fps)))
+                setTimeout(() => resolve(true), 2 * (1000 / (this.state.fps === 0 ? 1 : this.state.fps)))
             })
-            this.fadeTimer = null
+            this.state.fadeTimer = null
         }
     }
 
     /*  fade mode of canvas  */
     async canvasModeFade () {
-        const material = this.canvasMaterial!
+        const material = this.state.canvasMaterial!
         const modeTexFade = material.getBlockByName("ModeTextureFade") as
             BABYLON.Nullable<BABYLON.InputBlock>
         if (modeTexFade === null)
@@ -918,13 +703,13 @@ export default class CanvasRenderer extends EventEmitter {
         await new Promise((resolve, reject) => {
             let fade        = modeTexFade.value
             const fadeSign  = fade === 0.0 ? +1 : -1
-            const fadeTrans = this.fadeSwitch * 1000
+            const fadeTrans = this.state.fadeSwitch * 1000
             const fader = () => {
                 /*  reset timer (to not confuse stopping below)  */
-                this.modeTimer = null
+                this.state.modeTimer = null
 
                 /*  apply next fading step  */
-                const fadeInterval = 1000 / (this.fps === 0 ? 1 : this.fps)
+                const fadeInterval = 1000 / (this.state.fps === 0 ? 1 : this.state.fps)
                 const fadeStep = 1.0 / (fadeTrans / fadeInterval)
                 fade = fade + (fadeSign * fadeStep)
                 let wait = fadeInterval
@@ -934,13 +719,13 @@ export default class CanvasRenderer extends EventEmitter {
 
                 /*  wait for next iteration or stop processing  */
                 if (wait > 0)
-                    this.modeTimer = setTimeout(fader, wait)
+                    this.state.modeTimer = setTimeout(fader, wait)
                 else
                     resolve(true)
             }
-            if (this.modeTimer !== null)
-                clearTimeout(this.modeTimer)
-            this.modeTimer = setTimeout(fader, 0)
+            if (this.state.modeTimer !== null)
+                clearTimeout(this.state.modeTimer)
+            this.state.modeTimer = setTimeout(fader, 0)
         })
     }
 
@@ -952,7 +737,7 @@ export default class CanvasRenderer extends EventEmitter {
         await this.canvasFaderStop()
 
         /*  switch to next mode  */
-        this.canvasMode = (this.canvasMode + 1) % 2
+        this.state.canvasMode = (this.state.canvasMode + 1) % 2
 
         /*  reconfigure the new textures  */
         await this.canvasReconfigure().then(async () => {
@@ -963,12 +748,12 @@ export default class CanvasRenderer extends EventEmitter {
             await this.canvasModeFade()
 
             /*  dispose old textures  */
-            await this.canvasDisposeTextures((this.canvasMode + 1) % 2)
+            await this.canvasDisposeTextures((this.state.canvasMode + 1) % 2)
 
             this.emit("log", "INFO", "switching canvas (end)")
         }).catch(async () => {
             /*  switch back to previous mode  */
-            this.canvasMode = (this.canvasMode + 1) % 2
+            this.state.canvasMode = (this.state.canvasMode + 1) % 2
 
             /*  (re-)start the optional fader  */
             await this.canvasFaderStart()
@@ -980,8 +765,8 @@ export default class CanvasRenderer extends EventEmitter {
     /*  load video stream  */
     async loadVideoStream () {
         /*  initialize  */
-        this.videoStream  = null
-        this.videoTexture = null
+        this.state.videoStream  = null
+        this.state.videoTexture = null
 
         /*  ensure video devices can be enumerated by requesting a
             dummy media stream so permissions are granted once  */
@@ -998,7 +783,7 @@ export default class CanvasRenderer extends EventEmitter {
         const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
 
         /*  determine particular device  */
-        const label = this.videoStreamDevice
+        const label = this.state.videoStreamDevice
         if (label === "") {
             this.emit("log", "WARNING", "no video stream configured (using replacement content later)")
             return
@@ -1019,9 +804,9 @@ export default class CanvasRenderer extends EventEmitter {
             video: {
                 deviceId: device.deviceId,
                 aspectRatio: 16 / 9,
-                width:     { min: this.videoStreamWidth,  ideal: this.videoStreamWidth,  max: this.videoStreamWidth  },
-                height:    { min: this.videoStreamHeight, ideal: this.videoStreamHeight, max: this.videoStreamHeight },
-                frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
+                width:     { min: this.state.videoStreamWidth,  ideal: this.state.videoStreamWidth,  max: this.state.videoStreamWidth  },
+                height:    { min: this.state.videoStreamHeight, ideal: this.state.videoStreamHeight, max: this.state.videoStreamHeight },
+                frameRate: { min: this.state.videoStreamFPS,    ideal: this.state.videoStreamFPS,    max: this.state.videoStreamFPS }
             }
         }).catch((error: Error) => {
             this.emit("log", "ERROR", `failed to load video (device: "${label}"): ${error})`)
@@ -1029,7 +814,7 @@ export default class CanvasRenderer extends EventEmitter {
         })
 
         /*  create texture from media stream  */
-        const texture = await BABYLON.VideoTexture.CreateFromStreamAsync(this.scene!, stream, {} as any, true)
+        const texture = await BABYLON.VideoTexture.CreateFromStreamAsync(this.state.scene!, stream, {} as any, true)
         await new Promise((resolve) => {
             BABYLON.Texture.WhenAllReady([ texture ], () => { resolve(true) })
         })
@@ -1044,30 +829,30 @@ export default class CanvasRenderer extends EventEmitter {
         this.emit("log", "INFO", `loaded video stream (texture size: ${ts.width}x${ts.height})`)
 
         /*  provide results  */
-        this.videoStream  = stream
-        this.videoTexture = texture
+        this.state.videoStream  = stream
+        this.state.videoTexture = texture
     }
 
     /*  unload video stream  */
     async unloadVideoStream () {
         this.emit("log", "INFO", "unloading video stream")
-        if (this.videoTexture !== null) {
-            this.videoTexture.dispose()
-            this.videoTexture = null
+        if (this.state.videoTexture !== null) {
+            this.state.videoTexture.dispose()
+            this.state.videoTexture = null
         }
-        if (this.videoStream !== null) {
-            this.videoStream.getTracks().forEach((track) => track.stop())
-            this.videoStream = null
+        if (this.state.videoStream !== null) {
+            this.state.videoStream.getTracks().forEach((track) => track.stop())
+            this.state.videoStream = null
         }
     }
 
     /*  load media texture  */
     async loadMediaTexture (url: string): Promise<BABYLON.Nullable<BABYLON.Texture>> {
         let texture: BABYLON.Nullable<BABYLON.Texture> = null
-        if (this.displayTextureByURL.has(url)) {
+        if (this.state.displayTextureByURL.has(url)) {
             /*  provide existing texture  */
-            texture = this.displayTextureByURL.get(url)!
-            const info = this.displayTextureInfo.get(texture)!
+            texture = this.state.displayTextureByURL.get(url)!
+            const info = this.state.displayTextureInfo.get(texture)!
             info.refs++
         }
         else {
@@ -1077,7 +862,7 @@ export default class CanvasRenderer extends EventEmitter {
                 this.emit("log", "INFO", `loading image media "${url}"`)
                 await new Promise((resolve, reject) => {
                     texture = new BABYLON.Texture(
-                        url, this.scene, false, false,
+                        url, this.state.scene, false, false,
                         BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
                         null,
                         (msg, ex) => {
@@ -1091,8 +876,8 @@ export default class CanvasRenderer extends EventEmitter {
                         resolve(true)
                     })
                 })
-                this.displayTextureByURL.set(url, texture!)
-                this.displayTextureInfo.set(texture!, { type: "image", url, refs: 1 })
+                this.state.displayTextureByURL.set(url, texture!)
+                this.state.displayTextureInfo.set(texture!, { type: "image", url, refs: 1 })
             }
             else if (url.match(/.+\.(?:smp4|mp4|swebm|webm)$/)) {
                 /*  provide texture based on video media  */
@@ -1100,7 +885,7 @@ export default class CanvasRenderer extends EventEmitter {
                 const loop = (url.match(/.+-loop\.(?:smp4|mp4|swebm|webm)$/) !== null)
                 await new Promise((resolve, reject) => {
                     texture = new BABYLON.VideoTexture(
-                        url, url, this.scene, false, true,
+                        url, url, this.state.scene, false, true,
                         BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
                         { autoPlay: true, muted: true, autoUpdateTexture: true, loop },
                         (msg, ex) => {
@@ -1124,8 +909,8 @@ export default class CanvasRenderer extends EventEmitter {
                         resolve(true)
                     })
                 })
-                this.displayTextureByURL.set(url, texture!)
-                this.displayTextureInfo.set(texture!, { type: "video", url, refs: 1 })
+                this.state.displayTextureByURL.set(url, texture!)
+                this.state.displayTextureInfo.set(texture!, { type: "video", url, refs: 1 })
             }
             else
                 throw new Error("invalid media filename (neither PNG, JPG, GIF, MP4 or WebM)")
@@ -1136,12 +921,12 @@ export default class CanvasRenderer extends EventEmitter {
     /*  unload media texture  */
     async unloadMediaTexture (texture: BABYLON.Texture) {
         /*  sanity check: ensure texture is known  */
-        if (!this.displayTextureInfo.has(texture))
+        if (!this.state.displayTextureInfo.has(texture))
             throw new Error("invalid texture")
 
         /*  decrease reference count and in case texture is
             still used still do not unload anything  */
-        const info = this.displayTextureInfo.get(texture)!
+        const info = this.state.displayTextureInfo.get(texture)!
         if (info && info.refs > 1) {
             info.refs--
             return
@@ -1149,8 +934,8 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  unload texture by disposing all resources  */
         this.emit("log", "INFO", `unloading ${info.type} media "${info.url}"`)
-        this.displayTextureInfo.delete(texture)
-        this.displayTextureByURL.delete(info.url)
+        this.state.displayTextureInfo.delete(texture)
+        this.state.displayTextureByURL.delete(info.url)
         if (texture instanceof BABYLON.VideoTexture) {
             /*  dispose video texture  */
             const video = texture.video
@@ -1185,15 +970,15 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  determine media id  */
         let mediaId = ""
-        if (this.displaySourceMap[id].match(/^M/))
-            mediaId = this.mapMediaId(this.displaySourceMap[id])
+        if (this.state.displaySourceMap[id].match(/^M/))
+            mediaId = this.mapMediaId(this.state.displaySourceMap[id])
 
         /*  determine texture  */
         let texture: BABYLON.Nullable<BABYLON.Texture> = null
-        if (this.displaySourceMap[id].match(/^S/) && this.videoTexture !== null)
-            texture = this.videoTexture
-        else if (this.displaySourceMap[id].match(/^M/) && this.displayMediaURL.has(mediaId))
-            texture = await this.loadMediaTexture(this.displayMediaURL.get(mediaId)!).catch(() => null)
+        if (this.state.displaySourceMap[id].match(/^S/) && this.state.videoTexture !== null)
+            texture = this.state.videoTexture
+        else if (this.state.displaySourceMap[id].match(/^M/) && this.state.displayMediaURL.has(mediaId))
+            texture = await this.loadMediaTexture(this.state.displayMediaURL.get(mediaId)!).catch(() => null)
 
         /*  short-circuit processing in case texture is not available  */
         if (texture === null) {
@@ -1207,9 +992,9 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  create new shader material  */
-        const material = ShaderMaterial.displayStream(`video-${id}`, this.scene!)
-        if (this.displaySourceMap[id].match(/^M/))
-            this.displayMaterial2Texture.set(material, texture)
+        const material = ShaderMaterial.displayStream(`video-${id}`, this.state.scene!)
+        if (this.state.displaySourceMap[id].match(/^M/))
+            this.state.displayMaterial2Texture.set(material, texture)
         material.setTexture("textureSampler", texture)
         material.setFloat("opacity", opacity)
         material.setFloat("borderRadius", borderRad)
@@ -1217,20 +1002,20 @@ export default class CanvasRenderer extends EventEmitter {
         material.setInt("chromaEnable", chromaKey?.enable ? 1 : 0)
         material.setFloat("chromaThreshold", chromaKey?.threshold ?? 0.4)
         material.setFloat("chromaSmoothing", chromaKey?.smoothing ?? 0.1)
-        if (this.displaySourceMap[id].match(/^S/)) {
+        if (this.state.displaySourceMap[id].match(/^S/)) {
             let stack = 0
-            if      (this.displaySourceMap[id] === "S1") stack = 0
-            else if (this.displaySourceMap[id] === "S2") stack = 1
+            if      (this.state.displaySourceMap[id] === "S1") stack = 0
+            else if (this.state.displaySourceMap[id] === "S2") stack = 1
             material.setInt("stack", stack)
-            material.setInt("stacks", this.videoStacks)
+            material.setInt("stacks", this.state.videoStacks)
             material.setInt("stackAlphaInvert", 0)
         }
-        else if (this.displayMediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.displaySourceMap[id].match(/^M/)) {
+        else if (this.state.displayMediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.state.displaySourceMap[id].match(/^M/)) {
             material.setInt("stack", 0)
             material.setInt("stacks", 1)
             material.setInt("stackAlphaInvert", 0)
         }
-        else if (this.displaySourceMap[id].match(/^M/))
+        else if (this.state.displaySourceMap[id].match(/^M/))
             material.setInt("stacks", 0)
         material.zOffset = -200
         /* material.needAlphaBlending = () => true */
@@ -1240,9 +1025,9 @@ export default class CanvasRenderer extends EventEmitter {
         const materialOld = mesh.material as BABYLON.PBRMaterial
 
         /*  store original material once  */
-        const materialOriginal = !this.displayMeshMaterial.has(mesh)
+        const materialOriginal = !this.state.displayMeshMaterial.has(mesh)
         if (materialOriginal)
-            this.displayMeshMaterial.set(mesh, materialOld)
+            this.state.displayMeshMaterial.set(mesh, materialOld)
 
         /*  apply new material  */
         mesh.material = material
@@ -1250,10 +1035,10 @@ export default class CanvasRenderer extends EventEmitter {
         /*  optionally unload previously loaded material  */
         if (materialOld instanceof BABYLON.ShaderMaterial && !materialOriginal) {
             /*  dispose material texture  */
-            const texture = this.displayMaterial2Texture.get(materialOld)
+            const texture = this.state.displayMaterial2Texture.get(materialOld)
             if (texture !== undefined && texture !== null)
                 await this.unloadMediaTexture(texture)
-            this.displayMaterial2Texture.delete(materialOld)
+            this.state.displayMaterial2Texture.delete(materialOld)
 
             /*  dispose material  */
             materialOld.dispose(true, false)
@@ -1266,28 +1051,28 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  dispose material texture  */
         if (mesh.material) {
-            const texture = this.displayMaterial2Texture.get(mesh.material)
+            const texture = this.state.displayMaterial2Texture.get(mesh.material)
             if (texture !== undefined && texture !== null)
                 await this.unloadMediaTexture(texture)
-            this.displayMaterial2Texture.delete(mesh.material)
+            this.state.displayMaterial2Texture.delete(mesh.material)
         }
 
         /*  dispose material (and restore orginal material)  */
-        if (mesh.material instanceof BABYLON.ShaderMaterial && this.displayMeshMaterial.has(mesh)) {
+        if (mesh.material instanceof BABYLON.ShaderMaterial && this.state.displayMeshMaterial.has(mesh)) {
             mesh.material.dispose(true, false)
-            mesh.material = this.displayMeshMaterial.get(mesh)!
-            this.displayMeshMaterial.delete(mesh)
+            mesh.material = this.state.displayMeshMaterial.get(mesh)!
+            this.state.displayMeshMaterial.delete(mesh)
         }
     }
 
     /*  (re-)generate the decal  */
     async decalGenerate () {
         /*  remember potentially old decal  */
-        const oldDecal = this.decal
+        const oldDecal = this.state.decal
 
         /*  determine position, normal vector and size  */
-        const rayBegin = this.scene!.getMeshByName("DecalRay-Begin") as BABYLON.Nullable<BABYLON.Mesh>
-        const rayEnd   = this.scene!.getMeshByName("DecalRay-End")   as BABYLON.Nullable<BABYLON.Mesh>
+        const rayBegin = this.state.scene!.getMeshByName("DecalRay-Begin") as BABYLON.Nullable<BABYLON.Mesh>
+        const rayEnd   = this.state.scene!.getMeshByName("DecalRay-End")   as BABYLON.Nullable<BABYLON.Mesh>
         if (rayBegin === null || rayEnd === null)
             throw new Error("cannot find 'DecalRay-Begin' or 'DecalRay-End' nodes")
         rayBegin.setEnabled(false)
@@ -1297,7 +1082,7 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  tilt end point to achieve lift effect  */
         const rayEndLifted = rayEnd!.clone()
-        rayEndLifted.position.z += this.decalLift
+        rayEndLifted.position.z += this.state.decalLift
         rayEndLifted.setEnabled(false)
         rayEndLifted.computeWorldMatrix()
 
@@ -1312,24 +1097,24 @@ export default class CanvasRenderer extends EventEmitter {
         const rayEndPos   = BABYLON.Vector3.TransformCoordinates(rayEndLifted.position, rayEndLifted.getWorldMatrix())
         const rayBeginPos = BABYLON.Vector3.TransformCoordinates(rayBegin.position, rayBegin.getWorldMatrix())
         let rayDirection = rayEndPos.subtract(rayBeginPos).normalize()
-        rayDirection = rotateVector(rayDirection, 0, 0, this.ptz.deg2rad(this.decalRotate))
+        rayDirection = rotateVector(rayDirection, 0, 0, this.state.ptz!.deg2rad(this.state.decalRotate))
         const ray = new BABYLON.Ray(rayBeginPos, rayDirection, 10 /* meters, enough to be behind wall */)
-        const decalBase = this.scene!.pickWithRay(ray, (mesh) => (mesh === this.wall!))
+        const decalBase = this.state.scene!.pickWithRay(ray, (mesh) => (mesh === this.state.wall!))
         if (decalBase === null)
             throw new Error("cannot find decal base position on wall")
 
         /*  determine decal size (starting from a 16:9 aspect ratio)  */
-        const size = (new BABYLON.Vector3(1.6, 0.9, 0.9)).scaleInPlace(this.decalScale)
+        const size = (new BABYLON.Vector3(1.6, 0.9, 0.9)).scaleInPlace(this.state.decalScale)
 
         /*  invert the normal vector as it seems to be in the ray direction  */
         const normal = decalBase!.getNormal(true)!
         normal.multiplyInPlace(new BABYLON.Vector3(-1, -1, -1))
 
         /*  create new decal  */
-        this.decal = BABYLON.MeshBuilder.CreateDecal("Decal", this.wall!, {
+        this.state.decal = BABYLON.MeshBuilder.CreateDecal("Decal", this.state.wall!, {
             position:      decalBase!.pickedPoint!,
             normal,
-            angle:         this.ptz.deg2rad(90),
+            angle:         this.state.ptz!.deg2rad(90),
             size,
             cullBackFaces: false,
             localMode:     false
@@ -1337,18 +1122,18 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  ugly workaround for BabylonJS rendering issue: move the decal 4cm to the
             front (z-axis) of the wall in order to avoid rendering artifacts  */
-        this.decal.translate(new BABYLON.Vector3(0, 0, 1), 0.04, BABYLON.Space.LOCAL)
+        this.state.decal.translate(new BABYLON.Vector3(0, 0, 1), 0.04, BABYLON.Space.LOCAL)
 
         /*  take over material or create a fresh one  */
         let material = oldDecal?.material ?? null
         if (material === null) {
-            material = new BABYLON.PBRMaterial("Decal-Material", this.scene!)
+            material = new BABYLON.PBRMaterial("Decal-Material", this.state.scene!)
             material.alpha   = 1.0
             material.zOffset = -200
         }
-        this.decal.material = material
+        this.state.decal.material = material
         if (oldDecal)
-            this.decal.setEnabled(oldDecal.isEnabled())
+            this.state.decal.setEnabled(oldDecal.isEnabled())
 
         /*  dispose potential previous decal  */
         if (oldDecal !== null) {
@@ -1359,7 +1144,7 @@ export default class CanvasRenderer extends EventEmitter {
 
     /*  sync renderer  */
     async reflectSyncTime (timestamp: number) {
-        this.syncTime = timestamp
+        this.state.syncTime = timestamp
         await this.canvasFaderStop()
         await this.canvasFaderStart()
     }
@@ -1385,26 +1170,26 @@ export default class CanvasRenderer extends EventEmitter {
     /*  control scene  */
     async reflectSceneState (state: StateTypePartial) {
         /*  ensure we update only if we are already established  */
-        if (!this.established)
+        if (!this.state.established)
             return true
 
         /*  adjust streams  */
         if (state.streams !== undefined) {
             let changed = false
-            if (state.streams.device !== undefined && this.videoStreamDevice !== state.streams.device) {
-                this.videoStreamDevice = state.streams.device
+            if (state.streams.device !== undefined && this.state.videoStreamDevice !== state.streams.device) {
+                this.state.videoStreamDevice = state.streams.device
                 changed = true
             }
-            if (state.streams.width !== undefined && this.videoStreamWidth !== state.streams.width) {
-                this.videoStreamWidth = state.streams.width
+            if (state.streams.width !== undefined && this.state.videoStreamWidth !== state.streams.width) {
+                this.state.videoStreamWidth = state.streams.width
                 changed = true
             }
-            if (state.streams.height !== undefined && this.videoStreamHeight !== state.streams.height) {
-                this.videoStreamHeight = state.streams.height
+            if (state.streams.height !== undefined && this.state.videoStreamHeight !== state.streams.height) {
+                this.state.videoStreamHeight = state.streams.height
                 changed = true
             }
-            if (state.streams.fps !== undefined && this.videoStreamFPS !== state.streams.fps) {
-                this.videoStreamFPS = state.streams.fps
+            if (state.streams.fps !== undefined && this.state.videoStreamFPS !== state.streams.fps) {
+                this.state.videoStreamFPS = state.streams.fps
                 changed = true
             }
             if (changed) {
@@ -1417,185 +1202,185 @@ export default class CanvasRenderer extends EventEmitter {
         const modifiedMedia  = {} as { [ id: string ]: boolean }
         if (state.media !== undefined) {
             /*  adjust medias  */
-            if (this.displayMediaURL.get("media1") !== state.media!.media1) {
-                this.displayMediaURL.set("media1", state.media.media1)
+            if (this.state.displayMediaURL.get("media1") !== state.media!.media1) {
+                this.state.displayMediaURL.set("media1", state.media.media1)
                 modifiedMedia.media1 = true
             }
-            if (this.displayMediaURL.get("media2") !== state.media.media2) {
-                this.displayMediaURL.set("media2", state.media.media2)
+            if (this.state.displayMediaURL.get("media2") !== state.media.media2) {
+                this.state.displayMediaURL.set("media2", state.media.media2)
                 modifiedMedia.media2 = true
             }
-            if (this.displayMediaURL.get("media3") !== state.media.media3) {
-                this.displayMediaURL.set("media3", state.media.media3)
+            if (this.state.displayMediaURL.get("media3") !== state.media.media3) {
+                this.state.displayMediaURL.set("media3", state.media.media3)
                 modifiedMedia.media3 = true
             }
-            if (this.displayMediaURL.get("media4") !== state.media.media4) {
-                this.displayMediaURL.set("media4", state.media.media4)
+            if (this.state.displayMediaURL.get("media4") !== state.media.media4) {
+                this.state.displayMediaURL.set("media4", state.media.media4)
                 modifiedMedia.media4 = true
             }
 
             /*  update already active media receivers  */
-            if (this.layer === "back"
-                && this.decal !== null
-                && modifiedMedia[this.mapMediaId(this.displaySourceMap.decal)]
-                && this.decal.isEnabled())
-                await this.applyDisplayMaterial("decal", this.decal, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
-            if (this.layer === "back"
-                && this.monitorDisplay !== null
-                && modifiedMedia[this.mapMediaId(this.displaySourceMap.monitor)]
-                && this.monitorDisplay.isEnabled())
-                await this.applyDisplayMaterial("monitor", this.monitorDisplay, this.monitorOpacity, 0, 0, this.monitorChromaKey)
-            if (this.layer === "back"
-                && this.pillarDisplay !== null
-                && modifiedMedia[this.mapMediaId(this.displaySourceMap.pillar)]
-                && this.pillarDisplay.isEnabled())
-                await this.applyDisplayMaterial("pillar", this.pillarDisplay, this.pillarOpacity, 0, 0, this.pillarChromaKey)
-            if (this.layer === "front"
-                && this.plateDisplay !== null
-                && modifiedMedia[this.mapMediaId(this.displaySourceMap.plate)]
-                && this.plateDisplay.isEnabled())
-                await this.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
-            if (this.layer === "front"
-                && this.hologramDisplay !== null
-                && modifiedMedia[this.mapMediaId(this.displaySourceMap.hologram)]
-                && this.hologramDisplay.isEnabled())
-                await this.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
-            if (this.layer === "front"
-                && this.paneDisplay !== null
-                && modifiedMedia[this.mapMediaId(this.displaySourceMap.pane)]
-                && this.paneDisplay.isEnabled())
-                await this.applyDisplayMaterial("pane", this.paneDisplay, this.paneOpacity, 0, 0, this.paneChromaKey)
-            if (this.layer === "front"
-                && this.maskDisplay !== null
-                && modifiedMedia[this.mapMediaId(this.displaySourceMap.mask)]
-                && this.maskDisplay.isEnabled())
-                await this.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+            if (this.state.layer === "back"
+                && this.state.decal !== null
+                && modifiedMedia[this.mapMediaId(this.state.displaySourceMap.decal)]
+                && this.state.decal.isEnabled())
+                await this.applyDisplayMaterial("decal", this.state.decal, this.state.decalOpacity, this.state.decalBorderRad, this.state.decalBorderCrop, this.state.decalChromaKey)
+            if (this.state.layer === "back"
+                && this.state.monitorDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.state.displaySourceMap.monitor)]
+                && this.state.monitorDisplay.isEnabled())
+                await this.applyDisplayMaterial("monitor", this.state.monitorDisplay, this.state.monitorOpacity, 0, 0, this.state.monitorChromaKey)
+            if (this.state.layer === "back"
+                && this.state.pillarDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.state.displaySourceMap.pillar)]
+                && this.state.pillarDisplay.isEnabled())
+                await this.applyDisplayMaterial("pillar", this.state.pillarDisplay, this.state.pillarOpacity, 0, 0, this.state.pillarChromaKey)
+            if (this.state.layer === "front"
+                && this.state.plateDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.state.displaySourceMap.plate)]
+                && this.state.plateDisplay.isEnabled())
+                await this.applyDisplayMaterial("plate", this.state.plateDisplay, this.state.plateOpacity, this.state.plateBorderRad, this.state.plateBorderCrop, this.state.plateChromaKey)
+            if (this.state.layer === "front"
+                && this.state.hologramDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.state.displaySourceMap.hologram)]
+                && this.state.hologramDisplay.isEnabled())
+                await this.applyDisplayMaterial("hologram", this.state.hologramDisplay, this.state.hologramOpacity, this.state.hologramBorderRad, this.state.hologramBorderCrop, this.state.hologramChromaKey)
+            if (this.state.layer === "front"
+                && this.state.paneDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.state.displaySourceMap.pane)]
+                && this.state.paneDisplay.isEnabled())
+                await this.applyDisplayMaterial("pane", this.state.paneDisplay, this.state.paneOpacity, 0, 0, this.state.paneChromaKey)
+            if (this.state.layer === "front"
+                && this.state.maskDisplay !== null
+                && modifiedMedia[this.mapMediaId(this.state.displaySourceMap.mask)]
+                && this.state.maskDisplay.isEnabled())
+                await this.applyDisplayMaterial("mask", this.state.maskDisplay, 1.0, this.state.maskBorderRad, 0, null)
         }
 
         /*  adjust canvas  */
-        if (state.canvas !== undefined && this.layer === "back") {
+        if (state.canvas !== undefined && this.state.layer === "back") {
             let changed = false
-            if (   (state.canvas.texture1  !== undefined && this.canvasConfig[this.canvasMode].texture1  !== state.canvas.texture1)
-                || (state.canvas.texture2  !== undefined && this.canvasConfig[this.canvasMode].texture2  !== state.canvas.texture2)
-                || (state.canvas.fadeTrans !== undefined && this.canvasConfig[this.canvasMode].fadeTrans !== state.canvas.fadeTrans)
-                || (state.canvas.fadeWait  !== undefined && this.canvasConfig[this.canvasMode].fadeWait  !== state.canvas.fadeWait)) {
-                this.canvasConfig[(this.canvasMode + 1) % 2].texture1 =
+            if (   (state.canvas.texture1  !== undefined && this.state.canvasConfig[this.state.canvasMode].texture1  !== state.canvas.texture1)
+                || (state.canvas.texture2  !== undefined && this.state.canvasConfig[this.state.canvasMode].texture2  !== state.canvas.texture2)
+                || (state.canvas.fadeTrans !== undefined && this.state.canvasConfig[this.state.canvasMode].fadeTrans !== state.canvas.fadeTrans)
+                || (state.canvas.fadeWait  !== undefined && this.state.canvasConfig[this.state.canvasMode].fadeWait  !== state.canvas.fadeWait)) {
+                this.state.canvasConfig[(this.state.canvasMode + 1) % 2].texture1 =
                     state.canvas.texture1 !== undefined ?
                         state.canvas.texture1 :
-                        this.canvasConfig[this.canvasMode].texture1
-                this.canvasConfig[(this.canvasMode + 1) % 2].texture2 =
+                        this.state.canvasConfig[this.state.canvasMode].texture1
+                this.state.canvasConfig[(this.state.canvasMode + 1) % 2].texture2 =
                     state.canvas.texture2 !== undefined ?
                         state.canvas.texture2 :
-                        this.canvasConfig[this.canvasMode].texture2
-                this.canvasConfig[(this.canvasMode + 1) % 2].fadeTrans =
+                        this.state.canvasConfig[this.state.canvasMode].texture2
+                this.state.canvasConfig[(this.state.canvasMode + 1) % 2].fadeTrans =
                     state.canvas.fadeTrans !== undefined ?
                         state.canvas.fadeTrans :
-                        this.canvasConfig[this.canvasMode].fadeTrans
-                this.canvasConfig[(this.canvasMode + 1) % 2].fadeWait =
+                        this.state.canvasConfig[this.state.canvasMode].fadeTrans
+                this.state.canvasConfig[(this.state.canvasMode + 1) % 2].fadeWait =
                     state.canvas.fadeWait !== undefined ?
                         state.canvas.fadeWait :
-                        this.canvasConfig[this.canvasMode].fadeWait
+                        this.state.canvasConfig[this.state.canvasMode].fadeWait
                 changed = true
             }
             if (state.canvas.rotationZ !== undefined) {
-                this.wall!.rotationQuaternion = this.wallRotBase!.clone()
-                this.wall!.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(state.canvas.rotationZ), BABYLON.Space.WORLD)
+                this.state.wall!.rotationQuaternion = this.state.wallRotBase!.clone()
+                this.state.wall!.rotate(new BABYLON.Vector3(0, 0, 1),
+                    this.state.ptz!.deg2rad(state.canvas.rotationZ), BABYLON.Space.WORLD)
             }
             if (state.canvas.fadeSwitch !== undefined)
-                this.fadeSwitch = state.canvas.fadeSwitch
+                this.state.fadeSwitch = state.canvas.fadeSwitch
             if (changed)
                 await this.canvasModeChange()
         }
 
         /*  adjust monitor  */
         if (state.monitor !== undefined
-            && this.monitor !== null && this.monitorCase !== null && this.monitorDisplay !== null
-            && this.layer === "back") {
-            if (state.monitor.source !== undefined && this.displaySourceMap.monitor !== state.monitor.source) {
-                this.displaySourceMap.monitor = state.monitor.source
-                if (this.monitorDisplay.isEnabled())
-                    await this.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
+            && this.state.monitor !== null && this.state.monitorCase !== null && this.state.monitorDisplay !== null
+            && this.state.layer === "back") {
+            if (state.monitor.source !== undefined && this.state.displaySourceMap.monitor !== state.monitor.source) {
+                this.state.displaySourceMap.monitor = state.monitor.source
+                if (this.state.monitorDisplay.isEnabled())
+                    await this.applyDisplayMaterial("monitor", this.state.monitorDisplay!, this.state.monitorOpacity, 0, 0, this.state.monitorChromaKey)
             }
             if (state.monitor.opacity !== undefined) {
-                this.monitorOpacity = state.monitor.opacity
-                if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.monitorDisplay.material
-                    material.setFloat("opacity", this.monitorOpacity)
+                this.state.monitorOpacity = state.monitor.opacity
+                if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.monitorDisplay.material
+                    material.setFloat("opacity", this.state.monitorOpacity)
                 }
             }
             if (state.monitor.scale !== undefined) {
-                this.monitorCase.scaling.x    = this.monitorBase.scaleCaseX    * state.monitor.scale
-                this.monitorCase.scaling.y    = this.monitorBase.scaleCaseY    * state.monitor.scale
-                this.monitorCase.scaling.z    = this.monitorBase.scaleCaseZ    * state.monitor.scale
-                this.monitorDisplay.scaling.x = this.monitorBase.scaleDisplayX * state.monitor.scale
-                this.monitorDisplay.scaling.y = this.monitorBase.scaleDisplayY * state.monitor.scale
-                this.monitorDisplay.scaling.z = this.monitorBase.scaleDisplayZ * state.monitor.scale
+                this.state.monitorCase.scaling.x    = this.state.monitorBase.scaleCaseX    * state.monitor.scale
+                this.state.monitorCase.scaling.y    = this.state.monitorBase.scaleCaseY    * state.monitor.scale
+                this.state.monitorCase.scaling.z    = this.state.monitorBase.scaleCaseZ    * state.monitor.scale
+                this.state.monitorDisplay.scaling.x = this.state.monitorBase.scaleDisplayX * state.monitor.scale
+                this.state.monitorDisplay.scaling.y = this.state.monitorBase.scaleDisplayY * state.monitor.scale
+                this.state.monitorDisplay.scaling.z = this.state.monitorBase.scaleDisplayZ * state.monitor.scale
             }
             if (state.monitor.rotate !== undefined) {
-                this.monitor.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.monitor.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(state.monitor.rotate), BABYLON.Space.WORLD)
+                this.state.monitor.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.state.monitor.rotate(new BABYLON.Vector3(0, 0, 1),
+                    this.state.ptz!.deg2rad(state.monitor.rotate), BABYLON.Space.WORLD)
             }
             if (state.monitor.lift !== undefined)
-                this.monitor.position.z = this.monitorBase.positionZ + (state.monitor.lift / 100)
+                this.state.monitor.position.z = this.state.monitorBase.positionZ + (state.monitor.lift / 100)
             if (state.monitor.distance !== undefined) {
-                this.monitorCase.position.x    = this.monitorBase.positionCaseX    - state.monitor.distance
-                this.monitorDisplay.position.x = this.monitorBase.positionDisplayX - state.monitor.distance
+                this.state.monitorCase.position.x    = this.state.monitorBase.positionCaseX    - state.monitor.distance
+                this.state.monitorDisplay.position.x = this.state.monitorBase.positionDisplayX - state.monitor.distance
             }
-            if (state.monitor.fadeTime !== undefined && this.monitorFade !== state.monitor.fadeTime)
-                this.monitorFade = state.monitor.fadeTime
+            if (state.monitor.fadeTime !== undefined && this.state.monitorFade !== state.monitor.fadeTime)
+                this.state.monitorFade = state.monitor.fadeTime
             if (state.monitor.chromaKey !== undefined) {
-                if (state.monitor.chromaKey.enable !== undefined && this.monitorChromaKey.enable !== state.monitor.chromaKey.enable) {
-                    this.monitorChromaKey.enable = state.monitor.chromaKey.enable
-                    if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.monitorDisplay.material
-                        material.setInt("chromaEnable", this.monitorChromaKey.enable ? 1 : 0)
+                if (state.monitor.chromaKey.enable !== undefined && this.state.monitorChromaKey.enable !== state.monitor.chromaKey.enable) {
+                    this.state.monitorChromaKey.enable = state.monitor.chromaKey.enable
+                    if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.monitorDisplay.material
+                        material.setInt("chromaEnable", this.state.monitorChromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.monitor.chromaKey.threshold !== undefined && this.monitorChromaKey.threshold !== state.monitor.chromaKey.threshold) {
-                    this.monitorChromaKey.threshold = state.monitor.chromaKey.threshold
-                    if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.monitorDisplay.material
-                        material.setFloat("chromaThreshold", this.monitorChromaKey.threshold)
+                if (state.monitor.chromaKey.threshold !== undefined && this.state.monitorChromaKey.threshold !== state.monitor.chromaKey.threshold) {
+                    this.state.monitorChromaKey.threshold = state.monitor.chromaKey.threshold
+                    if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.monitorDisplay.material
+                        material.setFloat("chromaThreshold", this.state.monitorChromaKey.threshold)
                     }
                 }
-                if (state.monitor.chromaKey.smoothing !== undefined && this.monitorChromaKey.smoothing !== state.monitor.chromaKey.smoothing) {
-                    this.monitorChromaKey.smoothing = state.monitor.chromaKey.smoothing
-                    if (this.monitorChromaKey.enable && this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.monitorDisplay.material
-                        material.setFloat("chromaSmoothing", this.monitorChromaKey.smoothing)
+                if (state.monitor.chromaKey.smoothing !== undefined && this.state.monitorChromaKey.smoothing !== state.monitor.chromaKey.smoothing) {
+                    this.state.monitorChromaKey.smoothing = state.monitor.chromaKey.smoothing
+                    if (this.state.monitorChromaKey.enable && this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.monitorDisplay.material
+                        material.setFloat("chromaSmoothing", this.state.monitorChromaKey.smoothing)
                     }
                 }
             }
-            if (state.monitor.enable !== undefined && this.monitorDisplay.isEnabled() !== state.monitor.enable) {
+            if (state.monitor.enable !== undefined && this.state.monitorDisplay.isEnabled() !== state.monitor.enable) {
                 if (state.monitor.enable) {
-                    await this.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
-                    if (this.monitorFade > 0 && this.fps > 0) {
+                    await this.applyDisplayMaterial("monitor", this.state.monitorDisplay!, this.state.monitorOpacity, 0, 0, this.state.monitorChromaKey)
+                    if (this.state.monitorFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "enabling monitor (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.fps === 0 ? 1 : this.fps)
-                        const framesTotal = this.monitorFade * fps
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.monitorCase,
+                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const framesTotal = this.state.monitorFade * fps
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.state.monitorCase,
                             "visibility", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
-                        if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.monitorDisplay.material
+                        if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.monitorDisplay.material
                             material.setFloat("visibility", 0.0)
                         }
-                        this.monitor.setEnabled(true)
-                        this.monitorCase.visibility = 1
-                        this.monitorCase.setEnabled(true)
-                        this.monitorDisplay.visibility = 1
-                        this.monitorDisplay.setEnabled(true)
-                        const anim2 = this.manualAnimation(0, 1, this.monitorFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.monitorDisplay!.material
+                        this.state.monitor.setEnabled(true)
+                        this.state.monitorCase.visibility = 1
+                        this.state.monitorCase.setEnabled(true)
+                        this.state.monitorDisplay.visibility = 1
+                        this.state.monitorDisplay.setEnabled(true)
+                        const anim2 = this.manualAnimation(0, 1, this.state.monitorFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.monitorDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.monitorDisplay!.material
+                            if (this.state.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.monitorDisplay!.material
                                 material.setFloat("visibility", 1.0)
                             }
                         })
@@ -1605,378 +1390,378 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                     else {
                         this.emit("log", "INFO", "enabling monitor")
-                        this.monitorCase.visibility    = 1
-                        this.monitorDisplay.visibility = 1
-                        this.monitorCase.setEnabled(true)
-                        this.monitorDisplay.setEnabled(true)
-                        this.monitor.setEnabled(true)
+                        this.state.monitorCase.visibility    = 1
+                        this.state.monitorDisplay.visibility = 1
+                        this.state.monitorCase.setEnabled(true)
+                        this.state.monitorDisplay.setEnabled(true)
+                        this.state.monitor.setEnabled(true)
                     }
                 }
                 else if (!state.monitor.enable) {
-                    if (this.monitorFade > 0 && this.fps > 0) {
+                    if (this.state.monitorFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "disabling monitor (fading: start)")
-                        this.monitorCase.visibility = 1
-                        this.monitorCase.setEnabled(true)
-                        this.monitorDisplay.visibility = 1
-                        this.monitorDisplay.setEnabled(true)
+                        this.state.monitorCase.visibility = 1
+                        this.state.monitorCase.setEnabled(true)
+                        this.state.monitorDisplay.visibility = 1
+                        this.state.monitorDisplay.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.fps === 0 ? 1 : this.fps)
-                        const framesTotal = this.monitorFade * fps
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.monitorCase,
+                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const framesTotal = this.state.monitorFade * fps
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.state.monitorCase,
                             "visibility", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
-                        if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.monitorDisplay.material
+                        if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.monitorDisplay.material
                             material.setFloat("visibility", 1.0)
                         }
-                        const anim2 = this.manualAnimation(1, 0, this.monitorFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.monitorDisplay!.material
+                        const anim2 = this.manualAnimation(1, 0, this.state.monitorFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.monitorDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.monitorDisplay!.material
+                            if (this.state.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.monitorDisplay!.material
                                 material.setFloat("visibility", 0.0)
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
                             this.emit("log", "INFO", "disabling monitor (fading: end)")
-                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.monitorDisplay!.material
+                            if (this.state.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.monitorDisplay!.material
                                 material.setFloat("visibility", 0.0)
-                                this.monitorDisplay!.visibility = 0.0
-                                this.monitorCase!.visibility = 0.0
+                                this.state.monitorDisplay!.visibility = 0.0
+                                this.state.monitorCase!.visibility = 0.0
                             }
                             else  {
-                                this.monitorDisplay!.visibility = 0.0
-                                this.monitorCase!.visibility = 0.0
+                                this.state.monitorDisplay!.visibility = 0.0
+                                this.state.monitorCase!.visibility = 0.0
                             }
-                            this.monitorCase!.setEnabled(false)
-                            this.monitorDisplay!.setEnabled(false)
-                            this.monitor!.setEnabled(false)
-                            await this.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
+                            this.state.monitorCase!.setEnabled(false)
+                            this.state.monitorDisplay!.setEnabled(false)
+                            this.state.monitor!.setEnabled(false)
+                            await this.unapplyDisplayMaterial("monitor", this.state.monitorDisplay!)
                         })
                     }
                     else {
                         this.emit("log", "INFO", "disabling monitor")
-                        if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.monitorDisplay.material
+                        if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.monitorDisplay.material
                             material.setFloat("visibility", 0.0)
-                            this.monitorDisplay.visibility = 0.0
-                            this.monitorCase.visibility = 0.0
+                            this.state.monitorDisplay.visibility = 0.0
+                            this.state.monitorCase.visibility = 0.0
                         }
                         else {
-                            this.monitorDisplay.visibility = 0.0
-                            this.monitorCase.visibility = 0.0
+                            this.state.monitorDisplay.visibility = 0.0
+                            this.state.monitorCase.visibility = 0.0
                         }
-                        this.monitorCase.setEnabled(false)
-                        this.monitorDisplay.setEnabled(false)
-                        this.monitor.setEnabled(false)
-                        await this.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
+                        this.state.monitorCase.setEnabled(false)
+                        this.state.monitorDisplay.setEnabled(false)
+                        this.state.monitor.setEnabled(false)
+                        await this.unapplyDisplayMaterial("monitor", this.state.monitorDisplay!)
                     }
                 }
             }
         }
 
         /*  adjust decal  */
-        if (state.decal !== undefined && this.decal !== null && this.layer === "back") {
-            if (state.decal.fadeTime !== undefined && this.decalFade !== state.decal.fadeTime)
-                this.decalFade = state.decal.fadeTime
-            if (state.decal.source !== undefined && this.displaySourceMap.decal !== state.decal.source) {
-                this.displaySourceMap.decal = state.decal.source
-                if (this.decal.isEnabled())
-                    await this.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+        if (state.decal !== undefined && this.state.decal !== null && this.state.layer === "back") {
+            if (state.decal.fadeTime !== undefined && this.state.decalFade !== state.decal.fadeTime)
+                this.state.decalFade = state.decal.fadeTime
+            if (state.decal.source !== undefined && this.state.displaySourceMap.decal !== state.decal.source) {
+                this.state.displaySourceMap.decal = state.decal.source
+                if (this.state.decal.isEnabled())
+                    await this.applyDisplayMaterial("decal", this.state.decal!, this.state.decalOpacity, this.state.decalBorderRad, this.state.decalBorderCrop, this.state.decalChromaKey)
             }
             if (state.decal.opacity !== undefined) {
-                this.decalOpacity = state.decal.opacity
-                if (this.decal.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.decal.material
-                    material.setFloat("opacity", this.decalOpacity)
+                this.state.decalOpacity = state.decal.opacity
+                if (this.state.decal.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.decal.material
+                    material.setFloat("opacity", this.state.decalOpacity)
                 }
             }
             if (state.decal.borderRad !== undefined) {
-                this.decalBorderRad = state.decal.borderRad
-                if (this.decal.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.decal.material
-                    material.setFloat("borderRadius", this.decalBorderRad)
+                this.state.decalBorderRad = state.decal.borderRad
+                if (this.state.decal.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.decal.material
+                    material.setFloat("borderRadius", this.state.decalBorderRad)
                 }
             }
             if (state.decal.borderCrop !== undefined) {
-                this.decalBorderCrop = state.decal.borderCrop
-                if (this.decal.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.decal.material
-                    material.setFloat("borderCrop", this.decalBorderCrop)
+                this.state.decalBorderCrop = state.decal.borderCrop
+                if (this.state.decal.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.decal.material
+                    material.setFloat("borderCrop", this.state.decalBorderCrop)
                 }
             }
             if (state.decal.chromaKey !== undefined) {
-                if (state.decal.chromaKey.enable !== undefined && this.decalChromaKey.enable !== state.decal.chromaKey.enable) {
-                    this.decalChromaKey.enable = state.decal.chromaKey.enable
-                    if (this.decal.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.decal.material
-                        material.setInt("chromaEnable", this.decalChromaKey.enable ? 1 : 0)
+                if (state.decal.chromaKey.enable !== undefined && this.state.decalChromaKey.enable !== state.decal.chromaKey.enable) {
+                    this.state.decalChromaKey.enable = state.decal.chromaKey.enable
+                    if (this.state.decal.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.decal.material
+                        material.setInt("chromaEnable", this.state.decalChromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.decal.chromaKey.threshold !== undefined && this.decalChromaKey.threshold !== state.decal.chromaKey.threshold) {
-                    this.decalChromaKey.threshold = state.decal.chromaKey.threshold
-                    if (this.decal.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.decal.material
-                        material.setFloat("chromaThreshold", this.decalChromaKey.threshold)
+                if (state.decal.chromaKey.threshold !== undefined && this.state.decalChromaKey.threshold !== state.decal.chromaKey.threshold) {
+                    this.state.decalChromaKey.threshold = state.decal.chromaKey.threshold
+                    if (this.state.decal.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.decal.material
+                        material.setFloat("chromaThreshold", this.state.decalChromaKey.threshold)
                     }
                 }
-                if (state.decal.chromaKey.smoothing !== undefined && this.decalChromaKey.smoothing !== state.decal.chromaKey.smoothing) {
-                    this.decalChromaKey.smoothing = state.decal.chromaKey.smoothing
-                    if (this.decalChromaKey.enable && this.decal.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.decal.material
-                        material.setFloat("chromaSmoothing", this.decalChromaKey.smoothing)
+                if (state.decal.chromaKey.smoothing !== undefined && this.state.decalChromaKey.smoothing !== state.decal.chromaKey.smoothing) {
+                    this.state.decalChromaKey.smoothing = state.decal.chromaKey.smoothing
+                    if (this.state.decalChromaKey.enable && this.state.decal.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.decal.material
+                        material.setFloat("chromaSmoothing", this.state.decalChromaKey.smoothing)
                     }
                 }
             }
             if (state.decal.rotate !== undefined || state.decal.lift !== undefined || state.decal.scale !== undefined) {
                 let changed = false
-                if (state.decal.rotate !== undefined && this.decalRotate !== state.decal.rotate) {
-                    this.decalRotate = state.decal.rotate
+                if (state.decal.rotate !== undefined && this.state.decalRotate !== state.decal.rotate) {
+                    this.state.decalRotate = state.decal.rotate
                     changed = true
                 }
-                if (state.decal.lift !== undefined && this.decalLift !== state.decal.lift) {
-                    this.decalLift = state.decal.lift
+                if (state.decal.lift !== undefined && this.state.decalLift !== state.decal.lift) {
+                    this.state.decalLift = state.decal.lift
                     changed = true
                 }
-                if (state.decal.scale !== undefined && this.decalScale !== state.decal.scale) {
-                    this.decalScale = state.decal.scale
+                if (state.decal.scale !== undefined && this.state.decalScale !== state.decal.scale) {
+                    this.state.decalScale = state.decal.scale
                     changed = true
                 }
                 if (changed) {
                     await this.stop()
                     await this.decalGenerate()
-                    await this.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+                    await this.applyDisplayMaterial("decal", this.state.decal!, this.state.decalOpacity, this.state.decalBorderRad, this.state.decalBorderCrop, this.state.decalChromaKey)
                     await this.start()
                 }
             }
-            if (state.decal.enable !== undefined && this.decal.isEnabled() !== state.decal.enable) {
+            if (state.decal.enable !== undefined && this.state.decal.isEnabled() !== state.decal.enable) {
                 if (state.decal.enable) {
-                    await this.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
-                    if (this.decalFade > 0 && this.fps > 0) {
+                    await this.applyDisplayMaterial("decal", this.state.decal!, this.state.decalOpacity, this.state.decalBorderRad, this.state.decalBorderCrop, this.state.decalChromaKey)
+                    if (this.state.decalFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "enabling decal (fading: start)")
-                        if (this.decal.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.decal.material
+                        if (this.state.decal.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.decal.material
                             material.setFloat("visibility", 0.0)
                         }
-                        this.decal.visibility = 1
-                        this.decal.setEnabled(true)
-                        await this.manualAnimation(0, 1, this.decalFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.decal!.material
+                        this.state.decal.visibility = 1
+                        this.state.decal.setEnabled(true)
+                        await this.manualAnimation(0, 1, this.state.decalFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.decal!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.decal!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
                             this.emit("log", "INFO", "enabling decal (fading: end)")
-                            if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.decal!.material
+                            if (this.state.decal!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.decal!.material
                                 material.setFloat("visibility", 1.0)
                             }
                         })
                     }
                     else {
                         this.emit("log", "INFO", "enabling decal")
-                        this.decal.visibility = 1
-                        this.decal.setEnabled(true)
+                        this.state.decal.visibility = 1
+                        this.state.decal.setEnabled(true)
                     }
                 }
                 else if (!state.decal.enable) {
-                    if (this.decalFade > 0 && this.fps > 0) {
+                    if (this.state.decalFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "disabling decal (fading: start)")
-                        if (this.decal.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.decal.material
+                        if (this.state.decal.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.decal.material
                             material.setFloat("visibility", 1.0)
                         }
-                        this.decal.visibility = 1
-                        this.decal.setEnabled(true)
-                        await this.manualAnimation(1, 0, this.decalFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.decal!.material
+                        this.state.decal.visibility = 1
+                        this.state.decal.setEnabled(true)
+                        await this.manualAnimation(1, 0, this.state.decalFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.decal!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.decal!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(async () => {
                             this.emit("log", "INFO", "disabling decal (fading: end)")
-                            if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.decal!.material
+                            if (this.state.decal!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.decal!.material
                                 material.setFloat("visibility", 0.0)
-                                this.decal!.visibility = 0
+                                this.state.decal!.visibility = 0
                             }
                             else
-                                this.decal!.visibility = 0
-                            this.decal!.setEnabled(false)
-                            await this.unapplyDisplayMaterial("decal", this.decal!)
+                                this.state.decal!.visibility = 0
+                            this.state.decal!.setEnabled(false)
+                            await this.unapplyDisplayMaterial("decal", this.state.decal!)
                         })
                     }
                     else {
                         this.emit("log", "INFO", "disabling decal")
-                        this.decal.visibility = 0
-                        this.decal.setEnabled(false)
-                        await this.unapplyDisplayMaterial("decal", this.decal!)
+                        this.state.decal.visibility = 0
+                        this.state.decal.setEnabled(false)
+                        await this.unapplyDisplayMaterial("decal", this.state.decal!)
                     }
                 }
             }
         }
 
         /*  adjust plate  */
-        if (state.plate !== undefined && this.plate !== null && this.plateDisplay !== null && this.layer === "front") {
-            if (state.plate.source !== undefined && this.displaySourceMap.plate !== state.plate.source) {
-                this.displaySourceMap.plate = state.plate.source
-                if (this.plateDisplay.isEnabled())
-                    await this.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
+        if (state.plate !== undefined && this.state.plate !== null && this.state.plateDisplay !== null && this.state.layer === "front") {
+            if (state.plate.source !== undefined && this.state.displaySourceMap.plate !== state.plate.source) {
+                this.state.displaySourceMap.plate = state.plate.source
+                if (this.state.plateDisplay.isEnabled())
+                    await this.applyDisplayMaterial("plate", this.state.plateDisplay, this.state.plateOpacity, this.state.plateBorderRad, this.state.plateBorderCrop, this.state.plateChromaKey)
             }
             if (state.plate.scale !== undefined) {
-                this.plateDisplay.scaling.x = this.plateBase.scaleDisplayX * state.plate.scale
-                this.plateDisplay.scaling.y = this.plateBase.scaleDisplayY * state.plate.scale
-                this.plateDisplay.scaling.z = this.plateBase.scaleDisplayZ * state.plate.scale
+                this.state.plateDisplay.scaling.x = this.state.plateBase.scaleDisplayX * state.plate.scale
+                this.state.plateDisplay.scaling.y = this.state.plateBase.scaleDisplayY * state.plate.scale
+                this.state.plateDisplay.scaling.z = this.state.plateBase.scaleDisplayZ * state.plate.scale
             }
             if (state.plate.rotate !== undefined) {
-                this.plate.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.plate.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(state.plate.rotate), BABYLON.Space.WORLD)
+                this.state.plate.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.state.plate.rotate(new BABYLON.Vector3(0, 0, 1),
+                    this.state.ptz!.deg2rad(state.plate.rotate), BABYLON.Space.WORLD)
             }
             if (state.plate.lift !== undefined)
-                this.plate.position.z = this.plateBase.positionZ + state.plate.lift
+                this.state.plate.position.z = this.state.plateBase.positionZ + state.plate.lift
             if (state.plate.distance !== undefined)
-                this.plateDisplay.position.x = this.plateBase.positionX - state.plate.distance
-            if (state.plate.fadeTime !== undefined && this.plateFade !== state.plate.fadeTime)
-                this.plateFade = state.plate.fadeTime
+                this.state.plateDisplay.position.x = this.state.plateBase.positionX - state.plate.distance
+            if (state.plate.fadeTime !== undefined && this.state.plateFade !== state.plate.fadeTime)
+                this.state.plateFade = state.plate.fadeTime
             if (state.plate.opacity !== undefined) {
-                this.plateOpacity = state.plate.opacity
-                if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.plateDisplay.material
-                    material.setFloat("opacity", this.plateOpacity)
+                this.state.plateOpacity = state.plate.opacity
+                if (this.state.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.plateDisplay.material
+                    material.setFloat("opacity", this.state.plateOpacity)
                 }
             }
             if (state.plate.borderRad !== undefined) {
-                this.plateBorderRad = state.plate.borderRad
-                if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.plateDisplay.material
-                    material.setFloat("borderRadius", this.plateBorderRad)
+                this.state.plateBorderRad = state.plate.borderRad
+                if (this.state.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.plateDisplay.material
+                    material.setFloat("borderRadius", this.state.plateBorderRad)
                 }
             }
             if (state.plate.borderCrop !== undefined) {
-                this.plateBorderCrop = state.plate.borderCrop
-                if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.plateDisplay.material
-                    material.setFloat("borderCrop", this.plateBorderCrop)
+                this.state.plateBorderCrop = state.plate.borderCrop
+                if (this.state.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.plateDisplay.material
+                    material.setFloat("borderCrop", this.state.plateBorderCrop)
                 }
             }
             if (state.plate.chromaKey !== undefined) {
-                if (state.plate.chromaKey.enable !== undefined && this.plateChromaKey.enable !== state.plate.chromaKey.enable) {
-                    this.plateChromaKey.enable = state.plate.chromaKey.enable
-                    if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.plateDisplay.material
-                        material.setInt("chromaEnable", this.plateChromaKey.enable ? 1 : 0)
+                if (state.plate.chromaKey.enable !== undefined && this.state.plateChromaKey.enable !== state.plate.chromaKey.enable) {
+                    this.state.plateChromaKey.enable = state.plate.chromaKey.enable
+                    if (this.state.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.plateDisplay.material
+                        material.setInt("chromaEnable", this.state.plateChromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.plate.chromaKey.threshold !== undefined && this.plateChromaKey.threshold !== state.plate.chromaKey.threshold) {
-                    this.plateChromaKey.threshold = state.plate.chromaKey.threshold
-                    if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.plateDisplay.material
-                        material.setFloat("chromaThreshold", this.plateChromaKey.threshold)
+                if (state.plate.chromaKey.threshold !== undefined && this.state.plateChromaKey.threshold !== state.plate.chromaKey.threshold) {
+                    this.state.plateChromaKey.threshold = state.plate.chromaKey.threshold
+                    if (this.state.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.plateDisplay.material
+                        material.setFloat("chromaThreshold", this.state.plateChromaKey.threshold)
                     }
                 }
-                if (state.plate.chromaKey.smoothing !== undefined && this.plateChromaKey.smoothing !== state.plate.chromaKey.smoothing) {
-                    this.plateChromaKey.smoothing = state.plate.chromaKey.smoothing
-                    if (this.plateChromaKey.enable && this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.plateDisplay.material
-                        material.setFloat("chromaSmoothing", this.plateChromaKey.smoothing)
+                if (state.plate.chromaKey.smoothing !== undefined && this.state.plateChromaKey.smoothing !== state.plate.chromaKey.smoothing) {
+                    this.state.plateChromaKey.smoothing = state.plate.chromaKey.smoothing
+                    if (this.state.plateChromaKey.enable && this.state.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.plateDisplay.material
+                        material.setFloat("chromaSmoothing", this.state.plateChromaKey.smoothing)
                     }
                 }
             }
-            if (state.plate.enable !== undefined && this.plateDisplay.isEnabled() !== state.plate.enable) {
+            if (state.plate.enable !== undefined && this.state.plateDisplay.isEnabled() !== state.plate.enable) {
                 if (state.plate.enable) {
-                    await this.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
-                    if (this.plateFade > 0 && this.fps > 0) {
+                    await this.applyDisplayMaterial("plate", this.state.plateDisplay, this.state.plateOpacity, this.state.plateBorderRad, this.state.plateBorderCrop, this.state.plateChromaKey)
+                    if (this.state.plateFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "enabling plate (fading: start)")
-                        if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.plateDisplay.material
+                        if (this.state.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.plateDisplay.material
                             material.setFloat("visibility", 0.0)
-                            this.plateDisplay.visibility = 1.0
+                            this.state.plateDisplay.visibility = 1.0
                         }
                         else
-                            this.plateDisplay.visibility = 0.0
-                        this.plateDisplay.setEnabled(true)
-                        await this.manualAnimation(0, 1, this.plateFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.plateDisplay!.material
+                            this.state.plateDisplay.visibility = 0.0
+                        this.state.plateDisplay.setEnabled(true)
+                        await this.manualAnimation(0, 1, this.state.plateFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.plateDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                             else
-                                this.plateDisplay!.visibility = gradient
+                                this.state.plateDisplay!.visibility = gradient
                         }).then(() => {
                             this.emit("log", "INFO", "enabling plate (fading: end)")
-                            if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.plateDisplay!.material
+                            if (this.state.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.plateDisplay!.material
                                 material.setFloat("visibility", 1.0)
-                                this.plateDisplay!.visibility = 1.0
+                                this.state.plateDisplay!.visibility = 1.0
                             }
                             else
-                                this.plateDisplay!.visibility = 1.0
+                                this.state.plateDisplay!.visibility = 1.0
                         })
                     }
                     else {
                         this.emit("log", "INFO", "enabling plate")
-                        if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.plateDisplay!.material
+                        if (this.state.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.plateDisplay!.material
                             material.setFloat("visibility", 1.0)
-                            this.plateDisplay!.visibility = 1.0
+                            this.state.plateDisplay!.visibility = 1.0
                         }
                         else
-                            this.plateDisplay!.visibility = 1.0
-                        this.plateDisplay!.setEnabled(true)
+                            this.state.plateDisplay!.visibility = 1.0
+                        this.state.plateDisplay!.setEnabled(true)
                     }
                 }
                 else if (!state.plate.enable) {
-                    if (this.plateFade > 0 && this.fps > 0) {
+                    if (this.state.plateFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "disabling plate (fading: start)")
-                        if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.plateDisplay.material
+                        if (this.state.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.plateDisplay.material
                             material.setFloat("visibility", 1.0)
-                            this.plateDisplay.visibility = 1.0
+                            this.state.plateDisplay.visibility = 1.0
                         }
                         else
-                            this.plateDisplay.visibility = 1.0
-                        this.plateDisplay.setEnabled(true)
-                        await this.manualAnimation(1, 0, this.plateFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.plateDisplay!.material
+                            this.state.plateDisplay.visibility = 1.0
+                        this.state.plateDisplay.setEnabled(true)
+                        await this.manualAnimation(1, 0, this.state.plateFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.plateDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                             else
-                                this.plateDisplay!.visibility = gradient
+                                this.state.plateDisplay!.visibility = gradient
                         }).then(async () => {
                             this.emit("log", "INFO", "disabling plate (fading: end)")
-                            if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.plateDisplay!.material
+                            if (this.state.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.plateDisplay!.material
                                 material.setFloat("visibility", 0.0)
-                                this.plateDisplay!.visibility = 0.0
+                                this.state.plateDisplay!.visibility = 0.0
                             }
                             else
-                                this.plateDisplay!.visibility = 0.0
-                            this.plateDisplay!.setEnabled(false)
-                            await this.unapplyDisplayMaterial("plate", this.plateDisplay!)
+                                this.state.plateDisplay!.visibility = 0.0
+                            this.state.plateDisplay!.setEnabled(false)
+                            await this.unapplyDisplayMaterial("plate", this.state.plateDisplay!)
                         })
                     }
                     else {
                         this.emit("log", "INFO", "disabling plate")
                         const setOnce = (value: number) => {
-                            if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.plateDisplay!.material
+                            if (this.state.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.plateDisplay!.material
                                 material.setFloat("visibility", value)
-                                this.plateDisplay!.visibility = value
+                                this.state.plateDisplay!.visibility = value
                             }
                             else
-                                this.plateDisplay!.visibility = value
+                                this.state.plateDisplay!.visibility = value
                         }
                         setOnce(0.000000001)
-                        this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                        this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
-                            this.plateDisplay!.setEnabled(false)
-                            await this.unapplyDisplayMaterial("plate", this.plateDisplay!)
+                            this.state.plateDisplay!.setEnabled(false)
+                            await this.unapplyDisplayMaterial("plate", this.state.plateDisplay!)
                         })
                     }
                 }
@@ -1984,162 +1769,162 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  adjust hologram  */
-        if (state.hologram !== undefined && this.hologram !== null && this.hologramDisplay !== null && this.layer === "front") {
-            if (state.hologram.source !== undefined && this.displaySourceMap.hologram !== state.hologram.source) {
-                this.displaySourceMap.hologram = state.hologram.source
-                if (this.hologramDisplay.isEnabled())
-                    await this.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
+        if (state.hologram !== undefined && this.state.hologram !== null && this.state.hologramDisplay !== null && this.state.layer === "front") {
+            if (state.hologram.source !== undefined && this.state.displaySourceMap.hologram !== state.hologram.source) {
+                this.state.displaySourceMap.hologram = state.hologram.source
+                if (this.state.hologramDisplay.isEnabled())
+                    await this.applyDisplayMaterial("hologram", this.state.hologramDisplay, this.state.hologramOpacity, this.state.hologramBorderRad, this.state.hologramBorderCrop, this.state.hologramChromaKey)
             }
             if (state.hologram.scale !== undefined) {
-                this.hologramDisplay.scaling.x = this.hologramBase.scaleDisplayX * state.hologram.scale
-                this.hologramDisplay.scaling.y = this.hologramBase.scaleDisplayY * state.hologram.scale
-                this.hologramDisplay.scaling.z = this.hologramBase.scaleDisplayZ * state.hologram.scale
+                this.state.hologramDisplay.scaling.x = this.state.hologramBase.scaleDisplayX * state.hologram.scale
+                this.state.hologramDisplay.scaling.y = this.state.hologramBase.scaleDisplayY * state.hologram.scale
+                this.state.hologramDisplay.scaling.z = this.state.hologramBase.scaleDisplayZ * state.hologram.scale
             }
             if (state.hologram.rotate !== undefined) {
-                this.hologram.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.hologram.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(state.hologram.rotate), BABYLON.Space.WORLD)
+                this.state.hologram.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.state.hologram.rotate(new BABYLON.Vector3(0, 0, 1),
+                    this.state.ptz!.deg2rad(state.hologram.rotate), BABYLON.Space.WORLD)
             }
             if (state.hologram.lift !== undefined)
-                this.hologram.position.z = this.hologramBase.positionZ + state.hologram.lift
+                this.state.hologram.position.z = this.state.hologramBase.positionZ + state.hologram.lift
             if (state.hologram.distance !== undefined)
-                this.hologramDisplay.position.x = this.hologramBase.positionX - state.hologram.distance
-            if (state.hologram.fadeTime !== undefined && this.hologramFade !== state.hologram.fadeTime)
-                this.hologramFade = state.hologram.fadeTime
+                this.state.hologramDisplay.position.x = this.state.hologramBase.positionX - state.hologram.distance
+            if (state.hologram.fadeTime !== undefined && this.state.hologramFade !== state.hologram.fadeTime)
+                this.state.hologramFade = state.hologram.fadeTime
             if (state.hologram.opacity !== undefined) {
-                this.hologramOpacity = state.hologram.opacity
-                if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.hologramDisplay.material
-                    material.setFloat("opacity", this.hologramOpacity)
+                this.state.hologramOpacity = state.hologram.opacity
+                if (this.state.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.hologramDisplay.material
+                    material.setFloat("opacity", this.state.hologramOpacity)
                 }
             }
             if (state.hologram.borderRad !== undefined) {
-                this.hologramBorderRad = state.hologram.borderRad
-                if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.hologramDisplay.material
-                    material.setFloat("borderRadius", this.hologramBorderRad)
+                this.state.hologramBorderRad = state.hologram.borderRad
+                if (this.state.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.hologramDisplay.material
+                    material.setFloat("borderRadius", this.state.hologramBorderRad)
                 }
             }
             if (state.hologram.borderCrop !== undefined) {
-                this.hologramBorderCrop = state.hologram.borderCrop
-                if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.hologramDisplay.material
-                    material.setFloat("borderCrop", this.hologramBorderCrop)
+                this.state.hologramBorderCrop = state.hologram.borderCrop
+                if (this.state.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.hologramDisplay.material
+                    material.setFloat("borderCrop", this.state.hologramBorderCrop)
                 }
             }
             if (state.hologram.chromaKey !== undefined) {
-                if (state.hologram.chromaKey.enable !== undefined && this.hologramChromaKey.enable !== state.hologram.chromaKey.enable) {
-                    this.hologramChromaKey.enable = state.hologram.chromaKey.enable
-                    if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.hologramDisplay.material
-                        material.setInt("chromaEnable", this.hologramChromaKey.enable ? 1 : 0)
+                if (state.hologram.chromaKey.enable !== undefined && this.state.hologramChromaKey.enable !== state.hologram.chromaKey.enable) {
+                    this.state.hologramChromaKey.enable = state.hologram.chromaKey.enable
+                    if (this.state.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.hologramDisplay.material
+                        material.setInt("chromaEnable", this.state.hologramChromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.hologram.chromaKey.threshold !== undefined && this.hologramChromaKey.threshold !== state.hologram.chromaKey.threshold) {
-                    this.hologramChromaKey.threshold = state.hologram.chromaKey.threshold
-                    if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.hologramDisplay.material
-                        material.setFloat("chromaThreshold", this.hologramChromaKey.threshold)
+                if (state.hologram.chromaKey.threshold !== undefined && this.state.hologramChromaKey.threshold !== state.hologram.chromaKey.threshold) {
+                    this.state.hologramChromaKey.threshold = state.hologram.chromaKey.threshold
+                    if (this.state.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.hologramDisplay.material
+                        material.setFloat("chromaThreshold", this.state.hologramChromaKey.threshold)
                     }
                 }
-                if (state.hologram.chromaKey.smoothing !== undefined && this.hologramChromaKey.smoothing !== state.hologram.chromaKey.smoothing) {
-                    this.hologramChromaKey.smoothing = state.hologram.chromaKey.smoothing
-                    if (this.hologramChromaKey.enable && this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.hologramDisplay.material
-                        material.setFloat("chromaSmoothing", this.hologramChromaKey.smoothing)
+                if (state.hologram.chromaKey.smoothing !== undefined && this.state.hologramChromaKey.smoothing !== state.hologram.chromaKey.smoothing) {
+                    this.state.hologramChromaKey.smoothing = state.hologram.chromaKey.smoothing
+                    if (this.state.hologramChromaKey.enable && this.state.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.hologramDisplay.material
+                        material.setFloat("chromaSmoothing", this.state.hologramChromaKey.smoothing)
                     }
                 }
             }
-            if (state.hologram.enable !== undefined && this.hologramDisplay.isEnabled() !== state.hologram.enable) {
+            if (state.hologram.enable !== undefined && this.state.hologramDisplay.isEnabled() !== state.hologram.enable) {
                 if (state.hologram.enable) {
-                    await this.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
-                    if (this.hologramFade > 0 && this.fps > 0) {
+                    await this.applyDisplayMaterial("hologram", this.state.hologramDisplay, this.state.hologramOpacity, this.state.hologramBorderRad, this.state.hologramBorderCrop, this.state.hologramChromaKey)
+                    if (this.state.hologramFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "enabling hologram (fading: start)")
-                        if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.hologramDisplay.material
+                        if (this.state.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.hologramDisplay.material
                             material.setFloat("visibility", 0.0)
-                            this.hologramDisplay.visibility = 1.0
+                            this.state.hologramDisplay.visibility = 1.0
                         }
                         else
-                            this.hologramDisplay.visibility = 0.0
-                        this.hologramDisplay.setEnabled(true)
-                        await this.manualAnimation(0, 1, this.hologramFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.hologramDisplay!.material
+                            this.state.hologramDisplay.visibility = 0.0
+                        this.state.hologramDisplay.setEnabled(true)
+                        await this.manualAnimation(0, 1, this.state.hologramFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.hologramDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                             else
-                                this.hologramDisplay!.visibility = gradient
+                                this.state.hologramDisplay!.visibility = gradient
                         }).then(() => {
                             this.emit("log", "INFO", "enabling hologram (fading: end)")
-                            if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.hologramDisplay!.material
+                            if (this.state.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.hologramDisplay!.material
                                 material.setFloat("visibility", 1.0)
-                                this.hologramDisplay!.visibility = 1.0
+                                this.state.hologramDisplay!.visibility = 1.0
                             }
                             else
-                                this.hologramDisplay!.visibility = 1.0
+                                this.state.hologramDisplay!.visibility = 1.0
                         })
                     }
                     else {
                         this.emit("log", "INFO", "enabling hologram")
-                        if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.hologramDisplay!.material
+                        if (this.state.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.hologramDisplay!.material
                             material.setFloat("visibility", 1.0)
-                            this.hologramDisplay!.visibility = 1.0
+                            this.state.hologramDisplay!.visibility = 1.0
                         }
                         else
-                            this.hologramDisplay!.visibility = 1.0
-                        this.hologramDisplay!.setEnabled(true)
+                            this.state.hologramDisplay!.visibility = 1.0
+                        this.state.hologramDisplay!.setEnabled(true)
                     }
                 }
                 else if (!state.hologram.enable) {
-                    if (this.hologramFade > 0 && this.fps > 0) {
+                    if (this.state.hologramFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "disabling hologram (fading: start)")
-                        if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.hologramDisplay.material
+                        if (this.state.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.hologramDisplay.material
                             material.setFloat("visibility", 1.0)
-                            this.hologramDisplay.visibility = 1.0
+                            this.state.hologramDisplay.visibility = 1.0
                         }
                         else
-                            this.hologramDisplay.visibility = 1.0
-                        this.hologramDisplay.setEnabled(true)
-                        await this.manualAnimation(1, 0, this.hologramFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.hologramDisplay!.material
+                            this.state.hologramDisplay.visibility = 1.0
+                        this.state.hologramDisplay.setEnabled(true)
+                        await this.manualAnimation(1, 0, this.state.hologramFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.hologramDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                             else
-                                this.hologramDisplay!.visibility = gradient
+                                this.state.hologramDisplay!.visibility = gradient
                         }).then(async () => {
                             this.emit("log", "INFO", "disabling hologram (fading: end)")
-                            if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.hologramDisplay!.material
+                            if (this.state.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.hologramDisplay!.material
                                 material.setFloat("visibility", 0.0)
-                                this.hologramDisplay!.visibility = 0.0
+                                this.state.hologramDisplay!.visibility = 0.0
                             }
                             else
-                                this.hologramDisplay!.visibility = 0.0
-                            this.hologramDisplay!.setEnabled(false)
-                            await this.unapplyDisplayMaterial("hologram", this.hologramDisplay!)
+                                this.state.hologramDisplay!.visibility = 0.0
+                            this.state.hologramDisplay!.setEnabled(false)
+                            await this.unapplyDisplayMaterial("hologram", this.state.hologramDisplay!)
                         })
                     }
                     else {
                         this.emit("log", "INFO", "disabling hologram")
                         const setOnce = (value: number) => {
-                            if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.hologramDisplay!.material
+                            if (this.state.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.hologramDisplay!.material
                                 material.setFloat("visibility", value)
-                                this.hologramDisplay!.visibility = value
+                                this.state.hologramDisplay!.visibility = value
                             }
                             else
-                                this.hologramDisplay!.visibility = value
+                                this.state.hologramDisplay!.visibility = value
                         }
                         setOnce(0.000000001)
-                        this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                        this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
-                            this.hologramDisplay!.setEnabled(false)
-                            await this.unapplyDisplayMaterial("hologram", this.hologramDisplay!)
+                            this.state.hologramDisplay!.setEnabled(false)
+                            await this.unapplyDisplayMaterial("hologram", this.state.hologramDisplay!)
                         })
                     }
                 }
@@ -2148,92 +1933,92 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adjust pane  */
         if (state.pane !== undefined
-            && this.pane !== null && this.paneCase !== null && this.paneDisplay !== null
-            && this.layer === "front") {
-            if (state.pane.source !== undefined && this.displaySourceMap.pane !== state.pane.source) {
-                this.displaySourceMap.pane = state.pane.source
-                if (this.paneDisplay.isEnabled())
-                    await this.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
+            && this.state.pane !== null && this.state.paneCase !== null && this.state.paneDisplay !== null
+            && this.state.layer === "front") {
+            if (state.pane.source !== undefined && this.state.displaySourceMap.pane !== state.pane.source) {
+                this.state.displaySourceMap.pane = state.pane.source
+                if (this.state.paneDisplay.isEnabled())
+                    await this.applyDisplayMaterial("pane", this.state.paneDisplay!, this.state.paneOpacity, 0, 0, this.state.paneChromaKey)
             }
             if (state.pane.opacity !== undefined) {
-                this.paneOpacity = state.pane.opacity
-                if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.paneDisplay.material
-                    material.setFloat("opacity", this.paneOpacity)
+                this.state.paneOpacity = state.pane.opacity
+                if (this.state.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.paneDisplay.material
+                    material.setFloat("opacity", this.state.paneOpacity)
                 }
             }
             if (state.pane.scale !== undefined) {
-                this.paneCase.scaling.x    = this.paneBase.scaleCaseX    * state.pane.scale
-                this.paneCase.scaling.y    = this.paneBase.scaleCaseY    * state.pane.scale
-                this.paneCase.scaling.z    = this.paneBase.scaleCaseZ    * state.pane.scale
-                this.paneDisplay.scaling.x = this.paneBase.scaleDisplayX * state.pane.scale
-                this.paneDisplay.scaling.y = this.paneBase.scaleDisplayY * state.pane.scale
-                this.paneDisplay.scaling.z = this.paneBase.scaleDisplayZ * state.pane.scale
+                this.state.paneCase.scaling.x    = this.state.paneBase.scaleCaseX    * state.pane.scale
+                this.state.paneCase.scaling.y    = this.state.paneBase.scaleCaseY    * state.pane.scale
+                this.state.paneCase.scaling.z    = this.state.paneBase.scaleCaseZ    * state.pane.scale
+                this.state.paneDisplay.scaling.x = this.state.paneBase.scaleDisplayX * state.pane.scale
+                this.state.paneDisplay.scaling.y = this.state.paneBase.scaleDisplayY * state.pane.scale
+                this.state.paneDisplay.scaling.z = this.state.paneBase.scaleDisplayZ * state.pane.scale
             }
             if (state.pane.rotate !== undefined) {
-                this.pane.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.pane.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(state.pane.rotate), BABYLON.Space.WORLD)
+                this.state.pane.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.state.pane.rotate(new BABYLON.Vector3(0, 0, 1),
+                    this.state.ptz!.deg2rad(state.pane.rotate), BABYLON.Space.WORLD)
             }
             if (state.pane.lift !== undefined)
-                this.pane.position.z = this.paneBase.positionZ + (state.pane.lift / 100)
+                this.state.pane.position.z = this.state.paneBase.positionZ + (state.pane.lift / 100)
             if (state.pane.distance !== undefined) {
-                this.paneCase.position.x    = this.paneBase.positionCaseX    - state.pane.distance
-                this.paneDisplay.position.x = this.paneBase.positionDisplayX - state.pane.distance
+                this.state.paneCase.position.x    = this.state.paneBase.positionCaseX    - state.pane.distance
+                this.state.paneDisplay.position.x = this.state.paneBase.positionDisplayX - state.pane.distance
             }
-            if (state.pane.fadeTime !== undefined && this.paneFade !== state.pane.fadeTime)
-                this.paneFade = state.pane.fadeTime
+            if (state.pane.fadeTime !== undefined && this.state.paneFade !== state.pane.fadeTime)
+                this.state.paneFade = state.pane.fadeTime
             if (state.pane.chromaKey !== undefined) {
-                if (state.pane.chromaKey.enable !== undefined && this.paneChromaKey.enable !== state.pane.chromaKey.enable) {
-                    this.paneChromaKey.enable = state.pane.chromaKey.enable
-                    if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.paneDisplay.material
-                        material.setInt("chromaEnable", this.paneChromaKey.enable ? 1 : 0)
+                if (state.pane.chromaKey.enable !== undefined && this.state.paneChromaKey.enable !== state.pane.chromaKey.enable) {
+                    this.state.paneChromaKey.enable = state.pane.chromaKey.enable
+                    if (this.state.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.paneDisplay.material
+                        material.setInt("chromaEnable", this.state.paneChromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.pane.chromaKey.threshold !== undefined && this.paneChromaKey.threshold !== state.pane.chromaKey.threshold) {
-                    this.paneChromaKey.threshold = state.pane.chromaKey.threshold
-                    if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.paneDisplay.material
-                        material.setFloat("chromaThreshold", this.paneChromaKey.threshold)
+                if (state.pane.chromaKey.threshold !== undefined && this.state.paneChromaKey.threshold !== state.pane.chromaKey.threshold) {
+                    this.state.paneChromaKey.threshold = state.pane.chromaKey.threshold
+                    if (this.state.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.paneDisplay.material
+                        material.setFloat("chromaThreshold", this.state.paneChromaKey.threshold)
                     }
                 }
-                if (state.pane.chromaKey.smoothing !== undefined && this.paneChromaKey.smoothing !== state.pane.chromaKey.smoothing) {
-                    this.paneChromaKey.smoothing = state.pane.chromaKey.smoothing
-                    if (this.paneChromaKey.enable && this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.paneDisplay.material
-                        material.setFloat("chromaSmoothing", this.paneChromaKey.smoothing)
+                if (state.pane.chromaKey.smoothing !== undefined && this.state.paneChromaKey.smoothing !== state.pane.chromaKey.smoothing) {
+                    this.state.paneChromaKey.smoothing = state.pane.chromaKey.smoothing
+                    if (this.state.paneChromaKey.enable && this.state.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.paneDisplay.material
+                        material.setFloat("chromaSmoothing", this.state.paneChromaKey.smoothing)
                     }
                 }
             }
-            if (state.pane.enable !== undefined && this.pane.isEnabled() !== state.pane.enable) {
+            if (state.pane.enable !== undefined && this.state.pane.isEnabled() !== state.pane.enable) {
                 if (state.pane.enable) {
-                    await this.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
-                    if (this.paneFade > 0 && this.fps > 0) {
+                    await this.applyDisplayMaterial("pane", this.state.paneDisplay!, this.state.paneOpacity, 0, 0, this.state.paneChromaKey)
+                    if (this.state.paneFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "enabling pane (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.fps === 0 ? 1 : this.fps)
-                        const framesTotal = this.paneFade * fps
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.paneCase,
+                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const framesTotal = this.state.paneFade * fps
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.state.paneCase,
                             "visibility", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
-                        if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.paneDisplay.material
+                        if (this.state.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.paneDisplay.material
                             material.setFloat("visibility", 0.0)
                         }
-                        this.pane.setEnabled(true)
-                        this.paneCase.visibility = 1
-                        this.paneCase.setEnabled(true)
-                        this.paneDisplay.visibility = 1
-                        this.paneDisplay.setEnabled(true)
-                        const anim2 = this.manualAnimation(0, 1, this.paneFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                        this.state.pane.setEnabled(true)
+                        this.state.paneCase.visibility = 1
+                        this.state.paneCase.setEnabled(true)
+                        this.state.paneDisplay.visibility = 1
+                        this.state.paneDisplay.setEnabled(true)
+                        const anim2 = this.manualAnimation(0, 1, this.state.paneFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.paneDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                            if (this.state.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.paneDisplay!.material
                                 material.setFloat("visibility", 1.0)
                             }
                         })
@@ -2243,80 +2028,80 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                     else {
                         this.emit("log", "INFO", "enabling pane")
-                        this.paneCase.visibility    = 1
-                        this.paneDisplay.visibility = 1
-                        this.paneCase.setEnabled(true)
-                        this.paneDisplay.setEnabled(true)
-                        this.pane.setEnabled(true)
+                        this.state.paneCase.visibility    = 1
+                        this.state.paneDisplay.visibility = 1
+                        this.state.paneCase.setEnabled(true)
+                        this.state.paneDisplay.setEnabled(true)
+                        this.state.pane.setEnabled(true)
                     }
                 }
                 else if (!state.pane.enable) {
-                    if (this.paneFade > 0 && this.fps > 0) {
+                    if (this.state.paneFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "disabling pane (fading: start)")
-                        this.paneCase.visibility = 1
-                        this.paneCase.setEnabled(true)
-                        this.paneDisplay.visibility = 1
-                        this.paneDisplay.setEnabled(true)
+                        this.state.paneCase.visibility = 1
+                        this.state.paneCase.setEnabled(true)
+                        this.state.paneDisplay.visibility = 1
+                        this.state.paneDisplay.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.fps === 0 ? 1 : this.fps)
-                        const framesTotal = this.paneFade * fps
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.paneCase,
+                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const framesTotal = this.state.paneFade * fps
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.state.paneCase,
                             "visibility", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
-                        if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.paneDisplay.material
+                        if (this.state.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.paneDisplay.material
                             material.setFloat("visibility", 1.0)
                         }
-                        const anim2 = this.manualAnimation(1, 0, this.paneFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                        const anim2 = this.manualAnimation(1, 0, this.state.paneFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.paneDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                            if (this.state.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.paneDisplay!.material
                                 material.setFloat("visibility", 0.0)
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
                             this.emit("log", "INFO", "disabling pane (fading: end)")
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                            if (this.state.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.paneDisplay!.material
                                 material.setFloat("visibility", 0.0)
-                                this.paneDisplay!.visibility = 0.0
-                                this.paneCase!.visibility = 0.0
+                                this.state.paneDisplay!.visibility = 0.0
+                                this.state.paneCase!.visibility = 0.0
                             }
                             else  {
-                                this.paneDisplay!.visibility = 0.0
-                                this.paneCase!.visibility = 0.0
+                                this.state.paneDisplay!.visibility = 0.0
+                                this.state.paneCase!.visibility = 0.0
                             }
-                            this.paneCase!.setEnabled(false)
-                            this.paneDisplay!.setEnabled(false)
-                            this.pane!.setEnabled(false)
-                            await this.unapplyDisplayMaterial("pane", this.paneDisplay!)
+                            this.state.paneCase!.setEnabled(false)
+                            this.state.paneDisplay!.setEnabled(false)
+                            this.state.pane!.setEnabled(false)
+                            await this.unapplyDisplayMaterial("pane", this.state.paneDisplay!)
                         })
                     }
                     else {
                         this.emit("log", "INFO", "disabling pane")
                         const setOnce = (value: number) => {
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                            if (this.state.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.paneDisplay!.material
                                 material.setFloat("visibility", value)
-                                this.paneDisplay!.visibility = value
-                                this.paneCase!.visibility = value
+                                this.state.paneDisplay!.visibility = value
+                                this.state.paneCase!.visibility = value
                             }
                             else {
-                                this.paneDisplay!.visibility = value
-                                this.paneCase!.visibility = value
+                                this.state.paneDisplay!.visibility = value
+                                this.state.paneCase!.visibility = value
                             }
                         }
                         setOnce(0.000000001)
-                        this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                        this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
-                            this.paneCase!.setEnabled(false)
-                            this.paneDisplay!.setEnabled(false)
-                            this.pane!.setEnabled(false)
-                            await this.unapplyDisplayMaterial("pane", this.paneDisplay!)
+                            this.state.paneCase!.setEnabled(false)
+                            this.state.paneDisplay!.setEnabled(false)
+                            this.state.pane!.setEnabled(false)
+                            await this.unapplyDisplayMaterial("pane", this.state.paneDisplay!)
                         })
                     }
                 }
@@ -2325,110 +2110,110 @@ export default class CanvasRenderer extends EventEmitter {
 
         /*  adjust pillar  */
         if (state.pillar !== undefined
-            && this.pillar !== null && this.pillarCase !== null && this.pillarDisplay !== null
-            && this.layer === "back") {
-            if (state.pillar.source !== undefined && this.displaySourceMap.pillar !== state.pillar.source) {
-                this.displaySourceMap.pillar = state.pillar.source
-                if (this.pillarDisplay.isEnabled())
-                    await this.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
+            && this.state.pillar !== null && this.state.pillarCase !== null && this.state.pillarDisplay !== null
+            && this.state.layer === "back") {
+            if (state.pillar.source !== undefined && this.state.displaySourceMap.pillar !== state.pillar.source) {
+                this.state.displaySourceMap.pillar = state.pillar.source
+                if (this.state.pillarDisplay.isEnabled())
+                    await this.applyDisplayMaterial("pillar", this.state.pillarDisplay!, this.state.pillarOpacity, 0, 0, this.state.pillarChromaKey)
             }
             if (state.pillar.opacity !== undefined) {
-                this.pillarOpacity = state.pillar.opacity
-                if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.pillarDisplay.material
-                    material.setFloat("opacity", this.pillarOpacity)
+                this.state.pillarOpacity = state.pillar.opacity
+                if (this.state.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.pillarDisplay.material
+                    material.setFloat("opacity", this.state.pillarOpacity)
                 }
             }
             if (state.pillar.scale !== undefined) {
-                this.pillar.scaling.x    = this.pillarBase.scaleX * state.pillar.scale
-                this.pillar.scaling.y    = this.pillarBase.scaleY * state.pillar.scale
-                this.pillar.scaling.z    = this.pillarBase.scaleZ * state.pillar.scale
+                this.state.pillar.scaling.x    = this.state.pillarBase.scaleX * state.pillar.scale
+                this.state.pillar.scaling.y    = this.state.pillarBase.scaleY * state.pillar.scale
+                this.state.pillar.scaling.z    = this.state.pillarBase.scaleZ * state.pillar.scale
             }
             if (state.pillar.rotate !== undefined) {
-                this.pillar.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.pillar.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(state.pillar.rotate), BABYLON.Space.WORLD)
+                this.state.pillar.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.state.pillar.rotate(new BABYLON.Vector3(0, 0, 1),
+                    this.state.ptz!.deg2rad(state.pillar.rotate), BABYLON.Space.WORLD)
             }
             if (state.pillar.lift !== undefined)
-                this.pillar.position.z = this.pillarBase.positionZ + (state.pillar.lift / 100)
+                this.state.pillar.position.z = this.state.pillarBase.positionZ + (state.pillar.lift / 100)
             if (state.pillar.distance !== undefined) {
-                this.pillarCase.position.x    = this.pillarBase.positionCaseX    - state.pillar.distance
-                this.pillarDisplay.position.x = this.pillarBase.positionDisplayX - state.pillar.distance
+                this.state.pillarCase.position.x    = this.state.pillarBase.positionCaseX    - state.pillar.distance
+                this.state.pillarDisplay.position.x = this.state.pillarBase.positionDisplayX - state.pillar.distance
             }
-            if (state.pillar.fadeTime !== undefined && this.pillarFade !== state.pillar.fadeTime)
-                this.pillarFade = state.pillar.fadeTime
+            if (state.pillar.fadeTime !== undefined && this.state.pillarFade !== state.pillar.fadeTime)
+                this.state.pillarFade = state.pillar.fadeTime
             if (state.pillar.borderRad !== undefined) {
-                this.pillarBorderRad = state.pillar.borderRad
-                if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.pillarDisplay.material
-                    material.setFloat("borderRadius", this.pillarBorderRad)
+                this.state.pillarBorderRad = state.pillar.borderRad
+                if (this.state.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.pillarDisplay.material
+                    material.setFloat("borderRadius", this.state.pillarBorderRad)
                 }
             }
             if (state.pillar.borderCrop !== undefined) {
-                this.pillarBorderCrop = state.pillar.borderCrop
-                if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.pillarDisplay.material
-                    material.setFloat("borderCrop", this.pillarBorderCrop)
+                this.state.pillarBorderCrop = state.pillar.borderCrop
+                if (this.state.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.pillarDisplay.material
+                    material.setFloat("borderCrop", this.state.pillarBorderCrop)
                 }
             }
             if (state.pillar.chromaKey !== undefined) {
-                if (state.pillar.chromaKey.enable !== undefined && this.pillarChromaKey.enable !== state.pillar.chromaKey.enable) {
-                    this.pillarChromaKey.enable = state.pillar.chromaKey.enable
-                    if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.pillarDisplay.material
-                        material.setInt("chromaEnable", this.pillarChromaKey.enable ? 1 : 0)
+                if (state.pillar.chromaKey.enable !== undefined && this.state.pillarChromaKey.enable !== state.pillar.chromaKey.enable) {
+                    this.state.pillarChromaKey.enable = state.pillar.chromaKey.enable
+                    if (this.state.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.pillarDisplay.material
+                        material.setInt("chromaEnable", this.state.pillarChromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.pillar.chromaKey.threshold !== undefined && this.pillarChromaKey.threshold !== state.pillar.chromaKey.threshold) {
-                    this.pillarChromaKey.threshold = state.pillar.chromaKey.threshold
-                    if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.pillarDisplay.material
-                        material.setFloat("chromaThreshold", this.pillarChromaKey.threshold)
+                if (state.pillar.chromaKey.threshold !== undefined && this.state.pillarChromaKey.threshold !== state.pillar.chromaKey.threshold) {
+                    this.state.pillarChromaKey.threshold = state.pillar.chromaKey.threshold
+                    if (this.state.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.pillarDisplay.material
+                        material.setFloat("chromaThreshold", this.state.pillarChromaKey.threshold)
                     }
                 }
-                if (state.pillar.chromaKey.smoothing !== undefined && this.pillarChromaKey.smoothing !== state.pillar.chromaKey.smoothing) {
-                    this.pillarChromaKey.smoothing = state.pillar.chromaKey.smoothing
-                    if (this.pillarChromaKey.enable && this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.pillarDisplay.material
-                        material.setFloat("chromaSmoothing", this.pillarChromaKey.smoothing)
+                if (state.pillar.chromaKey.smoothing !== undefined && this.state.pillarChromaKey.smoothing !== state.pillar.chromaKey.smoothing) {
+                    this.state.pillarChromaKey.smoothing = state.pillar.chromaKey.smoothing
+                    if (this.state.pillarChromaKey.enable && this.state.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.pillarDisplay.material
+                        material.setFloat("chromaSmoothing", this.state.pillarChromaKey.smoothing)
                     }
                 }
             }
-            if (state.pillar.enable !== undefined && this.pillar.isEnabled() !== state.pillar.enable) {
+            if (state.pillar.enable !== undefined && this.state.pillar.isEnabled() !== state.pillar.enable) {
                 if (state.pillar.enable) {
-                    await this.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
-                    if (this.pillarFade > 0 && this.fps > 0) {
+                    await this.applyDisplayMaterial("pillar", this.state.pillarDisplay!, this.state.pillarOpacity, 0, 0, this.state.pillarChromaKey)
+                    if (this.state.pillarFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "enabling pillar (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.fps === 0 ? 1 : this.fps)
-                        const framesTotal = this.pillarFade * fps
-                        this.pillarCase.material!.alpha = 0
-                        this.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
-                        this.pillarCase.material!.backFaceCulling = true
-                        this.pillarCase.material!.forceDepthWrite = true
-                        this.pillarCase.receiveShadows = true
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.pillarCase,
+                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const framesTotal = this.state.pillarFade * fps
+                        this.state.pillarCase.material!.alpha = 0
+                        this.state.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
+                        this.state.pillarCase.material!.backFaceCulling = true
+                        this.state.pillarCase.material!.forceDepthWrite = true
+                        this.state.pillarCase.receiveShadows = true
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.state.pillarCase,
                             "material.alpha", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease, () => {
-                                this.pillarCase!.material!.transparencyMode = BABYLON.Material.MATERIAL_OPAQUE
+                                this.state.pillarCase!.material!.transparencyMode = BABYLON.Material.MATERIAL_OPAQUE
                             })!
-                        if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.pillarDisplay.material
+                        if (this.state.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.pillarDisplay.material
                             material.setFloat("visibility", 0.0)
                         }
-                        this.pillar.setEnabled(true)
-                        this.pillarCase.visibility = 1
-                        this.pillarCase.setEnabled(true)
-                        this.pillarDisplay.visibility = 1
-                        this.pillarDisplay.setEnabled(true)
-                        const anim2 = this.manualAnimation(0, 1, this.pillarFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                        this.state.pillar.setEnabled(true)
+                        this.state.pillarCase.visibility = 1
+                        this.state.pillarCase.setEnabled(true)
+                        this.state.pillarDisplay.visibility = 1
+                        this.state.pillarDisplay.setEnabled(true)
+                        const anim2 = this.manualAnimation(0, 1, this.state.pillarFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.pillarDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                            if (this.state.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.pillarDisplay!.material
                                 material.setFloat("visibility", 1.0)
                             }
                         })
@@ -2438,82 +2223,82 @@ export default class CanvasRenderer extends EventEmitter {
                     }
                     else {
                         this.emit("log", "INFO", "enabling pillar")
-                        this.pillarCase.visibility    = 1
-                        this.pillarDisplay.visibility = 1
-                        this.pillarCase.setEnabled(true)
-                        this.pillarDisplay.setEnabled(true)
-                        this.pillar.setEnabled(true)
+                        this.state.pillarCase.visibility    = 1
+                        this.state.pillarDisplay.visibility = 1
+                        this.state.pillarCase.setEnabled(true)
+                        this.state.pillarDisplay.setEnabled(true)
+                        this.state.pillar.setEnabled(true)
                     }
                 }
                 else if (!state.pillar.enable) {
-                    if (this.pillarFade > 0 && this.fps > 0) {
+                    if (this.state.pillarFade > 0 && this.state.fps > 0) {
                         this.emit("log", "INFO", "disabling pillar (fading: start)")
-                        this.pillarCase.material!.alpha = 1
-                        this.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
-                        this.pillarCase.visibility = 1
-                        this.pillarCase.setEnabled(true)
-                        this.pillarDisplay.visibility = 1
-                        this.pillarDisplay.setEnabled(true)
+                        this.state.pillarCase.material!.alpha = 1
+                        this.state.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
+                        this.state.pillarCase.visibility = 1
+                        this.state.pillarCase.setEnabled(true)
+                        this.state.pillarDisplay.visibility = 1
+                        this.state.pillarDisplay.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.fps === 0 ? 1 : this.fps)
-                        const framesTotal = this.pillarFade * fps
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.pillarCase,
+                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const framesTotal = this.state.pillarFade * fps
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.state.pillarCase,
                             "material.alpha", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
-                        if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.pillarDisplay.material
+                        if (this.state.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.pillarDisplay.material
                             material.setFloat("visibility", 1.0)
                         }
-                        const anim2 = this.manualAnimation(1, 0, this.pillarFade, (this.fps === 0 ? 1 : this.fps), (gradient) => {
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                        const anim2 = this.manualAnimation(1, 0, this.state.pillarFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.state.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.pillarDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                            if (this.state.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.pillarDisplay!.material
                                 material.setFloat("visibility", 0.0)
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
                             this.emit("log", "INFO", "disabling pillar (fading: end)")
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                            if (this.state.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.pillarDisplay!.material
                                 material.setFloat("visibility", 0.0)
-                                this.pillarDisplay!.visibility = 0.0
-                                this.pillarCase!.visibility = 0.0
+                                this.state.pillarDisplay!.visibility = 0.0
+                                this.state.pillarCase!.visibility = 0.0
                             }
                             else  {
-                                this.pillarDisplay!.visibility = 0.0
-                                this.pillarCase!.visibility = 0.0
+                                this.state.pillarDisplay!.visibility = 0.0
+                                this.state.pillarCase!.visibility = 0.0
                             }
-                            this.pillarCase!.setEnabled(false)
-                            this.pillarDisplay!.setEnabled(false)
-                            this.pillar!.setEnabled(false)
-                            await this.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
+                            this.state.pillarCase!.setEnabled(false)
+                            this.state.pillarDisplay!.setEnabled(false)
+                            this.state.pillar!.setEnabled(false)
+                            await this.unapplyDisplayMaterial("pillar", this.state.pillarDisplay!)
                         })
                     }
                     else {
                         this.emit("log", "INFO", "disabling pillar")
                         const setOnce = (value: number) => {
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                            if (this.state.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.state.pillarDisplay!.material
                                 material.setFloat("visibility", value)
-                                this.pillarDisplay!.visibility = value
-                                this.pillarCase!.visibility = value
+                                this.state.pillarDisplay!.visibility = value
+                                this.state.pillarCase!.visibility = value
                             }
                             else {
-                                this.pillarDisplay!.visibility = value
-                                this.pillarCase!.visibility = value
+                                this.state.pillarDisplay!.visibility = value
+                                this.state.pillarCase!.visibility = value
                             }
                         }
                         setOnce(0.000000001)
-                        this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                        this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
-                            this.pillarCase!.setEnabled(false)
-                            this.pillarDisplay!.setEnabled(false)
-                            this.pillar!.setEnabled(false)
-                            await this.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
+                            this.state.pillarCase!.setEnabled(false)
+                            this.state.pillarDisplay!.setEnabled(false)
+                            this.state.pillar!.setEnabled(false)
+                            await this.unapplyDisplayMaterial("pillar", this.state.pillarDisplay!)
                         })
                     }
                 }
@@ -2521,39 +2306,39 @@ export default class CanvasRenderer extends EventEmitter {
         }
 
         /*  adjust mask  */
-        if (state.mask !== undefined && this.mask !== null && this.maskDisplay !== null && this.layer === "front") {
-            if (state.mask.source !== undefined && (this.displaySourceMap.mask !== state.mask.source || modifiedMedia[this.mapMediaId(state.mask.source)] )) {
-                this.displaySourceMap.mask = state.mask.source
-                if (this.maskDisplay.isEnabled())
-                    await this.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+        if (state.mask !== undefined && this.state.mask !== null && this.state.maskDisplay !== null && this.state.layer === "front") {
+            if (state.mask.source !== undefined && (this.state.displaySourceMap.mask !== state.mask.source || modifiedMedia[this.mapMediaId(state.mask.source)] )) {
+                this.state.displaySourceMap.mask = state.mask.source
+                if (this.state.maskDisplay.isEnabled())
+                    await this.applyDisplayMaterial("mask", this.state.maskDisplay, 1.0, this.state.maskBorderRad, 0, null)
             }
             if (state.mask.scale !== undefined) {
-                this.maskDisplay.scaling.x = this.maskBase.scaleDisplayX * state.mask.scale
-                this.maskDisplay.scaling.y = this.maskBase.scaleDisplayY * state.mask.scale
-                this.maskDisplay.scaling.z = this.maskBase.scaleDisplayZ * state.mask.scale
+                this.state.maskDisplay.scaling.x = this.state.maskBase.scaleDisplayX * state.mask.scale
+                this.state.maskDisplay.scaling.y = this.state.maskBase.scaleDisplayY * state.mask.scale
+                this.state.maskDisplay.scaling.z = this.state.maskBase.scaleDisplayZ * state.mask.scale
             }
             if (state.mask.borderRad !== undefined) {
-                this.maskBorderRad = state.mask.borderRad
-                if (this.maskDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.maskDisplay.material
-                    material.setFloat("borderRadius", this.maskBorderRad)
+                this.state.maskBorderRad = state.mask.borderRad
+                if (this.state.maskDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.state.maskDisplay.material
+                    material.setFloat("borderRadius", this.state.maskBorderRad)
                 }
             }
-            if (state.mask.enable !== undefined && this.maskDisplay.isEnabled() !== state.mask.enable) {
+            if (state.mask.enable !== undefined && this.state.maskDisplay.isEnabled() !== state.mask.enable) {
                 if (state.mask.enable) {
-                    this.scene!.activeCamera = this.maskCamLens
-                    await this.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+                    this.state.scene!.activeCamera = this.state.maskCamLens
+                    await this.applyDisplayMaterial("mask", this.state.maskDisplay, 1.0, this.state.maskBorderRad, 0, null)
                     this.emit("log", "INFO", "enabling mask")
-                    if (this.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.maskDisplay!.material
+                    if (this.state.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.state.maskDisplay!.material
                         material.setFloat("visibility", 1.0)
-                        this.maskDisplay!.visibility = 1.0
+                        this.state.maskDisplay!.visibility = 1.0
                     }
                     else
-                        this.maskDisplay!.visibility = 1.0
-                    this.maskBackground!.visibility = 1.0
-                    this.maskDisplay!.setEnabled(true)
-                    this.maskBackground!.setEnabled(true)
+                        this.state.maskDisplay!.visibility = 1.0
+                    this.state.maskBackground!.visibility = 1.0
+                    this.state.maskDisplay!.setEnabled(true)
+                    this.state.maskBackground!.setEnabled(true)
                 }
                 else if (!state.mask.enable) {
                     /*  disable mask
@@ -2562,162 +2347,162 @@ export default class CanvasRenderer extends EventEmitter {
                         finally disable it  */
                     this.emit("log", "INFO", "disabling mask")
                     const setOnce = (value: number) => {
-                        if (this.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.maskDisplay!.material
+                        if (this.state.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.state.maskDisplay!.material
                             material.setFloat("visibility", value)
-                            this.maskDisplay!.visibility = value
+                            this.state.maskDisplay!.visibility = value
                         }
                         else
-                            this.maskDisplay!.visibility = value
-                        this.maskBackground!.visibility = value
+                            this.state.maskDisplay!.visibility = value
+                        this.state.maskBackground!.visibility = value
                     }
                     setOnce(0.000000001)
-                    this.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                    this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
                         setOnce(0)
-                        this.maskDisplay!.setEnabled(false)
-                        this.maskBackground!.setEnabled(false)
-                        this.scene!.activeCamera = this.cameraLens
-                        await this.unapplyDisplayMaterial("mask", this.maskDisplay!)
+                        this.state.maskDisplay!.setEnabled(false)
+                        this.state.maskBackground!.setEnabled(false)
+                        this.state.scene!.activeCamera = this.state.cameraLens
+                        await this.unapplyDisplayMaterial("mask", this.state.maskDisplay!)
                     })
                 }
             }
         }
 
         /*  adjust lights  */
-        if (state.lights !== undefined && this.light1 !== null && this.light2 !== null && this.light3 !== null) {
+        if (state.lights !== undefined && this.state.light1 !== null && this.state.light2 !== null && this.state.light3 !== null) {
             if (state.lights.intensity1 !== undefined)
-                this.light1.intensity = state.lights.intensity1
+                this.state.light1.intensity = state.lights.intensity1
             if (state.lights.intensity2 !== undefined)
-                this.light2.intensity = state.lights.intensity2
+                this.state.light2.intensity = state.lights.intensity2
             if (state.lights.intensity3 !== undefined)
-                this.light3.intensity = state.lights.intensity3
+                this.state.light3.intensity = state.lights.intensity3
         }
 
         /*  adjust avatars  */
-        if (state.avatars !== undefined && this.avatar1 !== null && this.avatar2 !== null && this.layer === "back") {
+        if (state.avatars !== undefined && this.state.avatar1 !== null && this.state.avatar2 !== null && this.state.layer === "back") {
             /*  adjust avatar 1  */
-            if (state.avatars.enable1 !== undefined && this.avatar1.isEnabled() !== state.avatars.enable1)
-                this.avatar1.setEnabled(state.avatars.enable1)
+            if (state.avatars.enable1 !== undefined && this.state.avatar1.isEnabled() !== state.avatars.enable1)
+                this.state.avatar1.setEnabled(state.avatars.enable1)
             if (state.avatars.size1 !== undefined) {
                 const scale = state.avatars.size1 / 185
-                this.avatar1Model!.scaling.x = this.avatar1Scale.x * scale
-                this.avatar1Model!.scaling.y = this.avatar1Scale.y * scale
-                this.avatar1Model!.scaling.z = this.avatar1Scale.z * scale
+                this.state.avatar1Model!.scaling.x = this.state.avatar1Scale.x * scale
+                this.state.avatar1Model!.scaling.y = this.state.avatar1Scale.y * scale
+                this.state.avatar1Model!.scaling.z = this.state.avatar1Scale.z * scale
             }
             if (state.avatars.rotate1 !== undefined) {
-                this.avatar1.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.avatar1.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(-state.avatars.rotate1), BABYLON.Space.WORLD)
+                this.state.avatar1.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.state.avatar1.rotate(new BABYLON.Vector3(0, 0, 1),
+                    this.state.ptz!.deg2rad(-state.avatars.rotate1), BABYLON.Space.WORLD)
             }
 
             /*  adjust avatar 2  */
-            if (state.avatars.enable2 !== undefined && this.avatar2.isEnabled() !== state.avatars.enable2)
-                this.avatar2.setEnabled(state.avatars.enable2)
+            if (state.avatars.enable2 !== undefined && this.state.avatar2.isEnabled() !== state.avatars.enable2)
+                this.state.avatar2.setEnabled(state.avatars.enable2)
             if (state.avatars.size2 !== undefined) {
                 const scale = state.avatars.size2 / 185
-                this.avatar2Model!.scaling.x = this.avatar2Scale.x * scale
-                this.avatar2Model!.scaling.y = this.avatar2Scale.y * scale
-                this.avatar2Model!.scaling.z = this.avatar2Scale.z * scale
+                this.state.avatar2Model!.scaling.x = this.state.avatar2Scale.x * scale
+                this.state.avatar2Model!.scaling.y = this.state.avatar2Scale.y * scale
+                this.state.avatar2Model!.scaling.z = this.state.avatar2Scale.z * scale
             }
             if (state.avatars.rotate2 !== undefined) {
-                this.avatar2.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.avatar2.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.ptz.deg2rad(-state.avatars.rotate2), BABYLON.Space.WORLD)
+                this.state.avatar2.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.state.avatar2.rotate(new BABYLON.Vector3(0, 0, 1),
+                    this.state.ptz!.deg2rad(-state.avatars.rotate2), BABYLON.Space.WORLD)
             }
         }
 
         /*  adjust reference points  */
-        if (state.references !== undefined && this.references !== null && this.layer === "back") {
+        if (state.references !== undefined && this.state.references !== null && this.state.layer === "back") {
             if (state.references.enable !== undefined)
-                this.references.setEnabled(state.references.enable)
+                this.state.references.setEnabled(state.references.enable)
         }
 
         /*  adjust camera calibration  */
-        if ((state as any)[this.cameraName] !== undefined && this.cameraHull !== null && this.cameraCase !== null && this.cameraLens !== null) {
+        if ((state as any)[this.state.cameraName] !== undefined && this.state.cameraHull !== null && this.state.cameraCase !== null && this.state.cameraLens !== null) {
             /*  adjust hull X position  */
-            if ((state as any)[this.cameraName].hullPosition?.x !== undefined) {
-                const x = this.ptzHull.posXV2P(this.cameraHull.position.x)
-                this.ptzHull.posXDelta = -((state as any)[this.cameraName].hullPosition.x / 100)
-                this.cameraHull.position.x = this.ptzHull.posXP2V(x)
+            if ((state as any)[this.state.cameraName].hullPosition?.x !== undefined) {
+                const x = this.state.ptzHull!.posXV2P(this.state.cameraHull.position.x)
+                this.state.ptzHull!.posXDelta = -((state as any)[this.state.cameraName].hullPosition.x / 100)
+                this.state.cameraHull.position.x = this.state.ptzHull!.posXP2V(x)
             }
 
             /*  adjust hull Y position  */
-            if ((state as any)[this.cameraName].hullPosition?.y !== undefined) {
-                const y = this.ptzHull.posYV2P(this.cameraHull.position.y)
-                this.ptzHull.posYDelta = (state as any)[this.cameraName].hullPosition.y / 100
-                this.cameraHull.position.y = this.ptzHull.posYP2V(y)
+            if ((state as any)[this.state.cameraName].hullPosition?.y !== undefined) {
+                const y = this.state.ptzHull!.posYV2P(this.state.cameraHull.position.y)
+                this.state.ptzHull!.posYDelta = (state as any)[this.state.cameraName].hullPosition.y / 100
+                this.state.cameraHull.position.y = this.state.ptzHull!.posYP2V(y)
             }
 
             /*  adjust hull Z position  */
-            if ((state as any)[this.cameraName].hullPosition?.z !== undefined) {
-                const z = this.ptzHull.posZV2P(this.cameraHull.position.z)
-                this.ptzHull.posZDelta = (state as any)[this.cameraName].hullPosition.z / 100
-                this.cameraHull.position.z = this.ptzHull.posZP2V(z)
+            if ((state as any)[this.state.cameraName].hullPosition?.z !== undefined) {
+                const z = this.state.ptzHull!.posZV2P(this.state.cameraHull.position.z)
+                this.state.ptzHull!.posZDelta = (state as any)[this.state.cameraName].hullPosition.z / 100
+                this.state.cameraHull.position.z = this.state.ptzHull!.posZP2V(z)
             }
 
             /*  adjust case tilt  */
-            if ((state as any)[this.cameraName].caseRotation?.x !== undefined) {
-                const tilt = this.ptzCase.tiltV2P(this.cameraCase.rotation.x)
-                this.ptzCase.tiltDelta = this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.x)
-                this.cameraCase.rotation.x = this.ptzCase.tiltP2V(tilt)
+            if ((state as any)[this.state.cameraName].caseRotation?.x !== undefined) {
+                const tilt = this.state.ptzCase!.tiltV2P(this.state.cameraCase.rotation.x)
+                this.state.ptzCase!.tiltDelta = this.state.ptzCase!.deg2rad((state as any)[this.state.cameraName].caseRotation.x)
+                this.state.cameraCase.rotation.x = this.state.ptzCase!.tiltP2V(tilt)
             }
 
             /*  adjust case pan  */
-            if ((state as any)[this.cameraName].caseRotation?.y !== undefined) {
-                const pan = this.ptzCase.panV2P(this.cameraCase.rotation.y)
-                this.ptzCase.panDelta = -(this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.y))
-                this.cameraCase.rotation.y = this.ptzCase.panP2V(pan)
+            if ((state as any)[this.state.cameraName].caseRotation?.y !== undefined) {
+                const pan = this.state.ptzCase!.panV2P(this.state.cameraCase.rotation.y)
+                this.state.ptzCase!.panDelta = -(this.state.ptzCase!.deg2rad((state as any)[this.state.cameraName].caseRotation.y))
+                this.state.cameraCase.rotation.y = this.state.ptzCase!.panP2V(pan)
             }
-            if ((state as any)[this.cameraName].caseRotation?.ym !== undefined) {
-                const pan = this.ptzCase.panV2P(this.cameraCase.rotation.y)
-                this.ptzCase.panMult = (state as any)[this.cameraName].caseRotation.ym
-                this.cameraCase.rotation.y = this.ptzCase.panP2V(pan)
+            if ((state as any)[this.state.cameraName].caseRotation?.ym !== undefined) {
+                const pan = this.state.ptzCase!.panV2P(this.state.cameraCase.rotation.y)
+                this.state.ptzCase!.panMult = (state as any)[this.state.cameraName].caseRotation.ym
+                this.state.cameraCase.rotation.y = this.state.ptzCase!.panP2V(pan)
             }
 
             /*  adjust case rotation  */
-            if ((state as any)[this.cameraName].caseRotation?.z !== undefined) {
-                const rotate = this.ptzCase.rotateV2P(this.cameraCase.rotation.z)
-                this.ptzCase.rotateDelta = -(this.ptzCase.deg2rad((state as any)[this.cameraName].caseRotation.z))
-                this.cameraCase.rotation.z = this.ptzCase.rotateP2V(rotate)
+            if ((state as any)[this.state.cameraName].caseRotation?.z !== undefined) {
+                const rotate = this.state.ptzCase!.rotateV2P(this.state.cameraCase.rotation.z)
+                this.state.ptzCase!.rotateDelta = -(this.state.ptzCase!.deg2rad((state as any)[this.state.cameraName].caseRotation.z))
+                this.state.cameraCase.rotation.z = this.state.ptzCase!.rotateP2V(rotate)
             }
 
             /*  adjust lens tilt  */
-            if ((state as any)[this.cameraName].lensRotation?.x !== undefined) {
-                const tilt = this.ptzLens.tiltV2P(this.cameraLens.rotation.x)
-                this.ptzLens.tiltDelta = -(this.ptzLens.deg2rad((state as any)[this.cameraName].lensRotation.x))
-                this.cameraLens.rotation.x = this.ptzLens.tiltP2V(tilt)
+            if ((state as any)[this.state.cameraName].lensRotation?.x !== undefined) {
+                const tilt = this.state.ptzLens!.tiltV2P(this.state.cameraLens.rotation.x)
+                this.state.ptzLens!.tiltDelta = -(this.state.ptzLens!.deg2rad((state as any)[this.state.cameraName].lensRotation.x))
+                this.state.cameraLens.rotation.x = this.state.ptzLens!.tiltP2V(tilt)
             }
-            if ((state as any)[this.cameraName].lensRotation?.xm !== undefined) {
-                const tilt = this.ptzLens.tiltV2P(this.cameraLens.rotation.x)
-                this.ptzLens.tiltMult = (state as any)[this.cameraName].lensRotation.xm
-                this.cameraLens.rotation.x = this.ptzLens.tiltP2V(tilt)
+            if ((state as any)[this.state.cameraName].lensRotation?.xm !== undefined) {
+                const tilt = this.state.ptzLens!.tiltV2P(this.state.cameraLens.rotation.x)
+                this.state.ptzLens!.tiltMult = (state as any)[this.state.cameraName].lensRotation.xm
+                this.state.cameraLens.rotation.x = this.state.ptzLens!.tiltP2V(tilt)
             }
 
             /*  adjust field-of-view  */
-            if ((state as any)[this.cameraName].fov?.m !== undefined) {
-                const zoom = this.ptzLens.zoomV2P(this.cameraLens.fov)
-                this.ptzLens.fovMult = (state as any)[this.cameraName].fov.m
-                this.cameraLens.fov = this.ptzLens.zoomP2V(zoom)
+            if ((state as any)[this.state.cameraName].fov?.m !== undefined) {
+                const zoom = this.state.ptzLens!.zoomV2P(this.state.cameraLens.fov)
+                this.state.ptzLens!.fovMult = (state as any)[this.state.cameraName].fov.m
+                this.state.cameraLens.fov = this.state.ptzLens!.zoomP2V(zoom)
             }
         }
 
         /*  control renderer  */
         if (state.renderer !== undefined) {
-            let fps = this.fps
+            let fps = this.state.fps
             if (state.renderer.other !== undefined) {
-                this.fpsOther = state.renderer.other
-                if (!(this.mixerPreview === this.cameraName || this.mixerProgram === this.cameraName))
-                    fps = this.fpsOther
+                this.state.fpsOther = state.renderer.other
+                if (!(this.state.mixerPreview === this.state.cameraName || this.state.mixerProgram === this.state.cameraName))
+                    fps = this.state.fpsOther
             }
             if (state.renderer.preview !== undefined) {
-                this.fpsPreview = state.renderer.preview
-                if (this.mixerPreview === this.cameraName)
-                    fps = this.fpsPreview
+                this.state.fpsPreview = state.renderer.preview
+                if (this.state.mixerPreview === this.state.cameraName)
+                    fps = this.state.fpsPreview
             }
             if (state.renderer.program !== undefined) {
-                this.fpsProgram = state.renderer.program
-                if (this.mixerProgram === this.cameraName)
-                    fps = this.fpsProgram
+                this.state.fpsProgram = state.renderer.program
+                if (this.state.mixerProgram === this.state.cameraName)
+                    fps = this.state.fpsProgram
             }
             this.configureFPS(fps)
         }
@@ -2727,27 +2512,27 @@ export default class CanvasRenderer extends EventEmitter {
 
     /*  react on a received mixer record by reflecting the camera mixer state  */
     reflectMixerState (mixer: MixerState) {
-        let fps = this.fpsOther
+        let fps = this.state.fpsOther
         if (mixer.preview !== undefined) {
-            this.mixerPreview = mixer.preview
-            if (this.mixerPreview === this.cameraName)
-                fps = this.fpsPreview
+            this.state.mixerPreview = mixer.preview
+            if (this.state.mixerPreview === this.state.cameraName)
+                fps = this.state.fpsPreview
         }
         if (mixer.program !== undefined) {
-            this.mixerProgram = mixer.program
-            if (this.mixerProgram === this.cameraName)
-                fps = this.fpsProgram
+            this.state.mixerProgram = mixer.program
+            if (this.state.mixerProgram === this.state.cameraName)
+                fps = this.state.fpsProgram
         }
         this.configureFPS(fps)
     }
 
     /*  (re-)configure FPS  */
     configureFPS (fps: number) {
-        if (this.fps !== fps) {
-            this.emit("log", "INFO", `switching from ${this.fps} to ${fps} frames-per-second (FPS)`)
-            this.fps = fps
-            if (this.optimizer !== null)
-                this.optimizer.targetFrameRate = fps
+        if (this.state.fps !== fps) {
+            this.emit("log", "INFO", `switching from ${this.state.fps} to ${fps} frames-per-second (FPS)`)
+            this.state.fps = fps
+            if (this.state.optimizer !== null)
+                this.state.optimizer.targetFrameRate = fps
             this.emit("fps", fps)
         }
     }
@@ -2755,71 +2540,71 @@ export default class CanvasRenderer extends EventEmitter {
     /*  react on a received FreeD state record by reflecting its camera PTZ state  */
     reflectFreeDState (state: FreeDState) {
         /*  ensure we update only if we are already established  */
-        if (!this.established)
+        if (!this.state.established)
             return
 
         /*  remember state  */
         if (state === null)
             return
-        this.state = state
+        this.state.state = state
 
         /*  notice: FreeD can be faster than Babylon, so we have to be careful...  */
-        if (this.ptzFreeD && this.cameraCase !== null && this.cameraLens !== null) {
-            this.cameraCase.rotation.x = this.ptzCase.tiltP2V(0)
-            this.cameraCase.rotation.y = this.ptzCase.panP2V((this.flippedCam ? -1 : 1) * state.pan)
-            this.cameraCase.rotation.z = this.ptzCase.rotateP2V(0)
-            this.cameraLens.rotation.x = this.ptzLens.tiltP2V((this.flippedCam ? -1 : 1) * state.tilt)
-            this.cameraLens.fov        = this.ptzLens.zoomP2V(state.zoom)
+        if (this.state.ptzFreeD && this.state.cameraCase !== null && this.state.cameraLens !== null) {
+            this.state.cameraCase.rotation.x = this.state.ptzCase!.tiltP2V(0)
+            this.state.cameraCase.rotation.y = this.state.ptzCase!.panP2V((this.state.flippedCam ? -1 : 1) * state.pan)
+            this.state.cameraCase.rotation.z = this.state.ptzCase!.rotateP2V(0)
+            this.state.cameraLens.rotation.x = this.state.ptzLens!.tiltP2V((this.state.flippedCam ? -1 : 1) * state.tilt)
+            this.state.cameraLens.fov        = this.state.ptzLens!.zoomP2V(state.zoom)
         }
     }
 
     /*  react on a key (down) event by manipulating the camera PTZ state  */
     async reactOnKeyEvent (key: string) {
-        if (!this.ptzKeys)
+        if (!this.state.ptzKeys)
             return
 
         /*  pan  */
         if (key === "ArrowLeft")
-            this.cameraCase!.rotation.y =
-                Math.min(this.cameraCase!.rotation.y + this.ptzCase.panStep, this.ptzCase.panP2V(this.ptzCase.panMinDeg))
+            this.state.cameraCase!.rotation.y =
+                Math.min(this.state.cameraCase!.rotation.y + this.state.ptzCase!.panStep, this.state.ptzCase!.panP2V(this.state.ptzCase!.panMinDeg))
         else if (key === "ArrowRight")
-            this.cameraCase!.rotation.y =
-                Math.max(this.cameraCase!.rotation.y - this.ptzCase.panStep, this.ptzCase.panP2V(this.ptzCase.panMaxDeg))
+            this.state.cameraCase!.rotation.y =
+                Math.max(this.state.cameraCase!.rotation.y - this.state.ptzCase!.panStep, this.state.ptzCase!.panP2V(this.state.ptzCase!.panMaxDeg))
 
         /*  tilt  */
         else if (key === "ArrowDown")
-            this.cameraLens!.rotation.x =
-                Math.min(this.cameraLens!.rotation.x + this.ptzLens.tiltStep, this.ptzLens.tiltP2V(this.ptzLens.tiltMinDeg))
+            this.state.cameraLens!.rotation.x =
+                Math.min(this.state.cameraLens!.rotation.x + this.state.ptzLens!.tiltStep, this.state.ptzLens!.tiltP2V(this.state.ptzLens!.tiltMinDeg))
         else if (key === "ArrowUp")
-            this.cameraLens!.rotation.x =
-                Math.max(this.cameraLens!.rotation.x - this.ptzLens.tiltStep, this.ptzLens.tiltP2V(this.ptzLens.tiltMaxDeg))
+            this.state.cameraLens!.rotation.x =
+                Math.max(this.state.cameraLens!.rotation.x - this.state.ptzLens!.tiltStep, this.state.ptzLens!.tiltP2V(this.state.ptzLens!.tiltMaxDeg))
 
         /*  rotate  */
         else if (key === "+")
-            this.cameraCase!.rotation.z =
-                Math.min(this.cameraCase!.rotation.z + this.ptzCase.rotateStep, this.ptzCase.rotateP2V(this.ptzCase.rotateMinDeg))
+            this.state.cameraCase!.rotation.z =
+                Math.min(this.state.cameraCase!.rotation.z + this.state.ptzCase!.rotateStep, this.state.ptzCase!.rotateP2V(this.state.ptzCase!.rotateMinDeg))
         else if (key === "-")
-            this.cameraCase!.rotation.z =
-                Math.max(this.cameraCase!.rotation.z - this.ptzCase.rotateStep, this.ptzCase.rotateP2V(this.ptzCase.rotateMaxDeg))
+            this.state.cameraCase!.rotation.z =
+                Math.max(this.state.cameraCase!.rotation.z - this.state.ptzCase!.rotateStep, this.state.ptzCase!.rotateP2V(this.state.ptzCase!.rotateMaxDeg))
 
         /*  zoom  */
         else if (key === "PageUp")
-            this.cameraLens!.fov =
-                Math.max(this.cameraLens!.fov - this.ptzLens.zoomStep, this.ptzLens.zoomP2V(this.ptzLens.zoomMax))
+            this.state.cameraLens!.fov =
+                Math.max(this.state.cameraLens!.fov - this.state.ptzLens!.zoomStep, this.state.ptzLens!.zoomP2V(this.state.ptzLens!.zoomMax))
         else if (key === "PageDown")
-            this.cameraLens!.fov =
-                Math.min(this.cameraLens!.fov + this.ptzLens.zoomStep, this.ptzLens.zoomP2V(this.ptzLens.zoomMin))
+            this.state.cameraLens!.fov =
+                Math.min(this.state.cameraLens!.fov + this.state.ptzLens!.zoomStep, this.state.ptzLens!.zoomP2V(this.state.ptzLens!.zoomMin))
 
         /*  reset  */
         else if (key === "Home") {
-            this.cameraHull!.position.x = this.ptzHull.posXP2V(0)
-            this.cameraHull!.position.y = this.ptzHull.posYP2V(0)
-            this.cameraHull!.position.z = this.ptzHull.posZP2V(0)
-            this.cameraCase!.rotation.x = this.ptzCase.tiltP2V(0)
-            this.cameraCase!.rotation.y = this.ptzCase.panP2V(0)
-            this.cameraCase!.rotation.z = this.ptzCase.rotateP2V(0)
-            this.cameraLens!.rotation.x = this.ptzLens.tiltP2V(0)
-            this.cameraLens!.fov        = this.ptzLens.zoomP2V(0)
+            this.state.cameraHull!.position.x = this.state.ptzHull!.posXP2V(0)
+            this.state.cameraHull!.position.y = this.state.ptzHull!.posYP2V(0)
+            this.state.cameraHull!.position.z = this.state.ptzHull!.posZP2V(0)
+            this.state.cameraCase!.rotation.x = this.state.ptzCase!.tiltP2V(0)
+            this.state.cameraCase!.rotation.y = this.state.ptzCase!.panP2V(0)
+            this.state.cameraCase!.rotation.z = this.state.ptzCase!.rotateP2V(0)
+            this.state.cameraLens!.rotation.x = this.state.ptzLens!.tiltP2V(0)
+            this.state.cameraLens!.fov        = this.state.ptzLens!.zoomP2V(0)
         }
     }
 }

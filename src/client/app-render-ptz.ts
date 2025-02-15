@@ -5,7 +5,7 @@
 */
 
 /*  the Babylon PTZ state class  */
-type PTZCamType = "birddog" | "panasonic" | "sony"
+export type PTZCamType = "birddog" | "panasonic" | "sony"
 export default class PTZ {
     constructor (private camType: PTZCamType) {}
 
