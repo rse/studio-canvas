@@ -10,8 +10,8 @@ import * as BABYLON   from "@babylonjs/core"
 import                     "@babylonjs/loaders/glTF"
 
 /*  import internal dependencies  */
-import ShaderMaterial from "./app-shader"
-import PTZ            from "./app-ptz"
+import ShaderMaterial from "./app-render-shader"
+import PTZ            from "./app-render-ptz"
 import { MixerState } from "../common/app-mixer"
 import { FreeDState } from "../common/app-freed"
 import { StateTypePartial } from "../common/app-state"
@@ -262,7 +262,7 @@ export default class CanvasRenderer extends EventEmitter {
     } as { [ name: string ]: { back: boolean, front: boolean } }
 
     /*  worker for off-loading image loading and decoding  */
-    private imageLoader = new Worker(new URL("./app-worker.js", import.meta.url))
+    private imageLoader = new Worker(new URL("./app-render-worker.js", import.meta.url))
 
     /*  initially establish rendering engine and scene  */
     async establish (canvas: HTMLCanvasElement) {
