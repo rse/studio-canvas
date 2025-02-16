@@ -79,9 +79,7 @@ export default class State {
     public fps = 30
 
     /*  rendering object references  */
-    public engine:          BABYLON.Nullable<BABYLON.Engine>         = null
     public scene:           BABYLON.Nullable<BABYLON.Scene>          = null
-    public optimizer:       BABYLON.Nullable<BABYLON.SceneOptimizer> = null
     public monitor:         BABYLON.Nullable<BABYLON.TransformNode>  = null
     public monitorCase:     BABYLON.Nullable<BABYLON.Mesh>           = null
     public monitorDisplay:  BABYLON.Nullable<BABYLON.Mesh>           = null

@@ -17,6 +17,8 @@ import { MixerState }          from "../common/app-mixer"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class AppRenderScene {
+    private engine:    BABYLON.Nullable<BABYLON.Engine>         = null
+    private optimizer: BABYLON.Nullable<BABYLON.SceneOptimizer> = null
     private renderCount  = 0
     private fpsProgram   = 30
     private fpsPreview   = 30
@@ -33,20 +35,20 @@ export default class AppRenderScene {
     /*  establish feature  */
     async establish (canvas: HTMLCanvasElement) {
         /*  establish rendering engine on canvas element  */
-        this.state.engine = new BABYLON.Engine(canvas, true, {
+        this.engine = new BABYLON.Engine(canvas, true, {
             useExactSrgbConversions: true,
             doNotHandleContextLost:  true
         })
-        if (this.state.engine === null)
+        if (this.engine === null)
             throw new Error("cannot establish Babylon engine")
         window.addEventListener("resize", () => {
-            this.state.engine!.resize()
+            this.engine!.resize()
         })
 
         /*  load the Blender glTF scene export  */
         this.log("INFO", "loading Studio Canvas scene")
         BABYLON.SceneLoader.ShowLoadingScreen = false
-        this.state.scene = await BABYLON.SceneLoader.LoadAsync("/res/", "canvas-scene.glb", this.state.engine)
+        this.state.scene = await BABYLON.SceneLoader.LoadAsync("/res/", "canvas-scene.glb", this.engine)
         if (this.state.scene === null)
             throw new Error("failed to create scene")
         await new Promise((resolve, reject) => {
@@ -74,7 +76,7 @@ export default class AppRenderScene {
         }
 
         /*  manually optimize engine  */
-        this.state.engine.enableOfflineSupport = false
+        this.engine.enableOfflineSupport = false
 
         /*  manually optimize scene  */
         this.state.scene.skipPointerMovePicking = true
@@ -84,7 +86,7 @@ export default class AppRenderScene {
         /*  automatically optimize scene  */
         const options = new BABYLON.SceneOptimizerOptions(this.state.fps, 2000)
         options.addOptimization(new BABYLON.HardwareScalingOptimization(0, 1))
-        this.state.optimizer = new BABYLON.SceneOptimizer(this.state.scene, options)
+        this.optimizer = new BABYLON.SceneOptimizer(this.state.scene, options)
     }
 
     async establishEnd () {
@@ -117,17 +119,17 @@ export default class AppRenderScene {
     /*  start/stop renderer  */
     async start () {
         /*  start render loop and scene optimizer  */
-        if (this.state.engine !== null)
-            this.state.engine.runRenderLoop(this.renderOnce)
-        if (this.state.optimizer !== null)
-            this.state.optimizer.start()
+        if (this.engine !== null)
+            this.engine.runRenderLoop(this.renderOnce)
+        if (this.optimizer !== null)
+            this.optimizer.start()
     }
     async stop () {
         /*  stop scene optimizer and render loop  */
-        if (this.state.optimizer !== null)
-            this.state.optimizer.stop()
-        if (this.state.engine !== null)
-            this.state.engine.stopRenderLoop(this.renderOnce)
+        if (this.optimizer !== null)
+            this.optimizer.stop()
+        if (this.engine !== null)
+            this.engine.stopRenderLoop(this.renderOnce)
 
         /*  give still active render loop iteration time to complete  */
         await new Promise((resolve, reject) => {
@@ -140,8 +142,8 @@ export default class AppRenderScene {
         if (this.state.fps !== fps) {
             this.log("INFO", `switching from ${this.state.fps} to ${fps} frames-per-second (FPS)`)
             this.state.fps = fps
-            if (this.state.optimizer !== null)
-                this.state.optimizer.targetFrameRate = fps
+            if (this.optimizer !== null)
+                this.optimizer.targetFrameRate = fps
             this.fps(fps)
         }
     }
