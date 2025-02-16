@@ -46,8 +46,6 @@ export default class AppRenderLights {
             sg.usePercentageCloserFiltering     = true
             for (const mesh of this.state.shadowCastingMeshes)
                 sg.addShadowCaster(mesh)
-            sg.addShadowCaster(this.state.paneCase!)
-            sg.addShadowCaster(this.state.paneDisplay!)
             sg.addShadowCaster(this.state.pillarCase!)
             sg.addShadowCaster(this.state.pillarDisplay!)
         }

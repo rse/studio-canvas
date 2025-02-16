@@ -15,9 +15,6 @@ export default class State {
     public established       = false
     public layer             = ""
     public cameraName        = ""
-    public paneFade          = 0
-    public paneOpacity       = 1.0
-    public paneChromaKey     = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     public pillarFade        = 0
     public pillarOpacity     = 1.0
     public pillarBorderRad   = 40.0
@@ -33,12 +30,6 @@ export default class State {
     public displayMaterial2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
     public displayTextureByURL = new Map<string, BABYLON.Texture>()
     public displayTextureInfo  = new Map<BABYLON.Texture, { type: string, url: string, refs: number }>()
-    public paneBase          = {
-        scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
-        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationZ:     0, positionZ:     0,
-        positionCaseX: 0, positionDisplayX: 0
-    }
     public pillarBase        = {
         scaleX:        0, scaleY:        0, scaleZ:        0,
         rotationZ:     0, positionZ:     0,
@@ -71,9 +62,6 @@ export default class State {
 
     /*  rendering object references  */
     public scene:           BABYLON.Nullable<BABYLON.Scene>          = null
-    public pane:            BABYLON.Nullable<BABYLON.TransformNode>  = null
-    public paneCase:        BABYLON.Nullable<BABYLON.Mesh>           = null
-    public paneDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
     public pillar:          BABYLON.Nullable<BABYLON.TransformNode>  = null
     public pillarCase:      BABYLON.Nullable<BABYLON.Mesh>           = null
     public pillarDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
