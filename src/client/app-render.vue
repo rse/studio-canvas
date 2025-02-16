@@ -229,7 +229,7 @@ export default defineComponent({
         ws.addEventListener("error", (ev) => {
             this.log("WARNING", "WebSocket server connection error")
         })
-        let queueSceneState: Promise<boolean> = Promise.resolve(true)
+        let queueSceneState: Promise<void> = Promise.resolve()
         ws.addEventListener("message", (ev: MessageEvent) => {
             if (typeof ev.data !== "string") {
                 this.log("WARNING", "invalid WebSocket server message received")
@@ -254,22 +254,20 @@ export default defineComponent({
                 }
                 setTimeout(() => {
                     queueSceneState = queueSceneState.then(() => {
-                        let promise: Promise<boolean>
+                        let promise: Promise<void>
                         try {
                             promise = renderer!.reflectSceneState(state).catch((err: Error) => {
                                 this.log("ERROR", `reflecting scene state FAILED (1): ${err.toString()}`)
-                                return true
                             })
                             this.reflectSceneState(state as StateType)
                         }
                         catch (err: any) {
                             this.log("ERROR", `reflecting scene state FAILED (2): ${err.toString()}`)
-                            promise = Promise.resolve(true)
+                            promise = Promise.resolve()
                         }
                         return promise
                     }).catch((err: Error) => {
                         this.log("ERROR", `reflecting scene state FAILED (3): ${err.toString()}`)
-                        return true
                     })
                 }, 0)
             }
