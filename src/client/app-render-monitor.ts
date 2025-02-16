@@ -5,17 +5,30 @@
 */
 
 /*  import external dependencies  */
-import * as BABYLON           from "@babylonjs/core"
+import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
-import State                  from "./app-render-state"
-import Utils                  from "./app-render-utils"
-import AppRenderMaterial      from "./app-render-material"
+import State, { type ChromaKey } from "./app-render-state"
+import Utils                     from "./app-render-utils"
+import AppRenderMaterial         from "./app-render-material"
 
 /*  import internal dependencies (shared)  */
-import { StateTypePartial }   from "../common/app-state"
+import { StateTypePartial }      from "../common/app-state"
 
 export default class AppRenderMonitor {
+    private monitor:          BABYLON.Nullable<BABYLON.TransformNode>  = null
+    private monitorCase:      BABYLON.Nullable<BABYLON.Mesh>           = null
+    private monitorDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
+    private monitorFade       = 0
+    private monitorOpacity    = 1.0
+    private monitorChromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
+    private monitorBase       = {
+        scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
+        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
+        rotationZ:     0, positionZ:     0,
+        positionCaseX: 0, positionDisplayX: 0
+    }
+
     constructor (
         private state:    State,
         private material: AppRenderMaterial,
@@ -25,25 +38,25 @@ export default class AppRenderMonitor {
     /*  establish feature  */
     async establish () {
         /*  gather references to monitor mesh nodes  */
-        this.state.monitor        = this.state.scene!.getNodeByName("Monitor")        as BABYLON.Nullable<BABYLON.TransformNode>
-        this.state.monitorCase    = this.state.scene!.getMeshByName("Monitor-Case")   as BABYLON.Nullable<BABYLON.Mesh>
-        this.state.monitorDisplay = this.state.scene!.getMeshByName("Monitor-Screen") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.state.monitor === null || this.state.monitorCase === null || this.state.monitorDisplay === null)
+        this.monitor        = this.state.scene!.getNodeByName("Monitor")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.monitorCase    = this.state.scene!.getMeshByName("Monitor-Case")   as BABYLON.Nullable<BABYLON.Mesh>
+        this.monitorDisplay = this.state.scene!.getMeshByName("Monitor-Screen") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.monitor === null || this.monitorCase === null || this.monitorDisplay === null)
             throw new Error("cannot find monitor mesh nodes")
         if (this.state.layer === "back")
-            this.state.monitor.setEnabled(false)
+            this.monitor.setEnabled(false)
 
         /*  initialize monitor base values  */
-        this.state.monitorBase.scaleCaseX       = this.state.monitorCase.scaling.x
-        this.state.monitorBase.scaleCaseY       = this.state.monitorCase.scaling.y
-        this.state.monitorBase.scaleCaseZ       = this.state.monitorCase.scaling.z
-        this.state.monitorBase.scaleDisplayX    = this.state.monitorDisplay.scaling.x
-        this.state.monitorBase.scaleDisplayY    = this.state.monitorDisplay.scaling.y
-        this.state.monitorBase.scaleDisplayZ    = this.state.monitorDisplay.scaling.z
-        this.state.monitorBase.rotationZ        = this.state.monitor.rotation.z
-        this.state.monitorBase.positionZ        = this.state.monitor.position.z
-        this.state.monitorBase.positionCaseX    = this.state.monitorCase.position.x
-        this.state.monitorBase.positionDisplayX = this.state.monitorDisplay.position.x
+        this.monitorBase.scaleCaseX       = this.monitorCase.scaling.x
+        this.monitorBase.scaleCaseY       = this.monitorCase.scaling.y
+        this.monitorBase.scaleCaseZ       = this.monitorCase.scaling.z
+        this.monitorBase.scaleDisplayX    = this.monitorDisplay.scaling.x
+        this.monitorBase.scaleDisplayY    = this.monitorDisplay.scaling.y
+        this.monitorBase.scaleDisplayZ    = this.monitorDisplay.scaling.z
+        this.monitorBase.rotationZ        = this.monitor.rotation.z
+        this.monitorBase.positionZ        = this.monitor.position.z
+        this.monitorBase.positionCaseX    = this.monitorCase.position.x
+        this.monitorBase.positionDisplayX = this.monitorDisplay.position.x
 
         /*  apply glass material to monitor case  */
         const glass1 = new BABYLON.PBRMaterial("glass1", this.state.scene!)
@@ -54,22 +67,26 @@ export default class AppRenderMonitor {
         glass1.microSurface         = 1
         glass1.reflectivityColor    = new BABYLON.Color3(0.1, 0.1, 0.1)
         glass1.albedoColor          = new BABYLON.Color3(1.0, 1.0, 1.0)
-        this.state.monitorCase.material = glass1
+        this.monitorCase.material = glass1
+
+        /*  register monitor for shadow casting  */
+        this.state.shadowCastingMeshes.push(this.monitorDisplay!)
+        this.state.shadowCastingMeshes.push(this.monitorCase!)
     }
 
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
         /*  sanity check situation  */
-        if (!(this.state.monitor !== null
-            && this.state.monitorCase !== null
-            && this.state.monitorDisplay !== null
+        if (!(this.monitor !== null
+            && this.monitorCase !== null
+            && this.monitorDisplay !== null
             && this.state.layer === "back"))
             return
 
         /*  update already active media receivers  */
         if (this.state.modifiedMedia[this.material.mapMediaId(this.state.displaySourceMap.monitor)]
-            && this.state.monitorDisplay.isEnabled())
-            await this.material.applyDisplayMaterial("monitor", this.state.monitorDisplay, this.state.monitorOpacity, 0, 0, this.state.monitorChromaKey)
+            && this.monitorDisplay.isEnabled())
+            await this.material.applyDisplayMaterial("monitor", this.monitorDisplay, this.monitorOpacity, 0, 0, this.monitorChromaKey)
 
         /*  reflect state changes  */
         if (state.monitor !== undefined) {
@@ -77,88 +94,88 @@ export default class AppRenderMonitor {
                 && (this.state.displaySourceMap.monitor !== state.monitor.source
                     || this.state.modifiedMedia[this.material.mapMediaId(state.monitor.source)])) {
                 this.state.displaySourceMap.monitor = state.monitor.source
-                if (this.state.monitorDisplay.isEnabled())
-                    await this.material.applyDisplayMaterial("monitor", this.state.monitorDisplay!, this.state.monitorOpacity, 0, 0, this.state.monitorChromaKey)
+                if (this.monitorDisplay.isEnabled())
+                    await this.material.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
             }
             if (state.monitor.opacity !== undefined) {
-                this.state.monitorOpacity = state.monitor.opacity
-                if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.state.monitorDisplay.material
-                    material.setFloat("opacity", this.state.monitorOpacity)
+                this.monitorOpacity = state.monitor.opacity
+                if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.monitorDisplay.material
+                    material.setFloat("opacity", this.monitorOpacity)
                 }
             }
             if (state.monitor.scale !== undefined) {
-                this.state.monitorCase.scaling.x    = this.state.monitorBase.scaleCaseX    * state.monitor.scale
-                this.state.monitorCase.scaling.y    = this.state.monitorBase.scaleCaseY    * state.monitor.scale
-                this.state.monitorCase.scaling.z    = this.state.monitorBase.scaleCaseZ    * state.monitor.scale
-                this.state.monitorDisplay.scaling.x = this.state.monitorBase.scaleDisplayX * state.monitor.scale
-                this.state.monitorDisplay.scaling.y = this.state.monitorBase.scaleDisplayY * state.monitor.scale
-                this.state.monitorDisplay.scaling.z = this.state.monitorBase.scaleDisplayZ * state.monitor.scale
+                this.monitorCase.scaling.x    = this.monitorBase.scaleCaseX    * state.monitor.scale
+                this.monitorCase.scaling.y    = this.monitorBase.scaleCaseY    * state.monitor.scale
+                this.monitorCase.scaling.z    = this.monitorBase.scaleCaseZ    * state.monitor.scale
+                this.monitorDisplay.scaling.x = this.monitorBase.scaleDisplayX * state.monitor.scale
+                this.monitorDisplay.scaling.y = this.monitorBase.scaleDisplayY * state.monitor.scale
+                this.monitorDisplay.scaling.z = this.monitorBase.scaleDisplayZ * state.monitor.scale
             }
             if (state.monitor.rotate !== undefined) {
-                this.state.monitor.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.state.monitor.rotate(new BABYLON.Vector3(0, 0, 1),
+                this.monitor.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.monitor.rotate(new BABYLON.Vector3(0, 0, 1),
                     Utils.deg2rad(state.monitor.rotate), BABYLON.Space.WORLD)
             }
             if (state.monitor.lift !== undefined)
-                this.state.monitor.position.z = this.state.monitorBase.positionZ + (state.monitor.lift / 100)
+                this.monitor.position.z = this.monitorBase.positionZ + (state.monitor.lift / 100)
             if (state.monitor.distance !== undefined) {
-                this.state.monitorCase.position.x    = this.state.monitorBase.positionCaseX    - state.monitor.distance
-                this.state.monitorDisplay.position.x = this.state.monitorBase.positionDisplayX - state.monitor.distance
+                this.monitorCase.position.x    = this.monitorBase.positionCaseX    - state.monitor.distance
+                this.monitorDisplay.position.x = this.monitorBase.positionDisplayX - state.monitor.distance
             }
-            if (state.monitor.fadeTime !== undefined && this.state.monitorFade !== state.monitor.fadeTime)
-                this.state.monitorFade = state.monitor.fadeTime
+            if (state.monitor.fadeTime !== undefined && this.monitorFade !== state.monitor.fadeTime)
+                this.monitorFade = state.monitor.fadeTime
             if (state.monitor.chromaKey !== undefined) {
-                if (state.monitor.chromaKey.enable !== undefined && this.state.monitorChromaKey.enable !== state.monitor.chromaKey.enable) {
-                    this.state.monitorChromaKey.enable = state.monitor.chromaKey.enable
-                    if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.state.monitorDisplay.material
-                        material.setInt("chromaEnable", this.state.monitorChromaKey.enable ? 1 : 0)
+                if (state.monitor.chromaKey.enable !== undefined && this.monitorChromaKey.enable !== state.monitor.chromaKey.enable) {
+                    this.monitorChromaKey.enable = state.monitor.chromaKey.enable
+                    if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.monitorDisplay.material
+                        material.setInt("chromaEnable", this.monitorChromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.monitor.chromaKey.threshold !== undefined && this.state.monitorChromaKey.threshold !== state.monitor.chromaKey.threshold) {
-                    this.state.monitorChromaKey.threshold = state.monitor.chromaKey.threshold
-                    if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.state.monitorDisplay.material
-                        material.setFloat("chromaThreshold", this.state.monitorChromaKey.threshold)
+                if (state.monitor.chromaKey.threshold !== undefined && this.monitorChromaKey.threshold !== state.monitor.chromaKey.threshold) {
+                    this.monitorChromaKey.threshold = state.monitor.chromaKey.threshold
+                    if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.monitorDisplay.material
+                        material.setFloat("chromaThreshold", this.monitorChromaKey.threshold)
                     }
                 }
-                if (state.monitor.chromaKey.smoothing !== undefined && this.state.monitorChromaKey.smoothing !== state.monitor.chromaKey.smoothing) {
-                    this.state.monitorChromaKey.smoothing = state.monitor.chromaKey.smoothing
-                    if (this.state.monitorChromaKey.enable && this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.state.monitorDisplay.material
-                        material.setFloat("chromaSmoothing", this.state.monitorChromaKey.smoothing)
+                if (state.monitor.chromaKey.smoothing !== undefined && this.monitorChromaKey.smoothing !== state.monitor.chromaKey.smoothing) {
+                    this.monitorChromaKey.smoothing = state.monitor.chromaKey.smoothing
+                    if (this.monitorChromaKey.enable && this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.monitorDisplay.material
+                        material.setFloat("chromaSmoothing", this.monitorChromaKey.smoothing)
                     }
                 }
             }
-            if (state.monitor.enable !== undefined && this.state.monitorDisplay.isEnabled() !== state.monitor.enable) {
+            if (state.monitor.enable !== undefined && this.monitorDisplay.isEnabled() !== state.monitor.enable) {
                 if (state.monitor.enable) {
-                    await this.material.applyDisplayMaterial("monitor", this.state.monitorDisplay!, this.state.monitorOpacity, 0, 0, this.state.monitorChromaKey)
-                    if (this.state.monitorFade > 0 && this.state.fps > 0) {
+                    await this.material.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
+                    if (this.monitorFade > 0 && this.state.fps > 0) {
                         this.log("INFO", "enabling monitor (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.state.fps === 0 ? 1 : this.state.fps)
-                        const framesTotal = this.state.monitorFade * fps
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.state.monitorCase,
+                        const framesTotal = this.monitorFade * fps
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.monitorCase,
                             "visibility", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
-                        if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.state.monitorDisplay.material
+                        if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.monitorDisplay.material
                             material.setFloat("visibility", 0.0)
                         }
-                        this.state.monitor.setEnabled(true)
-                        this.state.monitorCase.visibility = 1
-                        this.state.monitorCase.setEnabled(true)
-                        this.state.monitorDisplay.visibility = 1
-                        this.state.monitorDisplay.setEnabled(true)
-                        const anim2 = Utils.manualAnimation(0, 1, this.state.monitorFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
-                            if (this.state.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.state.monitorDisplay!.material
+                        this.monitor.setEnabled(true)
+                        this.monitorCase.visibility = 1
+                        this.monitorCase.setEnabled(true)
+                        this.monitorDisplay.visibility = 1
+                        this.monitorDisplay.setEnabled(true)
+                        const anim2 = Utils.manualAnimation(0, 1, this.monitorFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.monitorDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.state.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.state.monitorDisplay!.material
+                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.monitorDisplay!.material
                                 material.setFloat("visibility", 1.0)
                             }
                         })
@@ -168,75 +185,75 @@ export default class AppRenderMonitor {
                     }
                     else {
                         this.log("INFO", "enabling monitor")
-                        this.state.monitorCase.visibility    = 1
-                        this.state.monitorDisplay.visibility = 1
-                        this.state.monitorCase.setEnabled(true)
-                        this.state.monitorDisplay.setEnabled(true)
-                        this.state.monitor.setEnabled(true)
+                        this.monitorCase.visibility    = 1
+                        this.monitorDisplay.visibility = 1
+                        this.monitorCase.setEnabled(true)
+                        this.monitorDisplay.setEnabled(true)
+                        this.monitor.setEnabled(true)
                     }
                 }
                 else if (!state.monitor.enable) {
-                    if (this.state.monitorFade > 0 && this.state.fps > 0) {
+                    if (this.monitorFade > 0 && this.state.fps > 0) {
                         this.log("INFO", "disabling monitor (fading: start)")
-                        this.state.monitorCase.visibility = 1
-                        this.state.monitorCase.setEnabled(true)
-                        this.state.monitorDisplay.visibility = 1
-                        this.state.monitorDisplay.setEnabled(true)
+                        this.monitorCase.visibility = 1
+                        this.monitorCase.setEnabled(true)
+                        this.monitorDisplay.visibility = 1
+                        this.monitorDisplay.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.state.fps === 0 ? 1 : this.state.fps)
-                        const framesTotal = this.state.monitorFade * fps
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.state.monitorCase,
+                        const framesTotal = this.monitorFade * fps
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.monitorCase,
                             "visibility", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
-                        if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.state.monitorDisplay.material
+                        if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.monitorDisplay.material
                             material.setFloat("visibility", 1.0)
                         }
-                        const anim2 = Utils.manualAnimation(1, 0, this.state.monitorFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
-                            if (this.state.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.state.monitorDisplay!.material
+                        const anim2 = Utils.manualAnimation(1, 0, this.monitorFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.monitorDisplay!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.state.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.state.monitorDisplay!.material
+                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.monitorDisplay!.material
                                 material.setFloat("visibility", 0.0)
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
                             this.log("INFO", "disabling monitor (fading: end)")
-                            if (this.state.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.state.monitorDisplay!.material
+                            if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.monitorDisplay!.material
                                 material.setFloat("visibility", 0.0)
-                                this.state.monitorDisplay!.visibility = 0.0
-                                this.state.monitorCase!.visibility = 0.0
+                                this.monitorDisplay!.visibility = 0.0
+                                this.monitorCase!.visibility = 0.0
                             }
                             else  {
-                                this.state.monitorDisplay!.visibility = 0.0
-                                this.state.monitorCase!.visibility = 0.0
+                                this.monitorDisplay!.visibility = 0.0
+                                this.monitorCase!.visibility = 0.0
                             }
-                            this.state.monitorCase!.setEnabled(false)
-                            this.state.monitorDisplay!.setEnabled(false)
-                            this.state.monitor!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("monitor", this.state.monitorDisplay!)
+                            this.monitorCase!.setEnabled(false)
+                            this.monitorDisplay!.setEnabled(false)
+                            this.monitor!.setEnabled(false)
+                            await this.material.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
                         })
                     }
                     else {
                         this.log("INFO", "disabling monitor")
-                        if (this.state.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.state.monitorDisplay.material
+                        if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.monitorDisplay.material
                             material.setFloat("visibility", 0.0)
-                            this.state.monitorDisplay.visibility = 0.0
-                            this.state.monitorCase.visibility = 0.0
+                            this.monitorDisplay.visibility = 0.0
+                            this.monitorCase.visibility = 0.0
                         }
                         else {
-                            this.state.monitorDisplay.visibility = 0.0
-                            this.state.monitorCase.visibility = 0.0
+                            this.monitorDisplay.visibility = 0.0
+                            this.monitorCase.visibility = 0.0
                         }
-                        this.state.monitorCase.setEnabled(false)
-                        this.state.monitorDisplay.setEnabled(false)
-                        this.state.monitor.setEnabled(false)
-                        await this.material.unapplyDisplayMaterial("monitor", this.state.monitorDisplay!)
+                        this.monitorCase.setEnabled(false)
+                        this.monitorDisplay.setEnabled(false)
+                        this.monitor.setEnabled(false)
+                        await this.material.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
                     }
                 }
             }

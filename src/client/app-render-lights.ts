@@ -44,8 +44,8 @@ export default class AppRenderLights {
             sg.useCloseExponentialShadowMap     = false
             sg.useBlurCloseExponentialShadowMap = false
             sg.usePercentageCloserFiltering     = true
-            sg.addShadowCaster(this.state.monitorDisplay!)
-            sg.addShadowCaster(this.state.monitorCase!)
+            for (const mesh of this.state.shadowCastingMeshes)
+                sg.addShadowCaster(mesh)
             sg.addShadowCaster(this.state.paneCase!)
             sg.addShadowCaster(this.state.paneDisplay!)
             sg.addShadowCaster(this.state.pillarCase!)
