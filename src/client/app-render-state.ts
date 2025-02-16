@@ -88,8 +88,6 @@ export default class State {
         rotationZ:     0, positionZ:     0,
         positionCaseX: 0, positionDisplayX: 0
     }
-    public avatar1Scale      = { x: 0, y: 0, z: 0 }
-    public avatar2Scale      = { x: 0, y: 0, z: 0 }
     public flippedCam        = false
     public plateFade         = 0
     public plateOpacity      = 1.0
@@ -148,10 +146,6 @@ export default class State {
     public pillar:          BABYLON.Nullable<BABYLON.TransformNode>  = null
     public pillarCase:      BABYLON.Nullable<BABYLON.Mesh>           = null
     public pillarDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
-    public avatar1:         BABYLON.Nullable<BABYLON.TransformNode>  = null
-    public avatar1Model:    BABYLON.Nullable<BABYLON.Mesh>           = null
-    public avatar2:         BABYLON.Nullable<BABYLON.TransformNode>  = null
-    public avatar2Model:    BABYLON.Nullable<BABYLON.Mesh>           = null
     public references:      BABYLON.Nullable<BABYLON.TransformNode>  = null
     public wall:            BABYLON.Nullable<BABYLON.Mesh>           = null
     public decal:           BABYLON.Nullable<BABYLON.Mesh>           = null
