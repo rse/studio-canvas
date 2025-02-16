@@ -17,7 +17,12 @@ import { MixerState }          from "../common/app-mixer"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class AppRenderScene {
-    private renderCount = 0
+    private renderCount  = 0
+    private fpsProgram   = 30
+    private fpsPreview   = 30
+    private fpsOther     = 30
+    private mixerProgram = ""
+    private mixerPreview = ""
 
     constructor (
         private state:   State,
@@ -143,16 +148,16 @@ export default class AppRenderScene {
 
     /*  react on a received mixer record by reflecting the camera mixer state  */
     reflectMixerState (mixer: MixerState) {
-        let fps = this.state.fpsOther
+        let fps = this.fpsOther
         if (mixer.preview !== undefined) {
-            this.state.mixerPreview = mixer.preview
-            if (this.state.mixerPreview === this.state.cameraName)
-                fps = this.state.fpsPreview
+            this.mixerPreview = mixer.preview
+            if (this.mixerPreview === this.state.cameraName)
+                fps = this.fpsPreview
         }
         if (mixer.program !== undefined) {
-            this.state.mixerProgram = mixer.program
-            if (this.state.mixerProgram === this.state.cameraName)
-                fps = this.state.fpsProgram
+            this.mixerProgram = mixer.program
+            if (this.mixerProgram === this.state.cameraName)
+                fps = this.fpsProgram
         }
         this.configureFPS(fps)
     }
@@ -163,19 +168,19 @@ export default class AppRenderScene {
         if (state.renderer !== undefined) {
             let fps = this.state.fps
             if (state.renderer.other !== undefined) {
-                this.state.fpsOther = state.renderer.other
-                if (!(this.state.mixerPreview === this.state.cameraName || this.state.mixerProgram === this.state.cameraName))
-                    fps = this.state.fpsOther
+                this.fpsOther = state.renderer.other
+                if (!(this.mixerPreview === this.state.cameraName || this.mixerProgram === this.state.cameraName))
+                    fps = this.fpsOther
             }
             if (state.renderer.preview !== undefined) {
-                this.state.fpsPreview = state.renderer.preview
-                if (this.state.mixerPreview === this.state.cameraName)
-                    fps = this.state.fpsPreview
+                this.fpsPreview = state.renderer.preview
+                if (this.mixerPreview === this.state.cameraName)
+                    fps = this.fpsPreview
             }
             if (state.renderer.program !== undefined) {
-                this.state.fpsProgram = state.renderer.program
-                if (this.state.mixerProgram === this.state.cameraName)
-                    fps = this.state.fpsProgram
+                this.fpsProgram = state.renderer.program
+                if (this.mixerProgram === this.state.cameraName)
+                    fps = this.fpsProgram
             }
             this.configureFPS(fps)
         }

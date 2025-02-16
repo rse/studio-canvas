@@ -17,6 +17,10 @@ import AppRenderTexture       from "./app-render-texture"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class AppRenderCanvas {
+    private fadeTimer: ReturnType<typeof setTimeout> | null = null
+    private modeTimer: ReturnType<typeof setTimeout> | null = null
+    private fadeSwitch = 2.0
+
     constructor (
         private state:   State,
         private texture: AppRenderTexture,
@@ -230,7 +234,7 @@ export default class AppRenderCanvas {
         const fadeWait  = this.state.canvasConfig[this.state.canvasMode].fadeWait
         const fader = () => {
             /*  reset timer (to not confuse stopping below)  */
-            this.state.fadeTimer = null
+            this.fadeTimer = null
 
             /*  apply next fading step  */
             const fadeInterval = 1000 / (this.state.fps === 0 ? 1 : this.state.fps)
@@ -242,21 +246,21 @@ export default class AppRenderCanvas {
             texFade.value = fade
 
             /*  wait for next iteration  */
-            this.state.fadeTimer = setTimeout(fader, wait)
+            this.fadeTimer = setTimeout(fader, wait)
         }
-        if (this.state.fadeTimer !== null)
-            clearTimeout(this.state.fadeTimer)
-        this.state.fadeTimer = setTimeout(fader, 0)
+        if (this.fadeTimer !== null)
+            clearTimeout(this.fadeTimer)
+        this.fadeTimer = setTimeout(fader, 0)
     }
 
     /*  stop canvas/wall fader  */
     async canvasFaderStop () {
-        if (this.state.fadeTimer !== null) {
-            clearTimeout(this.state.fadeTimer)
+        if (this.fadeTimer !== null) {
+            clearTimeout(this.fadeTimer)
             await new Promise((resolve, reject) => {
                 setTimeout(() => resolve(true), 2 * (1000 / (this.state.fps === 0 ? 1 : this.state.fps)))
             })
-            this.state.fadeTimer = null
+            this.fadeTimer = null
         }
     }
 
@@ -270,10 +274,10 @@ export default class AppRenderCanvas {
         await new Promise((resolve, reject) => {
             let fade        = modeTexFade.value
             const fadeSign  = fade === 0.0 ? +1 : -1
-            const fadeTrans = this.state.fadeSwitch * 1000
+            const fadeTrans = this.fadeSwitch * 1000
             const fader = () => {
                 /*  reset timer (to not confuse stopping below)  */
-                this.state.modeTimer = null
+                this.modeTimer = null
 
                 /*  apply next fading step  */
                 const fadeInterval = 1000 / (this.state.fps === 0 ? 1 : this.state.fps)
@@ -286,13 +290,13 @@ export default class AppRenderCanvas {
 
                 /*  wait for next iteration or stop processing  */
                 if (wait > 0)
-                    this.state.modeTimer = setTimeout(fader, wait)
+                    this.modeTimer = setTimeout(fader, wait)
                 else
                     resolve(true)
             }
-            if (this.state.modeTimer !== null)
-                clearTimeout(this.state.modeTimer)
-            this.state.modeTimer = setTimeout(fader, 0)
+            if (this.modeTimer !== null)
+                clearTimeout(this.modeTimer)
+            this.modeTimer = setTimeout(fader, 0)
         })
     }
 
@@ -360,7 +364,7 @@ export default class AppRenderCanvas {
                     Utils.deg2rad(state.canvas.rotationZ), BABYLON.Space.WORLD)
             }
             if (state.canvas.fadeSwitch !== undefined)
-                this.state.fadeSwitch = state.canvas.fadeSwitch
+                this.fadeSwitch = state.canvas.fadeSwitch
             if (changed)
                 await this.canvasModeChange()
         }

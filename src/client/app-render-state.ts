@@ -103,14 +103,7 @@ export default class State {
     }
 
     /*  frames per second (FPS) control  */
-    public fps        = 30
-    public fpsProgram = 30
-    public fpsPreview = 30
-    public fpsOther   = 30
-
-    /*  current camera mixer state  */
-    public mixerProgram = ""
-    public mixerPreview = ""
+    public fps = 30
 
     /*  latest sync time  */
     public syncTime = 0
