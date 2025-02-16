@@ -7,9 +7,6 @@
 /*  import external dependencies  */
 import * as BABYLON         from "@babylonjs/core"
 
-/*  import internal dependencies (client-side)  */
-import PTZ                  from "./app-render-ptz"
-
 /*  utility types  */
 export type ChromaKey = { enable: boolean, threshold: number, smoothing: number }
 
@@ -30,8 +27,6 @@ type CanvasState = {
 /*  the canvas rendering state class  */
 export default class State {
     public established       = false
-    public ptzFreeD          = false
-    public ptzKeys           = false
     public layer             = ""
     public cameraName        = ""
     public canvasMode        = 0
@@ -85,7 +80,6 @@ export default class State {
         rotationZ:     0, positionZ:     0,
         positionCaseX: 0, positionDisplayX: 0
     }
-    public flippedCam        = false
     public plateFade         = 0
     public plateOpacity      = 1.0
     public plateBorderRad    = 40.0
@@ -161,12 +155,6 @@ export default class State {
     public maskDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
     public maskBackground:  BABYLON.Nullable<BABYLON.Mesh>           = null
     public maskCamLens:     BABYLON.Nullable<BABYLON.FreeCamera>     = null
-
-    /*  PTZ sub-module  */
-    public ptz:     PTZ | null = null
-    public ptzHull: PTZ | null = null
-    public ptzCase: PTZ | null = null
-    public ptzLens: PTZ | null = null
 
     /*  cross-fade timer  */
     public fadeTimer: ReturnType<typeof setTimeout> | null = null

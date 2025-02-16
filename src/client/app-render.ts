@@ -8,9 +8,7 @@
 import EventEmitter                from "eventemitter2"
 
 /*  import internal dependencies (client-side)  */
-import Config, { type CameraName } from "./app-render-config"
 import State                       from "./app-render-state"
-import PTZ                         from "./app-render-ptz"
 import Texture                     from "./app-render-texture"
 import Stream                      from "./app-render-stream"
 import Material                    from "./app-render-material"
@@ -60,23 +58,9 @@ export default class CanvasRenderer extends EventEmitter {
         super()
         this.state = new State()
 
+        /*  remember parameters  */
         this.state.cameraName  = params.cameraName
         this.state.layer       = params.layer
-        this.state.ptzFreeD    = params.ptzFreeD
-        this.state.ptzKeys     = params.ptzKeys
-        this.state.flippedCam  = Config.flippedCams.includes(params.cameraName)
-
-        /*  mapping of camera to type  */
-        const cameraType = Config.camNameToTypeMap.get(
-            this.state.cameraName as CameraName)
-        if (!cameraType)
-            throw new Error("invalid camera")
-
-        /*  instantiate PTZ  */
-        this.state.ptz     = new PTZ(cameraType)
-        this.state.ptzHull = new PTZ(cameraType)
-        this.state.ptzCase = new PTZ(cameraType)
-        this.state.ptzLens = new PTZ(cameraType)
 
         /*  helper functions for passing-through information  */
         const passThroughLog = (level: string, msg: string) => { this.emit("log", level, msg) }
@@ -90,6 +74,10 @@ export default class CanvasRenderer extends EventEmitter {
         /*  instantiate rendering scene  */
         this.scene     = new Scene(    this.state, passThroughLog, passThroughFPS)
 
+        /*  instantiate rendering camera  */
+        this.camera    = new Camera(   this.state,                            passThroughLog)
+        this.camera.configure(params.cameraName, params.ptzFreeD, params.ptzKeys)
+
         /*  instantiate rendering features  */
         this.canvas    = new Canvas(   this.state, this.texture,              passThroughLog)
         this.decal     = new Decal(    this.state, this.scene, this.material, passThroughLog)
@@ -99,7 +87,6 @@ export default class CanvasRenderer extends EventEmitter {
         this.pillar    = new Pillar(   this.state, this.material,             passThroughLog)
         this.hologram  = new Hologram( this.state, this.material,             passThroughLog)
         this.mask      = new Mask(     this.state, this.material,             passThroughLog)
-        this.camera    = new Camera(   this.state,                            passThroughLog)
         this.avatars   = new Avatars(  this.state,                            passThroughLog)
         this.reference = new Reference(this.state,                            passThroughLog)
         this.lights    = new Lights(   this.state,                            passThroughLog)
