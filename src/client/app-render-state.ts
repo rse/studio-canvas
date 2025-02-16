@@ -15,14 +15,6 @@ export default class State {
     public established       = false
     public layer             = ""
     public cameraName        = ""
-    public decalRotate       = 0.0
-    public decalLift         = 0.0
-    public decalScale        = 1.0
-    public decalFade         = 0
-    public decalOpacity      = 1.0
-    public decalBorderRad    = 40.0
-    public decalBorderCrop   = 0.0
-    public decalChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     public monitorFade       = 0
     public monitorOpacity    = 1.0
     public monitorChromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
@@ -101,7 +93,6 @@ export default class State {
     public pillarDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
     public references:      BABYLON.Nullable<BABYLON.TransformNode>  = null
     public wall:            BABYLON.Nullable<BABYLON.Mesh>           = null
-    public decal:           BABYLON.Nullable<BABYLON.Mesh>           = null
     public light1:          BABYLON.Nullable<BABYLON.PointLight>     = null
     public light2:          BABYLON.Nullable<BABYLON.PointLight>     = null
     public light3:          BABYLON.Nullable<BABYLON.PointLight>     = null
