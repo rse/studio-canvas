@@ -10,9 +10,6 @@ import * as BABYLON         from "@babylonjs/core"
 /*  import internal dependencies (client-side)  */
 import PTZ                  from "./app-render-ptz"
 
-/*  import internal dependencies (shared)  */
-import { FreeDState }       from "../common/app-freed"
-
 /*  utility types  */
 export type ChromaKey = { enable: boolean, threshold: number, smoothing: number }
 
@@ -134,9 +131,6 @@ export default class State {
     public engine:          BABYLON.Nullable<BABYLON.Engine>         = null
     public scene:           BABYLON.Nullable<BABYLON.Scene>          = null
     public optimizer:       BABYLON.Nullable<BABYLON.SceneOptimizer> = null
-    public cameraHull:      BABYLON.Nullable<BABYLON.TransformNode>  = null
-    public cameraCase:      BABYLON.Nullable<BABYLON.TransformNode>  = null
-    public cameraLens:      BABYLON.Nullable<BABYLON.FreeCamera>     = null
     public monitor:         BABYLON.Nullable<BABYLON.TransformNode>  = null
     public monitorCase:     BABYLON.Nullable<BABYLON.Mesh>           = null
     public monitorDisplay:  BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -174,15 +168,10 @@ export default class State {
     public ptzCase: PTZ | null = null
     public ptzLens: PTZ | null = null
 
-    /*  FreeD state  */
-    public state: FreeDState | null = null
-
     /*  cross-fade timer  */
     public fadeTimer: ReturnType<typeof setTimeout> | null = null
     public modeTimer: ReturnType<typeof setTimeout> | null = null
     public fadeSwitch = 2.0
-
-    public renderCount = 0
 
     public modifiedMedia = {} as { [ id: string ]: boolean }
 }

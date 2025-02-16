@@ -15,6 +15,8 @@ import AppRenderMaterial      from "./app-render-material"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class AppRenderPlate {
+    private originalCamera: BABYLON.Nullable<BABYLON.Camera> = null
+
     constructor (
         private state:    State,
         private material: AppRenderMaterial,
@@ -85,6 +87,7 @@ export default class AppRenderPlate {
             }
             if (state.mask.enable !== undefined && this.state.maskDisplay.isEnabled() !== state.mask.enable) {
                 if (state.mask.enable) {
+                    this.originalCamera = this.state.scene!.activeCamera
                     this.state.scene!.activeCamera = this.state.maskCamLens
                     await this.material.applyDisplayMaterial("mask", this.state.maskDisplay, 1.0, this.state.maskBorderRad, 0, null)
                     this.log("INFO", "enabling mask")
@@ -120,7 +123,8 @@ export default class AppRenderPlate {
                         setOnce(0)
                         this.state.maskDisplay!.setEnabled(false)
                         this.state.maskBackground!.setEnabled(false)
-                        this.state.scene!.activeCamera = this.state.cameraLens
+                        if (this.originalCamera !== null)
+                            this.state.scene!.activeCamera = this.originalCamera
                         await this.material.unapplyDisplayMaterial("mask", this.state.maskDisplay!)
                     })
                 }

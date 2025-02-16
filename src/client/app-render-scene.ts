@@ -17,6 +17,8 @@ import { MixerState }          from "../common/app-mixer"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class AppRenderScene {
+    private renderCount = 0
+
     constructor (
         private state:   State,
         private log:     (level: string, msg: string) => void,
@@ -100,7 +102,7 @@ export default class AppRenderScene {
     private renderOnce = () => {
         if (this.state.fps === 0)
             return
-        if ((this.state.renderCount++ % Config.fpsFactor[this.state.fps]) !== 0)
+        if ((this.renderCount++ % Config.fpsFactor[this.state.fps]) !== 0)
             return
         if (this.state.scene === null)
             return
