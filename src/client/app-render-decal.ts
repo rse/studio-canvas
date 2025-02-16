@@ -63,7 +63,7 @@ export default class AppRenderDecal {
         const rayEndPos   = BABYLON.Vector3.TransformCoordinates(rayEndLifted.position, rayEndLifted.getWorldMatrix())
         const rayBeginPos = BABYLON.Vector3.TransformCoordinates(rayBegin.position, rayBegin.getWorldMatrix())
         let rayDirection = rayEndPos.subtract(rayBeginPos).normalize()
-        rayDirection = rotateVector(rayDirection, 0, 0, this.state.ptz!.deg2rad(this.state.decalRotate))
+        rayDirection = rotateVector(rayDirection, 0, 0, Utils.deg2rad(this.state.decalRotate))
         const ray = new BABYLON.Ray(rayBeginPos, rayDirection, 10 /* meters, enough to be behind wall */)
         const decalBase = this.state.scene!.pickWithRay(ray, (mesh) => (mesh === this.state.wall!))
         if (decalBase === null)
@@ -80,7 +80,7 @@ export default class AppRenderDecal {
         this.state.decal = BABYLON.MeshBuilder.CreateDecal("Decal", this.state.wall!, {
             position:      decalBase!.pickedPoint!,
             normal,
-            angle:         this.state.ptz!.deg2rad(90),
+            angle:         Utils.deg2rad(90),
             size,
             cullBackFaces: false,
             localMode:     false

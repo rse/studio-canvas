@@ -10,6 +10,7 @@ import * as BABYLON           from "@babylonjs/core"
 /*  import internal dependencies (client-side)  */
 import Config                 from "./app-render-config"
 import State                  from "./app-render-state"
+import Utils                  from "./app-render-utils"
 import AppRenderTexture       from "./app-render-texture"
 
 /*  import internal dependencies (shared)  */
@@ -356,7 +357,7 @@ export default class AppRenderCanvas {
             if (state.canvas.rotationZ !== undefined) {
                 this.state.wall!.rotationQuaternion = this.state.wallRotBase!.clone()
                 this.state.wall!.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.state.ptz!.deg2rad(state.canvas.rotationZ), BABYLON.Space.WORLD)
+                    Utils.deg2rad(state.canvas.rotationZ), BABYLON.Space.WORLD)
             }
             if (state.canvas.fadeSwitch !== undefined)
                 this.state.fadeSwitch = state.canvas.fadeSwitch

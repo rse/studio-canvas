@@ -4,14 +4,12 @@
 **  Licensed under GPL 3.0 <https://spdx.org/licenses/GPL-3.0-only>
 */
 
+import Utils from "./app-render-utils"
+
 /*  the Babylon PTZ state class  */
 export type PTZCamType = "birddog" | "panasonic" | "sony"
 export default class PTZ {
     constructor (private camType: PTZCamType) {}
-
-    /*  convert between degree and radians  */
-    deg2rad (deg: number) { return (deg * (Math.PI / 180)) }
-    rad2deg (rad: number) { return (rad * (180 / Math.PI)) }
 
     /*  ==== X/Y/Z Position ====  */
 
@@ -83,8 +81,8 @@ export default class PTZ {
             panDelta:  0,
             panMinDeg: -175,
             panMaxDeg: 175,
-            panTotal:  this.deg2rad(360),
-            panStep:   this.deg2rad(1),
+            panTotal:  Utils.deg2rad(360),
+            panStep:   Utils.deg2rad(1),
             panMult:   1
         },
         "panasonic": {
@@ -92,8 +90,8 @@ export default class PTZ {
             panDelta:  0,
             panMinDeg: -175,
             panMaxDeg: 175,
-            panTotal:  this.deg2rad(360),
-            panStep:   this.deg2rad(1),
+            panTotal:  Utils.deg2rad(360),
+            panStep:   Utils.deg2rad(1),
             panMult:   1
         },
         "sony": {
@@ -101,8 +99,8 @@ export default class PTZ {
             panDelta:  0,
             panMinDeg: -170,
             panMaxDeg: 170,
-            panTotal:  this.deg2rad(360),
-            panStep:   this.deg2rad(1),
+            panTotal:  Utils.deg2rad(360),
+            panStep:   Utils.deg2rad(1),
             panMult:   1
         }
     }
@@ -130,9 +128,9 @@ export default class PTZ {
         if (deg < this.panMinDeg) deg = this.panMinDeg
         if (deg > this.panMaxDeg) deg = this.panMaxDeg
         if (deg < 0)
-            return (this.panOrigin + this.panDelta) + this.deg2rad(-deg * this.panMult)
+            return (this.panOrigin + this.panDelta) + Utils.deg2rad(-deg * this.panMult)
         else
-            return (this.panOrigin + this.panDelta) - this.deg2rad(deg * this.panMult)
+            return (this.panOrigin + this.panDelta) - Utils.deg2rad(deg * this.panMult)
     }
 
     /*  convert pan
@@ -142,9 +140,9 @@ export default class PTZ {
         let deg
         rad = (rad % this.panTotal)
         if (rad <= (this.panOrigin + this.panDelta))
-            deg = +this.rad2deg(Math.abs((this.panOrigin + this.panDelta) - rad)) / this.panMult
+            deg = +Utils.rad2deg(Math.abs((this.panOrigin + this.panDelta) - rad)) / this.panMult
         else
-            deg = -this.rad2deg(Math.abs((this.panOrigin + this.panDelta) - rad)) / this.panMult
+            deg = -Utils.rad2deg(Math.abs((this.panOrigin + this.panDelta) - rad)) / this.panMult
         return deg
     }
 
@@ -156,8 +154,8 @@ export default class PTZ {
             tiltDelta:  0,
             tiltMinDeg: -30,
             tiltMaxDeg: 90,
-            tiltTotal:  this.deg2rad(360),
-            tiltStep:   this.deg2rad(1),
+            tiltTotal:  Utils.deg2rad(360),
+            tiltStep:   Utils.deg2rad(1),
             tiltMult:   1
         },
         "panasonic": {
@@ -165,8 +163,8 @@ export default class PTZ {
             tiltDelta:  0,
             tiltMinDeg: -30,
             tiltMaxDeg: 210,
-            tiltTotal:  this.deg2rad(360),
-            tiltStep:   this.deg2rad(1),
+            tiltTotal:  Utils.deg2rad(360),
+            tiltStep:   Utils.deg2rad(1),
             tiltMult:   1
         },
         "sony": {
@@ -174,8 +172,8 @@ export default class PTZ {
             tiltDelta:  0,
             tiltMinDeg: -30,
             tiltMaxDeg: 195,
-            tiltTotal:  this.deg2rad(360),
-            tiltStep:   this.deg2rad(1),
+            tiltTotal:  Utils.deg2rad(360),
+            tiltStep:   Utils.deg2rad(1),
             tiltMult:   1
         }
     }
@@ -203,9 +201,9 @@ export default class PTZ {
         if (deg < this.tiltMinDeg) deg = this.tiltMinDeg
         if (deg > this.tiltMaxDeg) deg = this.tiltMaxDeg
         if (deg < 0)
-            return (this.tiltOrigin + this.tiltDelta) + this.deg2rad(-deg * this.tiltMult)
+            return (this.tiltOrigin + this.tiltDelta) + Utils.deg2rad(-deg * this.tiltMult)
         else
-            return (this.tiltOrigin + this.tiltDelta) - this.deg2rad(deg * this.tiltMult)
+            return (this.tiltOrigin + this.tiltDelta) - Utils.deg2rad(deg * this.tiltMult)
     }
 
     /*  convert tilt
@@ -215,9 +213,9 @@ export default class PTZ {
         let deg
         rad = (rad % this.tiltTotal)
         if (rad <= (this.tiltOrigin + this.tiltDelta))
-            deg = +this.rad2deg(Math.abs((this.tiltOrigin + this.tiltDelta) - rad)) / this.tiltMult
+            deg = +Utils.rad2deg(Math.abs((this.tiltOrigin + this.tiltDelta) - rad)) / this.tiltMult
         else
-            deg = -this.rad2deg(Math.abs((this.tiltOrigin + this.tiltDelta) - rad)) / this.tiltMult
+            deg = -Utils.rad2deg(Math.abs((this.tiltOrigin + this.tiltDelta) - rad)) / this.tiltMult
         return deg
     }
 
@@ -229,24 +227,24 @@ export default class PTZ {
             rotateDelta:   0,
             rotateMinDeg:  -30,
             rotateMaxDeg:  30,
-            rotateTotal:   this.deg2rad(360),
-            rotateStep:    this.deg2rad(0.5)
+            rotateTotal:   Utils.deg2rad(360),
+            rotateStep:    Utils.deg2rad(0.5)
         },
         "panasonic": {
             rotateOrigin:  0,
             rotateDelta:   0,
             rotateMinDeg:  -30,
             rotateMaxDeg:  30,
-            rotateTotal:   this.deg2rad(360),
-            rotateStep:    this.deg2rad(0.5)
+            rotateTotal:   Utils.deg2rad(360),
+            rotateStep:    Utils.deg2rad(0.5)
         },
         "sony": {
             rotateOrigin:  0,
             rotateDelta:   0,
             rotateMinDeg:  -30,
             rotateMaxDeg:  30,
-            rotateTotal:   this.deg2rad(360),
-            rotateStep:    this.deg2rad(0.5)
+            rotateTotal:   Utils.deg2rad(360),
+            rotateStep:    Utils.deg2rad(0.5)
         }
     }
 
@@ -271,9 +269,9 @@ export default class PTZ {
         if (deg < this.rotateMinDeg) deg = this.rotateMinDeg
         if (deg > this.rotateMaxDeg) deg = this.rotateMaxDeg
         if (deg < 0)
-            return (this.rotateOrigin + this.rotateDelta) + this.deg2rad(-deg)
+            return (this.rotateOrigin + this.rotateDelta) + Utils.deg2rad(-deg)
         else
-            return (this.rotateOrigin + this.rotateDelta) - this.deg2rad(deg)
+            return (this.rotateOrigin + this.rotateDelta) - Utils.deg2rad(deg)
     }
 
     /*  convert rotation
@@ -283,9 +281,9 @@ export default class PTZ {
         let deg
         rad = (rad % this.rotateTotal)
         if (rad <= (this.rotateOrigin + this.rotateDelta))
-            deg = +this.rad2deg(Math.abs((this.rotateOrigin + this.rotateDelta) - rad))
+            deg = +Utils.rad2deg(Math.abs((this.rotateOrigin + this.rotateDelta) - rad))
         else
-            deg = -this.rad2deg(Math.abs((this.rotateOrigin + this.rotateDelta) - rad))
+            deg = -Utils.rad2deg(Math.abs((this.rotateOrigin + this.rotateDelta) - rad))
         return deg
     }
 
@@ -299,13 +297,13 @@ export default class PTZ {
                 (compare https://birddog.tv/p400-overview/p400-techspecs/)  */
             fovMinDeg:      4.1,
             fovMaxDeg:      70.2,
-            fovMin:         this.deg2rad(4.1),
-            fovMax:         this.deg2rad(70.2),
+            fovMin:         Utils.deg2rad(4.1),
+            fovMax:         Utils.deg2rad(70.2),
             fovMult:        1, /* FIXME: unused until polynomial adjustment is implemented  */
             zoomMin:        0,
             zoomMax:        20,
             zoomLevels:     40,
-            zoomStep:       (this.deg2rad(70.2) - this.deg2rad(4.1)) / 40,
+            zoomStep:       (Utils.deg2rad(70.2) - Utils.deg2rad(4.1)) / 40,
             sensorSize:     35,
             sensorWidth:    6.28,
             focalLenMin:    4.4,
@@ -340,13 +338,13 @@ export default class PTZ {
         "panasonic": {
             fovMinDeg:      3.3,
             fovMaxDeg:      74.1,
-            fovMin:         this.deg2rad(3.3),
-            fovMax:         this.deg2rad(74.1),
+            fovMin:         Utils.deg2rad(3.3),
+            fovMax:         Utils.deg2rad(74.1),
             fovMult:        1, /* FIXME: unused until polynomial adjustment is implemented  */
             zoomMin:        1.666259765625,
             zoomMax:        4.998779296875,
             zoomLevels:     24,
-            zoomStep:       (this.deg2rad(74.1) - this.deg2rad(3.3)) / 24,
+            zoomStep:       (Utils.deg2rad(74.1) - Utils.deg2rad(3.3)) / 24,
             sensorSize:     25,
             sensorWidth:    5.75,
             focalLenMin:    4.12,
@@ -381,13 +379,13 @@ export default class PTZ {
         "sony": {
             fovMinDeg:      18,
             fovMaxDeg:      75,
-            fovMin:         this.deg2rad(18),
-            fovMax:         this.deg2rad(75),
+            fovMin:         Utils.deg2rad(18),
+            fovMax:         Utils.deg2rad(75),
             fovMult:        1, /* FIXME: unused until polynomial adjustment is implemented  */
             zoomMin:        35.06591796875,
             zoomMax:        149.263916015625,
             zoomLevels:     80, /* at least  */
-            zoomStep:       (this.deg2rad(75) - this.deg2rad(18)) / 80,
+            zoomStep:       (Utils.deg2rad(75) - Utils.deg2rad(18)) / 80,
             sensorSize:     35,
             sensorWidth:    35.6,
             focalLenMin:    28,

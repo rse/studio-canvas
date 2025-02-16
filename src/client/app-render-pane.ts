@@ -98,7 +98,7 @@ export default class AppRenderPane {
             if (state.pane.rotate !== undefined) {
                 this.state.pane.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.state.pane.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.state.ptz!.deg2rad(state.pane.rotate), BABYLON.Space.WORLD)
+                    Utils.deg2rad(state.pane.rotate), BABYLON.Space.WORLD)
             }
             if (state.pane.lift !== undefined)
                 this.state.pane.position.z = this.state.paneBase.positionZ + (state.pane.lift / 100)

@@ -9,6 +9,7 @@ import * as BABYLON           from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
 import State                  from "./app-render-state"
+import Utils                  from "./app-render-utils"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
@@ -69,7 +70,7 @@ export default class AppRenderAvatars {
             if (state.avatars.rotate1 !== undefined) {
                 this.state.avatar1.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.state.avatar1.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.state.ptz!.deg2rad(-state.avatars.rotate1), BABYLON.Space.WORLD)
+                    Utils.deg2rad(-state.avatars.rotate1), BABYLON.Space.WORLD)
             }
 
             /*  adjust avatar 2  */
@@ -84,7 +85,7 @@ export default class AppRenderAvatars {
             if (state.avatars.rotate2 !== undefined) {
                 this.state.avatar2.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.state.avatar2.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.state.ptz!.deg2rad(-state.avatars.rotate2), BABYLON.Space.WORLD)
+                    Utils.deg2rad(-state.avatars.rotate2), BABYLON.Space.WORLD)
             }
         }
     }

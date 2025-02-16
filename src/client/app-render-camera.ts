@@ -9,6 +9,7 @@ import * as BABYLON           from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
 import State                  from "./app-render-state"
+import Utils                  from "./app-render-utils"
 
 /*  import internal dependencies (shared)  */
 import { FreeDState }         from "../common/app-freed"
@@ -105,14 +106,14 @@ export default class AppRenderCamera {
             /*  adjust case tilt  */
             if ((state as any)[this.state.cameraName].caseRotation?.x !== undefined) {
                 const tilt = this.state.ptzCase!.tiltV2P(this.state.cameraCase.rotation.x)
-                this.state.ptzCase!.tiltDelta = this.state.ptzCase!.deg2rad((state as any)[this.state.cameraName].caseRotation.x)
+                this.state.ptzCase!.tiltDelta = Utils.deg2rad((state as any)[this.state.cameraName].caseRotation.x)
                 this.state.cameraCase.rotation.x = this.state.ptzCase!.tiltP2V(tilt)
             }
 
             /*  adjust case pan  */
             if ((state as any)[this.state.cameraName].caseRotation?.y !== undefined) {
                 const pan = this.state.ptzCase!.panV2P(this.state.cameraCase.rotation.y)
-                this.state.ptzCase!.panDelta = -(this.state.ptzCase!.deg2rad((state as any)[this.state.cameraName].caseRotation.y))
+                this.state.ptzCase!.panDelta = -(Utils.deg2rad((state as any)[this.state.cameraName].caseRotation.y))
                 this.state.cameraCase.rotation.y = this.state.ptzCase!.panP2V(pan)
             }
             if ((state as any)[this.state.cameraName].caseRotation?.ym !== undefined) {
@@ -124,14 +125,14 @@ export default class AppRenderCamera {
             /*  adjust case rotation  */
             if ((state as any)[this.state.cameraName].caseRotation?.z !== undefined) {
                 const rotate = this.state.ptzCase!.rotateV2P(this.state.cameraCase.rotation.z)
-                this.state.ptzCase!.rotateDelta = -(this.state.ptzCase!.deg2rad((state as any)[this.state.cameraName].caseRotation.z))
+                this.state.ptzCase!.rotateDelta = -(Utils.deg2rad((state as any)[this.state.cameraName].caseRotation.z))
                 this.state.cameraCase.rotation.z = this.state.ptzCase!.rotateP2V(rotate)
             }
 
             /*  adjust lens tilt  */
             if ((state as any)[this.state.cameraName].lensRotation?.x !== undefined) {
                 const tilt = this.state.ptzLens!.tiltV2P(this.state.cameraLens.rotation.x)
-                this.state.ptzLens!.tiltDelta = -(this.state.ptzLens!.deg2rad((state as any)[this.state.cameraName].lensRotation.x))
+                this.state.ptzLens!.tiltDelta = -(Utils.deg2rad((state as any)[this.state.cameraName].lensRotation.x))
                 this.state.cameraLens.rotation.x = this.state.ptzLens!.tiltP2V(tilt)
             }
             if ((state as any)[this.state.cameraName].lensRotation?.xm !== undefined) {

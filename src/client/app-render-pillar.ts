@@ -81,7 +81,7 @@ export default class AppRenderPillar {
             if (state.pillar.rotate !== undefined) {
                 this.state.pillar.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.state.pillar.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.state.ptz!.deg2rad(state.pillar.rotate), BABYLON.Space.WORLD)
+                    Utils.deg2rad(state.pillar.rotate), BABYLON.Space.WORLD)
             }
             if (state.pillar.lift !== undefined)
                 this.state.pillar.position.z = this.state.pillarBase.positionZ + (state.pillar.lift / 100)

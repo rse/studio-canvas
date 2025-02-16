@@ -98,7 +98,7 @@ export default class AppRenderMonitor {
             if (state.monitor.rotate !== undefined) {
                 this.state.monitor.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.state.monitor.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.state.ptz!.deg2rad(state.monitor.rotate), BABYLON.Space.WORLD)
+                    Utils.deg2rad(state.monitor.rotate), BABYLON.Space.WORLD)
             }
             if (state.monitor.lift !== undefined)
                 this.state.monitor.position.z = this.state.monitorBase.positionZ + (state.monitor.lift / 100)

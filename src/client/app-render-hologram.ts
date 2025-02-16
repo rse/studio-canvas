@@ -71,7 +71,7 @@ export default class AppRenderPlate {
             if (state.hologram.rotate !== undefined) {
                 this.state.hologram.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.state.hologram.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.state.ptz!.deg2rad(state.hologram.rotate), BABYLON.Space.WORLD)
+                    Utils.deg2rad(state.hologram.rotate), BABYLON.Space.WORLD)
             }
             if (state.hologram.lift !== undefined)
                 this.state.hologram.position.z = this.state.hologramBase.positionZ + state.hologram.lift

@@ -71,7 +71,7 @@ export default class AppRenderPlate {
             if (state.plate.rotate !== undefined) {
                 this.state.plate.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.state.plate.rotate(new BABYLON.Vector3(0, 0, 1),
-                    this.state.ptz!.deg2rad(state.plate.rotate), BABYLON.Space.WORLD)
+                    Utils.deg2rad(state.plate.rotate), BABYLON.Space.WORLD)
             }
             if (state.plate.lift !== undefined)
                 this.state.plate.position.z = this.state.plateBase.positionZ + state.plate.lift

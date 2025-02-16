@@ -8,6 +8,10 @@
 import * as BABYLON from "@babylonjs/core"
 
 export default class Utils {
+    /*  convert between degree and radians  */
+    static deg2rad (deg: number) { return (deg * (Math.PI / 180)) }
+    static rad2deg (rad: number) { return (rad * (180 / Math.PI)) }
+
     /*  perform a value animation manually  */
     static manualAnimation (from: number, to: number, duration: number, fps: number, callback: (grad: number) => void) {
         return new Promise((resolve) => {
