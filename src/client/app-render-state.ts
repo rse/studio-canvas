@@ -10,30 +10,11 @@ import * as BABYLON         from "@babylonjs/core"
 /*  utility types  */
 export type ChromaKey = { enable: boolean, threshold: number, smoothing: number }
 
-type CanvasConfig = {
-    texture1:  string,
-    texture2:  string,
-    fadeTrans: number,
-    fadeWait:  number
-}
-
-type CanvasState = {
-    canvas1:  HTMLCanvasElement | null
-    canvas2:  HTMLCanvasElement | null
-    texture1: BABYLON.Nullable<BABYLON.Texture>
-    texture2: BABYLON.Nullable<BABYLON.Texture>
-}
-
 /*  the canvas rendering state class  */
 export default class State {
     public established       = false
     public layer             = ""
     public cameraName        = ""
-    public canvasMode        = 0
-    public canvasConfig      = [
-        { texture1: "", texture2: "", fadeTrans: 2 * 1000, fadeWait: 10 * 1000 },
-        { texture1: "", texture2: "", fadeTrans: 2 * 1000, fadeWait: 10 * 1000 }
-    ] as CanvasConfig[]
     public decalRotate       = 0.0
     public decalLift         = 0.0
     public decalScale        = 1.0
@@ -124,12 +105,6 @@ export default class State {
     public light1:          BABYLON.Nullable<BABYLON.PointLight>     = null
     public light2:          BABYLON.Nullable<BABYLON.PointLight>     = null
     public light3:          BABYLON.Nullable<BABYLON.PointLight>     = null
-    public canvasMaterial:  BABYLON.Nullable<BABYLON.NodeMaterial>   = null
-    public canvasTexture:   BABYLON.Nullable<BABYLON.Texture>        = null
-    public canvasState = [
-        { texture1: null, texture2: null },
-        { texture1: null, texture2: null }
-    ] as CanvasState[]
     public wallRotBase:     BABYLON.Nullable<BABYLON.Quaternion>     = null
     public plate:           BABYLON.Nullable<BABYLON.TransformNode>  = null
     public plateDisplay:    BABYLON.Nullable<BABYLON.Mesh>           = null

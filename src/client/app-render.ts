@@ -129,7 +129,7 @@ export default class CanvasRenderer extends EventEmitter {
     }
 
     /*  sync renderer  */
-    async reflectSyncTime (/* timestamp: number */) {
+    async reflectSyncTime (timestamp: number) {
         await this.canvas.canvasFaderStop()
         await this.canvas.canvasFaderStart()
     }
