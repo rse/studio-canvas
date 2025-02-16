@@ -14,6 +14,11 @@ import State                  from "./app-render-state"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class AppRenderStream {
+    private videoStreamDevice = ""
+    private videoStreamWidth  = 0
+    private videoStreamHeight = 0
+    private videoStreamFPS    = 0
+
     constructor (
         private state: State,
         private log:   (level: string, msg: string) => void
@@ -40,7 +45,7 @@ export default class AppRenderStream {
         const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
 
         /*  determine particular device  */
-        const label = this.state.videoStreamDevice
+        const label = this.videoStreamDevice
         if (label === "") {
             this.log("WARNING", "no video stream configured (using replacement content later)")
             return
@@ -61,9 +66,9 @@ export default class AppRenderStream {
             video: {
                 deviceId: device.deviceId,
                 aspectRatio: 16 / 9,
-                width:     { min: this.state.videoStreamWidth,  ideal: this.state.videoStreamWidth,  max: this.state.videoStreamWidth  },
-                height:    { min: this.state.videoStreamHeight, ideal: this.state.videoStreamHeight, max: this.state.videoStreamHeight },
-                frameRate: { min: this.state.videoStreamFPS,    ideal: this.state.videoStreamFPS,    max: this.state.videoStreamFPS }
+                width:     { min: this.videoStreamWidth,  ideal: this.videoStreamWidth,  max: this.videoStreamWidth  },
+                height:    { min: this.videoStreamHeight, ideal: this.videoStreamHeight, max: this.videoStreamHeight },
+                frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
             }
         }).catch((error: Error) => {
             this.log("ERROR", `failed to load video (device: "${label}"): ${error})`)
@@ -108,23 +113,23 @@ export default class AppRenderStream {
         if (state.streams !== undefined) {
             let changed = false
             if (state.streams.device !== undefined
-                && this.state.videoStreamDevice !== state.streams.device) {
-                this.state.videoStreamDevice = state.streams.device
+                && this.videoStreamDevice !== state.streams.device) {
+                this.videoStreamDevice = state.streams.device
                 changed = true
             }
             if (state.streams.width !== undefined
-                && this.state.videoStreamWidth !== state.streams.width) {
-                this.state.videoStreamWidth = state.streams.width
+                && this.videoStreamWidth !== state.streams.width) {
+                this.videoStreamWidth = state.streams.width
                 changed = true
             }
             if (state.streams.height !== undefined
-                && this.state.videoStreamHeight !== state.streams.height) {
-                this.state.videoStreamHeight = state.streams.height
+                && this.videoStreamHeight !== state.streams.height) {
+                this.videoStreamHeight = state.streams.height
                 changed = true
             }
             if (state.streams.fps !== undefined
-                && this.state.videoStreamFPS !== state.streams.fps) {
-                this.state.videoStreamFPS = state.streams.fps
+                && this.videoStreamFPS !== state.streams.fps) {
+                this.videoStreamFPS = state.streams.fps
                 changed = true
             }
             if (changed) {

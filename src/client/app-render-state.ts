@@ -105,15 +105,6 @@ export default class State {
     /*  frames per second (FPS) control  */
     public fps = 30
 
-    /*  latest sync time  */
-    public syncTime = 0
-
-    /*  effectively constant values of video stream  */
-    public videoStreamDevice = ""
-    public videoStreamWidth  = 0
-    public videoStreamHeight = 0
-    public videoStreamFPS    = 0
-
     /*  rendering object references  */
     public engine:          BABYLON.Nullable<BABYLON.Engine>         = null
     public scene:           BABYLON.Nullable<BABYLON.Scene>          = null
@@ -148,11 +139,6 @@ export default class State {
     public maskDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
     public maskBackground:  BABYLON.Nullable<BABYLON.Mesh>           = null
     public maskCamLens:     BABYLON.Nullable<BABYLON.FreeCamera>     = null
-
-    /*  cross-fade timer  */
-    public fadeTimer: ReturnType<typeof setTimeout> | null = null
-    public modeTimer: ReturnType<typeof setTimeout> | null = null
-    public fadeSwitch = 2.0
 
     public modifiedMedia = {} as { [ id: string ]: boolean }
 }
