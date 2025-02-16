@@ -15,11 +15,6 @@ export default class State {
     public established       = false
     public layer             = ""
     public cameraName        = ""
-    public pillarFade        = 0
-    public pillarOpacity     = 1.0
-    public pillarBorderRad   = 40.0
-    public pillarBorderCrop  = 0.0
-    public pillarChromaKey   = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     public maskBorderRad     = 0.0
     public videoStream:      MediaStream | null = null
     public videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
@@ -30,11 +25,6 @@ export default class State {
     public displayMaterial2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
     public displayTextureByURL = new Map<string, BABYLON.Texture>()
     public displayTextureInfo  = new Map<BABYLON.Texture, { type: string, url: string, refs: number }>()
-    public pillarBase        = {
-        scaleX:        0, scaleY:        0, scaleZ:        0,
-        rotationZ:     0, positionZ:     0,
-        positionCaseX: 0, positionDisplayX: 0
-    }
     public plateFade         = 0
     public plateOpacity      = 1.0
     public plateBorderRad    = 40.0
@@ -62,9 +52,6 @@ export default class State {
 
     /*  rendering object references  */
     public scene:           BABYLON.Nullable<BABYLON.Scene>          = null
-    public pillar:          BABYLON.Nullable<BABYLON.TransformNode>  = null
-    public pillarCase:      BABYLON.Nullable<BABYLON.Mesh>           = null
-    public pillarDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
     public references:      BABYLON.Nullable<BABYLON.TransformNode>  = null
     public wall:            BABYLON.Nullable<BABYLON.Mesh>           = null
     public light1:          BABYLON.Nullable<BABYLON.PointLight>     = null
