@@ -5,15 +5,15 @@
 */
 
 /*  import external dependencies  */
-import * as BABYLON           from "@babylonjs/core"
+import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
-import State                  from "./app-render-state"
-import Utils                  from "./app-render-utils"
-import AppRenderMaterial      from "./app-render-material"
+import State, { type ChromaKey } from "./app-render-state"
+import Utils                     from "./app-render-utils"
+import AppRenderMaterial         from "./app-render-material"
 
 /*  import internal dependencies (shared)  */
-import { StateTypePartial }   from "../common/app-state"
+import { StateTypePartial }      from "../common/app-state"
 
 export default class AppRenderPlate {
     private plate:           BABYLON.Nullable<BABYLON.TransformNode>  = null
