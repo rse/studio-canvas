@@ -70,16 +70,17 @@ export default class CanvasRenderer extends EventEmitter {
         const passThroughFPS = (fps: number) => { this.emit("fps", fps) }
 
         /*  instantiate rendering utilities  */
-        this.texture   = new Texture(  this.state, passThroughLog)
-        this.stream    = new Stream(   this.state, passThroughLog)
-        this.material  = new Material( this.state, passThroughLog)
+        this.texture   = new Texture( this.state, passThroughLog)
+        this.stream    = new Stream(  this.state, passThroughLog)
+        this.material  = new Material(this.state, passThroughLog)
 
         /*  instantiate rendering scene  */
-        this.scene     = new Scene(    this.state, passThroughLog, passThroughFPS)
+        this.scene     = new Scene(this.state, passThroughLog, passThroughFPS)
 
         /*  instantiate rendering camera  */
-        this.camera    = new Camera(   this.state,                            passThroughLog)
-        this.camera.configure(params.cameraName, params.ptzFreeD, params.ptzKeys)
+        this.camera = new Camera(this.state,
+            params.cameraName, params.ptzFreeD, params.ptzKeys,
+            passThroughLog)
 
         /*  instantiate rendering features  */
         this.canvas    = new Canvas(   this.state, this.texture,              passThroughLog)

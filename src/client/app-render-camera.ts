@@ -24,8 +24,6 @@ export default class Camera {
     private cameraCase:  BABYLON.Nullable<BABYLON.TransformNode>  = null
     private cameraLens:  BABYLON.Nullable<BABYLON.FreeCamera>     = null
     private cameraState: FreeDState | null                        = null
-    private ptzFreeD                                              = false
-    private ptzKeys                                               = false
     private flippedCam                                            = false
     private ptzHull:     PTZ | null                               = null
     private ptzCase:     PTZ | null                               = null
@@ -33,15 +31,14 @@ export default class Camera {
 
     /*  object construction  */
     constructor (
-        private state:   State,
-        private log:     (level: string, msg: string) => void
-    ) {}
-
-    /*  object configuration  */
-    configure (cameraName: string, ptzFreeD: boolean, ptzKeys: boolean) {
-        this.ptzFreeD    = ptzFreeD
-        this.ptzKeys     = ptzKeys
-        this.flippedCam  = Config.flippedCams.includes(cameraName)
+        private state:      State,
+        private cameraName: string,
+        private ptzFreeD:   boolean,
+        private ptzKeys:    boolean,
+        private log:        (level: string, msg: string) => void
+    ) {
+        /*  determine whether camera is flipped  */
+        this.flippedCam = Config.flippedCams.includes(cameraName)
 
         /*  mapping of camera to type  */
         const cameraType = Config.camNameToTypeMap.get(cameraName as CameraName)
@@ -58,15 +55,15 @@ export default class Camera {
     async establish () {
         /*  use particular camera of scene  */
         this.cameraHull = this.state.scene!.getNodeByName(
-            this.state.cameraName + "-Hull") as BABYLON.Nullable<BABYLON.TransformNode>
+            this.cameraName + "-Hull") as BABYLON.Nullable<BABYLON.TransformNode>
         if (this.cameraHull === null)
             throw new Error("cannot find camera hull")
         this.cameraCase = this.state.scene!.getNodeByName(
-            this.state.cameraName + "-Case") as BABYLON.Nullable<BABYLON.TransformNode>
+            this.cameraName + "-Case") as BABYLON.Nullable<BABYLON.TransformNode>
         if (this.cameraCase === null)
             throw new Error("cannot find camera case")
         this.cameraLens = this.state.scene!.getCameraByName(
-            this.state.cameraName + "-Lens") as BABYLON.FreeCamera
+            this.cameraName + "-Lens") as BABYLON.FreeCamera
         if (this.cameraLens === null)
             throw new Error("cannot find camera device")
 
@@ -110,74 +107,77 @@ export default class Camera {
 
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
+        if (this.state.cameraName !== this.cameraName)
+            return
+
         /*  adjust camera calibration  */
-        if ((state as any)[this.state.cameraName] !== undefined
+        if ((state as any)[this.cameraName] !== undefined
             && this.cameraHull !== null
             && this.cameraCase !== null
             && this.cameraLens !== null) {
             /*  adjust hull X position  */
-            if ((state as any)[this.state.cameraName].hullPosition?.x !== undefined) {
+            if ((state as any)[this.cameraName].hullPosition?.x !== undefined) {
                 const x = this.ptzHull!.posXV2P(this.cameraHull.position.x)
-                this.ptzHull!.posXDelta = -((state as any)[this.state.cameraName].hullPosition.x / 100)
+                this.ptzHull!.posXDelta = -((state as any)[this.cameraName].hullPosition.x / 100)
                 this.cameraHull.position.x = this.ptzHull!.posXP2V(x)
             }
 
             /*  adjust hull Y position  */
-            if ((state as any)[this.state.cameraName].hullPosition?.y !== undefined) {
+            if ((state as any)[this.cameraName].hullPosition?.y !== undefined) {
                 const y = this.ptzHull!.posYV2P(this.cameraHull.position.y)
-                this.ptzHull!.posYDelta = (state as any)[this.state.cameraName].hullPosition.y / 100
+                this.ptzHull!.posYDelta = (state as any)[this.cameraName].hullPosition.y / 100
                 this.cameraHull.position.y = this.ptzHull!.posYP2V(y)
             }
 
             /*  adjust hull Z position  */
-            if ((state as any)[this.state.cameraName].hullPosition?.z !== undefined) {
+            if ((state as any)[this.cameraName].hullPosition?.z !== undefined) {
                 const z = this.ptzHull!.posZV2P(this.cameraHull.position.z)
-                this.ptzHull!.posZDelta = (state as any)[this.state.cameraName].hullPosition.z / 100
+                this.ptzHull!.posZDelta = (state as any)[this.cameraName].hullPosition.z / 100
                 this.cameraHull.position.z = this.ptzHull!.posZP2V(z)
             }
 
             /*  adjust case tilt  */
-            if ((state as any)[this.state.cameraName].caseRotation?.x !== undefined) {
+            if ((state as any)[this.cameraName].caseRotation?.x !== undefined) {
                 const tilt = this.ptzCase!.tiltV2P(this.cameraCase.rotation.x)
-                this.ptzCase!.tiltDelta = Utils.deg2rad((state as any)[this.state.cameraName].caseRotation.x)
+                this.ptzCase!.tiltDelta = Utils.deg2rad((state as any)[this.cameraName].caseRotation.x)
                 this.cameraCase.rotation.x = this.ptzCase!.tiltP2V(tilt)
             }
 
             /*  adjust case pan  */
-            if ((state as any)[this.state.cameraName].caseRotation?.y !== undefined) {
+            if ((state as any)[this.cameraName].caseRotation?.y !== undefined) {
                 const pan = this.ptzCase!.panV2P(this.cameraCase.rotation.y)
-                this.ptzCase!.panDelta = -(Utils.deg2rad((state as any)[this.state.cameraName].caseRotation.y))
+                this.ptzCase!.panDelta = -(Utils.deg2rad((state as any)[this.cameraName].caseRotation.y))
                 this.cameraCase.rotation.y = this.ptzCase!.panP2V(pan)
             }
-            if ((state as any)[this.state.cameraName].caseRotation?.ym !== undefined) {
+            if ((state as any)[this.cameraName].caseRotation?.ym !== undefined) {
                 const pan = this.ptzCase!.panV2P(this.cameraCase.rotation.y)
-                this.ptzCase!.panMult = (state as any)[this.state.cameraName].caseRotation.ym
+                this.ptzCase!.panMult = (state as any)[this.cameraName].caseRotation.ym
                 this.cameraCase.rotation.y = this.ptzCase!.panP2V(pan)
             }
 
             /*  adjust case rotation  */
-            if ((state as any)[this.state.cameraName].caseRotation?.z !== undefined) {
+            if ((state as any)[this.cameraName].caseRotation?.z !== undefined) {
                 const rotate = this.ptzCase!.rotateV2P(this.cameraCase.rotation.z)
-                this.ptzCase!.rotateDelta = -(Utils.deg2rad((state as any)[this.state.cameraName].caseRotation.z))
+                this.ptzCase!.rotateDelta = -(Utils.deg2rad((state as any)[this.cameraName].caseRotation.z))
                 this.cameraCase.rotation.z = this.ptzCase!.rotateP2V(rotate)
             }
 
             /*  adjust lens tilt  */
-            if ((state as any)[this.state.cameraName].lensRotation?.x !== undefined) {
+            if ((state as any)[this.cameraName].lensRotation?.x !== undefined) {
                 const tilt = this.ptzLens!.tiltV2P(this.cameraLens.rotation.x)
-                this.ptzLens!.tiltDelta = -(Utils.deg2rad((state as any)[this.state.cameraName].lensRotation.x))
+                this.ptzLens!.tiltDelta = -(Utils.deg2rad((state as any)[this.cameraName].lensRotation.x))
                 this.cameraLens.rotation.x = this.ptzLens!.tiltP2V(tilt)
             }
-            if ((state as any)[this.state.cameraName].lensRotation?.xm !== undefined) {
+            if ((state as any)[this.cameraName].lensRotation?.xm !== undefined) {
                 const tilt = this.ptzLens!.tiltV2P(this.cameraLens.rotation.x)
-                this.ptzLens!.tiltMult = (state as any)[this.state.cameraName].lensRotation.xm
+                this.ptzLens!.tiltMult = (state as any)[this.cameraName].lensRotation.xm
                 this.cameraLens.rotation.x = this.ptzLens!.tiltP2V(tilt)
             }
 
             /*  adjust field-of-view  */
-            if ((state as any)[this.state.cameraName].fov?.m !== undefined) {
+            if ((state as any)[this.cameraName].fov?.m !== undefined) {
                 const zoom = this.ptzLens!.zoomV2P(this.cameraLens.fov)
-                this.ptzLens!.fovMult = (state as any)[this.state.cameraName].fov.m
+                this.ptzLens!.fovMult = (state as any)[this.cameraName].fov.m
                 this.cameraLens.fov = this.ptzLens!.zoomP2V(zoom)
             }
         }
@@ -185,6 +185,9 @@ export default class Camera {
 
     /*  react on a received FreeD state record by reflecting its camera PTZ state  */
     reflectFreeDState (state: FreeDState) {
+        if (this.state.cameraName !== this.cameraName)
+            return
+
         /*  remember state  */
         if (state === null)
             return
@@ -203,6 +206,8 @@ export default class Camera {
     /*  react on a key (down) event by manipulating the camera PTZ state  */
     async reactOnKeyEvent (key: string) {
         if (!this.ptzKeys)
+            return
+        if (this.state.cameraName !== this.cameraName)
             return
 
         /*  pan  */
