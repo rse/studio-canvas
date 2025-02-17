@@ -185,10 +185,6 @@ export default class Camera {
 
     /*  react on a received FreeD state record by reflecting its camera PTZ state  */
     reflectFreeDState (state: FreeDState) {
-        /*  ensure we update only if we are already established  */
-        if (!this.state.established)
-            return
-
         /*  remember state  */
         if (state === null)
             return

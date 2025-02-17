@@ -36,6 +36,9 @@ export default class CanvasRenderer extends EventEmitter {
     private state
 
     /*  internal state  */
+    public established = false
+
+    /*  internal state (references)  */
     private texture:    Texture
     private stream:     Stream
     private material:   Material
@@ -115,7 +118,7 @@ export default class CanvasRenderer extends EventEmitter {
         await this.scene.establishEnd()
 
         /*  indicate established state  */
-        this.state.established = true
+        this.established = true
     }
 
     /*  start rendering  */
@@ -137,7 +140,7 @@ export default class CanvasRenderer extends EventEmitter {
     /*  control rendering scene  */
     async reflectSceneState (state: StateTypePartial) {
         /*  ensure we update only if we are already established  */
-        if (!this.state.established)
+        if (!this.established)
             return
 
         /*  pass-through operation to rendering scene  */
@@ -164,11 +167,19 @@ export default class CanvasRenderer extends EventEmitter {
 
     /*  react on a received mixer record by reflecting the camera mixer state  */
     reflectMixerState (mixer: MixerState) {
+        /*  ensure we update only if we are already established  */
+        if (!this.established)
+            return
+
         /*  pass-through operation to rendering scene  */
         this.scene.reflectMixerState(mixer)
     }
 
     reflectFreeDState (state: FreeDState) {
+        /*  ensure we update only if we are already established  */
+        if (!this.established)
+            return
+
         /*  pass-through operation to rendering camera  */
         this.camera.reflectFreeDState(state)
     }

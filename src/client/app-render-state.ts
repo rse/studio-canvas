@@ -12,7 +12,6 @@ export type ChromaKey = { enable: boolean, threshold: number, smoothing: number 
 
 /*  the canvas rendering state class  */
 export default class State {
-    public established                                            = false
     public layer                                                  = ""
     public cameraName                                             = ""
     public videoTexture:    BABYLON.Nullable<BABYLON.Texture>     = null
