@@ -14,10 +14,11 @@ import State                  from "./app-render-state"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class AppRenderStream {
-    private videoStreamDevice = ""
-    private videoStreamWidth  = 0
-    private videoStreamHeight = 0
-    private videoStreamFPS    = 0
+    private videoStream:      MediaStream | null = null
+    private videoStreamDevice                    = ""
+    private videoStreamWidth                     = 0
+    private videoStreamHeight                    = 0
+    private videoStreamFPS                       = 0
 
     constructor (
         private state: State,
@@ -27,7 +28,7 @@ export default class AppRenderStream {
     /*  load video stream  */
     async loadVideoStream () {
         /*  initialize  */
-        this.state.videoStream  = null
+        this.videoStream  = null
         this.state.videoTexture = null
 
         /*  ensure video devices can be enumerated by requesting a
@@ -91,7 +92,7 @@ export default class AppRenderStream {
         this.log("INFO", `loaded video stream (texture size: ${ts.width}x${ts.height})`)
 
         /*  provide results  */
-        this.state.videoStream  = stream
+        this.videoStream = stream
         this.state.videoTexture = texture
     }
 
@@ -102,9 +103,9 @@ export default class AppRenderStream {
             this.state.videoTexture.dispose()
             this.state.videoTexture = null
         }
-        if (this.state.videoStream !== null) {
-            this.state.videoStream.getTracks().forEach((track) => track.stop())
-            this.state.videoStream = null
+        if (this.videoStream !== null) {
+            this.videoStream.getTracks().forEach((track) => track.stop())
+            this.videoStream = null
         }
     }
 

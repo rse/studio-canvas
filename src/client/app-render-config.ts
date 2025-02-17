@@ -79,4 +79,7 @@ export default class Config {
 
     /*  cameras which have a flipped pan/tilt coordination system  */
     static flippedCams = [ "" ]
+
+    /*  number of stacked videos in video stream  */
+    static videoStacks = 2
 }

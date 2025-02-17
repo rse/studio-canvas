@@ -16,9 +16,7 @@ export default class State {
     public layer             = ""
     public cameraName        = ""
     public maskBorderRad     = 0.0
-    public videoStream:      MediaStream | null = null
     public videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
-    public videoStacks       = 2
     public displaySourceMap    = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2", mask: "S2" } as { [ id: string ]: string }
     public displayMeshMaterial = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
     public displayMediaURL     = new Map<string, string>()

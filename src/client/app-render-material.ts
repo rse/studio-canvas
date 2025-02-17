@@ -8,6 +8,7 @@
 import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
+import Config                    from "./app-render-config"
 import State, { type ChromaKey } from "./app-render-state"
 import ShaderMaterial            from "./app-render-shader"
 
@@ -184,7 +185,7 @@ export default class AppRenderMaterial {
             if      (this.state.displaySourceMap[id] === "S1") stack = 0
             else if (this.state.displaySourceMap[id] === "S2") stack = 1
             material.setInt("stack", stack)
-            material.setInt("stacks", this.state.videoStacks)
+            material.setInt("stacks", Config.videoStacks)
             material.setInt("stackAlphaInvert", 0)
         }
         else if (this.state.displayMediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.state.displaySourceMap[id].match(/^M/)) {
