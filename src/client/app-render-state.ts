@@ -18,15 +18,6 @@ export default class State {
     public maskBorderRad     = 0.0
     public videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
     public displaySourceMap    = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2", mask: "S2" } as { [ id: string ]: string }
-    public plateFade         = 0
-    public plateOpacity      = 1.0
-    public plateBorderRad    = 40.0
-    public plateBorderCrop   = 0.0
-    public plateChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    public plateBase = {
-        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationZ:     0, positionZ:     0, positionX:     0
-    }
     public hologramFade         = 0
     public hologramOpacity      = 1.0
     public hologramBorderRad    = 40.0
@@ -51,8 +42,6 @@ export default class State {
     public light2:          BABYLON.Nullable<BABYLON.PointLight>     = null
     public light3:          BABYLON.Nullable<BABYLON.PointLight>     = null
     public wallRotBase:     BABYLON.Nullable<BABYLON.Quaternion>     = null
-    public plate:           BABYLON.Nullable<BABYLON.TransformNode>  = null
-    public plateDisplay:    BABYLON.Nullable<BABYLON.Mesh>           = null
     public hologram:        BABYLON.Nullable<BABYLON.TransformNode>  = null
     public hologramDisplay: BABYLON.Nullable<BABYLON.Mesh>           = null
     public mask:            BABYLON.Nullable<BABYLON.TransformNode>  = null
