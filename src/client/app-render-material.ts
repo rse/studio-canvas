@@ -18,6 +18,12 @@ import { StateTypePartial }      from "../common/app-state"
 type VideoStackId = "monitor" | "decal" | "hologram" | "plate" | "pane" | "pillar" | "mask"
 
 export default class AppRenderMaterial {
+    private displayMeshMaterial     = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
+    private displayMediaURL         = new Map<string, string>()
+    private displayMaterial2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
+    private displayTextureByURL     = new Map<string, BABYLON.Texture>()
+    private displayTextureInfo      = new Map<BABYLON.Texture, { type: string, url: string, refs: number }>()
+
     constructor (
         private state: State,
         private log:   (level: string, msg: string) => void
@@ -26,10 +32,10 @@ export default class AppRenderMaterial {
     /*  load media texture  */
     async loadMediaTexture (url: string): Promise<BABYLON.Nullable<BABYLON.Texture>> {
         let texture: BABYLON.Nullable<BABYLON.Texture> = null
-        if (this.state.displayTextureByURL.has(url)) {
+        if (this.displayTextureByURL.has(url)) {
             /*  provide existing texture  */
-            texture = this.state.displayTextureByURL.get(url)!
-            const info = this.state.displayTextureInfo.get(texture)!
+            texture = this.displayTextureByURL.get(url)!
+            const info = this.displayTextureInfo.get(texture)!
             info.refs++
         }
         else {
@@ -53,8 +59,8 @@ export default class AppRenderMaterial {
                         resolve(true)
                     })
                 })
-                this.state.displayTextureByURL.set(url, texture!)
-                this.state.displayTextureInfo.set(texture!, { type: "image", url, refs: 1 })
+                this.displayTextureByURL.set(url, texture!)
+                this.displayTextureInfo.set(texture!, { type: "image", url, refs: 1 })
             }
             else if (url.match(/.+\.(?:smp4|mp4|swebm|webm)$/)) {
                 /*  provide texture based on video media  */
@@ -86,8 +92,8 @@ export default class AppRenderMaterial {
                         resolve(true)
                     })
                 })
-                this.state.displayTextureByURL.set(url, texture!)
-                this.state.displayTextureInfo.set(texture!, { type: "video", url, refs: 1 })
+                this.displayTextureByURL.set(url, texture!)
+                this.displayTextureInfo.set(texture!, { type: "video", url, refs: 1 })
             }
             else
                 throw new Error("invalid media filename (neither PNG, JPG, GIF, MP4 or WebM)")
@@ -98,12 +104,12 @@ export default class AppRenderMaterial {
     /*  unload media texture  */
     async unloadMediaTexture (texture: BABYLON.Texture) {
         /*  sanity check: ensure texture is known  */
-        if (!this.state.displayTextureInfo.has(texture))
+        if (!this.displayTextureInfo.has(texture))
             throw new Error("invalid texture")
 
         /*  decrease reference count and in case texture is
             still used still do not unload anything  */
-        const info = this.state.displayTextureInfo.get(texture)!
+        const info = this.displayTextureInfo.get(texture)!
         if (info && info.refs > 1) {
             info.refs--
             return
@@ -111,8 +117,8 @@ export default class AppRenderMaterial {
 
         /*  unload texture by disposing all resources  */
         this.log("INFO", `unloading ${info.type} media "${info.url}"`)
-        this.state.displayTextureInfo.delete(texture)
-        this.state.displayTextureByURL.delete(info.url)
+        this.displayTextureInfo.delete(texture)
+        this.displayTextureByURL.delete(info.url)
         if (texture instanceof BABYLON.VideoTexture) {
             /*  dispose video texture  */
             const video = texture.video
@@ -155,8 +161,8 @@ export default class AppRenderMaterial {
         let texture: BABYLON.Nullable<BABYLON.Texture> = null
         if (this.state.displaySourceMap[id].match(/^S/) && this.state.videoTexture !== null)
             texture = this.state.videoTexture
-        else if (this.state.displaySourceMap[id].match(/^M/) && this.state.displayMediaURL.has(mediaId))
-            texture = await this.loadMediaTexture(this.state.displayMediaURL.get(mediaId)!).catch(() => null)
+        else if (this.state.displaySourceMap[id].match(/^M/) && this.displayMediaURL.has(mediaId))
+            texture = await this.loadMediaTexture(this.displayMediaURL.get(mediaId)!).catch(() => null)
 
         /*  short-circuit processing in case texture is not available  */
         if (texture === null) {
@@ -172,7 +178,7 @@ export default class AppRenderMaterial {
         /*  create new shader material  */
         const material = ShaderMaterial.displayStream(`video-${id}`, this.state.scene!)
         if (this.state.displaySourceMap[id].match(/^M/))
-            this.state.displayMaterial2Texture.set(material, texture)
+            this.displayMaterial2Texture.set(material, texture)
         material.setTexture("textureSampler", texture)
         material.setFloat("opacity", opacity)
         material.setFloat("borderRadius", borderRad)
@@ -188,7 +194,7 @@ export default class AppRenderMaterial {
             material.setInt("stacks", Config.videoStacks)
             material.setInt("stackAlphaInvert", 0)
         }
-        else if (this.state.displayMediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.state.displaySourceMap[id].match(/^M/)) {
+        else if (this.displayMediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.state.displaySourceMap[id].match(/^M/)) {
             material.setInt("stack", 0)
             material.setInt("stacks", 1)
             material.setInt("stackAlphaInvert", 0)
@@ -203,9 +209,9 @@ export default class AppRenderMaterial {
         const materialOld = mesh.material as BABYLON.PBRMaterial
 
         /*  store original material once  */
-        const materialOriginal = !this.state.displayMeshMaterial.has(mesh)
+        const materialOriginal = !this.displayMeshMaterial.has(mesh)
         if (materialOriginal)
-            this.state.displayMeshMaterial.set(mesh, materialOld)
+            this.displayMeshMaterial.set(mesh, materialOld)
 
         /*  apply new material  */
         mesh.material = material
@@ -213,10 +219,10 @@ export default class AppRenderMaterial {
         /*  optionally unload previously loaded material  */
         if (materialOld instanceof BABYLON.ShaderMaterial && !materialOriginal) {
             /*  dispose material texture  */
-            const texture = this.state.displayMaterial2Texture.get(materialOld)
+            const texture = this.displayMaterial2Texture.get(materialOld)
             if (texture !== undefined && texture !== null)
                 await this.unloadMediaTexture(texture)
-            this.state.displayMaterial2Texture.delete(materialOld)
+            this.displayMaterial2Texture.delete(materialOld)
 
             /*  dispose material  */
             materialOld.dispose(true, false)
@@ -229,17 +235,17 @@ export default class AppRenderMaterial {
 
         /*  dispose material texture  */
         if (mesh.material) {
-            const texture = this.state.displayMaterial2Texture.get(mesh.material)
+            const texture = this.displayMaterial2Texture.get(mesh.material)
             if (texture !== undefined && texture !== null)
                 await this.unloadMediaTexture(texture)
-            this.state.displayMaterial2Texture.delete(mesh.material)
+            this.displayMaterial2Texture.delete(mesh.material)
         }
 
         /*  dispose material (and restore orginal material)  */
-        if (mesh.material instanceof BABYLON.ShaderMaterial && this.state.displayMeshMaterial.has(mesh)) {
+        if (mesh.material instanceof BABYLON.ShaderMaterial && this.displayMeshMaterial.has(mesh)) {
             mesh.material.dispose(true, false)
-            mesh.material = this.state.displayMeshMaterial.get(mesh)!
-            this.state.displayMeshMaterial.delete(mesh)
+            mesh.material = this.displayMeshMaterial.get(mesh)!
+            this.displayMeshMaterial.delete(mesh)
         }
     }
 
@@ -248,20 +254,20 @@ export default class AppRenderMaterial {
         this.state.modifiedMedia = {} as { [ id: string ]: boolean }
         if (state.media !== undefined) {
             /*  adjust medias  */
-            if (this.state.displayMediaURL.get("media1") !== state.media!.media1) {
-                this.state.displayMediaURL.set("media1", state.media.media1)
+            if (this.displayMediaURL.get("media1") !== state.media!.media1) {
+                this.displayMediaURL.set("media1", state.media.media1)
                 this.state.modifiedMedia.media1 = true
             }
-            if (this.state.displayMediaURL.get("media2") !== state.media.media2) {
-                this.state.displayMediaURL.set("media2", state.media.media2)
+            if (this.displayMediaURL.get("media2") !== state.media.media2) {
+                this.displayMediaURL.set("media2", state.media.media2)
                 this.state.modifiedMedia.media2 = true
             }
-            if (this.state.displayMediaURL.get("media3") !== state.media.media3) {
-                this.state.displayMediaURL.set("media3", state.media.media3)
+            if (this.displayMediaURL.get("media3") !== state.media.media3) {
+                this.displayMediaURL.set("media3", state.media.media3)
                 this.state.modifiedMedia.media3 = true
             }
-            if (this.state.displayMediaURL.get("media4") !== state.media.media4) {
-                this.state.displayMediaURL.set("media4", state.media.media4)
+            if (this.displayMediaURL.get("media4") !== state.media.media4) {
+                this.displayMediaURL.set("media4", state.media.media4)
                 this.state.modifiedMedia.media4 = true
             }
         }

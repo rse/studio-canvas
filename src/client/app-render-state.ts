@@ -18,11 +18,6 @@ export default class State {
     public maskBorderRad     = 0.0
     public videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
     public displaySourceMap    = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2", mask: "S2" } as { [ id: string ]: string }
-    public displayMeshMaterial = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
-    public displayMediaURL     = new Map<string, string>()
-    public displayMaterial2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
-    public displayTextureByURL = new Map<string, BABYLON.Texture>()
-    public displayTextureInfo  = new Map<BABYLON.Texture, { type: string, url: string, refs: number }>()
     public plateFade         = 0
     public plateOpacity      = 1.0
     public plateBorderRad    = 40.0
