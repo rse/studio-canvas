@@ -45,6 +45,7 @@ export default class AppRenderCanvas {
         { texture1: null, texture2: null },
         { texture1: null, texture2: null }
     ] as CanvasState[]
+    private wallRotBase: BABYLON.Nullable<BABYLON.Quaternion>  = null
 
     constructor (
         private state:   State,
@@ -59,7 +60,7 @@ export default class AppRenderCanvas {
             BABYLON.Nullable<BABYLON.Mesh>
         if (this.state.wall === null)
             throw new Error("cannot find wall node")
-        this.state.wallRotBase = this.state.wall.rotationQuaternion
+        this.wallRotBase = this.state.wall.rotationQuaternion
 
         /*  on-the-fly load wall canvas  */
         if (this.state.layer === "back")
@@ -384,7 +385,7 @@ export default class AppRenderCanvas {
                 changed = true
             }
             if (state.canvas.rotationZ !== undefined) {
-                this.state.wall!.rotationQuaternion = this.state.wallRotBase!.clone()
+                this.state.wall!.rotationQuaternion = this.wallRotBase!.clone()
                 this.state.wall!.rotate(new BABYLON.Vector3(0, 0, 1),
                     Utils.deg2rad(state.canvas.rotationZ), BABYLON.Space.WORLD)
             }

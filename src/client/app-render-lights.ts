@@ -14,6 +14,10 @@ import State                  from "./app-render-state"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class AppRenderLights {
+    private light1: BABYLON.Nullable<BABYLON.PointLight>     = null
+    private light2: BABYLON.Nullable<BABYLON.PointLight>     = null
+    private light3: BABYLON.Nullable<BABYLON.PointLight>     = null
+
     constructor (
         private state:   State,
         private log:     (level: string, msg: string) => void
@@ -21,13 +25,13 @@ export default class AppRenderLights {
 
     /*  establish feature  */
     async establish () {
-        this.state.light1 = this.state.scene!.getLightByName("Light-1") as
+        this.light1 = this.state.scene!.getLightByName("Light-1") as
             BABYLON.Nullable<BABYLON.PointLight>
-        this.state.light2 = this.state.scene!.getLightByName("Light-2") as
+        this.light2 = this.state.scene!.getLightByName("Light-2") as
             BABYLON.Nullable<BABYLON.PointLight>
-        this.state.light3 = this.state.scene!.getLightByName("Light-3") as
+        this.light3 = this.state.scene!.getLightByName("Light-3") as
             BABYLON.Nullable<BABYLON.PointLight>
-        if (this.state.light1 === null || this.state.light2 === null || this.state.light3 === null)
+        if (this.light1 === null || this.light2 === null || this.light3 === null)
             throw new Error("cannot find lights nodes")
 
         /*  setup light shadow casting the display onto the wall  */
@@ -47,24 +51,24 @@ export default class AppRenderLights {
             for (const mesh of this.state.shadowCastingMeshes)
                 sg.addShadowCaster(mesh)
         }
-        setupLight(this.state.light1)
-        setupLight(this.state.light2)
-        setupLight(this.state.light3)
+        setupLight(this.light1)
+        setupLight(this.light2)
+        setupLight(this.light3)
         this.state.wall!.receiveShadows = true
     }
 
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
         if (state.lights !== undefined
-            && this.state.light1 !== null
-            && this.state.light2 !== null
-            && this.state.light3 !== null) {
+            && this.light1 !== null
+            && this.light2 !== null
+            && this.light3 !== null) {
             if (state.lights.intensity1 !== undefined)
-                this.state.light1.intensity = state.lights.intensity1
+                this.light1.intensity = state.lights.intensity1
             if (state.lights.intensity2 !== undefined)
-                this.state.light2.intensity = state.lights.intensity2
+                this.light2.intensity = state.lights.intensity2
             if (state.lights.intensity3 !== undefined)
-                this.state.light3.intensity = state.lights.intensity3
+                this.light3.intensity = state.lights.intensity3
         }
     }
 }

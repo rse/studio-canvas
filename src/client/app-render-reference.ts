@@ -14,6 +14,8 @@ import State                  from "./app-render-state"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class AppRenderReference {
+    private references: BABYLON.Nullable<BABYLON.TransformNode>  = null
+
     constructor (
         private state:   State,
         private log:     (level: string, msg: string) => void
@@ -22,20 +24,20 @@ export default class AppRenderReference {
     /*  establish feature  */
     async establish () {
         /*  gather reference to reference points  */
-        this.state.references = this.state.scene!.getNodeByName("Reference") as
+        this.references = this.state.scene!.getNodeByName("Reference") as
             BABYLON.Nullable<BABYLON.TransformNode>
-        if (this.state.references === null)
+        if (this.references === null)
             throw new Error("cannot find node 'References'")
-        this.state.references.setEnabled(true)
+        this.references.setEnabled(true)
     }
 
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
         if (state.references !== undefined
-            && this.state.references !== null
+            && this.references !== null
             && this.state.layer === "back") {
             if (state.references.enable !== undefined)
-                this.state.references.setEnabled(state.references.enable)
+                this.references.setEnabled(state.references.enable)
         }
     }
 }
