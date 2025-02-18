@@ -205,7 +205,7 @@ export default class Decal {
             if (state.decal.enable !== undefined && this.decal.isEnabled() !== state.decal.enable) {
                 if (state.decal.enable) {
                     await this.api.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
-                    if (this.decalFade > 0 && this.state.fps > 0) {
+                    if (this.decalFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "enabling decal (fading: start)")
                         if (this.decal.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.decal.material
@@ -213,7 +213,7 @@ export default class Decal {
                         }
                         this.decal.visibility = 1
                         this.decal.setEnabled(true)
-                        await Utils.manualAnimation(0, 1, this.decalFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        await Utils.manualAnimation(0, 1, this.decalFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
                                 material.setFloat("visibility", gradient)
@@ -233,7 +233,7 @@ export default class Decal {
                     }
                 }
                 else if (!state.decal.enable) {
-                    if (this.decalFade > 0 && this.state.fps > 0) {
+                    if (this.decalFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "disabling decal (fading: start)")
                         if (this.decal.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.decal.material
@@ -241,7 +241,7 @@ export default class Decal {
                         }
                         this.decal.visibility = 1
                         this.decal.setEnabled(true)
-                        await Utils.manualAnimation(1, 0, this.decalFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        await Utils.manualAnimation(1, 0, this.decalFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
                                 material.setFloat("visibility", gradient)

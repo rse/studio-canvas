@@ -149,11 +149,11 @@ export default class Pillar {
             if (state.pillar.enable !== undefined && this.pillar.isEnabled() !== state.pillar.enable) {
                 if (state.pillar.enable) {
                     await this.api.material.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
-                    if (this.pillarFade > 0 && this.state.fps > 0) {
+                    if (this.pillarFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "enabling pillar (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
                         const framesTotal = this.pillarFade * fps
                         this.pillarCase.material!.alpha = 0
                         this.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
@@ -173,7 +173,7 @@ export default class Pillar {
                         this.pillarCase.setEnabled(true)
                         this.pillarDisplay.visibility = 1
                         this.pillarDisplay.setEnabled(true)
-                        const anim2 = Utils.manualAnimation(0, 1, this.pillarFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        const anim2 = Utils.manualAnimation(0, 1, this.pillarFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.pillarDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -198,7 +198,7 @@ export default class Pillar {
                     }
                 }
                 else if (!state.pillar.enable) {
-                    if (this.pillarFade > 0 && this.state.fps > 0) {
+                    if (this.pillarFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "disabling pillar (fading: start)")
                         this.pillarCase.material!.alpha = 1
                         this.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
@@ -208,7 +208,7 @@ export default class Pillar {
                         this.pillarDisplay.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
                         const framesTotal = this.pillarFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.pillarCase,
                             "material.alpha", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
@@ -216,7 +216,7 @@ export default class Pillar {
                             const material = this.pillarDisplay.material
                             material.setFloat("visibility", 1.0)
                         }
-                        const anim2 = Utils.manualAnimation(1, 0, this.pillarFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        const anim2 = Utils.manualAnimation(1, 0, this.pillarFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.pillarDisplay!.material
                                 material.setFloat("visibility", gradient)

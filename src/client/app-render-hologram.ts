@@ -138,7 +138,7 @@ export default class Hologram {
             if (state.hologram.enable !== undefined && this.hologramDisplay.isEnabled() !== state.hologram.enable) {
                 if (state.hologram.enable) {
                     await this.api.material.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
-                    if (this.hologramFade > 0 && this.state.fps > 0) {
+                    if (this.hologramFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "enabling hologram (fading: start)")
                         if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.hologramDisplay.material
@@ -148,7 +148,7 @@ export default class Hologram {
                         else
                             this.hologramDisplay.visibility = 0.0
                         this.hologramDisplay.setEnabled(true)
-                        await Utils.manualAnimation(0, 1, this.hologramFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        await Utils.manualAnimation(0, 1, this.hologramFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -179,7 +179,7 @@ export default class Hologram {
                     }
                 }
                 else if (!state.hologram.enable) {
-                    if (this.hologramFade > 0 && this.state.fps > 0) {
+                    if (this.hologramFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "disabling hologram (fading: start)")
                         if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.hologramDisplay.material
@@ -189,7 +189,7 @@ export default class Hologram {
                         else
                             this.hologramDisplay.visibility = 1.0
                         this.hologramDisplay.setEnabled(true)
-                        await Utils.manualAnimation(1, 0, this.hologramFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        await Utils.manualAnimation(1, 0, this.hologramFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", gradient)

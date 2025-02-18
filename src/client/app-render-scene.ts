@@ -21,6 +21,7 @@ export default class Scene {
     private engine:    BABYLON.Nullable<BABYLON.Engine>         = null
     private optimizer: BABYLON.Nullable<BABYLON.SceneOptimizer> = null
     private renderCount  = 0
+    private fps          = 30
     private fpsProgram   = 30
     private fpsPreview   = 30
     private fpsOther     = 30
@@ -31,7 +32,7 @@ export default class Scene {
         private api:     API,
         private state:   State,
         private log:     (level: string, msg: string) => void,
-        private fps:     (fps: number) => void
+        private onFPS:   (fps: number) => void
     ) {}
 
     /*  establish feature  */
@@ -86,7 +87,7 @@ export default class Scene {
         this.state.scene.autoClearDepthAndStencil = false
 
         /*  automatically optimize scene  */
-        const options = new BABYLON.SceneOptimizerOptions(this.state.fps, 2000)
+        const options = new BABYLON.SceneOptimizerOptions(this.fps, 2000)
         options.addOptimization(new BABYLON.HardwareScalingOptimization(0, 1))
         this.optimizer = new BABYLON.SceneOptimizer(this.state.scene, options)
     }
@@ -109,9 +110,9 @@ export default class Scene {
 
     /*  render the scene once  */
     private renderOnce = () => {
-        if (this.state.fps === 0)
+        if (this.fps === 0)
             return
-        if ((this.renderCount++ % Config.fpsFactor[this.state.fps]) !== 0)
+        if ((this.renderCount++ % Config.fpsFactor[this.fps]) !== 0)
             return
         if (this.state.scene === null)
             return
@@ -135,18 +136,18 @@ export default class Scene {
 
         /*  give still active render loop iteration time to complete  */
         await new Promise((resolve, reject) => {
-            setTimeout(() => resolve(true), 2 * (1000 / (this.state.fps === 0 ? 1 : this.state.fps)))
+            setTimeout(() => resolve(true), 2 * (1000 / (this.fps === 0 ? 1 : this.fps)))
         })
     }
 
     /*  (re-)configure FPS  */
     configureFPS (fps: number) {
-        if (this.state.fps !== fps) {
-            this.log("INFO", `switching from ${this.state.fps} to ${fps} frames-per-second (FPS)`)
-            this.state.fps = fps
+        if (this.fps !== fps) {
+            this.log("INFO", `switching from ${this.fps} to ${fps} frames-per-second (FPS)`)
+            this.fps = fps
             if (this.optimizer !== null)
                 this.optimizer.targetFrameRate = fps
-            this.fps(fps)
+            this.onFPS(fps)
         }
     }
 
@@ -170,7 +171,7 @@ export default class Scene {
     async reflectSceneState (state: StateTypePartial) {
         /*  control renderer  */
         if (state.renderer !== undefined) {
-            let fps = this.state.fps
+            let fps = this.api.scene.currentFPS()
             if (state.renderer.other !== undefined) {
                 this.fpsOther = state.renderer.other
                 if (!(this.mixerPreview === this.state.cameraName || this.mixerProgram === this.state.cameraName))
@@ -188,6 +189,16 @@ export default class Scene {
             }
             this.configureFPS(fps)
         }
+    }
+
+    /*  retrieve current FPS  */
+    currentFPS () {
+        return this.fps
+    }
+
+    /*  calculate millisconds per frame  */
+    currentMillisecondsPerFrame () {
+        return 1000 / (this.fps === 0 ? 1 : this.fps)
     }
 }
 

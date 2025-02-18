@@ -138,7 +138,7 @@ export default class Plate {
             if (state.plate.enable !== undefined && this.plateDisplay.isEnabled() !== state.plate.enable) {
                 if (state.plate.enable) {
                     await this.api.material.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
-                    if (this.plateFade > 0 && this.state.fps > 0) {
+                    if (this.plateFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "enabling plate (fading: start)")
                         if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.plateDisplay.material
@@ -148,7 +148,7 @@ export default class Plate {
                         else
                             this.plateDisplay.visibility = 0.0
                         this.plateDisplay.setEnabled(true)
-                        await Utils.manualAnimation(0, 1, this.plateFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        await Utils.manualAnimation(0, 1, this.plateFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -179,7 +179,7 @@ export default class Plate {
                     }
                 }
                 else if (!state.plate.enable) {
-                    if (this.plateFade > 0 && this.state.fps > 0) {
+                    if (this.plateFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "disabling plate (fading: start)")
                         if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.plateDisplay.material
@@ -189,7 +189,7 @@ export default class Plate {
                         else
                             this.plateDisplay.visibility = 1.0
                         this.plateDisplay.setEnabled(true)
-                        await Utils.manualAnimation(1, 0, this.plateFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        await Utils.manualAnimation(1, 0, this.plateFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", gradient)

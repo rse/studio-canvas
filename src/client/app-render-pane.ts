@@ -151,11 +151,11 @@ export default class Pane {
             if (state.pane.enable !== undefined && this.pane.isEnabled() !== state.pane.enable) {
                 if (state.pane.enable) {
                     await this.api.material.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
-                    if (this.paneFade > 0 && this.state.fps > 0) {
+                    if (this.paneFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "enabling pane (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
                         const framesTotal = this.paneFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.paneCase,
                             "visibility", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
@@ -168,7 +168,7 @@ export default class Pane {
                         this.paneCase.setEnabled(true)
                         this.paneDisplay.visibility = 1
                         this.paneDisplay.setEnabled(true)
-                        const anim2 = Utils.manualAnimation(0, 1, this.paneFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        const anim2 = Utils.manualAnimation(0, 1, this.paneFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.paneDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -193,7 +193,7 @@ export default class Pane {
                     }
                 }
                 else if (!state.pane.enable) {
-                    if (this.paneFade > 0 && this.state.fps > 0) {
+                    if (this.paneFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "disabling pane (fading: start)")
                         this.paneCase.visibility = 1
                         this.paneCase.setEnabled(true)
@@ -201,7 +201,7 @@ export default class Pane {
                         this.paneDisplay.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
                         const framesTotal = this.paneFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.paneCase,
                             "visibility", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
@@ -209,7 +209,7 @@ export default class Pane {
                             const material = this.paneDisplay.material
                             material.setFloat("visibility", 1.0)
                         }
-                        const anim2 = Utils.manualAnimation(1, 0, this.paneFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        const anim2 = Utils.manualAnimation(1, 0, this.paneFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.paneDisplay!.material
                                 material.setFloat("visibility", gradient)

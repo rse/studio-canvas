@@ -151,11 +151,11 @@ export default class Monitor {
             if (state.monitor.enable !== undefined && this.monitorDisplay.isEnabled() !== state.monitor.enable) {
                 if (state.monitor.enable) {
                     await this.api.material.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
-                    if (this.monitorFade > 0 && this.state.fps > 0) {
+                    if (this.monitorFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "enabling monitor (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
                         const framesTotal = this.monitorFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.monitorCase,
                             "visibility", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
@@ -168,7 +168,7 @@ export default class Monitor {
                         this.monitorCase.setEnabled(true)
                         this.monitorDisplay.visibility = 1
                         this.monitorDisplay.setEnabled(true)
-                        const anim2 = Utils.manualAnimation(0, 1, this.monitorFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        const anim2 = Utils.manualAnimation(0, 1, this.monitorFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.monitorDisplay!.material
                                 material.setFloat("visibility", gradient)
@@ -193,7 +193,7 @@ export default class Monitor {
                     }
                 }
                 else if (!state.monitor.enable) {
-                    if (this.monitorFade > 0 && this.state.fps > 0) {
+                    if (this.monitorFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.log("INFO", "disabling monitor (fading: start)")
                         this.monitorCase.visibility = 1
                         this.monitorCase.setEnabled(true)
@@ -201,7 +201,7 @@ export default class Monitor {
                         this.monitorDisplay.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
-                        const fps = (this.state.fps === 0 ? 1 : this.state.fps)
+                        const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
                         const framesTotal = this.monitorFade * fps
                         const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.monitorCase,
                             "visibility", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
@@ -209,7 +209,7 @@ export default class Monitor {
                             const material = this.monitorDisplay.material
                             material.setFloat("visibility", 1.0)
                         }
-                        const anim2 = Utils.manualAnimation(1, 0, this.monitorFade, (this.state.fps === 0 ? 1 : this.state.fps), (gradient) => {
+                        const anim2 = Utils.manualAnimation(1, 0, this.monitorFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
                             if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.monitorDisplay!.material
                                 material.setFloat("visibility", gradient)
