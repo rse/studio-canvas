@@ -18,6 +18,7 @@ export default class Lights {
     private light1: BABYLON.Nullable<BABYLON.PointLight>     = null
     private light2: BABYLON.Nullable<BABYLON.PointLight>     = null
     private light3: BABYLON.Nullable<BABYLON.PointLight>     = null
+    private shadowCastingMeshes = [] as BABYLON.Mesh[]
 
     constructor (
         private api:     API,
@@ -50,13 +51,18 @@ export default class Lights {
             sg.useCloseExponentialShadowMap     = false
             sg.useBlurCloseExponentialShadowMap = false
             sg.usePercentageCloserFiltering     = true
-            for (const mesh of this.state.shadowCastingMeshes)
+            for (const mesh of this.shadowCastingMeshes)
                 sg.addShadowCaster(mesh)
         }
         setupLight(this.light1)
         setupLight(this.light2)
         setupLight(this.light3)
         this.state.wall!.receiveShadows = true
+    }
+
+    /*  configure shadow-casting mesh  */
+    addShadowCastingMesh (mesh: BABYLON.Mesh) {
+        this.shadowCastingMeshes.push(mesh)
     }
 
     /*  reflect the current scene state  */

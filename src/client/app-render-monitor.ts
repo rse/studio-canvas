@@ -70,8 +70,8 @@ export default class Monitor {
         this.monitorCase.material = glass1
 
         /*  register monitor for shadow casting  */
-        this.state.shadowCastingMeshes.push(this.monitorDisplay!)
-        this.state.shadowCastingMeshes.push(this.monitorCase!)
+        this.api.lights.addShadowCastingMesh(this.monitorDisplay!)
+        this.api.lights.addShadowCastingMesh(this.monitorCase!)
     }
 
     /*  reflect the current scene state  */

@@ -57,8 +57,8 @@ export default class Pillar {
         this.pillarBase.positionDisplayX  = this.pillarDisplay.position.x
 
         /*  register pillar for shadow casting  */
-        this.state.shadowCastingMeshes.push(this.pillarCase!)
-        this.state.shadowCastingMeshes.push(this.pillarDisplay!)
+        this.api.lights.addShadowCastingMesh(this.pillarCase!)
+        this.api.lights.addShadowCastingMesh(this.pillarDisplay!)
     }
 
     /*  reflect the current scene state  */

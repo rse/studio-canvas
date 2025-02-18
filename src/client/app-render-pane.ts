@@ -70,8 +70,8 @@ export default class Pane {
         this.paneCase.material = glass2
 
         /*  register pane for shadow casting  */
-        this.state.shadowCastingMeshes.push(this.paneCase!)
-        this.state.shadowCastingMeshes.push(this.paneDisplay!)
+        this.api.lights.addShadowCastingMesh(this.paneCase!)
+        this.api.lights.addShadowCastingMesh(this.paneDisplay!)
     }
 
     /*  reflect the current scene state  */
