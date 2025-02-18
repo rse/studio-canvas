@@ -38,9 +38,9 @@ export default class Monitor {
     /*  establish feature  */
     async establish () {
         /*  gather references to monitor mesh nodes  */
-        this.monitor        = this.state.scene!.getNodeByName("Monitor")        as BABYLON.Nullable<BABYLON.TransformNode>
-        this.monitorCase    = this.state.scene!.getMeshByName("Monitor-Case")   as BABYLON.Nullable<BABYLON.Mesh>
-        this.monitorDisplay = this.state.scene!.getMeshByName("Monitor-Screen") as BABYLON.Nullable<BABYLON.Mesh>
+        this.monitor        = this.api.scene.getScene().getNodeByName("Monitor")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.monitorCase    = this.api.scene.getScene().getMeshByName("Monitor-Case")   as BABYLON.Nullable<BABYLON.Mesh>
+        this.monitorDisplay = this.api.scene.getScene().getMeshByName("Monitor-Screen") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.monitor === null || this.monitorCase === null || this.monitorDisplay === null)
             throw new Error("cannot find monitor mesh nodes")
         if (this.api.scene.renderingLayer("back"))
@@ -59,7 +59,7 @@ export default class Monitor {
         this.monitorBase.positionDisplayX = this.monitorDisplay.position.x
 
         /*  apply glass material to monitor case  */
-        const glass1 = new BABYLON.PBRMaterial("glass1", this.state.scene!)
+        const glass1 = new BABYLON.PBRMaterial("glass1", this.api.scene.getScene())
         glass1.indexOfRefraction    = 1.52
         glass1.alpha                = 0.20
         glass1.directIntensity      = 1.0

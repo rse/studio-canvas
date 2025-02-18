@@ -44,8 +44,8 @@ export default class Decal {
         const oldDecal = this.decal
 
         /*  determine position, normal vector and size  */
-        const rayBegin = this.state.scene!.getMeshByName("DecalRay-Begin") as BABYLON.Nullable<BABYLON.Mesh>
-        const rayEnd   = this.state.scene!.getMeshByName("DecalRay-End")   as BABYLON.Nullable<BABYLON.Mesh>
+        const rayBegin = this.api.scene.getScene().getMeshByName("DecalRay-Begin") as BABYLON.Nullable<BABYLON.Mesh>
+        const rayEnd   = this.api.scene.getScene().getMeshByName("DecalRay-End")   as BABYLON.Nullable<BABYLON.Mesh>
         if (rayBegin === null || rayEnd === null)
             throw new Error("cannot find 'DecalRay-Begin' or 'DecalRay-End' nodes")
         rayBegin.setEnabled(false)
@@ -73,7 +73,7 @@ export default class Decal {
         rayDirection = rotateVector(rayDirection, 0, 0, Utils.deg2rad(this.decalRotate))
         const ray = new BABYLON.Ray(rayBeginPos, rayDirection, 10 /* meters, enough to be behind wall */)
         const wall = this.api.canvas.getWallMesh()!
-        const decalBase = this.state.scene!.pickWithRay(ray, (mesh) => (mesh === wall))
+        const decalBase = this.api.scene.getScene().pickWithRay(ray, (mesh) => (mesh === wall))
         if (decalBase === null)
             throw new Error("cannot find decal base position on wall")
 
@@ -101,7 +101,7 @@ export default class Decal {
         /*  take over material or create a fresh one  */
         let material = oldDecal?.material ?? null
         if (material === null) {
-            material = new BABYLON.PBRMaterial("Decal-Material", this.state.scene!)
+            material = new BABYLON.PBRMaterial("Decal-Material", this.api.scene.getScene())
             material.alpha   = 1.0
             material.zOffset = -200
         }

@@ -35,15 +35,15 @@ export default class Avatars {
     /*  establish feature  */
     async establish () {
         /*  sanity check situation  */
-        if (!(this.state.scene !== null && this.api.scene.renderingLayer("back")))
+        if (!(this.api.scene.getScene() !== null && this.api.scene.renderingLayer("back")))
             return
 
         /*  gather references to avatar #1  */
-        this.avatar1 = this.state.scene.getNodeByName("Avatar1") as
+        this.avatar1 = this.api.scene.getScene().getNodeByName("Avatar1") as
             BABYLON.Nullable<BABYLON.TransformNode>
         if (this.avatar1 === null)
             throw new Error("cannot find node 'Avatar1'")
-        this.avatar1Model = this.state.scene.getNodeByName("Avatar1-Model") as
+        this.avatar1Model = this.api.scene.getScene().getNodeByName("Avatar1-Model") as
             BABYLON.Nullable<BABYLON.Mesh>
         if (this.avatar1Model === null)
             throw new Error("cannot find node 'Avatar1-Model'")
@@ -57,11 +57,11 @@ export default class Avatars {
         this.avatar1Scale.z = this.avatar1Model.scaling.z
 
         /*  gather references to avatar #2  */
-        this.avatar2 = this.state.scene.getNodeByName("Avatar2") as
+        this.avatar2 = this.api.scene.getScene().getNodeByName("Avatar2") as
             BABYLON.Nullable<BABYLON.TransformNode>
         if (this.avatar2 === null)
             throw new Error("cannot find node 'Avatar2'")
-        this.avatar2Model = this.state.scene.getNodeByName("Avatar2-Model") as
+        this.avatar2Model = this.api.scene.getScene().getNodeByName("Avatar2-Model") as
             BABYLON.Nullable<BABYLON.Mesh>
         if (this.avatar2Model === null)
             throw new Error("cannot find node 'Avatar2-Model'")

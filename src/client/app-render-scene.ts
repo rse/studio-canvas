@@ -19,6 +19,7 @@ import { StateTypePartial }   from "../common/app-state"
 
 export default class Scene {
     private engine:    BABYLON.Nullable<BABYLON.Engine>         = null
+    private scene:     BABYLON.Nullable<BABYLON.Scene>          = null
     private optimizer: BABYLON.Nullable<BABYLON.SceneOptimizer> = null
     private renderCount  = 0
     private fps          = 30
@@ -52,11 +53,11 @@ export default class Scene {
         /*  load the Blender glTF scene export  */
         this.log("INFO", "loading Studio Canvas scene")
         BABYLON.SceneLoader.ShowLoadingScreen = false
-        this.state.scene = await BABYLON.SceneLoader.LoadAsync("/res/", "canvas-scene.glb", this.engine)
-        if (this.state.scene === null)
+        this.scene = await BABYLON.SceneLoader.LoadAsync("/res/", "canvas-scene.glb", this.engine)
+        if (this.scene === null)
             throw new Error("failed to create scene")
         await new Promise((resolve, reject) => {
-            this.state.scene!.executeWhenReady(() => {
+            this.scene!.executeWhenReady(() => {
                 resolve(true)
             })
         })
@@ -64,38 +65,38 @@ export default class Scene {
         /*  create studio environment for correct texture image colors  */
         if (this.layer === "back") {
             this.log("INFO", "loading opaque environment")
-            this.state.scene.createDefaultEnvironment({
+            this.scene.createDefaultEnvironment({
                 environmentTexture: "/res/canvas-scene.env",
                 skyboxColor: new BABYLON.Color3(0.5, 0.5, 0.5)
             })
         }
         else if (this.layer === "front") {
             this.log("INFO", "creating transparent environment")
-            this.state.scene.createDefaultEnvironment({
+            this.scene.createDefaultEnvironment({
                 environmentTexture: "/res/canvas-scene.env",
                 createGround: false,
                 createSkybox: false
             })
-            this.state.scene.clearColor = new BABYLON.Color4(0.5, 0.5, 0.5, 0)
+            this.scene.clearColor = new BABYLON.Color4(0.5, 0.5, 0.5, 0)
         }
 
         /*  manually optimize engine  */
         this.engine.enableOfflineSupport = false
 
         /*  manually optimize scene  */
-        this.state.scene.skipPointerMovePicking = true
-        this.state.scene.autoClear = false
-        this.state.scene.autoClearDepthAndStencil = false
+        this.scene.skipPointerMovePicking = true
+        this.scene.autoClear = false
+        this.scene.autoClearDepthAndStencil = false
 
         /*  automatically optimize scene  */
         const options = new BABYLON.SceneOptimizerOptions(this.fps, 2000)
         options.addOptimization(new BABYLON.HardwareScalingOptimization(0, 1))
-        this.optimizer = new BABYLON.SceneOptimizer(this.state.scene, options)
+        this.optimizer = new BABYLON.SceneOptimizer(this.scene, options)
     }
 
     async establishEnd () {
         /*  determine all layer-specific nodes which should be disabled  */
-        for (const node of this.state.scene!.getNodes()) {
+        for (const node of this.scene!.getNodes()) {
             if (Config.layerNodes[node.name] !== undefined) {
                 if (  (this.layer === "back"  && !Config.layerNodes[node.name].back)
                    || (this.layer === "front" && !Config.layerNodes[node.name].front)) {
@@ -106,7 +107,7 @@ export default class Scene {
         }
 
         /*  manually optimize scene  */
-        this.state.scene!.cleanCachedTextureBuffer()
+        this.scene!.cleanCachedTextureBuffer()
     }
 
     /*  render the scene once  */
@@ -115,9 +116,9 @@ export default class Scene {
             return
         if ((this.renderCount++ % Config.fpsFactor[this.fps]) !== 0)
             return
-        if (this.state.scene === null)
+        if (this.scene === null)
             return
-        this.state.scene.render()
+        this.scene.render()
     }
 
     /*  start/stop renderer  */
@@ -205,6 +206,13 @@ export default class Scene {
     /*  determine whether we are rendering a particular layer  */
     renderingLayer (layer: string) {
         return this.layer === layer
+    }
+
+    /*  provide reference to scene  */
+    getScene () {
+        if (this.scene === null)
+            throw new Error("scene still not established")
+        return this.scene
     }
 }
 

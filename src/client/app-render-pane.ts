@@ -38,9 +38,9 @@ export default class Pane {
     /*  establish feature  */
     async establish () {
         /*  gather references to pane mesh nodes  */
-        this.pane        = this.state.scene!.getNodeByName("Pane")        as BABYLON.Nullable<BABYLON.TransformNode>
-        this.paneCase    = this.state.scene!.getMeshByName("Pane-Case")   as BABYLON.Nullable<BABYLON.Mesh>
-        this.paneDisplay = this.state.scene!.getMeshByName("Pane-Screen") as BABYLON.Nullable<BABYLON.Mesh>
+        this.pane        = this.api.scene.getScene().getNodeByName("Pane")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.paneCase    = this.api.scene.getScene().getMeshByName("Pane-Case")   as BABYLON.Nullable<BABYLON.Mesh>
+        this.paneDisplay = this.api.scene.getScene().getMeshByName("Pane-Screen") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.pane === null || this.paneCase === null || this.paneDisplay === null)
             throw new Error("cannot find pane mesh nodes")
         if (this.api.scene.renderingLayer("front"))
@@ -59,7 +59,7 @@ export default class Pane {
         this.paneBase.positionDisplayX    = this.paneDisplay.position.x
 
         /*  apply glass material to pane case  */
-        const glass2 = new BABYLON.PBRMaterial("glass2", this.state.scene!)
+        const glass2 = new BABYLON.PBRMaterial("glass2", this.api.scene.getScene())
         glass2.indexOfRefraction    = 1.52
         glass2.alpha                = 0.20
         glass2.directIntensity      = 1.0
@@ -253,7 +253,7 @@ export default class Pane {
                             }
                         }
                         setOnce(0.000000001)
-                        this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                        this.api.scene.getScene().onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
                             this.paneCase!.setEnabled(false)
                             this.paneDisplay!.setEnabled(false)

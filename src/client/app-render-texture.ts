@@ -54,7 +54,7 @@ export default class Texture {
         /*  create dynamic texture from canvas
             (NOTICE: this is a 10ms CPU burst)  */
         const texture = new BABYLON.DynamicTexture("canvas", canvas, {
-            scene:        this.state.scene,
+            scene:        this.api.scene.getScene(),
             format:       BABYLON.Engine.TEXTUREFORMAT_RGBA,
             samplingMode: BABYLON.Texture.LINEAR_LINEAR,
             invertY:      false

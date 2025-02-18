@@ -37,8 +37,8 @@ export default class Plate {
     /*  establish feature  */
     async establish () {
         /*  gather references to plate mesh nodes  */
-        this.plate        = this.state.scene!.getNodeByName("Plate")         as BABYLON.Nullable<BABYLON.TransformNode>
-        this.plateDisplay = this.state.scene!.getMeshByName("Plate-Display") as BABYLON.Nullable<BABYLON.Mesh>
+        this.plate        = this.api.scene.getScene().getNodeByName("Plate")         as BABYLON.Nullable<BABYLON.TransformNode>
+        this.plateDisplay = this.api.scene.getScene().getMeshByName("Plate-Display") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.plate === null || this.plateDisplay === null)
             throw new Error("cannot find plate mesh nodes")
         if (this.api.scene.renderingLayer("front"))
@@ -221,7 +221,7 @@ export default class Plate {
                                 this.plateDisplay!.visibility = value
                         }
                         setOnce(0.000000001)
-                        this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                        this.api.scene.getScene().onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
                             this.plateDisplay!.setEnabled(false)
                             await this.api.material.unapplyDisplayMaterial("plate", this.plateDisplay!)

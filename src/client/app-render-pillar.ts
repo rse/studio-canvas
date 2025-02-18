@@ -39,9 +39,9 @@ export default class Pillar {
     /*  establish feature  */
     async establish () {
         /*  gather references to pillar mesh nodes  */
-        this.pillar        = this.state.scene!.getNodeByName("Pillar")        as BABYLON.Nullable<BABYLON.TransformNode>
-        this.pillarCase    = this.state.scene!.getMeshByName("Pillar-Case")   as BABYLON.Nullable<BABYLON.Mesh>
-        this.pillarDisplay = this.state.scene!.getMeshByName("Pillar-Screen") as BABYLON.Nullable<BABYLON.Mesh>
+        this.pillar        = this.api.scene.getScene().getNodeByName("Pillar")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.pillarCase    = this.api.scene.getScene().getMeshByName("Pillar-Case")   as BABYLON.Nullable<BABYLON.Mesh>
+        this.pillarDisplay = this.api.scene.getScene().getMeshByName("Pillar-Screen") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.pillar === null || this.pillarCase === null || this.pillarDisplay === null)
             throw new Error("cannot find pillar mesh nodes")
         if (this.api.scene.renderingLayer("back"))
@@ -260,7 +260,7 @@ export default class Pillar {
                             }
                         }
                         setOnce(0.000000001)
-                        this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                        this.api.scene.getScene().onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
                             this.pillarCase!.setEnabled(false)
                             this.pillarDisplay!.setEnabled(false)

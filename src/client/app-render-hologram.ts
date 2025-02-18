@@ -37,8 +37,8 @@ export default class Hologram {
     /*  establish feature  */
     async establish () {
         /*  gather references to hologram mesh nodes  */
-        this.hologram        = this.state.scene!.getNodeByName("Hologram")         as BABYLON.Nullable<BABYLON.TransformNode>
-        this.hologramDisplay = this.state.scene!.getMeshByName("Hologram-Display") as BABYLON.Nullable<BABYLON.Mesh>
+        this.hologram        = this.api.scene.getScene().getNodeByName("Hologram")         as BABYLON.Nullable<BABYLON.TransformNode>
+        this.hologramDisplay = this.api.scene.getScene().getMeshByName("Hologram-Display") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.hologram === null || this.hologramDisplay === null)
             throw new Error("cannot find hologram mesh nodes")
         if (this.api.scene.renderingLayer("front"))
@@ -221,7 +221,7 @@ export default class Hologram {
                                 this.hologramDisplay!.visibility = value
                         }
                         setOnce(0.000000001)
-                        this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                        this.api.scene.getScene().onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
                             this.hologramDisplay!.setEnabled(false)
                             await this.api.material.unapplyDisplayMaterial("hologram", this.hologramDisplay!)

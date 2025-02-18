@@ -57,7 +57,7 @@ export default class Canvas {
     /*  establish feature  */
     async establish () {
         /*  gather reference to wall  */
-        this.wall = this.state.scene!.getMeshByName("Wall") as
+        this.wall = this.api.scene.getScene().getMeshByName("Wall") as
             BABYLON.Nullable<BABYLON.Mesh>
         if (this.wall === null)
             throw new Error("cannot find wall node")
@@ -78,7 +78,7 @@ export default class Canvas {
         /*  load externally defined node material  */
         const material = this.canvasMaterial =
             await BABYLON.NodeMaterial.ParseFromFileAsync("material",
-                "/res/canvas-material.json", this.state.scene!)
+                "/res/canvas-material.json", this.api.scene.getScene())
 
         /*  initialize canvas mode  */
         this.canvasMode = 0
@@ -100,8 +100,8 @@ export default class Canvas {
 
         /*  create composed texture and apply onto wall  */
         this.canvasTexture = material.createProceduralTexture(
-            { width: Config.wall.width, height: Config.wall.height }, this.state.scene!)
-        const wall = this.state.scene!.getMaterialByName("Wall") as
+            { width: Config.wall.width, height: Config.wall.height }, this.api.scene.getScene())
+        const wall = this.api.scene.getScene().getMaterialByName("Wall") as
             BABYLON.Nullable<BABYLON.PBRMaterial>
         if (wall === null)
             throw new Error("cannot find Wall object")
@@ -117,7 +117,7 @@ export default class Canvas {
         await this.canvasFaderStop()
 
         /*  dispose wall texture  */
-        const wall = this.state.scene!.getMaterialByName("Wall") as
+        const wall = this.api.scene.getScene().getMaterialByName("Wall") as
             BABYLON.Nullable<BABYLON.PBRMaterial>
         if (wall === null)
             throw new Error("cannot find Wall object")

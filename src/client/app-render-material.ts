@@ -49,7 +49,7 @@ export default class Material {
                 this.log("INFO", `loading image media "${url}"`)
                 await new Promise((resolve, reject) => {
                     texture = new BABYLON.Texture(
-                        url, this.state.scene, false, false,
+                        url, this.api.scene.getScene(), false, false,
                         BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
                         null,
                         (msg, ex) => {
@@ -72,7 +72,7 @@ export default class Material {
                 const loop = (url.match(/.+-loop\.(?:smp4|mp4|swebm|webm)$/) !== null)
                 await new Promise((resolve, reject) => {
                     texture = new BABYLON.VideoTexture(
-                        url, url, this.state.scene, false, true,
+                        url, url, this.api.scene.getScene(), false, true,
                         BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
                         { autoPlay: true, muted: true, autoUpdateTexture: true, loop },
                         (msg, ex) => {
@@ -184,7 +184,7 @@ export default class Material {
         }
 
         /*  create new shader material  */
-        const material = ShaderMaterial.displayStream(`video-${id}`, this.state.scene!)
+        const material = ShaderMaterial.displayStream(`video-${id}`, this.api.scene.getScene())
         if (this.displaySourceMap[id].match(/^M/))
             this.displayMaterial2Texture.set(material, texture)
         material.setTexture("textureSampler", texture)

@@ -56,21 +56,21 @@ export default class Camera {
     /*  establish feature  */
     async establish () {
         /*  use particular camera of scene  */
-        this.cameraHull = this.state.scene!.getNodeByName(
+        this.cameraHull = this.api.scene.getScene().getNodeByName(
             this.cameraName + "-Hull") as BABYLON.Nullable<BABYLON.TransformNode>
         if (this.cameraHull === null)
             throw new Error("cannot find camera hull")
-        this.cameraCase = this.state.scene!.getNodeByName(
+        this.cameraCase = this.api.scene.getScene().getNodeByName(
             this.cameraName + "-Case") as BABYLON.Nullable<BABYLON.TransformNode>
         if (this.cameraCase === null)
             throw new Error("cannot find camera case")
-        this.cameraLens = this.state.scene!.getCameraByName(
+        this.cameraLens = this.api.scene.getScene().getCameraByName(
             this.cameraName + "-Lens") as BABYLON.FreeCamera
         if (this.cameraLens === null)
             throw new Error("cannot find camera device")
 
         /*  initialize camera  */
-        this.state.scene!.activeCamera = this.cameraLens
+        this.api.scene.getScene().activeCamera = this.cameraLens
         this.cameraLens.fovMode = BABYLON.FreeCamera.FOVMODE_HORIZONTAL_FIXED
         this.cameraCase.rotationQuaternion = null
 
@@ -99,7 +99,7 @@ export default class Camera {
 
         /*  allow keyboard to manually adjust camera  */
         if (this.ptzKeys) {
-            this.state.scene!.onKeyboardObservable.add((kbInfo) => {
+            this.api.scene.getScene().onKeyboardObservable.add((kbInfo) => {
                 if (kbInfo.type !== BABYLON.KeyboardEventTypes.KEYDOWN)
                     return
                 this.reactOnKeyEvent(kbInfo.event.key)

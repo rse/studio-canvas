@@ -26,7 +26,7 @@ export default class Reference {
     /*  establish feature  */
     async establish () {
         /*  gather reference to reference points  */
-        this.references = this.state.scene!.getNodeByName("Reference") as
+        this.references = this.api.scene.getScene().getNodeByName("Reference") as
             BABYLON.Nullable<BABYLON.TransformNode>
         if (this.references === null)
             throw new Error("cannot find node 'References'")

@@ -28,11 +28,11 @@ export default class Lights {
 
     /*  establish feature  */
     async establish () {
-        this.light1 = this.state.scene!.getLightByName("Light-1") as
+        this.light1 = this.api.scene.getScene().getLightByName("Light-1") as
             BABYLON.Nullable<BABYLON.PointLight>
-        this.light2 = this.state.scene!.getLightByName("Light-2") as
+        this.light2 = this.api.scene.getScene().getLightByName("Light-2") as
             BABYLON.Nullable<BABYLON.PointLight>
-        this.light3 = this.state.scene!.getLightByName("Light-3") as
+        this.light3 = this.api.scene.getScene().getLightByName("Light-3") as
             BABYLON.Nullable<BABYLON.PointLight>
         if (this.light1 === null || this.light2 === null || this.light3 === null)
             throw new Error("cannot find lights nodes")

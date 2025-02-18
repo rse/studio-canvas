@@ -80,7 +80,7 @@ export default class Stream {
         })
 
         /*  create texture from media stream  */
-        const texture = await BABYLON.VideoTexture.CreateFromStreamAsync(this.state.scene!, stream, {} as any, true)
+        const texture = await BABYLON.VideoTexture.CreateFromStreamAsync(this.api.scene.getScene(), stream, {} as any, true)
         await new Promise((resolve) => {
             BABYLON.Texture.WhenAllReady([ texture ], () => { resolve(true) })
         })

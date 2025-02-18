@@ -34,10 +34,10 @@ export default class Mask {
     /*  establish feature  */
     async establish () {
         /*  gather references to mask mesh nodes  */
-        this.mask           = this.state.scene!.getNodeByName("Mask")            as BABYLON.Nullable<BABYLON.TransformNode>
-        this.maskDisplay    = this.state.scene!.getMeshByName("Mask-Display")    as BABYLON.Nullable<BABYLON.Mesh>
-        this.maskBackground = this.state.scene!.getMeshByName("Mask-Background") as BABYLON.Nullable<BABYLON.Mesh>
-        this.maskCamLens    = this.state.scene!.getNodeByName("Mask-Cam-Lens")   as BABYLON.Nullable<BABYLON.FreeCamera>
+        this.mask           = this.api.scene.getScene().getNodeByName("Mask")            as BABYLON.Nullable<BABYLON.TransformNode>
+        this.maskDisplay    = this.api.scene.getScene().getMeshByName("Mask-Display")    as BABYLON.Nullable<BABYLON.Mesh>
+        this.maskBackground = this.api.scene.getScene().getMeshByName("Mask-Background") as BABYLON.Nullable<BABYLON.Mesh>
+        this.maskCamLens    = this.api.scene.getScene().getNodeByName("Mask-Cam-Lens")   as BABYLON.Nullable<BABYLON.FreeCamera>
         if (this.mask === null || this.maskDisplay === null || this.maskBackground === null || this.maskCamLens === null)
             throw new Error("cannot find mask mesh nodes")
         if (this.api.scene.renderingLayer("front")) {
@@ -95,8 +95,8 @@ export default class Mask {
             }
             if (state.mask.enable !== undefined && this.maskDisplay.isEnabled() !== state.mask.enable) {
                 if (state.mask.enable) {
-                    this.originalCamera = this.state.scene!.activeCamera
-                    this.state.scene!.activeCamera = this.maskCamLens
+                    this.originalCamera = this.api.scene.getScene().activeCamera
+                    this.api.scene.getScene().activeCamera = this.maskCamLens
                     await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
                     this.log("INFO", "enabling mask")
                     if (this.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
@@ -127,12 +127,12 @@ export default class Mask {
                         this.maskBackground!.visibility = value
                     }
                     setOnce(0.000000001)
-                    this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
+                    this.api.scene.getScene().onAfterRenderObservable.addOnce(async (ev, state) => {
                         setOnce(0)
                         this.maskDisplay!.setEnabled(false)
                         this.maskBackground!.setEnabled(false)
                         if (this.originalCamera !== null)
-                            this.state.scene!.activeCamera = this.originalCamera
+                            this.api.scene.getScene().activeCamera = this.originalCamera
                         await this.api.material.unapplyDisplayMaterial("mask", this.maskDisplay!)
                     })
                 }
