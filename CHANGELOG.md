@@ -5,6 +5,7 @@ ChangeLog
 3.0.0 (2025-02-18)
 ------------------
 
+- IMPROVEMENT: allow switching active camera
 - REFACTORING: split control UI into manageable code chunks
 - REFACTORING: split render UI into manageable code chunks
 - CLEANUP: cleanup code by factoring out inner function
