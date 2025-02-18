@@ -8,14 +8,14 @@
 import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
+import { type API }              from "./app-render-api"
 import State, { type ChromaKey } from "./app-render-state"
 import Utils                     from "./app-render-utils"
-import AppRenderMaterial         from "./app-render-material"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
-export default class AppRenderPillar {
+export default class Pillar {
     public pillar:          BABYLON.Nullable<BABYLON.TransformNode>  = null
     public pillarCase:      BABYLON.Nullable<BABYLON.Mesh>           = null
     public pillarDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -31,8 +31,8 @@ export default class AppRenderPillar {
     }
 
     constructor (
+        private api:      API,
         private state:    State,
-        private material: AppRenderMaterial,
         private log:      (level: string, msg: string) => void
     ) {}
 
@@ -71,18 +71,18 @@ export default class AppRenderPillar {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.material.mapMediaId(this.state.displaySourceMap.pillar)]
+        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.pillar)]
             && this.pillarDisplay.isEnabled())
-            await this.material.applyDisplayMaterial("pillar", this.pillarDisplay, this.pillarOpacity, 0, 0, this.pillarChromaKey)
+            await this.api.material.applyDisplayMaterial("pillar", this.pillarDisplay, this.pillarOpacity, 0, 0, this.pillarChromaKey)
 
         /*  reflect state changes  */
         if (state.pillar !== undefined) {
             if (state.pillar.source !== undefined
                 && (this.state.displaySourceMap.pillar !== state.pillar.source
-                    || this.state.modifiedMedia[this.material.mapMediaId(state.pillar.source)])) {
+                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.pillar.source)])) {
                 this.state.displaySourceMap.pillar = state.pillar.source
                 if (this.pillarDisplay.isEnabled())
-                    await this.material.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
+                    await this.api.material.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
             }
             if (state.pillar.opacity !== undefined) {
                 this.pillarOpacity = state.pillar.opacity
@@ -148,7 +148,7 @@ export default class AppRenderPillar {
             }
             if (state.pillar.enable !== undefined && this.pillar.isEnabled() !== state.pillar.enable) {
                 if (state.pillar.enable) {
-                    await this.material.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
+                    await this.api.material.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
                     if (this.pillarFade > 0 && this.state.fps > 0) {
                         this.log("INFO", "enabling pillar (fading: start)")
                         const ease = new BABYLON.SineEase()
@@ -242,7 +242,7 @@ export default class AppRenderPillar {
                             this.pillarCase!.setEnabled(false)
                             this.pillarDisplay!.setEnabled(false)
                             this.pillar!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
                         })
                     }
                     else {
@@ -265,7 +265,7 @@ export default class AppRenderPillar {
                             this.pillarCase!.setEnabled(false)
                             this.pillarDisplay!.setEnabled(false)
                             this.pillar!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
                         })
                     }
                 }

@@ -8,14 +8,14 @@
 import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
+import { type API }              from "./app-render-api"
 import State, { type ChromaKey } from "./app-render-state"
 import Utils                     from "./app-render-utils"
-import AppRenderMaterial         from "./app-render-material"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
-export default class AppRenderPane {
+export default class Pane {
     public pane:            BABYLON.Nullable<BABYLON.TransformNode>  = null
     public paneCase:        BABYLON.Nullable<BABYLON.Mesh>           = null
     public paneDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -30,8 +30,8 @@ export default class AppRenderPane {
     }
 
     constructor (
+        private api:      API,
         private state:    State,
-        private material: AppRenderMaterial,
         private log:      (level: string, msg: string) => void
     ) {}
 
@@ -84,18 +84,18 @@ export default class AppRenderPane {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.material.mapMediaId(this.state.displaySourceMap.pane)]
+        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.pane)]
             && this.paneDisplay.isEnabled())
-            await this.material.applyDisplayMaterial("pane", this.paneDisplay, this.paneOpacity, 0, 0, this.paneChromaKey)
+            await this.api.material.applyDisplayMaterial("pane", this.paneDisplay, this.paneOpacity, 0, 0, this.paneChromaKey)
 
         /*  reflect scene changes  */
         if (state.pane !== undefined) {
             if (state.pane.source !== undefined
                 && (this.state.displaySourceMap.pane !== state.pane.source
-                    || this.state.modifiedMedia[this.material.mapMediaId(state.pane.source)])) {
+                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.pane.source)])) {
                 this.state.displaySourceMap.pane = state.pane.source
                 if (this.paneDisplay.isEnabled())
-                    await this.material.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
+                    await this.api.material.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
             }
             if (state.pane.opacity !== undefined) {
                 this.paneOpacity = state.pane.opacity
@@ -150,7 +150,7 @@ export default class AppRenderPane {
             }
             if (state.pane.enable !== undefined && this.pane.isEnabled() !== state.pane.enable) {
                 if (state.pane.enable) {
-                    await this.material.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
+                    await this.api.material.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
                     if (this.paneFade > 0 && this.state.fps > 0) {
                         this.log("INFO", "enabling pane (fading: start)")
                         const ease = new BABYLON.SineEase()
@@ -235,7 +235,7 @@ export default class AppRenderPane {
                             this.paneCase!.setEnabled(false)
                             this.paneDisplay!.setEnabled(false)
                             this.pane!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("pane", this.paneDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("pane", this.paneDisplay!)
                         })
                     }
                     else {
@@ -258,7 +258,7 @@ export default class AppRenderPane {
                             this.paneCase!.setEnabled(false)
                             this.paneDisplay!.setEnabled(false)
                             this.pane!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("pane", this.paneDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("pane", this.paneDisplay!)
                         })
                     }
                 }

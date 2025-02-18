@@ -10,13 +10,14 @@ import                             "@babylonjs/loaders/glTF"
 
 /*  import internal dependencies (client-side)  */
 import Config                 from "./app-render-config"
+import { type API }           from "./app-render-api"
 import State                  from "./app-render-state"
 
 /*  import internal dependencies (shared)  */
 import { MixerState }          from "../common/app-mixer"
 import { StateTypePartial }   from "../common/app-state"
 
-export default class AppRenderScene {
+export default class Scene {
     private engine:    BABYLON.Nullable<BABYLON.Engine>         = null
     private optimizer: BABYLON.Nullable<BABYLON.SceneOptimizer> = null
     private renderCount  = 0
@@ -27,6 +28,7 @@ export default class AppRenderScene {
     private mixerPreview = ""
 
     constructor (
+        private api:     API,
         private state:   State,
         private log:     (level: string, msg: string) => void,
         private fps:     (fps: number) => void

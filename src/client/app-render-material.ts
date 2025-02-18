@@ -9,6 +9,7 @@ import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
 import Config                    from "./app-render-config"
+import { type API }              from "./app-render-api"
 import State, { type ChromaKey } from "./app-render-state"
 import ShaderMaterial            from "./app-render-shader"
 
@@ -17,7 +18,7 @@ import { StateTypePartial }      from "../common/app-state"
 
 type VideoStackId = "monitor" | "decal" | "hologram" | "plate" | "pane" | "pillar" | "mask"
 
-export default class AppRenderMaterial {
+export default class Material {
     private displayMeshMaterial     = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
     private displayMediaURL         = new Map<string, string>()
     private displayMaterial2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
@@ -25,6 +26,7 @@ export default class AppRenderMaterial {
     private displayTextureInfo      = new Map<BABYLON.Texture, { type: string, url: string, refs: number }>()
 
     constructor (
+        private api:   API,
         private state: State,
         private log:   (level: string, msg: string) => void
     ) {}

@@ -8,14 +8,14 @@
 import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
+import { type API }              from "./app-render-api"
 import State, { type ChromaKey } from "./app-render-state"
 import Utils                     from "./app-render-utils"
-import AppRenderMaterial         from "./app-render-material"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
-export default class AppRenderMonitor {
+export default class Monitor {
     private monitor:          BABYLON.Nullable<BABYLON.TransformNode>  = null
     private monitorCase:      BABYLON.Nullable<BABYLON.Mesh>           = null
     private monitorDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -30,8 +30,8 @@ export default class AppRenderMonitor {
     }
 
     constructor (
+        private api:      API,
         private state:    State,
-        private material: AppRenderMaterial,
         private log:      (level: string, msg: string) => void
     ) {}
 
@@ -84,18 +84,18 @@ export default class AppRenderMonitor {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.material.mapMediaId(this.state.displaySourceMap.monitor)]
+        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.monitor)]
             && this.monitorDisplay.isEnabled())
-            await this.material.applyDisplayMaterial("monitor", this.monitorDisplay, this.monitorOpacity, 0, 0, this.monitorChromaKey)
+            await this.api.material.applyDisplayMaterial("monitor", this.monitorDisplay, this.monitorOpacity, 0, 0, this.monitorChromaKey)
 
         /*  reflect state changes  */
         if (state.monitor !== undefined) {
             if (state.monitor.source !== undefined
                 && (this.state.displaySourceMap.monitor !== state.monitor.source
-                    || this.state.modifiedMedia[this.material.mapMediaId(state.monitor.source)])) {
+                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.monitor.source)])) {
                 this.state.displaySourceMap.monitor = state.monitor.source
                 if (this.monitorDisplay.isEnabled())
-                    await this.material.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
+                    await this.api.material.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
             }
             if (state.monitor.opacity !== undefined) {
                 this.monitorOpacity = state.monitor.opacity
@@ -150,7 +150,7 @@ export default class AppRenderMonitor {
             }
             if (state.monitor.enable !== undefined && this.monitorDisplay.isEnabled() !== state.monitor.enable) {
                 if (state.monitor.enable) {
-                    await this.material.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
+                    await this.api.material.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
                     if (this.monitorFade > 0 && this.state.fps > 0) {
                         this.log("INFO", "enabling monitor (fading: start)")
                         const ease = new BABYLON.SineEase()
@@ -235,7 +235,7 @@ export default class AppRenderMonitor {
                             this.monitorCase!.setEnabled(false)
                             this.monitorDisplay!.setEnabled(false)
                             this.monitor!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
                         })
                     }
                     else {
@@ -253,7 +253,7 @@ export default class AppRenderMonitor {
                         this.monitorCase.setEnabled(false)
                         this.monitorDisplay.setEnabled(false)
                         this.monitor.setEnabled(false)
-                        await this.material.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
+                        await this.api.material.unapplyDisplayMaterial("monitor", this.monitorDisplay!)
                     }
                 }
             }

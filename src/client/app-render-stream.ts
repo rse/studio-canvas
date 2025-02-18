@@ -8,12 +8,13 @@
 import * as BABYLON           from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
+import { type API }           from "./app-render-api"
 import State                  from "./app-render-state"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
 
-export default class AppRenderStream {
+export default class Stream {
     private videoStream:      MediaStream | null = null
     private videoStreamDevice                    = ""
     private videoStreamWidth                     = 0
@@ -21,6 +22,7 @@ export default class AppRenderStream {
     private videoStreamFPS                       = 0
 
     constructor (
+        private api:   API,
         private state: State,
         private log:   (level: string, msg: string) => void
     ) {}

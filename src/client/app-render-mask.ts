@@ -8,13 +8,13 @@
 import * as BABYLON           from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
+import { type API }           from "./app-render-api"
 import State                  from "./app-render-state"
-import AppRenderMaterial      from "./app-render-material"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
 
-export default class AppRenderPlate {
+export default class Mask {
     private originalCamera:  BABYLON.Nullable<BABYLON.Camera> = null
     private mask:            BABYLON.Nullable<BABYLON.TransformNode>  = null
     private maskDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -26,8 +26,8 @@ export default class AppRenderPlate {
     }
 
     constructor (
+        private api:      API,
         private state:    State,
-        private material: AppRenderMaterial,
         private log:      (level: string, msg: string) => void
     ) {}
 
@@ -68,18 +68,18 @@ export default class AppRenderPlate {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.material.mapMediaId(this.state.displaySourceMap.mask)]
+        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.mask)]
             && this.maskDisplay.isEnabled())
-            await this.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+            await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
 
         /*  reflect scene changes  */
         if (state.mask !== undefined) {
             if (state.mask.source !== undefined
                 && (this.state.displaySourceMap.mask !== state.mask.source
-                    || this.state.modifiedMedia[this.material.mapMediaId(state.mask.source)])) {
+                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.mask.source)])) {
                 this.state.displaySourceMap.mask = state.mask.source
                 if (this.maskDisplay.isEnabled())
-                    await this.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+                    await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
             }
             if (state.mask.scale !== undefined) {
                 this.maskDisplay.scaling.x = this.maskBase.scaleDisplayX * state.mask.scale
@@ -97,7 +97,7 @@ export default class AppRenderPlate {
                 if (state.mask.enable) {
                     this.originalCamera = this.state.scene!.activeCamera
                     this.state.scene!.activeCamera = this.maskCamLens
-                    await this.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+                    await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
                     this.log("INFO", "enabling mask")
                     if (this.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.maskDisplay!.material
@@ -133,7 +133,7 @@ export default class AppRenderPlate {
                         this.maskBackground!.setEnabled(false)
                         if (this.originalCamera !== null)
                             this.state.scene!.activeCamera = this.originalCamera
-                        await this.material.unapplyDisplayMaterial("mask", this.maskDisplay!)
+                        await this.api.material.unapplyDisplayMaterial("mask", this.maskDisplay!)
                     })
                 }
             }

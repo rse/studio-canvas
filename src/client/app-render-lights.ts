@@ -8,17 +8,19 @@
 import * as BABYLON           from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
+import { type API }           from "./app-render-api"
 import State                  from "./app-render-state"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
 
-export default class AppRenderLights {
+export default class Lights {
     private light1: BABYLON.Nullable<BABYLON.PointLight>     = null
     private light2: BABYLON.Nullable<BABYLON.PointLight>     = null
     private light3: BABYLON.Nullable<BABYLON.PointLight>     = null
 
     constructor (
+        private api:     API,
         private state:   State,
         private log:     (level: string, msg: string) => void
     ) {}

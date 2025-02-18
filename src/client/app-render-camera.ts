@@ -9,6 +9,7 @@ import * as BABYLON                from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
 import Config, { type CameraName } from "./app-render-config"
+import { type API }                from "./app-render-api"
 import State                       from "./app-render-state"
 import Utils                       from "./app-render-utils"
 import PTZ                         from "./app-render-ptz"
@@ -31,6 +32,7 @@ export default class Camera {
 
     /*  object construction  */
     constructor (
+        private api:        API,
         private state:      State,
         private cameraName: string,
         private ptzFreeD:   boolean,

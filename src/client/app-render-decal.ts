@@ -8,15 +8,14 @@
 import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
+import { type API }              from "./app-render-api"
 import State, { type ChromaKey } from "./app-render-state"
 import Utils                     from "./app-render-utils"
-import AppRenderScene            from "./app-render-scene"
-import AppRenderMaterial         from "./app-render-material"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
-export default class AppRenderDecal {
+export default class Decal {
     private decal:            BABYLON.Nullable<BABYLON.Mesh> = null
     private decalRotate       = 0.0
     private decalLift         = 0.0
@@ -28,9 +27,8 @@ export default class AppRenderDecal {
     private decalChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
 
     constructor (
+        private api:      API,
         private state:    State,
-        private scene:    AppRenderScene,
-        private material: AppRenderMaterial,
         private log:      (level: string, msg: string) => void
     ) {}
 
@@ -124,9 +122,9 @@ export default class AppRenderDecal {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.material.mapMediaId(this.state.displaySourceMap.decal)]
+        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.decal)]
             && this.decal.isEnabled())
-            await this.material.applyDisplayMaterial("decal", this.decal, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+            await this.api.material.applyDisplayMaterial("decal", this.decal, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
 
         /*  reflect state changes  */
         if (state.decal !== undefined) {
@@ -134,10 +132,10 @@ export default class AppRenderDecal {
                 this.decalFade = state.decal.fadeTime
             if (state.decal.source !== undefined
                 && (this.state.displaySourceMap.decal !== state.decal.source
-                    || this.state.modifiedMedia[this.material.mapMediaId(state.decal.source)])) {
+                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.decal.source)])) {
                 this.state.displaySourceMap.decal = state.decal.source
                 if (this.decal.isEnabled())
-                    await this.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+                    await this.api.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
             }
             if (state.decal.opacity !== undefined) {
                 this.decalOpacity = state.decal.opacity
@@ -198,15 +196,15 @@ export default class AppRenderDecal {
                     changed = true
                 }
                 if (changed) {
-                    await this.scene.stop()
+                    await this.api.scene.stop()
                     await this.decalGenerate()
-                    await this.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
-                    await this.scene.start()
+                    await this.api.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+                    await this.api.scene.start()
                 }
             }
             if (state.decal.enable !== undefined && this.decal.isEnabled() !== state.decal.enable) {
                 if (state.decal.enable) {
-                    await this.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+                    await this.api.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
                     if (this.decalFade > 0 && this.state.fps > 0) {
                         this.log("INFO", "enabling decal (fading: start)")
                         if (this.decal.material instanceof BABYLON.ShaderMaterial) {
@@ -258,14 +256,14 @@ export default class AppRenderDecal {
                             else
                                 this.decal!.visibility = 0
                             this.decal!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("decal", this.decal!)
+                            await this.api.material.unapplyDisplayMaterial("decal", this.decal!)
                         })
                     }
                     else {
                         this.log("INFO", "disabling decal")
                         this.decal.visibility = 0
                         this.decal.setEnabled(false)
-                        await this.material.unapplyDisplayMaterial("decal", this.decal!)
+                        await this.api.material.unapplyDisplayMaterial("decal", this.decal!)
                     }
                 }
             }

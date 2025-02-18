@@ -6,8 +6,9 @@
 
 import Utils from "./app-render-utils"
 
-/*  the Babylon PTZ state class  */
 export type PTZCamType = "birddog" | "panasonic" | "sony"
+
+/*  the Babylon PTZ state class  */
 export default class PTZ {
     constructor (private camType: PTZCamType) {}
 

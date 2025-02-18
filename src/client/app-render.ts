@@ -9,6 +9,9 @@ import EventEmitter                from "eventemitter2"
 
 /*  import internal dependencies (client-side)  */
 import State                       from "./app-render-state"
+import { type API }                from "./app-render-api"
+
+/*  import internal dependencies (client-side)  */
 import Texture                     from "./app-render-texture"
 import Stream                      from "./app-render-stream"
 import Material                    from "./app-render-material"
@@ -31,35 +34,21 @@ import { FreeDState }              from "../common/app-freed"
 import { MixerState }              from "../common/app-mixer"
 import { StateTypePartial }        from "../common/app-state"
 
-export default class CanvasRenderer extends EventEmitter {
+export default class Renderer extends EventEmitter {
     /*  shared state  */
-    private state
+    private state: State
+
+    /*  shared API  */
+    private api: API
 
     /*  internal state  */
     public established = false
-
-    /*  internal state (references)  */
-    private texture:    Texture
-    private stream:     Stream
-    private material:   Material
-    private scene:      Scene
-    private canvas:     Canvas
-    private decal:      Decal
-    private monitor:    Monitor
-    private pane:       Pane
-    private plate:      Plate
-    private pillar:     Pillar
-    private hologram:   Hologram
-    private mask:       Mask
-    private camera:     Camera
-    private avatars:    Avatars
-    private reference:  Reference
-    private lights:     Lights
 
     /*  (re-)configure camera (by name) and options (by URL)  */
     constructor (params: { layer: string, cameraName: string, ptzFreeD: boolean, ptzKeys: boolean }) {
         super()
         this.state = new State()
+        this.api   = {} as API
 
         /*  remember parameters  */
         this.state.cameraName  = params.cameraName
@@ -70,53 +59,53 @@ export default class CanvasRenderer extends EventEmitter {
         const passThroughFPS = (fps: number) => { this.emit("fps", fps) }
 
         /*  instantiate rendering utilities  */
-        this.texture   = new Texture( this.state, passThroughLog)
-        this.stream    = new Stream(  this.state, passThroughLog)
-        this.material  = new Material(this.state, passThroughLog)
+        this.api.texture   = new Texture( this.api, this.state, passThroughLog)
+        this.api.stream    = new Stream(  this.api, this.state, passThroughLog)
+        this.api.material  = new Material(this.api, this.state, passThroughLog)
 
         /*  instantiate rendering scene  */
-        this.scene     = new Scene(this.state, passThroughLog, passThroughFPS)
+        this.api.scene     = new Scene(this.api, this.state, passThroughLog, passThroughFPS)
 
         /*  instantiate rendering camera  */
-        this.camera = new Camera(this.state,
+        this.api.camera = new Camera(this.api, this.state,
             params.cameraName, params.ptzFreeD, params.ptzKeys,
             passThroughLog)
 
         /*  instantiate rendering features  */
-        this.canvas    = new Canvas(   this.state, this.texture,              passThroughLog)
-        this.decal     = new Decal(    this.state, this.scene, this.material, passThroughLog)
-        this.monitor   = new Monitor(  this.state, this.material,             passThroughLog)
-        this.pane      = new Pane(     this.state, this.material,             passThroughLog)
-        this.plate     = new Plate(    this.state, this.material,             passThroughLog)
-        this.pillar    = new Pillar(   this.state, this.material,             passThroughLog)
-        this.hologram  = new Hologram( this.state, this.material,             passThroughLog)
-        this.mask      = new Mask(     this.state, this.material,             passThroughLog)
-        this.avatars   = new Avatars(  this.state,                            passThroughLog)
-        this.reference = new Reference(this.state,                            passThroughLog)
-        this.lights    = new Lights(   this.state,                            passThroughLog)
+        this.api.canvas    = new Canvas(   this.api, this.state, passThroughLog)
+        this.api.decal     = new Decal(    this.api, this.state, passThroughLog)
+        this.api.monitor   = new Monitor(  this.api, this.state, passThroughLog)
+        this.api.pane      = new Pane(     this.api, this.state, passThroughLog)
+        this.api.plate     = new Plate(    this.api, this.state, passThroughLog)
+        this.api.pillar    = new Pillar(   this.api, this.state, passThroughLog)
+        this.api.hologram  = new Hologram( this.api, this.state, passThroughLog)
+        this.api.mask      = new Mask(     this.api, this.state, passThroughLog)
+        this.api.avatars   = new Avatars(  this.api, this.state, passThroughLog)
+        this.api.reference = new Reference(this.api, this.state, passThroughLog)
+        this.api.lights    = new Lights(   this.api, this.state, passThroughLog)
     }
 
     /*  initially establish rendering engine and scene  */
     async establish (canvas: HTMLCanvasElement) {
         /*  pass-through operation to rendering scene (begin)  */
-        await this.scene.establish(canvas)
+        await this.api.scene.establish(canvas)
 
         /*  pass-through operation to rendering features  */
-        await this.canvas.establish()
-        await this.decal.establish()
-        await this.monitor.establish()
-        await this.pane.establish()
-        await this.plate.establish()
-        await this.pillar.establish()
-        await this.hologram.establish()
-        await this.mask.establish()
-        await this.camera.establish()
-        await this.avatars.establish()
-        await this.reference.establish()
-        await this.lights.establish()
+        await this.api.canvas.establish()
+        await this.api.decal.establish()
+        await this.api.monitor.establish()
+        await this.api.pane.establish()
+        await this.api.plate.establish()
+        await this.api.pillar.establish()
+        await this.api.hologram.establish()
+        await this.api.mask.establish()
+        await this.api.camera.establish()
+        await this.api.avatars.establish()
+        await this.api.reference.establish()
+        await this.api.lights.establish()
 
         /*  pass-through operation to rendering scene (end)  */
-        await this.scene.establishEnd()
+        await this.api.scene.establishEnd()
 
         /*  indicate established state  */
         this.established = true
@@ -124,18 +113,18 @@ export default class CanvasRenderer extends EventEmitter {
 
     /*  start rendering  */
     async start () {
-        await this.scene.start()
+        await this.api.scene.start()
     }
 
     /*  stop rendering  */
     async stop () {
-        await this.scene.stop()
+        await this.api.scene.stop()
     }
 
     /*  sync renderer  */
     async reflectSyncTime (timestamp: number) {
-        await this.canvas.canvasFaderStop()
-        await this.canvas.canvasFaderStart()
+        await this.api.canvas.canvasFaderStop()
+        await this.api.canvas.canvasFaderStart()
     }
 
     /*  control rendering scene  */
@@ -145,25 +134,25 @@ export default class CanvasRenderer extends EventEmitter {
             return
 
         /*  pass-through operation to rendering scene  */
-        await this.scene.reflectSceneState(state)
+        await this.api.scene.reflectSceneState(state)
 
         /*  pass-through operation to rendering utilities  */
-        await this.stream.reflectSceneState(state)
-        await this.material.reflectSceneState(state)
+        await this.api.stream.reflectSceneState(state)
+        await this.api.material.reflectSceneState(state)
 
         /*  pass-through operation to rendering features  */
-        await this.canvas.reflectSceneState(state)
-        await this.decal.reflectSceneState(state)
-        await this.monitor.reflectSceneState(state)
-        await this.pane.reflectSceneState(state)
-        await this.plate.reflectSceneState(state)
-        await this.pillar.reflectSceneState(state)
-        await this.hologram.reflectSceneState(state)
-        await this.mask.reflectSceneState(state)
-        await this.lights.reflectSceneState(state)
-        await this.avatars.reflectSceneState(state)
-        await this.reference.reflectSceneState(state)
-        await this.camera.reflectSceneState(state)
+        await this.api.canvas.reflectSceneState(state)
+        await this.api.decal.reflectSceneState(state)
+        await this.api.monitor.reflectSceneState(state)
+        await this.api.pane.reflectSceneState(state)
+        await this.api.plate.reflectSceneState(state)
+        await this.api.pillar.reflectSceneState(state)
+        await this.api.hologram.reflectSceneState(state)
+        await this.api.mask.reflectSceneState(state)
+        await this.api.lights.reflectSceneState(state)
+        await this.api.avatars.reflectSceneState(state)
+        await this.api.reference.reflectSceneState(state)
+        await this.api.camera.reflectSceneState(state)
     }
 
     /*  react on a received mixer record by reflecting the camera mixer state  */
@@ -173,7 +162,7 @@ export default class CanvasRenderer extends EventEmitter {
             return
 
         /*  pass-through operation to rendering scene  */
-        this.scene.reflectMixerState(mixer)
+        this.api.scene.reflectMixerState(mixer)
     }
 
     reflectFreeDState (state: FreeDState) {
@@ -182,7 +171,7 @@ export default class CanvasRenderer extends EventEmitter {
             return
 
         /*  pass-through operation to rendering camera  */
-        this.camera.reflectFreeDState(state)
+        this.api.camera.reflectFreeDState(state)
     }
 }
 

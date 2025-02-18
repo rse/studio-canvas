@@ -8,14 +8,14 @@
 import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
+import { type API }              from "./app-render-api"
 import State, { type ChromaKey } from "./app-render-state"
 import Utils                     from "./app-render-utils"
-import AppRenderMaterial         from "./app-render-material"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
-export default class AppRenderPlate {
+export default class Hologram {
     private hologram:        BABYLON.Nullable<BABYLON.TransformNode>  = null
     private hologramDisplay: BABYLON.Nullable<BABYLON.Mesh>           = null
     private hologramFade         = 0
@@ -29,8 +29,8 @@ export default class AppRenderPlate {
     }
 
     constructor (
+        private api:      API,
         private state:    State,
-        private material: AppRenderMaterial,
         private log:      (level: string, msg: string) => void
     ) {}
 
@@ -62,18 +62,18 @@ export default class AppRenderPlate {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.material.mapMediaId(this.state.displaySourceMap.hologram)]
+        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.hologram)]
             && this.hologramDisplay.isEnabled())
-            await this.material.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
+            await this.api.material.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
 
         /*  reflect scene changes  */
         if (state.hologram !== undefined) {
             if (state.hologram.source !== undefined
                 && (this.state.displaySourceMap.hologram !== state.hologram.source
-                    || this.state.modifiedMedia[this.material.mapMediaId(state.hologram.source)])) {
+                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.hologram.source)])) {
                 this.state.displaySourceMap.hologram = state.hologram.source
                 if (this.hologramDisplay.isEnabled())
-                    await this.material.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
+                    await this.api.material.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
             }
             if (state.hologram.scale !== undefined) {
                 this.hologramDisplay.scaling.x = this.hologramBase.scaleDisplayX * state.hologram.scale
@@ -137,7 +137,7 @@ export default class AppRenderPlate {
             }
             if (state.hologram.enable !== undefined && this.hologramDisplay.isEnabled() !== state.hologram.enable) {
                 if (state.hologram.enable) {
-                    await this.material.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
+                    await this.api.material.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
                     if (this.hologramFade > 0 && this.state.fps > 0) {
                         this.log("INFO", "enabling hologram (fading: start)")
                         if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
@@ -206,7 +206,7 @@ export default class AppRenderPlate {
                             else
                                 this.hologramDisplay!.visibility = 0.0
                             this.hologramDisplay!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("hologram", this.hologramDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("hologram", this.hologramDisplay!)
                         })
                     }
                     else {
@@ -224,7 +224,7 @@ export default class AppRenderPlate {
                         this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
                             this.hologramDisplay!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("hologram", this.hologramDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("hologram", this.hologramDisplay!)
                         })
                     }
                 }

@@ -8,14 +8,14 @@
 import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
+import { type API }              from "./app-render-api"
 import State, { type ChromaKey } from "./app-render-state"
 import Utils                     from "./app-render-utils"
-import AppRenderMaterial         from "./app-render-material"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
-export default class AppRenderPlate {
+export default class Plate {
     private plate:           BABYLON.Nullable<BABYLON.TransformNode>  = null
     private plateDisplay:    BABYLON.Nullable<BABYLON.Mesh>           = null
     private plateFade        = 0
@@ -29,8 +29,8 @@ export default class AppRenderPlate {
     }
 
     constructor (
+        private api:      API,
         private state:    State,
-        private material: AppRenderMaterial,
         private log:      (level: string, msg: string) => void
     ) {}
 
@@ -62,18 +62,18 @@ export default class AppRenderPlate {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.material.mapMediaId(this.state.displaySourceMap.plate)]
+        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.plate)]
             && this.plateDisplay.isEnabled())
-            await this.material.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
+            await this.api.material.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
 
         /*  reflect scene changes  */
         if (state.plate !== undefined) {
             if (state.plate.source !== undefined
                 && (this.state.displaySourceMap.plate !== state.plate.source
-                    || this.state.modifiedMedia[this.material.mapMediaId(state.plate.source)])) {
+                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.plate.source)])) {
                 this.state.displaySourceMap.plate = state.plate.source
                 if (this.plateDisplay.isEnabled())
-                    await this.material.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
+                    await this.api.material.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
             }
             if (state.plate.scale !== undefined) {
                 this.plateDisplay.scaling.x = this.plateBase.scaleDisplayX * state.plate.scale
@@ -137,7 +137,7 @@ export default class AppRenderPlate {
             }
             if (state.plate.enable !== undefined && this.plateDisplay.isEnabled() !== state.plate.enable) {
                 if (state.plate.enable) {
-                    await this.material.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
+                    await this.api.material.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
                     if (this.plateFade > 0 && this.state.fps > 0) {
                         this.log("INFO", "enabling plate (fading: start)")
                         if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
@@ -206,7 +206,7 @@ export default class AppRenderPlate {
                             else
                                 this.plateDisplay!.visibility = 0.0
                             this.plateDisplay!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("plate", this.plateDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("plate", this.plateDisplay!)
                         })
                     }
                     else {
@@ -224,7 +224,7 @@ export default class AppRenderPlate {
                         this.state.scene!.onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
                             this.plateDisplay!.setEnabled(false)
-                            await this.material.unapplyDisplayMaterial("plate", this.plateDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("plate", this.plateDisplay!)
                         })
                     }
                 }

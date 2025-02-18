@@ -9,9 +9,9 @@ import * as BABYLON           from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
 import Config                 from "./app-render-config"
+import { type API }           from "./app-render-api"
 import State                  from "./app-render-state"
 import Utils                  from "./app-render-utils"
-import AppRenderTexture       from "./app-render-texture"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
@@ -30,7 +30,7 @@ type CanvasState = {
     texture2: BABYLON.Nullable<BABYLON.Texture>
 }
 
-export default class AppRenderCanvas {
+export default class Canvas {
     private fadeTimer: ReturnType<typeof setTimeout> | null = null
     private modeTimer: ReturnType<typeof setTimeout> | null = null
     private fadeSwitch = 2.0
@@ -48,8 +48,8 @@ export default class AppRenderCanvas {
     private wallRotBase: BABYLON.Nullable<BABYLON.Quaternion>  = null
 
     constructor (
+        private api:     API,
         private state:   State,
-        private texture: AppRenderTexture,
         private log:     (level: string, msg: string) => void
     ) {}
 
@@ -154,12 +154,12 @@ export default class AppRenderCanvas {
         const canvas = document.createElement("canvas")
         this.canvasState[this.canvasMode].canvas1 = canvas
         this.canvasState[this.canvasMode].texture1 =
-            await this.texture.createTexture(this.canvasConfig[this.canvasMode].texture1, canvas)
+            await this.api.texture.createTexture(this.canvasConfig[this.canvasMode].texture1, canvas)
         if (this.canvasConfig[this.canvasMode].texture2 !== "") {
             const canvas = document.createElement("canvas")
             this.canvasState[this.canvasMode].canvas2 = canvas
             this.canvasState[this.canvasMode].texture2 =
-                await this.texture.createTexture(this.canvasConfig[this.canvasMode].texture2, canvas)
+                await this.api.texture.createTexture(this.canvasConfig[this.canvasMode].texture2, canvas)
         }
         else {
             this.canvasState[this.canvasMode].canvas2  = null

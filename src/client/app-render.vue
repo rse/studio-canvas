@@ -137,7 +137,7 @@ import RecWebSocket               from "@opensumi/reconnecting-websocket"
 import Ducky                      from "ducky"
 import moment                     from "moment"
 import axios                      from "axios"
-import CanvasRenderer             from "./app-render"
+import Renderer                   from "./app-render"
 import { MixerState }             from "../common/app-mixer"
 import { FreeDState }             from "../common/app-freed"
 import {
@@ -147,7 +147,7 @@ import {
 </script>
 
 <script lang="ts">
-let renderer: CanvasRenderer | null = null
+let renderer: Renderer | null = null
 let debugTimer: ReturnType<typeof setTimeout> | null = null
 export default defineComponent({
     name: "app-render",
@@ -175,7 +175,7 @@ export default defineComponent({
         this.log("INFO", "establish Babylon game engine")
         this.overlay("establish Babylon game engine")
         this.overlayShow = true
-        renderer = new CanvasRenderer({
+        renderer = new Renderer({
             layer:       this.layer,
             cameraName:  this.cam,
             ptzFreeD:    this.options.get("ptzFreeD"),
