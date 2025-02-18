@@ -52,24 +52,25 @@ export default class Renderer extends EventEmitter {
 
         /*  remember parameters  */
         this.state.cameraName  = params.cameraName
-        this.state.layer       = params.layer
 
         /*  helper functions for passing-through information  */
         const passThroughLog = (level: string, msg: string) => { this.emit("log", level, msg) }
         const passThroughFPS = (fps: number) => { this.emit("fps", fps) }
 
-        /*  instantiate rendering utilities  */
-        this.api.texture   = new Texture( this.api, this.state, passThroughLog)
-        this.api.stream    = new Stream(  this.api, this.state, passThroughLog)
-        this.api.material  = new Material(this.api, this.state, passThroughLog)
-
         /*  instantiate rendering scene  */
-        this.api.scene     = new Scene(this.api, this.state, passThroughLog, passThroughFPS)
+        this.api.scene = new Scene(this.api, this.state,
+            params.layer,
+            passThroughLog, passThroughFPS)
 
         /*  instantiate rendering camera  */
         this.api.camera = new Camera(this.api, this.state,
             params.cameraName, params.ptzFreeD, params.ptzKeys,
             passThroughLog)
+
+        /*  instantiate rendering utilities  */
+        this.api.texture   = new Texture(  this.api, this.state, passThroughLog)
+        this.api.stream    = new Stream(   this.api, this.state, passThroughLog)
+        this.api.material  = new Material( this.api, this.state, passThroughLog)
 
         /*  instantiate rendering features  */
         this.api.canvas    = new Canvas(   this.api, this.state, passThroughLog)

@@ -43,7 +43,7 @@ export default class Pane {
         this.paneDisplay = this.state.scene!.getMeshByName("Pane-Screen") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.pane === null || this.paneCase === null || this.paneDisplay === null)
             throw new Error("cannot find pane mesh nodes")
-        if (this.state.layer === "front")
+        if (this.api.scene.renderingLayer("front"))
             this.pane.setEnabled(false)
 
         /*  initialize pane base values  */
@@ -80,7 +80,7 @@ export default class Pane {
         if (!(this.pane !== null
             && this.paneCase !== null
             && this.paneDisplay !== null
-            && this.state.layer === "front"))
+            && this.api.scene.renderingLayer("front")))
             return
 
         /*  update already active media receivers  */

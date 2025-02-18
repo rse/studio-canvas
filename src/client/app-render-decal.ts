@@ -34,7 +34,7 @@ export default class Decal {
 
     /*  establish feature  */
     async establish () {
-        if (this.state.layer === "back")
+        if (this.api.scene.renderingLayer("back"))
             await this.decalGenerate()
     }
 
@@ -118,7 +118,7 @@ export default class Decal {
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
         /*  sanity check situation  */
-        if (!(this.decal !== null && this.state.layer === "back"))
+        if (!(this.decal !== null && this.api.scene.renderingLayer("back")))
             return
 
         /*  update already active media receivers  */

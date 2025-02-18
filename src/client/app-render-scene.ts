@@ -31,6 +31,7 @@ export default class Scene {
     constructor (
         private api:     API,
         private state:   State,
+        private layer:   string,
         private log:     (level: string, msg: string) => void,
         private onFPS:   (fps: number) => void
     ) {}
@@ -61,14 +62,14 @@ export default class Scene {
         })
 
         /*  create studio environment for correct texture image colors  */
-        if (this.state.layer === "back") {
+        if (this.layer === "back") {
             this.log("INFO", "loading opaque environment")
             this.state.scene.createDefaultEnvironment({
                 environmentTexture: "/res/canvas-scene.env",
                 skyboxColor: new BABYLON.Color3(0.5, 0.5, 0.5)
             })
         }
-        else if (this.state.layer === "front") {
+        else if (this.layer === "front") {
             this.log("INFO", "creating transparent environment")
             this.state.scene.createDefaultEnvironment({
                 environmentTexture: "/res/canvas-scene.env",
@@ -96,8 +97,8 @@ export default class Scene {
         /*  determine all layer-specific nodes which should be disabled  */
         for (const node of this.state.scene!.getNodes()) {
             if (Config.layerNodes[node.name] !== undefined) {
-                if (  (this.state.layer === "back"  && !Config.layerNodes[node.name].back)
-                   || (this.state.layer === "front" && !Config.layerNodes[node.name].front)) {
+                if (  (this.layer === "back"  && !Config.layerNodes[node.name].back)
+                   || (this.layer === "front" && !Config.layerNodes[node.name].front)) {
                     node.setEnabled(false)
                     node.dispose()
                 }
@@ -171,7 +172,7 @@ export default class Scene {
     async reflectSceneState (state: StateTypePartial) {
         /*  control renderer  */
         if (state.renderer !== undefined) {
-            let fps = this.api.scene.currentFPS()
+            let fps = this.fps
             if (state.renderer.other !== undefined) {
                 this.fpsOther = state.renderer.other
                 if (!(this.mixerPreview === this.state.cameraName || this.mixerProgram === this.state.cameraName))
@@ -199,6 +200,11 @@ export default class Scene {
     /*  calculate millisconds per frame  */
     currentMillisecondsPerFrame () {
         return 1000 / (this.fps === 0 ? 1 : this.fps)
+    }
+
+    /*  determine whether we are rendering a particular layer  */
+    renderingLayer (layer: string) {
+        return this.layer === layer
     }
 }
 

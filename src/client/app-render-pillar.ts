@@ -44,7 +44,7 @@ export default class Pillar {
         this.pillarDisplay = this.state.scene!.getMeshByName("Pillar-Screen") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.pillar === null || this.pillarCase === null || this.pillarDisplay === null)
             throw new Error("cannot find pillar mesh nodes")
-        if (this.state.layer === "back")
+        if (this.api.scene.renderingLayer("back"))
             this.pillar.setEnabled(false)
 
         /*  initialize pillar base values  */
@@ -67,7 +67,7 @@ export default class Pillar {
         if (!(this.pillar !== null
             && this.pillarCase !== null
             && this.pillarDisplay !== null
-            && this.state.layer === "back"))
+            && this.api.scene.renderingLayer("back")))
             return
 
         /*  update already active media receivers  */

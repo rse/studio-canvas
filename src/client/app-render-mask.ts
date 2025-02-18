@@ -40,7 +40,7 @@ export default class Mask {
         this.maskCamLens    = this.state.scene!.getNodeByName("Mask-Cam-Lens")   as BABYLON.Nullable<BABYLON.FreeCamera>
         if (this.mask === null || this.maskDisplay === null || this.maskBackground === null || this.maskCamLens === null)
             throw new Error("cannot find mask mesh nodes")
-        if (this.state.layer === "front") {
+        if (this.api.scene.renderingLayer("front")) {
             this.maskDisplay.setEnabled(false)
             this.maskBackground.setEnabled(false)
         }
@@ -64,7 +64,7 @@ export default class Mask {
         /*  sanity check situation  */
         if (!(this.mask !== null
             && this.maskDisplay !== null
-            && this.state.layer === "front"))
+            && this.api.scene.renderingLayer("front")))
             return
 
         /*  update already active media receivers  */

@@ -41,7 +41,7 @@ export default class Hologram {
         this.hologramDisplay = this.state.scene!.getMeshByName("Hologram-Display") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.hologram === null || this.hologramDisplay === null)
             throw new Error("cannot find hologram mesh nodes")
-        if (this.state.layer === "front")
+        if (this.api.scene.renderingLayer("front"))
             this.hologramDisplay.setEnabled(false)
 
         /*  initialize hologram base values  */
@@ -58,7 +58,7 @@ export default class Hologram {
         /*  sanity check situation  */
         if (!(this.hologram !== null
             && this.hologramDisplay !== null
-            && this.state.layer === "front"))
+            && this.api.scene.renderingLayer("front")))
             return
 
         /*  update already active media receivers  */

@@ -35,7 +35,7 @@ export default class Avatars {
     /*  establish feature  */
     async establish () {
         /*  sanity check situation  */
-        if (!(this.state.scene !== null && this.state.layer === "back"))
+        if (!(this.state.scene !== null && this.api.scene.renderingLayer("back")))
             return
 
         /*  gather references to avatar #1  */
@@ -80,7 +80,7 @@ export default class Avatars {
         /*  sanity check situation  */
         if (!(this.avatar1 !== null
             && this.avatar2 !== null
-            && this.state.layer === "back"))
+            && this.api.scene.renderingLayer("back")))
             return
 
         /*  reflect scene changes  */

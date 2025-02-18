@@ -43,7 +43,7 @@ export default class Monitor {
         this.monitorDisplay = this.state.scene!.getMeshByName("Monitor-Screen") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.monitor === null || this.monitorCase === null || this.monitorDisplay === null)
             throw new Error("cannot find monitor mesh nodes")
-        if (this.state.layer === "back")
+        if (this.api.scene.renderingLayer("back"))
             this.monitor.setEnabled(false)
 
         /*  initialize monitor base values  */
@@ -80,7 +80,7 @@ export default class Monitor {
         if (!(this.monitor !== null
             && this.monitorCase !== null
             && this.monitorDisplay !== null
-            && this.state.layer === "back"))
+            && this.api.scene.renderingLayer("back")))
             return
 
         /*  update already active media receivers  */

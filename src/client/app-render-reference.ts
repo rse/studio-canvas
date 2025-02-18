@@ -37,7 +37,7 @@ export default class Reference {
     async reflectSceneState (state: StateTypePartial) {
         if (state.references !== undefined
             && this.references !== null
-            && this.state.layer === "back") {
+            && this.api.scene.renderingLayer("back")) {
             if (state.references.enable !== undefined)
                 this.references.setEnabled(state.references.enable)
         }

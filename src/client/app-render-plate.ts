@@ -41,7 +41,7 @@ export default class Plate {
         this.plateDisplay = this.state.scene!.getMeshByName("Plate-Display") as BABYLON.Nullable<BABYLON.Mesh>
         if (this.plate === null || this.plateDisplay === null)
             throw new Error("cannot find plate mesh nodes")
-        if (this.state.layer === "front")
+        if (this.api.scene.renderingLayer("front"))
             this.plateDisplay.setEnabled(false)
 
         /*  initialize plate base values  */
@@ -58,7 +58,7 @@ export default class Plate {
         /*  sanity check situation  */
         if (!(this.plate !== null
             && this.plateDisplay !== null
-            && this.state.layer === "front"))
+            && this.api.scene.renderingLayer("front")))
             return
 
         /*  update already active media receivers  */

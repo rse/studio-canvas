@@ -63,7 +63,7 @@ export default class Canvas {
         this.wallRotBase = this.state.wall.rotationQuaternion
 
         /*  on-the-fly load wall canvas  */
-        if (this.state.layer === "back")
+        if (this.api.scene.renderingLayer("back"))
             await this.canvasLoad()
     }
 
@@ -360,7 +360,7 @@ export default class Canvas {
     }
 
     async reflectSceneState (state: StateTypePartial) {
-        if (state.canvas !== undefined && this.state.layer === "back") {
+        if (state.canvas !== undefined && this.api.scene.renderingLayer("back")) {
             let changed = false
             if (   (state.canvas.texture1  !== undefined && this.canvasConfig[this.canvasMode].texture1  !== state.canvas.texture1)
                 || (state.canvas.texture2  !== undefined && this.canvasConfig[this.canvasMode].texture2  !== state.canvas.texture2)
