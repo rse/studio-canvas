@@ -158,12 +158,12 @@ export default class Scene {
         let fps = this.fpsOther
         if (mixer.preview !== undefined) {
             this.mixerPreview = mixer.preview
-            if (this.mixerPreview === this.state.cameraName)
+            if (this.mixerPreview === this.api.viewpoint.currentCamera())
                 fps = this.fpsPreview
         }
         if (mixer.program !== undefined) {
             this.mixerProgram = mixer.program
-            if (this.mixerProgram === this.state.cameraName)
+            if (this.mixerProgram === this.api.viewpoint.currentCamera())
                 fps = this.fpsProgram
         }
         this.configureFPS(fps)
@@ -176,17 +176,18 @@ export default class Scene {
             let fps = this.fps
             if (state.renderer.other !== undefined) {
                 this.fpsOther = state.renderer.other
-                if (!(this.mixerPreview === this.state.cameraName || this.mixerProgram === this.state.cameraName))
+                if (!(this.mixerPreview === this.api.viewpoint.currentCamera()
+                    || this.mixerProgram === this.api.viewpoint.currentCamera()))
                     fps = this.fpsOther
             }
             if (state.renderer.preview !== undefined) {
                 this.fpsPreview = state.renderer.preview
-                if (this.mixerPreview === this.state.cameraName)
+                if (this.mixerPreview === this.api.viewpoint.currentCamera())
                     fps = this.fpsPreview
             }
             if (state.renderer.program !== undefined) {
                 this.fpsProgram = state.renderer.program
-                if (this.mixerProgram === this.state.cameraName)
+                if (this.mixerProgram === this.api.viewpoint.currentCamera())
                     fps = this.fpsProgram
             }
             this.configureFPS(fps)

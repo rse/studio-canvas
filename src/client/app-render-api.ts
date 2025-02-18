@@ -9,6 +9,7 @@ import Texture     from "./app-render-texture"
 import Stream      from "./app-render-stream"
 import Material    from "./app-render-material"
 import Scene       from "./app-render-scene"
+import Viewpoint   from "./app-render-viewpoint"
 import Canvas      from "./app-render-canvas"
 import Decal       from "./app-render-decal"
 import Monitor     from "./app-render-monitor"
@@ -17,7 +18,6 @@ import Plate       from "./app-render-plate"
 import Pillar      from "./app-render-pillar"
 import Hologram    from "./app-render-hologram"
 import Mask        from "./app-render-mask"
-import Camera      from "./app-render-camera"
 import Avatars     from "./app-render-avatars"
 import Reference   from "./app-render-reference"
 import Lights      from "./app-render-lights"
@@ -27,8 +27,8 @@ export type API = {
     texture:   Texture
     stream:    Stream
     material:  Material
-    camera:    Camera
     scene:     Scene
+    viewpoint: Viewpoint
     canvas:    Canvas
     decal:     Decal
     monitor:   Monitor

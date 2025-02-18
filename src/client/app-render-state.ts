@@ -9,5 +9,4 @@ export type ChromaKey = { enable: boolean, threshold: number, smoothing: number 
 
 /*  the canvas rendering state class  */
 export default class State {
-    public cameraName = ""
 }

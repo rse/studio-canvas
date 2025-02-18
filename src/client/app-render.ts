@@ -16,6 +16,7 @@ import Texture                     from "./app-render-texture"
 import Stream                      from "./app-render-stream"
 import Material                    from "./app-render-material"
 import Scene                       from "./app-render-scene"
+import Viewpoint                   from "./app-render-viewpoint"
 import Canvas                      from "./app-render-canvas"
 import Decal                       from "./app-render-decal"
 import Monitor                     from "./app-render-monitor"
@@ -24,7 +25,6 @@ import Plate                       from "./app-render-plate"
 import Pillar                      from "./app-render-pillar"
 import Hologram                    from "./app-render-hologram"
 import Mask                        from "./app-render-mask"
-import Camera                      from "./app-render-camera"
 import Avatars                     from "./app-render-avatars"
 import Reference                   from "./app-render-reference"
 import Lights                      from "./app-render-lights"
@@ -42,16 +42,13 @@ export default class Renderer extends EventEmitter {
     private api: API
 
     /*  internal state  */
-    public established = false
+    private established = false
 
     /*  (re-)configure camera (by name) and options (by URL)  */
     constructor (params: { layer: string, cameraName: string, ptzFreeD: boolean, ptzKeys: boolean }) {
         super()
         this.state = new State()
         this.api   = {} as API
-
-        /*  remember parameters  */
-        this.state.cameraName  = params.cameraName
 
         /*  helper functions for passing-through information  */
         const passThroughLog = (level: string, msg: string) => { this.emit("log", level, msg) }
@@ -63,7 +60,7 @@ export default class Renderer extends EventEmitter {
             passThroughLog, passThroughFPS)
 
         /*  instantiate rendering camera  */
-        this.api.camera = new Camera(this.api, this.state,
+        this.api.viewpoint = new Viewpoint(this.api,
             params.cameraName, params.ptzFreeD, params.ptzKeys,
             passThroughLog)
 
@@ -92,7 +89,7 @@ export default class Renderer extends EventEmitter {
         await this.api.scene.establish(canvas)
 
         /*  pass-through operation to rendering camera  */
-        await this.api.camera.establish()
+        await this.api.viewpoint.establish()
 
         /*  pass-through operation to rendering features  */
         await this.api.canvas.establish()
@@ -143,7 +140,7 @@ export default class Renderer extends EventEmitter {
         await this.api.scene.reflectSceneState(state)
 
         /*  pass-through operation to rendering camera  */
-        await this.api.camera.reflectSceneState(state)
+        await this.api.viewpoint.reflectSceneState(state)
 
         /*  pass-through operation to rendering utilities  */
         await this.api.stream.reflectSceneState(state)
@@ -179,7 +176,7 @@ export default class Renderer extends EventEmitter {
             return
 
         /*  pass-through operation to rendering camera  */
-        this.api.camera.reflectFreeDState(state)
+        this.api.viewpoint.reflectFreeDState(state)
     }
 }
 

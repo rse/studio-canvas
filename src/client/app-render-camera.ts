@@ -10,7 +10,6 @@ import * as BABYLON                from "@babylonjs/core"
 /*  import internal dependencies (client-side)  */
 import Config, { type CameraName } from "./app-render-config"
 import { type API }                from "./app-render-api"
-import State                       from "./app-render-state"
 import Utils                       from "./app-render-utils"
 import PTZ                         from "./app-render-ptz"
 
@@ -33,10 +32,7 @@ export default class Camera {
     /*  object construction  */
     constructor (
         private api:        API,
-        private state:      State,
         private cameraName: string,
-        private ptzFreeD:   boolean,
-        private ptzKeys:    boolean,
         private log:        (level: string, msg: string) => void
     ) {
         /*  determine whether camera is flipped  */
@@ -94,24 +90,12 @@ export default class Camera {
         this.cameraLens!.fov        = this.ptzLens!.zoomP2V(0)
 
         /*  apply latest PTZ (if already available)  */
-        if (this.cameraState !== null && this.ptzFreeD)
+        if (this.cameraState !== null)
             this.reflectFreeDState(this.cameraState)
-
-        /*  allow keyboard to manually adjust camera  */
-        if (this.ptzKeys) {
-            this.api.scene.getScene().onKeyboardObservable.add((kbInfo) => {
-                if (kbInfo.type !== BABYLON.KeyboardEventTypes.KEYDOWN)
-                    return
-                this.reactOnKeyEvent(kbInfo.event.key)
-            })
-        }
     }
 
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
-        if (this.state.cameraName !== this.cameraName)
-            return
-
         /*  adjust camera calibration  */
         if ((state as any)[this.cameraName] !== undefined
             && this.cameraHull !== null
@@ -187,16 +171,13 @@ export default class Camera {
 
     /*  react on a received FreeD state record by reflecting its camera PTZ state  */
     reflectFreeDState (state: FreeDState) {
-        if (this.state.cameraName !== this.cameraName)
-            return
-
         /*  remember state  */
         if (state === null)
             return
         this.cameraState = state
 
         /*  notice: FreeD can be faster than Babylon, so we have to be careful...  */
-        if (this.ptzFreeD && this.cameraCase !== null && this.cameraLens !== null) {
+        if (this.cameraCase !== null && this.cameraLens !== null) {
             this.cameraCase.rotation.x = this.ptzCase!.tiltP2V(0)
             this.cameraCase.rotation.y = this.ptzCase!.panP2V((this.flippedCam ? -1 : 1) * state.pan)
             this.cameraCase.rotation.z = this.ptzCase!.rotateP2V(0)
@@ -207,11 +188,6 @@ export default class Camera {
 
     /*  react on a key (down) event by manipulating the camera PTZ state  */
     async reactOnKeyEvent (key: string) {
-        if (!this.ptzKeys)
-            return
-        if (this.state.cameraName !== this.cameraName)
-            return
-
         /*  pan  */
         if (key === "ArrowLeft")
             this.cameraCase!.rotation.y =
@@ -263,6 +239,11 @@ export default class Camera {
             this.cameraLens!.rotation.x = this.ptzLens!.tiltP2V(0)
             this.cameraLens!.fov        = this.ptzLens!.zoomP2V(0)
         }
+    }
+
+    /*  provide name of camera  */
+    getCamera () {
+        return this.cameraLens
     }
 }
 
