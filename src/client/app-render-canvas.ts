@@ -263,7 +263,7 @@ export default class Canvas {
             this.fadeTimer = null
 
             /*  apply next fading step  */
-            const fadeInterval = 1000 / (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
+            const fadeInterval = this.api.scene.currentMillisecondsPerFrame()
             const fadeStep = 1.0 / (fadeTrans / fadeInterval)
             fade = fade + (fadeSign * fadeStep)
             let wait = fadeInterval
@@ -284,7 +284,7 @@ export default class Canvas {
         if (this.fadeTimer !== null) {
             clearTimeout(this.fadeTimer)
             await new Promise((resolve, reject) => {
-                setTimeout(() => resolve(true), 2 * (1000 / (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())))
+                setTimeout(() => resolve(true), 2 * (this.api.scene.currentMillisecondsPerFrame()))
             })
             this.fadeTimer = null
         }
@@ -306,7 +306,7 @@ export default class Canvas {
                 this.modeTimer = null
 
                 /*  apply next fading step  */
-                const fadeInterval = 1000 / (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
+                const fadeInterval = this.api.scene.currentMillisecondsPerFrame()
                 const fadeStep = 1.0 / (fadeTrans / fadeInterval)
                 fade = fade + (fadeSign * fadeStep)
                 let wait = fadeInterval
