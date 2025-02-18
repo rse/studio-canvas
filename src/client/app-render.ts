@@ -90,6 +90,9 @@ export default class Renderer extends EventEmitter {
         /*  pass-through operation to rendering scene (begin)  */
         await this.api.scene.establish(canvas)
 
+        /*  pass-through operation to rendering camera  */
+        await this.api.camera.establish()
+
         /*  pass-through operation to rendering features  */
         await this.api.canvas.establish()
         await this.api.decal.establish()
@@ -99,7 +102,6 @@ export default class Renderer extends EventEmitter {
         await this.api.pillar.establish()
         await this.api.hologram.establish()
         await this.api.mask.establish()
-        await this.api.camera.establish()
         await this.api.avatars.establish()
         await this.api.reference.establish()
         await this.api.lights.establish()
@@ -113,16 +115,19 @@ export default class Renderer extends EventEmitter {
 
     /*  start rendering  */
     async start () {
+        /*  pass-through operation to rendering scene  */
         await this.api.scene.start()
     }
 
     /*  stop rendering  */
     async stop () {
+        /*  pass-through operation to rendering scene  */
         await this.api.scene.stop()
     }
 
     /*  sync renderer  */
     async reflectSyncTime (timestamp: number) {
+        /*  pass-through operation to rendering canvas  */
         await this.api.canvas.canvasFaderStop()
         await this.api.canvas.canvasFaderStart()
     }
@@ -135,6 +140,9 @@ export default class Renderer extends EventEmitter {
 
         /*  pass-through operation to rendering scene  */
         await this.api.scene.reflectSceneState(state)
+
+        /*  pass-through operation to rendering camera  */
+        await this.api.camera.reflectSceneState(state)
 
         /*  pass-through operation to rendering utilities  */
         await this.api.stream.reflectSceneState(state)
@@ -149,10 +157,9 @@ export default class Renderer extends EventEmitter {
         await this.api.pillar.reflectSceneState(state)
         await this.api.hologram.reflectSceneState(state)
         await this.api.mask.reflectSceneState(state)
-        await this.api.lights.reflectSceneState(state)
         await this.api.avatars.reflectSceneState(state)
         await this.api.reference.reflectSceneState(state)
-        await this.api.camera.reflectSceneState(state)
+        await this.api.lights.reflectSceneState(state)
     }
 
     /*  react on a received mixer record by reflecting the camera mixer state  */
