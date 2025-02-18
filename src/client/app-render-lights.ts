@@ -57,7 +57,6 @@ export default class Lights {
         setupLight(this.light1)
         setupLight(this.light2)
         setupLight(this.light3)
-        this.state.wall!.receiveShadows = true
     }
 
     /*  configure shadow-casting mesh  */

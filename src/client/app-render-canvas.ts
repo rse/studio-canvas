@@ -45,6 +45,7 @@ export default class Canvas {
         { texture1: null, texture2: null },
         { texture1: null, texture2: null }
     ] as CanvasState[]
+    private wall:        BABYLON.Nullable<BABYLON.Mesh>        = null
     private wallRotBase: BABYLON.Nullable<BABYLON.Quaternion>  = null
 
     constructor (
@@ -56,11 +57,16 @@ export default class Canvas {
     /*  establish feature  */
     async establish () {
         /*  gather reference to wall  */
-        this.state.wall = this.state.scene!.getMeshByName("Wall") as
+        this.wall = this.state.scene!.getMeshByName("Wall") as
             BABYLON.Nullable<BABYLON.Mesh>
-        if (this.state.wall === null)
+        if (this.wall === null)
             throw new Error("cannot find wall node")
-        this.wallRotBase = this.state.wall.rotationQuaternion
+
+        /*  configure wall mesh  */
+        this.wall.receiveShadows = true
+
+        /*  remember wall mesh property  */
+        this.wallRotBase = this.wall.rotationQuaternion
 
         /*  on-the-fly load wall canvas  */
         if (this.api.scene.renderingLayer("back"))
@@ -385,8 +391,8 @@ export default class Canvas {
                 changed = true
             }
             if (state.canvas.rotationZ !== undefined) {
-                this.state.wall!.rotationQuaternion = this.wallRotBase!.clone()
-                this.state.wall!.rotate(new BABYLON.Vector3(0, 0, 1),
+                this.wall!.rotationQuaternion = this.wallRotBase!.clone()
+                this.wall!.rotate(new BABYLON.Vector3(0, 0, 1),
                     Utils.deg2rad(state.canvas.rotationZ), BABYLON.Space.WORLD)
             }
             if (state.canvas.fadeSwitch !== undefined)
@@ -394,6 +400,11 @@ export default class Canvas {
             if (changed)
                 await this.canvasModeChange()
         }
+    }
+
+    /*  provide reference to wall mesh  */
+    getWallMesh () {
+        return this.wall
     }
 }
 

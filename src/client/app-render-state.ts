@@ -14,5 +14,4 @@ export type ChromaKey = { enable: boolean, threshold: number, smoothing: number 
 export default class State {
     public cameraName                             = ""
     public scene: BABYLON.Nullable<BABYLON.Scene> = null
-    public wall:  BABYLON.Nullable<BABYLON.Mesh>  = null
 }

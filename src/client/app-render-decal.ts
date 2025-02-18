@@ -72,7 +72,8 @@ export default class Decal {
         let rayDirection = rayEndPos.subtract(rayBeginPos).normalize()
         rayDirection = rotateVector(rayDirection, 0, 0, Utils.deg2rad(this.decalRotate))
         const ray = new BABYLON.Ray(rayBeginPos, rayDirection, 10 /* meters, enough to be behind wall */)
-        const decalBase = this.state.scene!.pickWithRay(ray, (mesh) => (mesh === this.state.wall!))
+        const wall = this.api.canvas.getWallMesh()!
+        const decalBase = this.state.scene!.pickWithRay(ray, (mesh) => (mesh === wall))
         if (decalBase === null)
             throw new Error("cannot find decal base position on wall")
 
@@ -84,7 +85,7 @@ export default class Decal {
         normal.multiplyInPlace(new BABYLON.Vector3(-1, -1, -1))
 
         /*  create new decal  */
-        this.decal = BABYLON.MeshBuilder.CreateDecal("Decal", this.state.wall!, {
+        this.decal = BABYLON.MeshBuilder.CreateDecal("Decal", wall, {
             position:      decalBase!.pickedPoint!,
             normal,
             angle:         Utils.deg2rad(90),
