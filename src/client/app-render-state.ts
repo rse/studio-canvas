@@ -19,6 +19,5 @@ export default class State {
     public wall:            BABYLON.Nullable<BABYLON.Mesh>        = null
     public fps                                                    = 30
     public displaySourceMap                                       = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2", mask: "S2" } as { [ id: string ]: string }
-    public modifiedMedia                                          = {} as { [ id: string ]: boolean }
     public shadowCastingMeshes                                    = [] as BABYLON.Mesh[]
 }

@@ -71,7 +71,7 @@ export default class Pillar {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.pillar)]
+        if (this.api.material.isMediaModified(this.state.displaySourceMap.pillar)
             && this.pillarDisplay.isEnabled())
             await this.api.material.applyDisplayMaterial("pillar", this.pillarDisplay, this.pillarOpacity, 0, 0, this.pillarChromaKey)
 
@@ -79,7 +79,7 @@ export default class Pillar {
         if (state.pillar !== undefined) {
             if (state.pillar.source !== undefined
                 && (this.state.displaySourceMap.pillar !== state.pillar.source
-                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.pillar.source)])) {
+                    || this.api.material.isMediaModified(state.pillar.source))) {
                 this.state.displaySourceMap.pillar = state.pillar.source
                 if (this.pillarDisplay.isEnabled())
                     await this.api.material.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)

@@ -24,6 +24,7 @@ export default class Material {
     private displayMaterial2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
     private displayTextureByURL     = new Map<string, BABYLON.Texture>()
     private displayTextureInfo      = new Map<BABYLON.Texture, { type: string, url: string, refs: number }>()
+    private modifiedMedia           = {} as { [ id: string ]: boolean }
 
     constructor (
         private api:   API,
@@ -140,7 +141,6 @@ export default class Material {
         }
     }
 
-
     /*  convert from "Mx" to "mediaX"  */
     mapMediaId (id: string) {
         if      (id === "M1") id = "media1"
@@ -148,6 +148,11 @@ export default class Material {
         else if (id === "M3") id = "media3"
         else if (id === "M4") id = "media4"
         return id
+    }
+
+    /*  check whether material was modified  */
+    isMediaModified (id: string) {
+        return this.modifiedMedia[this.api.material.mapMediaId(id)]
     }
 
     /*  apply video stream onto mesh  */
@@ -253,24 +258,24 @@ export default class Material {
 
     /*  reflect current scene state  */
     async reflectSceneState (state: StateTypePartial) {
-        this.state.modifiedMedia = {} as { [ id: string ]: boolean }
+        this.modifiedMedia = {} as { [ id: string ]: boolean }
         if (state.media !== undefined) {
             /*  adjust medias  */
             if (this.displayMediaURL.get("media1") !== state.media!.media1) {
                 this.displayMediaURL.set("media1", state.media.media1)
-                this.state.modifiedMedia.media1 = true
+                this.modifiedMedia.media1 = true
             }
             if (this.displayMediaURL.get("media2") !== state.media.media2) {
                 this.displayMediaURL.set("media2", state.media.media2)
-                this.state.modifiedMedia.media2 = true
+                this.modifiedMedia.media2 = true
             }
             if (this.displayMediaURL.get("media3") !== state.media.media3) {
                 this.displayMediaURL.set("media3", state.media.media3)
-                this.state.modifiedMedia.media3 = true
+                this.modifiedMedia.media3 = true
             }
             if (this.displayMediaURL.get("media4") !== state.media.media4) {
                 this.displayMediaURL.set("media4", state.media.media4)
-                this.state.modifiedMedia.media4 = true
+                this.modifiedMedia.media4 = true
             }
         }
     }

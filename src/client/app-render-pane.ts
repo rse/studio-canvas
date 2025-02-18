@@ -84,7 +84,7 @@ export default class Pane {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.pane)]
+        if (this.api.material.isMediaModified(this.state.displaySourceMap.pane)
             && this.paneDisplay.isEnabled())
             await this.api.material.applyDisplayMaterial("pane", this.paneDisplay, this.paneOpacity, 0, 0, this.paneChromaKey)
 
@@ -92,7 +92,7 @@ export default class Pane {
         if (state.pane !== undefined) {
             if (state.pane.source !== undefined
                 && (this.state.displaySourceMap.pane !== state.pane.source
-                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.pane.source)])) {
+                    || this.api.material.isMediaModified(state.pane.source))) {
                 this.state.displaySourceMap.pane = state.pane.source
                 if (this.paneDisplay.isEnabled())
                     await this.api.material.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)

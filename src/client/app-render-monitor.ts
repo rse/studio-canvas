@@ -84,7 +84,7 @@ export default class Monitor {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.monitor)]
+        if (this.api.material.isMediaModified(this.state.displaySourceMap.monitor)
             && this.monitorDisplay.isEnabled())
             await this.api.material.applyDisplayMaterial("monitor", this.monitorDisplay, this.monitorOpacity, 0, 0, this.monitorChromaKey)
 
@@ -92,7 +92,7 @@ export default class Monitor {
         if (state.monitor !== undefined) {
             if (state.monitor.source !== undefined
                 && (this.state.displaySourceMap.monitor !== state.monitor.source
-                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.monitor.source)])) {
+                    || this.api.material.isMediaModified(state.monitor.source))) {
                 this.state.displaySourceMap.monitor = state.monitor.source
                 if (this.monitorDisplay.isEnabled())
                     await this.api.material.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)

@@ -62,7 +62,7 @@ export default class Hologram {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.hologram)]
+        if (this.api.material.isMediaModified(this.state.displaySourceMap.hologram)
             && this.hologramDisplay.isEnabled())
             await this.api.material.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
 
@@ -70,7 +70,7 @@ export default class Hologram {
         if (state.hologram !== undefined) {
             if (state.hologram.source !== undefined
                 && (this.state.displaySourceMap.hologram !== state.hologram.source
-                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.hologram.source)])) {
+                    || this.api.material.isMediaModified(state.hologram.source))) {
                 this.state.displaySourceMap.hologram = state.hologram.source
                 if (this.hologramDisplay.isEnabled())
                     await this.api.material.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)

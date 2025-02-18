@@ -62,7 +62,7 @@ export default class Plate {
             return
 
         /*  update already active media receivers  */
-        if (this.state.modifiedMedia[this.api.material.mapMediaId(this.state.displaySourceMap.plate)]
+        if (this.api.material.isMediaModified(this.state.displaySourceMap.plate)
             && this.plateDisplay.isEnabled())
             await this.api.material.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
 
@@ -70,7 +70,7 @@ export default class Plate {
         if (state.plate !== undefined) {
             if (state.plate.source !== undefined
                 && (this.state.displaySourceMap.plate !== state.plate.source
-                    || this.state.modifiedMedia[this.api.material.mapMediaId(state.plate.source)])) {
+                    || this.api.material.isMediaModified(state.plate.source))) {
                 this.state.displaySourceMap.plate = state.plate.source
                 if (this.plateDisplay.isEnabled())
                     await this.api.material.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
