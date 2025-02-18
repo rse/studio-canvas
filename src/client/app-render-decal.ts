@@ -122,7 +122,7 @@ export default class Decal {
             return
 
         /*  update already active media receivers  */
-        if (this.api.material.isMediaModified(this.state.displaySourceMap.decal)
+        if (this.api.material.isMediaModified(this.api.material.displaySource("decal"))
             && this.decal.isEnabled())
             await this.api.material.applyDisplayMaterial("decal", this.decal, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
 
@@ -131,9 +131,9 @@ export default class Decal {
             if (state.decal.fadeTime !== undefined && this.decalFade !== state.decal.fadeTime)
                 this.decalFade = state.decal.fadeTime
             if (state.decal.source !== undefined
-                && (this.state.displaySourceMap.decal !== state.decal.source
+                && (this.api.material.displaySource("decal") !== state.decal.source
                     || this.api.material.isMediaModified(state.decal.source))) {
-                this.state.displaySourceMap.decal = state.decal.source
+                this.api.material.displaySource("decal", state.decal.source)
                 if (this.decal.isEnabled())
                     await this.api.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
             }

@@ -24,6 +24,7 @@ export default class Material {
     private displayMaterial2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
     private displayTextureByURL     = new Map<string, BABYLON.Texture>()
     private displayTextureInfo      = new Map<BABYLON.Texture, { type: string, url: string, refs: number }>()
+    private displaySourceMap        = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2", mask: "S2" } as { [ id: string ]: string }
     private modifiedMedia           = {} as { [ id: string ]: boolean }
 
     constructor (
@@ -161,14 +162,14 @@ export default class Material {
 
         /*  determine media id  */
         let mediaId = ""
-        if (this.state.displaySourceMap[id].match(/^M/))
-            mediaId = this.mapMediaId(this.state.displaySourceMap[id])
+        if (this.displaySourceMap[id].match(/^M/))
+            mediaId = this.mapMediaId(this.displaySourceMap[id])
 
         /*  determine texture  */
         let texture: BABYLON.Nullable<BABYLON.Texture> = null
-        if (this.state.displaySourceMap[id].match(/^S/) && this.api.stream.getVideoTexture() !== null)
+        if (this.displaySourceMap[id].match(/^S/) && this.api.stream.getVideoTexture() !== null)
             texture = this.api.stream.getVideoTexture()
-        else if (this.state.displaySourceMap[id].match(/^M/) && this.displayMediaURL.has(mediaId))
+        else if (this.displaySourceMap[id].match(/^M/) && this.displayMediaURL.has(mediaId))
             texture = await this.loadMediaTexture(this.displayMediaURL.get(mediaId)!).catch(() => null)
 
         /*  short-circuit processing in case texture is not available  */
@@ -184,7 +185,7 @@ export default class Material {
 
         /*  create new shader material  */
         const material = ShaderMaterial.displayStream(`video-${id}`, this.state.scene!)
-        if (this.state.displaySourceMap[id].match(/^M/))
+        if (this.displaySourceMap[id].match(/^M/))
             this.displayMaterial2Texture.set(material, texture)
         material.setTexture("textureSampler", texture)
         material.setFloat("opacity", opacity)
@@ -193,20 +194,20 @@ export default class Material {
         material.setInt("chromaEnable", chromaKey?.enable ? 1 : 0)
         material.setFloat("chromaThreshold", chromaKey?.threshold ?? 0.4)
         material.setFloat("chromaSmoothing", chromaKey?.smoothing ?? 0.1)
-        if (this.state.displaySourceMap[id].match(/^S/)) {
+        if (this.displaySourceMap[id].match(/^S/)) {
             let stack = 0
-            if      (this.state.displaySourceMap[id] === "S1") stack = 0
-            else if (this.state.displaySourceMap[id] === "S2") stack = 1
+            if      (this.displaySourceMap[id] === "S1") stack = 0
+            else if (this.displaySourceMap[id] === "S2") stack = 1
             material.setInt("stack", stack)
             material.setInt("stacks", Config.videoStacks)
             material.setInt("stackAlphaInvert", 0)
         }
-        else if (this.displayMediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.state.displaySourceMap[id].match(/^M/)) {
+        else if (this.displayMediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.displaySourceMap[id].match(/^M/)) {
             material.setInt("stack", 0)
             material.setInt("stacks", 1)
             material.setInt("stackAlphaInvert", 0)
         }
-        else if (this.state.displaySourceMap[id].match(/^M/))
+        else if (this.displaySourceMap[id].match(/^M/))
             material.setInt("stacks", 0)
         material.zOffset = -200
         /* material.needAlphaBlending = () => true */
@@ -278,6 +279,17 @@ export default class Material {
                 this.modifiedMedia.media4 = true
             }
         }
+    }
+
+    /*  lookup/register source for display  */
+    /* eslint no-dupe-class-members: off */
+    displaySource (display: string): string
+    displaySource (display: string, source: string): void
+    displaySource (display: string, source?: string): any {
+        if (source !== undefined)
+            this.displaySourceMap[display] = source
+        else
+            return this.displaySourceMap[display]
     }
 }
 

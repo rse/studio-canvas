@@ -68,16 +68,16 @@ export default class Mask {
             return
 
         /*  update already active media receivers  */
-        if (this.api.material.isMediaModified(this.state.displaySourceMap.mask)
+        if (this.api.material.isMediaModified(this.api.material.displaySource("mask"))
             && this.maskDisplay.isEnabled())
             await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
 
         /*  reflect scene changes  */
         if (state.mask !== undefined) {
             if (state.mask.source !== undefined
-                && (this.state.displaySourceMap.mask !== state.mask.source
+                && (this.api.material.displaySource("mask") !== state.mask.source
                     || this.api.material.isMediaModified(state.mask.source))) {
-                this.state.displaySourceMap.mask = state.mask.source
+                this.api.material.displaySource("mask", state.mask.source)
                 if (this.maskDisplay.isEnabled())
                     await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
             }
