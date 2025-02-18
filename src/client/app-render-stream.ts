@@ -15,6 +15,7 @@ import State                  from "./app-render-state"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class Stream {
+    private videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
     private videoStream:      MediaStream | null = null
     private videoStreamDevice                    = ""
     private videoStreamWidth                     = 0
@@ -31,7 +32,7 @@ export default class Stream {
     async loadVideoStream () {
         /*  initialize  */
         this.videoStream  = null
-        this.state.videoTexture = null
+        this.videoTexture = null
 
         /*  ensure video devices can be enumerated by requesting a
             dummy media stream so permissions are granted once  */
@@ -95,15 +96,15 @@ export default class Stream {
 
         /*  provide results  */
         this.videoStream = stream
-        this.state.videoTexture = texture
+        this.videoTexture = texture
     }
 
     /*  unload video stream  */
     async unloadVideoStream () {
         this.log("INFO", "unloading video stream")
-        if (this.state.videoTexture !== null) {
-            this.state.videoTexture.dispose()
-            this.state.videoTexture = null
+        if (this.videoTexture !== null) {
+            this.videoTexture.dispose()
+            this.videoTexture = null
         }
         if (this.videoStream !== null) {
             this.videoStream.getTracks().forEach((track) => track.stop())
@@ -140,6 +141,11 @@ export default class Stream {
                 await this.loadVideoStream()
             }
         }
+    }
+
+    /*  retrieve current video texture  */
+    getVideoTexture () {
+        return this.videoTexture
     }
 }
 

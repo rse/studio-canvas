@@ -166,8 +166,8 @@ export default class Material {
 
         /*  determine texture  */
         let texture: BABYLON.Nullable<BABYLON.Texture> = null
-        if (this.state.displaySourceMap[id].match(/^S/) && this.state.videoTexture !== null)
-            texture = this.state.videoTexture
+        if (this.state.displaySourceMap[id].match(/^S/) && this.api.stream.getVideoTexture() !== null)
+            texture = this.api.stream.getVideoTexture()
         else if (this.state.displaySourceMap[id].match(/^M/) && this.displayMediaURL.has(mediaId))
             texture = await this.loadMediaTexture(this.displayMediaURL.get(mediaId)!).catch(() => null)
 
