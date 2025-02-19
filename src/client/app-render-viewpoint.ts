@@ -17,14 +17,14 @@ import { FreeDState }              from "../common/app-freed"
 import { ViewpointState }          from "../common/app-viewpoint"
 import { StateTypePartial }        from "../common/app-state"
 
-/*  exported renderer feature  */
+/*  exported rendering feature  */
 export default class Viewpoint {
     /*  internal state  */
     private cameras = new Map<CameraName, Camera>()
     private camera: CameraName
     private viewpoint: CameraName
 
-    /*  object construction  */
+    /*  create feature  */
     constructor (
         private api:        API,
         private cameraName: string,

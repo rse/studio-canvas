@@ -14,22 +14,23 @@ import Utils, { type ChromaKey } from "./app-render-utils"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
+/*  exported rendering feature  */
 export default class Hologram {
+    /*  internal state  */
     private hologram:        BABYLON.Nullable<BABYLON.TransformNode>  = null
     private hologramDisplay: BABYLON.Nullable<BABYLON.Mesh>           = null
-    private hologramFade         = 0
-    private hologramOpacity      = 1.0
-    private hologramBorderRad    = 40.0
-    private hologramBorderCrop   = 0.0
-    private hologramChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
+    private hologramFade       = 0
+    private hologramOpacity    = 1.0
+    private hologramBorderRad  = 40.0
+    private hologramBorderCrop = 0.0
+    private hologramChromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private hologramBase = {
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
         rotationZ:     0, positionZ:     0, positionX:     0
     }
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {

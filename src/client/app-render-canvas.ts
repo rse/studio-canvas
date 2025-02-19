@@ -15,6 +15,7 @@ import Utils                  from "./app-render-utils"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
 
+/*  utility type for canvas configuration  */
 type CanvasConfig = {
     texture1:  string,
     texture2:  string,
@@ -22,6 +23,7 @@ type CanvasConfig = {
     fadeWait:  number
 }
 
+/*  utility type for canvas state  */
 type CanvasState = {
     canvas1:  HTMLCanvasElement | null
     canvas2:  HTMLCanvasElement | null
@@ -29,27 +31,28 @@ type CanvasState = {
     texture2: BABYLON.Nullable<BABYLON.Texture>
 }
 
+/*  exported rendering feature  */
 export default class Canvas {
-    private fadeTimer: ReturnType<typeof setTimeout> | null = null
-    private modeTimer: ReturnType<typeof setTimeout> | null = null
-    private fadeSwitch = 2.0
-    private canvasMode        = 0
-    private canvasConfig      = [
+    /*  internal state  */
+    private canvasMode = 0
+    private canvasMaterial: BABYLON.Nullable<BABYLON.NodeMaterial> = null
+    private canvasTexture:  BABYLON.Nullable<BABYLON.Texture>      = null
+    private canvasConfig = [
         { texture1: "", texture2: "", fadeTrans: 2 * 1000, fadeWait: 10 * 1000 },
         { texture1: "", texture2: "", fadeTrans: 2 * 1000, fadeWait: 10 * 1000 }
     ] as CanvasConfig[]
-    private canvasMaterial:  BABYLON.Nullable<BABYLON.NodeMaterial>   = null
-    private canvasTexture:   BABYLON.Nullable<BABYLON.Texture>        = null
     private canvasState = [
         { texture1: null, texture2: null },
         { texture1: null, texture2: null }
     ] as CanvasState[]
+    private fadeTimer: ReturnType<typeof setTimeout> | null = null
+    private modeTimer: ReturnType<typeof setTimeout> | null = null
+    private fadeSwitch = 2.0
     private wall:        BABYLON.Nullable<BABYLON.Mesh>        = null
     private wallRotBase: BABYLON.Nullable<BABYLON.Quaternion>  = null
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {

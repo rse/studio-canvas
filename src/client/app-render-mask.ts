@@ -13,7 +13,9 @@ import { type API }           from "./app-render-api"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
 
+/*  exported rendering feature  */
 export default class Mask {
+    /*  internal state  */
     private originalCamera:  BABYLON.Nullable<BABYLON.Camera> = null
     private mask:            BABYLON.Nullable<BABYLON.TransformNode>  = null
     private maskDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -24,9 +26,8 @@ export default class Mask {
         scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0
     }
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {

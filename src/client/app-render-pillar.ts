@@ -14,7 +14,9 @@ import Utils, { type ChromaKey } from "./app-render-utils"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
+/*  exported rendering feature  */
 export default class Pillar {
+    /*  internal state  */
     public pillar:          BABYLON.Nullable<BABYLON.TransformNode>  = null
     public pillarCase:      BABYLON.Nullable<BABYLON.Mesh>           = null
     public pillarDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -29,9 +31,8 @@ export default class Pillar {
         positionCaseX: 0, positionDisplayX: 0
     }
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {

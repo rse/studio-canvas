@@ -7,8 +7,10 @@
 /*  import internal dependencies (client-side)  */
 import { type PTZCamType } from "./app-render-ptz"
 
+/*  exported utility type of the camera names  */
 export type CameraName = "CAM1" | "CAM2" | "CAM3" | "CAM4"
 
+/*  exported global configuration  */
 export default class Config {
     /*  FPS to factor conversion  */
     static fpsFactor = {

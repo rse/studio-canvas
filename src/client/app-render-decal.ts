@@ -14,20 +14,21 @@ import Utils, { type ChromaKey } from "./app-render-utils"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
+/*  exported renderer feature  */
 export default class Decal {
-    private decal:            BABYLON.Nullable<BABYLON.Mesh> = null
-    private decalRotate       = 0.0
-    private decalLift         = 0.0
-    private decalScale        = 1.0
-    private decalFade         = 0
-    private decalOpacity      = 1.0
-    private decalBorderRad    = 40.0
-    private decalBorderCrop   = 0.0
-    private decalChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
+    /*  internal state  */
+    private decal:          BABYLON.Nullable<BABYLON.Mesh> = null
+    private decalRotate     = 0.0
+    private decalLift       = 0.0
+    private decalScale      = 1.0
+    private decalFade       = 0
+    private decalOpacity    = 1.0
+    private decalBorderRad  = 40.0
+    private decalBorderCrop = 0.0
+    private decalChromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {

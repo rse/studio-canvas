@@ -22,6 +22,7 @@ import Avatars     from "./app-render-avatars"
 import Reference   from "./app-render-reference"
 import Lights      from "./app-render-lights"
 
+/*  special renderer API  */
 type Renderer = {
     log: (level: string, msg: string) => void
     fps: (fps: number) => void

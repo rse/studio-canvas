@@ -14,7 +14,9 @@ import Utils, { type ChromaKey } from "./app-render-utils"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
+/*  exported rendering feature  */
 export default class Plate {
+    /*  internal state  */
     private plate:           BABYLON.Nullable<BABYLON.TransformNode>  = null
     private plateDisplay:    BABYLON.Nullable<BABYLON.Mesh>           = null
     private plateFade        = 0
@@ -27,9 +29,8 @@ export default class Plate {
         rotationZ:     0, positionZ:     0, positionX:     0
     }
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {

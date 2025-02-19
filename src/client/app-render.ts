@@ -34,6 +34,7 @@ import { MixerState }              from "../common/app-mixer"
 import { ViewpointState }          from "../common/app-viewpoint"
 import { StateTypePartial }        from "../common/app-state"
 
+/*  exported rendering class  */
 export default class Renderer extends EventEmitter {
     /*  shared API  */
     private api: API
@@ -43,10 +44,13 @@ export default class Renderer extends EventEmitter {
 
     /*  (re-)configure camera (by name) and options (by URL)  */
     constructor (params: { layer: string, cameraName: string, ptzFreeD: boolean, ptzKeys: boolean }) {
+        /*  initialize EventEmitter  */
         super()
+
+        /*  initialize shared API  */
         this.api = {} as API
 
-        /*  utility functions for passing-through information  */
+        /*  provide utility functions for passing-through information  */
         this.api.renderer = {
             log: (level: string, msg: string) => { this.emit("log", level, msg) },
             fps: (fps: number) => { this.emit("fps", fps) }

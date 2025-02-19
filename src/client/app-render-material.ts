@@ -16,9 +16,12 @@ import { type ChromaKey }        from "./app-render-utils"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
+/*  utility type of display video stacks  */
 type VideoStackId = "monitor" | "decal" | "hologram" | "plate" | "pane" | "pillar" | "mask"
 
+/*  exported rendering feature  */
 export default class Material {
+    /*  internal state  */
     private displayMeshMaterial     = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
     private displayMediaURL         = new Map<string, string>()
     private displayMaterial2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
@@ -27,9 +30,8 @@ export default class Material {
     private displaySourceMap        = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2", mask: "S2" } as { [ id: string ]: string }
     private modifiedMedia           = {} as { [ id: string ]: boolean }
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  load media texture  */
     async loadMediaTexture (url: string): Promise<BABYLON.Nullable<BABYLON.Texture>> {

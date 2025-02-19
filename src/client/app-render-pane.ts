@@ -14,7 +14,9 @@ import Utils, { type ChromaKey } from "./app-render-utils"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
+/*  exported rendering feature  */
 export default class Pane {
+    /*  internal state  */
     public pane:            BABYLON.Nullable<BABYLON.TransformNode>  = null
     public paneCase:        BABYLON.Nullable<BABYLON.Mesh>           = null
     public paneDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -28,9 +30,8 @@ export default class Pane {
         positionCaseX: 0, positionDisplayX: 0
     }
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {

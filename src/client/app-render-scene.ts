@@ -16,7 +16,9 @@ import { type API }           from "./app-render-api"
 import { MixerState }         from "../common/app-mixer"
 import { StateTypePartial }   from "../common/app-state"
 
+/*  exported rendering feature  */
 export default class Scene {
+    /*  internal state  */
     private engine:      BABYLON.Nullable<BABYLON.Engine>         = null
     private scene:       BABYLON.Nullable<BABYLON.Scene>          = null
     private optimizer:   BABYLON.Nullable<BABYLON.SceneOptimizer> = null
@@ -28,10 +30,8 @@ export default class Scene {
     private mixerProgram = ""
     private mixerPreview = ""
 
-    constructor (
-        private api:     API,
-        private layer:   string
-    ) {}
+    /*  create feature  */
+    constructor (private api: API, private layer: string) {}
 
     /*  establish feature  */
     async establish (canvas: HTMLCanvasElement) {

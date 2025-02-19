@@ -7,16 +7,24 @@
 /*  import external dependencies  */
 import * as BABYLON from "@babylonjs/core"
 
+/*  exported utility type  */
 export type ChromaKey = {
     enable:    boolean
     threshold: number
     smoothing: number
 }
 
+/*  exported utility functions  */
 export default class Utils {
-    /*  convert between degree and radians  */
-    static deg2rad (deg: number) { return (deg * (Math.PI / 180)) }
-    static rad2deg (rad: number) { return (rad * (180 / Math.PI)) }
+    /*  convert from degree to radians  */
+    static deg2rad (deg: number) {
+        return (deg * (Math.PI / 180))
+    }
+
+    /*  convert from radians to degree  */
+    static rad2deg (rad: number) {
+        return (rad * (180 / Math.PI))
+    }
 
     /*  perform a value animation manually  */
     static manualAnimation (from: number, to: number, duration: number, fps: number, callback: (grad: number) => void) {

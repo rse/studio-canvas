@@ -10,16 +10,18 @@ import * as BABYLON           from "@babylonjs/core"
 /*  import internal dependencies (client-side)  */
 import { type API }           from "./app-render-api"
 
+/*  exported rendering feature  */
 export default class Texture {
+    /*  internal state  */
     private imageLoader: Worker
 
-    constructor (
-        private api: API
-    ) {
+    /*  create feature  */
+    constructor (private api: API) {
         /*  worker for off-loading image loading and decoding  */
         this.imageLoader = new Worker(new URL("./app-render-texture-worker.js", import.meta.url))
     }
 
+    /*  create/load texture  */
     async createTexture (url: string, canvas: HTMLCanvasElement) {
         /*  fetch image from URL and decode PNG/JPEG format  */
         const imageBitmap = await (new Promise((resolve, reject) => {

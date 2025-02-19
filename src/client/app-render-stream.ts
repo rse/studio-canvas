@@ -13,7 +13,9 @@ import { type API }           from "./app-render-api"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
 
+/*  exported rendering feature  */
 export default class Stream {
+    /*  internal state  */
     private videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
     private videoStream:      MediaStream | null = null
     private videoStreamDevice                    = ""
@@ -21,9 +23,8 @@ export default class Stream {
     private videoStreamHeight                    = 0
     private videoStreamFPS                       = 0
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  load video stream  */
     async loadVideoStream () {

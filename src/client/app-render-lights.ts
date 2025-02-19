@@ -13,15 +13,16 @@ import { type API }           from "./app-render-api"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
 
+/*  exported rendering feature  */
 export default class Lights {
+    /*  internal state  */
     private light1: BABYLON.Nullable<BABYLON.PointLight>     = null
     private light2: BABYLON.Nullable<BABYLON.PointLight>     = null
     private light3: BABYLON.Nullable<BABYLON.PointLight>     = null
     private shadowCastingMeshes = [] as BABYLON.Mesh[]
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {

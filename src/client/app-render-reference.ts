@@ -13,12 +13,13 @@ import { type API }           from "./app-render-api"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
 
+/*  exported rendering feature  */
 export default class Reference {
+    /*  internal state  */
     private references: BABYLON.Nullable<BABYLON.TransformNode>  = null
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {

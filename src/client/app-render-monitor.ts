@@ -14,7 +14,9 @@ import Utils, { type ChromaKey } from "./app-render-utils"
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
 
+/*  exported rendering feature  */
 export default class Monitor {
+    /*  internal state  */
     private monitor:          BABYLON.Nullable<BABYLON.TransformNode>  = null
     private monitorCase:      BABYLON.Nullable<BABYLON.Mesh>           = null
     private monitorDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
@@ -28,9 +30,8 @@ export default class Monitor {
         positionCaseX: 0, positionDisplayX: 0
     }
 
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {

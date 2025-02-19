@@ -29,18 +29,15 @@ export default class Camera {
     private ptzCase:     PTZ | null                               = null
     private ptzLens:     PTZ | null                               = null
 
-    /*  object construction  */
-    constructor (
-        private api:        API,
-        private cameraName: string
-    ) {
-        /*  determine whether camera is flipped  */
-        this.flippedCam = Config.flippedCams.includes(cameraName)
-
+    /*  create feature  */
+    constructor (private api: API, private cameraName: string) {
         /*  mapping of camera to type  */
         const cameraType = Config.camNameToTypeMap.get(cameraName as CameraName)
         if (!cameraType)
             throw new Error("invalid camera")
+
+        /*  determine whether camera is flipped  */
+        this.flippedCam = Config.flippedCams.includes(cameraName)
 
         /*  instantiate PTZ  */
         this.ptzHull = new PTZ(cameraType)

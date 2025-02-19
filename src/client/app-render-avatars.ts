@@ -24,10 +24,8 @@ export default class Avatars {
     private avatar2Model: BABYLON.Nullable<BABYLON.Mesh>           = null
     private avatar2Scale                                           = { x: 0, y: 0, z: 0 }
 
-    /*  object construction  */
-    constructor (
-        private api: API
-    ) {}
+    /*  create feature  */
+    constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {
