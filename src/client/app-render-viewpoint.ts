@@ -84,11 +84,8 @@ export default class Viewpoint {
             const cameraType = Config.camNameToTypeMap.get(camera)
             if (!cameraType)
                 throw new Error("invalid camera")
-            console.log("CHANGE", viewpoint, camera)
-            if (this.viewpoint === viewpoint && this.camera !== camera) {
-                console.log("DO")
+            if (this.viewpoint === viewpoint && this.camera !== camera)
                 this.activateCamera(camera)
-            }
         }
         if (viewpoint.CAM1) changeCamera("CAM1", viewpoint.CAM1)
         if (viewpoint.CAM2) changeCamera("CAM2", viewpoint.CAM2)
