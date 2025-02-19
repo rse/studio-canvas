@@ -30,7 +30,7 @@ export default class Avatars {
     /*  establish feature  */
     async establish () {
         /*  sanity check situation  */
-        if (!(this.api.scene.getScene() !== null && this.api.scene.renderingLayer("back")))
+        if (!this.api.scene.renderingLayer("back"))
             return
 
         /*  gather references to avatar #1  */
@@ -46,7 +46,7 @@ export default class Avatars {
         /*  disable avatar #1 by default  */
         this.avatar1.setEnabled(false)
 
-        /*  rember base scaling of avatar #1  */
+        /*  remember base scaling of avatar #1  */
         this.avatar1Scale.x = this.avatar1Model.scaling.x
         this.avatar1Scale.y = this.avatar1Model.scaling.y
         this.avatar1Scale.z = this.avatar1Model.scaling.z
@@ -64,7 +64,7 @@ export default class Avatars {
         /*  disable avatar #2 by default  */
         this.avatar2.setEnabled(false)
 
-        /*  rember base scaling of avatar #2  */
+        /*  remember base scaling of avatar #2  */
         this.avatar2Scale.x = this.avatar2Model.scaling.x
         this.avatar2Scale.y = this.avatar2Model.scaling.y
         this.avatar2Scale.z = this.avatar2Model.scaling.z
@@ -73,8 +73,8 @@ export default class Avatars {
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
         /*  sanity check situation  */
-        if (!(this.avatar1 !== null
-            && this.avatar2 !== null
+        if (!(this.avatar1 !== null && this.avatar1Model !== null
+            && this.avatar2 !== null && this.avatar2Model !== null
             && this.api.scene.renderingLayer("back")))
             return
 
@@ -86,9 +86,9 @@ export default class Avatars {
                 this.avatar1.setEnabled(state.avatars.enable1)
             if (state.avatars.size1 !== undefined) {
                 const scale = state.avatars.size1 / 185 /* cm */
-                this.avatar1Model!.scaling.x = this.avatar1Scale.x * scale
-                this.avatar1Model!.scaling.y = this.avatar1Scale.y * scale
-                this.avatar1Model!.scaling.z = this.avatar1Scale.z * scale
+                this.avatar1Model.scaling.x = this.avatar1Scale.x * scale
+                this.avatar1Model.scaling.y = this.avatar1Scale.y * scale
+                this.avatar1Model.scaling.z = this.avatar1Scale.z * scale
             }
             if (state.avatars.rotate1 !== undefined) {
                 this.avatar1.rotationQuaternion = BABYLON.Quaternion.Identity()
@@ -102,9 +102,9 @@ export default class Avatars {
                 this.avatar2.setEnabled(state.avatars.enable2)
             if (state.avatars.size2 !== undefined) {
                 const scale = state.avatars.size2 / 185 /* cm */
-                this.avatar2Model!.scaling.x = this.avatar2Scale.x * scale
-                this.avatar2Model!.scaling.y = this.avatar2Scale.y * scale
-                this.avatar2Model!.scaling.z = this.avatar2Scale.z * scale
+                this.avatar2Model.scaling.x = this.avatar2Scale.x * scale
+                this.avatar2Model.scaling.y = this.avatar2Scale.y * scale
+                this.avatar2Model.scaling.z = this.avatar2Scale.z * scale
             }
             if (state.avatars.rotate2 !== undefined) {
                 this.avatar2.rotationQuaternion = BABYLON.Quaternion.Identity()
