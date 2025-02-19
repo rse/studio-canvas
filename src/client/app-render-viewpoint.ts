@@ -14,6 +14,7 @@ import Camera                      from "./app-render-camera"
 
 /*  import internal dependencies (shared)  */
 import { FreeDState }              from "../common/app-freed"
+import { ViewpointState }          from "../common/app-viewpoint"
 import { StateTypePartial }        from "../common/app-state"
 
 /*  exported renderer feature  */
@@ -21,6 +22,7 @@ export default class Viewpoint {
     /*  internal state  */
     private cameras = new Map<CameraName, Camera>()
     private camera: CameraName
+    private viewpoint: CameraName
 
     /*  object construction  */
     constructor (
@@ -40,7 +42,8 @@ export default class Viewpoint {
         const cameraType = Config.camNameToTypeMap.get(camera)
         if (!cameraType)
             throw new Error("invalid camera")
-        this.camera = camera
+        this.camera    = camera
+        this.viewpoint = camera
     }
 
     /*  establish feature  */
@@ -72,6 +75,25 @@ export default class Viewpoint {
         if (!this.ptzFreeD)
             return
         this.cameras.get(this.camera)?.reflectFreeDState(state)
+    }
+
+    /*  react on a received Viewpoint state record  */
+    reflectViewpointState (viewpoint: ViewpointState) {
+        const changeCamera = (viewpoint: CameraName, cameraName: string) => {
+            const camera = cameraName as CameraName
+            const cameraType = Config.camNameToTypeMap.get(camera)
+            if (!cameraType)
+                throw new Error("invalid camera")
+            console.log("CHANGE", viewpoint, camera)
+            if (this.viewpoint === viewpoint && this.camera !== camera) {
+                console.log("DO")
+                this.activateCamera(camera)
+            }
+        }
+        if (viewpoint.CAM1) changeCamera("CAM1", viewpoint.CAM1)
+        if (viewpoint.CAM2) changeCamera("CAM2", viewpoint.CAM2)
+        if (viewpoint.CAM3) changeCamera("CAM3", viewpoint.CAM3)
+        if (viewpoint.CAM4) changeCamera("CAM4", viewpoint.CAM4)
     }
 
     /*  react on a key (down) event by manipulating the camera PTZ state  */

@@ -139,6 +139,7 @@ import moment                     from "moment"
 import axios                      from "axios"
 import Renderer                   from "./app-render"
 import { MixerState }             from "../common/app-mixer"
+import { ViewpointState }         from "../common/app-viewpoint"
 import { FreeDState }             from "../common/app-freed"
 import {
     StateType, StateTypePartial,
@@ -274,6 +275,10 @@ export default defineComponent({
             else if (data.cmd === "MIXER") {
                 const mixer = data.arg.mixer as MixerState
                 renderer!.reflectMixerState(mixer)
+            }
+            else if (data.cmd === "VIEWPOINT") {
+                const viewpoint = data.arg.viewpoint as ViewpointState
+                renderer!.reflectViewpointState(viewpoint)
             }
             else if (data.cmd === "SYNC") {
                 const timestamp = data.arg.timestamp as number

@@ -18,6 +18,7 @@ import RESTMedia      from "./app-rest-media"
 import RESTState      from "./app-rest-state"
 import RESTPreset     from "./app-rest-preset"
 import RESTMixer      from "./app-rest-mixer"
+import RESTViewpoint  from "./app-rest-viewpoint"
 import RESTWS         from "./app-rest-ws"
 import DB             from "./app-db"
 
@@ -31,19 +32,20 @@ import DB             from "./app-db"
     /*  register classes  */
     const ctx = {}
     container.register({
-        ctx:        awilix.asValue(ctx),
-        pkg:        awilix.asClass(Pkg        ).setLifetime(awilix.Lifetime.SINGLETON),
-        argv:       awilix.asClass(Argv       ).setLifetime(awilix.Lifetime.SINGLETON),
-        log:        awilix.asClass(Log        ).setLifetime(awilix.Lifetime.SINGLETON),
-        db:         awilix.asClass(DB         ).setLifetime(awilix.Lifetime.SINGLETON),
-        freed:      awilix.asClass(FreeD      ).setLifetime(awilix.Lifetime.SINGLETON),
-        rest:       awilix.asClass(REST       ).setLifetime(awilix.Lifetime.SINGLETON),
-        restCanvas: awilix.asClass(RESTCanvas ).setLifetime(awilix.Lifetime.SINGLETON),
-        restMedia:  awilix.asClass(RESTMedia  ).setLifetime(awilix.Lifetime.SINGLETON),
-        restState:  awilix.asClass(RESTState  ).setLifetime(awilix.Lifetime.SINGLETON),
-        restPreset: awilix.asClass(RESTPreset ).setLifetime(awilix.Lifetime.SINGLETON),
-        restMixer:  awilix.asClass(RESTMixer  ).setLifetime(awilix.Lifetime.SINGLETON),
-        restWS:     awilix.asClass(RESTWS     ).setLifetime(awilix.Lifetime.SINGLETON)
+        ctx:           awilix.asValue(ctx),
+        pkg:           awilix.asClass(Pkg          ).setLifetime(awilix.Lifetime.SINGLETON),
+        argv:          awilix.asClass(Argv         ).setLifetime(awilix.Lifetime.SINGLETON),
+        log:           awilix.asClass(Log          ).setLifetime(awilix.Lifetime.SINGLETON),
+        db:            awilix.asClass(DB           ).setLifetime(awilix.Lifetime.SINGLETON),
+        freed:         awilix.asClass(FreeD        ).setLifetime(awilix.Lifetime.SINGLETON),
+        rest:          awilix.asClass(REST         ).setLifetime(awilix.Lifetime.SINGLETON),
+        restCanvas:    awilix.asClass(RESTCanvas   ).setLifetime(awilix.Lifetime.SINGLETON),
+        restMedia:     awilix.asClass(RESTMedia    ).setLifetime(awilix.Lifetime.SINGLETON),
+        restState:     awilix.asClass(RESTState    ).setLifetime(awilix.Lifetime.SINGLETON),
+        restPreset:    awilix.asClass(RESTPreset   ).setLifetime(awilix.Lifetime.SINGLETON),
+        restMixer:     awilix.asClass(RESTMixer    ).setLifetime(awilix.Lifetime.SINGLETON),
+        restViewpoint: awilix.asClass(RESTViewpoint).setLifetime(awilix.Lifetime.SINGLETON),
+        restWS:        awilix.asClass(RESTWS       ).setLifetime(awilix.Lifetime.SINGLETON)
     })
 
     /*  initialize classes  */
@@ -58,6 +60,7 @@ import DB             from "./app-db"
     await container.cradle.restState.init()
     await container.cradle.restPreset.init()
     await container.cradle.restMixer.init()
+    await container.cradle.restViewpoint.init()
     await container.cradle.restWS.init()
 
     /*  start classes  */

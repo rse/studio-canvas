@@ -31,6 +31,7 @@ import Lights                      from "./app-render-lights"
 /*  import internal dependencies (shared)  */
 import { FreeDState }              from "../common/app-freed"
 import { MixerState }              from "../common/app-mixer"
+import { ViewpointState }          from "../common/app-viewpoint"
 import { StateTypePartial }        from "../common/app-state"
 
 export default class Renderer extends EventEmitter {
@@ -163,6 +164,17 @@ export default class Renderer extends EventEmitter {
         this.api.scene.reflectMixerState(mixer)
     }
 
+    /*  react on a received Viewpoint record by reflecting the camera state  */
+    reflectViewpointState (viewpoint: ViewpointState) {
+        /*  ensure we update only if we are already established  */
+        if (!this.established)
+            return
+
+        /*  pass-through operation to rendering scene  */
+        this.api.viewpoint.reflectViewpointState(viewpoint)
+    }
+
+    /*  react on a received FreeD state  */
     reflectFreeDState (state: FreeDState) {
         /*  ensure we update only if we are already established  */
         if (!this.established)

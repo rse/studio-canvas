@@ -15,6 +15,7 @@ import Log                  from "./app-log"
 import { FreeDEntry }       from "./app-freed"
 import REST                 from "./app-rest"
 import { MixerState }       from "../common/app-mixer"
+import { ViewpointState }   from "../common/app-viewpoint"
 import { FreeDState }       from "../common/app-freed"
 import { StateTypePartial } from "../common/app-state"
 
@@ -147,6 +148,15 @@ export default class RESTWS extends Latching {
         const msg = JSON.stringify({ cmd: "MIXER", arg: { mixer } })
         for (const [ id, info ] of this.wsPeers.entries()) {
             this.log.log(3, `WebSocket: notify MIXER change: peer="${id} (${info.peer})" msg=${msg}`)
+            info.ws.send(msg)
+        }
+    }
+
+    /*  notify clients about viewpoint change  */
+    notifyViewpointState (viewpoint: ViewpointState) {
+        const msg = JSON.stringify({ cmd: "VIEWPOINT", arg: { viewpoint } })
+        for (const [ id, info ] of this.wsPeers.entries()) {
+            this.log.log(3, `WebSocket: notify VIEWPOINT change: peer="${id} (${info.peer})" msg=${msg}`)
             info.ws.send(msg)
         }
     }
