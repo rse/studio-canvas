@@ -11,6 +11,3 @@ Improvements
 Cleanups
 --------
 
-- CLEANUP:
-  Refactor code into smaller pieces
-
