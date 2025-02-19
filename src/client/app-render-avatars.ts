@@ -43,7 +43,7 @@ export default class Avatars {
         if (this.avatar1Model === null)
             throw new Error("cannot find node 'Avatar1-Model'")
 
-        /*  enable avatar #1  */
+        /*  disable avatar #1 by default  */
         this.avatar1.setEnabled(false)
 
         /*  rember base scaling of avatar #1  */
@@ -61,7 +61,7 @@ export default class Avatars {
         if (this.avatar2Model === null)
             throw new Error("cannot find node 'Avatar2-Model'")
 
-        /*  enable avatar #2  */
+        /*  disable avatar #2 by default  */
         this.avatar2.setEnabled(false)
 
         /*  rember base scaling of avatar #2  */
