@@ -9,7 +9,6 @@ import * as BABYLON           from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
 import { type API }           from "./app-render-api"
-import State                  from "./app-render-state"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
@@ -24,7 +23,6 @@ export default class Stream {
 
     constructor (
         private api:   API,
-        private state: State,
         private log:   (level: string, msg: string) => void
     ) {}
 

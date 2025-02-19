@@ -8,7 +8,6 @@
 import EventEmitter                from "eventemitter2"
 
 /*  import internal dependencies (client-side)  */
-import State                       from "./app-render-state"
 import { type API }                from "./app-render-api"
 
 /*  import internal dependencies (client-side)  */
@@ -35,9 +34,6 @@ import { MixerState }              from "../common/app-mixer"
 import { StateTypePartial }        from "../common/app-state"
 
 export default class Renderer extends EventEmitter {
-    /*  shared state  */
-    private state: State
-
     /*  shared API  */
     private api: API
 
@@ -47,15 +43,14 @@ export default class Renderer extends EventEmitter {
     /*  (re-)configure camera (by name) and options (by URL)  */
     constructor (params: { layer: string, cameraName: string, ptzFreeD: boolean, ptzKeys: boolean }) {
         super()
-        this.state = new State()
-        this.api   = {} as API
+        this.api = {} as API
 
         /*  helper functions for passing-through information  */
         const passThroughLog = (level: string, msg: string) => { this.emit("log", level, msg) }
         const passThroughFPS = (fps: number) => { this.emit("fps", fps) }
 
         /*  instantiate rendering scene  */
-        this.api.scene = new Scene(this.api, this.state,
+        this.api.scene = new Scene(this.api,
             params.layer,
             passThroughLog, passThroughFPS)
 
@@ -65,22 +60,22 @@ export default class Renderer extends EventEmitter {
             passThroughLog)
 
         /*  instantiate rendering utilities  */
-        this.api.texture   = new Texture(  this.api, this.state, passThroughLog)
-        this.api.stream    = new Stream(   this.api, this.state, passThroughLog)
-        this.api.material  = new Material( this.api, this.state, passThroughLog)
+        this.api.texture   = new Texture(  this.api, passThroughLog)
+        this.api.stream    = new Stream(   this.api, passThroughLog)
+        this.api.material  = new Material( this.api, passThroughLog)
 
         /*  instantiate rendering features  */
-        this.api.canvas    = new Canvas(   this.api, this.state, passThroughLog)
-        this.api.decal     = new Decal(    this.api, this.state, passThroughLog)
-        this.api.monitor   = new Monitor(  this.api, this.state, passThroughLog)
-        this.api.pane      = new Pane(     this.api, this.state, passThroughLog)
-        this.api.plate     = new Plate(    this.api, this.state, passThroughLog)
-        this.api.pillar    = new Pillar(   this.api, this.state, passThroughLog)
-        this.api.hologram  = new Hologram( this.api, this.state, passThroughLog)
-        this.api.mask      = new Mask(     this.api, this.state, passThroughLog)
-        this.api.avatars   = new Avatars(  this.api, this.state, passThroughLog)
-        this.api.reference = new Reference(this.api, this.state, passThroughLog)
-        this.api.lights    = new Lights(   this.api, this.state, passThroughLog)
+        this.api.canvas    = new Canvas(   this.api, passThroughLog)
+        this.api.decal     = new Decal(    this.api, passThroughLog)
+        this.api.monitor   = new Monitor(  this.api, passThroughLog)
+        this.api.pane      = new Pane(     this.api, passThroughLog)
+        this.api.plate     = new Plate(    this.api, passThroughLog)
+        this.api.pillar    = new Pillar(   this.api, passThroughLog)
+        this.api.hologram  = new Hologram( this.api, passThroughLog)
+        this.api.mask      = new Mask(     this.api, passThroughLog)
+        this.api.avatars   = new Avatars(  this.api, passThroughLog)
+        this.api.reference = new Reference(this.api, passThroughLog)
+        this.api.lights    = new Lights(   this.api, passThroughLog)
     }
 
     /*  initially establish rendering engine and scene  */

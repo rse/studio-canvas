@@ -11,7 +11,6 @@ import                             "@babylonjs/loaders/glTF"
 /*  import internal dependencies (client-side)  */
 import Config                 from "./app-render-config"
 import { type API }           from "./app-render-api"
-import State                  from "./app-render-state"
 
 /*  import internal dependencies (shared)  */
 import { MixerState }          from "../common/app-mixer"
@@ -31,7 +30,6 @@ export default class Scene {
 
     constructor (
         private api:     API,
-        private state:   State,
         private layer:   string,
         private log:     (level: string, msg: string) => void,
         private onFPS:   (fps: number) => void

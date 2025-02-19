@@ -10,8 +10,8 @@ import * as BABYLON              from "@babylonjs/core"
 /*  import internal dependencies (client-side)  */
 import Config                    from "./app-render-config"
 import { type API }              from "./app-render-api"
-import State, { type ChromaKey } from "./app-render-state"
 import ShaderMaterial            from "./app-render-shader"
+import { type ChromaKey }        from "./app-render-utils"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }      from "../common/app-state"
@@ -29,7 +29,6 @@ export default class Material {
 
     constructor (
         private api:   API,
-        private state: State,
         private log:   (level: string, msg: string) => void
     ) {}
 

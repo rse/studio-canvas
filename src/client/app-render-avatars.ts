@@ -9,7 +9,6 @@ import * as BABYLON           from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
 import { type API }           from "./app-render-api"
-import State                  from "./app-render-state"
 import Utils                  from "./app-render-utils"
 
 /*  import internal dependencies (shared)  */
@@ -28,7 +27,6 @@ export default class Avatars {
     /*  object construction  */
     constructor (
         private api:     API,
-        private state:   State,
         private log:     (level: string, msg: string) => void
     ) {}
 

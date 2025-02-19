@@ -7,6 +7,12 @@
 /*  import external dependencies  */
 import * as BABYLON from "@babylonjs/core"
 
+export type ChromaKey = {
+    enable:    boolean
+    threshold: number
+    smoothing: number
+}
+
 export default class Utils {
     /*  convert between degree and radians  */
     static deg2rad (deg: number) { return (deg * (Math.PI / 180)) }
