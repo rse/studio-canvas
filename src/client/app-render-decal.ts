@@ -26,8 +26,7 @@ export default class Decal {
     private decalChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
 
     constructor (
-        private api:      API,
-        private log:      (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  establish feature  */
@@ -205,7 +204,7 @@ export default class Decal {
                 if (state.decal.enable) {
                     await this.api.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
                     if (this.decalFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "enabling decal (fading: start)")
+                        this.api.renderer.log("INFO", "enabling decal (fading: start)")
                         if (this.decal.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.decal.material
                             material.setFloat("visibility", 0.0)
@@ -218,7 +217,7 @@ export default class Decal {
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            this.log("INFO", "enabling decal (fading: end)")
+                            this.api.renderer.log("INFO", "enabling decal (fading: end)")
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
                                 material.setFloat("visibility", 1.0)
@@ -226,14 +225,14 @@ export default class Decal {
                         })
                     }
                     else {
-                        this.log("INFO", "enabling decal")
+                        this.api.renderer.log("INFO", "enabling decal")
                         this.decal.visibility = 1
                         this.decal.setEnabled(true)
                     }
                 }
                 else if (!state.decal.enable) {
                     if (this.decalFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "disabling decal (fading: start)")
+                        this.api.renderer.log("INFO", "disabling decal (fading: start)")
                         if (this.decal.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.decal.material
                             material.setFloat("visibility", 1.0)
@@ -246,7 +245,7 @@ export default class Decal {
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(async () => {
-                            this.log("INFO", "disabling decal (fading: end)")
+                            this.api.renderer.log("INFO", "disabling decal (fading: end)")
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
                                 material.setFloat("visibility", 0.0)
@@ -259,7 +258,7 @@ export default class Decal {
                         })
                     }
                     else {
-                        this.log("INFO", "disabling decal")
+                        this.api.renderer.log("INFO", "disabling decal")
                         this.decal.visibility = 0
                         this.decal.setEnabled(false)
                         await this.api.material.unapplyDisplayMaterial("decal", this.decal!)

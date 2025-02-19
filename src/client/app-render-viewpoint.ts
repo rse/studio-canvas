@@ -27,14 +27,13 @@ export default class Viewpoint {
         private api:        API,
         private cameraName: string,
         private ptzFreeD:   boolean,
-        private ptzKeys:    boolean,
-        private log:        (level: string, msg: string) => void
+        private ptzKeys:    boolean
     ) {
         /*  instantiate individual cameras  */
-        this.cameras.set("CAM1", new Camera(api, "CAM1", log))
-        this.cameras.set("CAM2", new Camera(api, "CAM2", log))
-        this.cameras.set("CAM3", new Camera(api, "CAM3", log))
-        this.cameras.set("CAM4", new Camera(api, "CAM4", log))
+        this.cameras.set("CAM1", new Camera(api, "CAM1"))
+        this.cameras.set("CAM2", new Camera(api, "CAM2"))
+        this.cameras.set("CAM3", new Camera(api, "CAM3"))
+        this.cameras.set("CAM4", new Camera(api, "CAM4"))
 
         /*  mapping of camera to type  */
         const camera = cameraName as CameraName

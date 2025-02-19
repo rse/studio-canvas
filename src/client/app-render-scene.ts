@@ -13,13 +13,13 @@ import Config                 from "./app-render-config"
 import { type API }           from "./app-render-api"
 
 /*  import internal dependencies (shared)  */
-import { MixerState }          from "../common/app-mixer"
+import { MixerState }         from "../common/app-mixer"
 import { StateTypePartial }   from "../common/app-state"
 
 export default class Scene {
-    private engine:    BABYLON.Nullable<BABYLON.Engine>         = null
-    private scene:     BABYLON.Nullable<BABYLON.Scene>          = null
-    private optimizer: BABYLON.Nullable<BABYLON.SceneOptimizer> = null
+    private engine:      BABYLON.Nullable<BABYLON.Engine>         = null
+    private scene:       BABYLON.Nullable<BABYLON.Scene>          = null
+    private optimizer:   BABYLON.Nullable<BABYLON.SceneOptimizer> = null
     private renderCount  = 0
     private fps          = 30
     private fpsProgram   = 30
@@ -30,9 +30,7 @@ export default class Scene {
 
     constructor (
         private api:     API,
-        private layer:   string,
-        private log:     (level: string, msg: string) => void,
-        private onFPS:   (fps: number) => void
+        private layer:   string
     ) {}
 
     /*  establish feature  */
@@ -49,7 +47,7 @@ export default class Scene {
         })
 
         /*  load the Blender glTF scene export  */
-        this.log("INFO", "loading Studio Canvas scene")
+        this.api.renderer.log("INFO", "loading Studio Canvas scene")
         BABYLON.SceneLoader.ShowLoadingScreen = false
         this.scene = await BABYLON.SceneLoader.LoadAsync("/res/", "canvas-scene.glb", this.engine)
         if (this.scene === null)
@@ -62,14 +60,14 @@ export default class Scene {
 
         /*  create studio environment for correct texture image colors  */
         if (this.layer === "back") {
-            this.log("INFO", "loading opaque environment")
+            this.api.renderer.log("INFO", "loading opaque environment")
             this.scene.createDefaultEnvironment({
                 environmentTexture: "/res/canvas-scene.env",
                 skyboxColor: new BABYLON.Color3(0.5, 0.5, 0.5)
             })
         }
         else if (this.layer === "front") {
-            this.log("INFO", "creating transparent environment")
+            this.api.renderer.log("INFO", "creating transparent environment")
             this.scene.createDefaultEnvironment({
                 environmentTexture: "/res/canvas-scene.env",
                 createGround: false,
@@ -143,11 +141,11 @@ export default class Scene {
     /*  (re-)configure FPS  */
     configureFPS (fps: number) {
         if (this.fps !== fps) {
-            this.log("INFO", `switching from ${this.fps} to ${fps} frames-per-second (FPS)`)
+            this.api.renderer.log("INFO", `switching from ${this.fps} to ${fps} frames-per-second (FPS)`)
             this.fps = fps
             if (this.optimizer !== null)
                 this.optimizer.targetFrameRate = fps
-            this.onFPS(fps)
+            this.api.renderer.fps(fps)
         }
     }
 

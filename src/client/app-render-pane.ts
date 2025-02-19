@@ -29,8 +29,7 @@ export default class Pane {
     }
 
     constructor (
-        private api:      API,
-        private log:      (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  establish feature  */
@@ -150,7 +149,7 @@ export default class Pane {
                 if (state.pane.enable) {
                     await this.api.material.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
                     if (this.paneFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "enabling pane (fading: start)")
+                        this.api.renderer.log("INFO", "enabling pane (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
@@ -178,11 +177,11 @@ export default class Pane {
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(() => {
-                            this.log("INFO", "enabling pane (fading: end)")
+                            this.api.renderer.log("INFO", "enabling pane (fading: end)")
                         })
                     }
                     else {
-                        this.log("INFO", "enabling pane")
+                        this.api.renderer.log("INFO", "enabling pane")
                         this.paneCase.visibility    = 1
                         this.paneDisplay.visibility = 1
                         this.paneCase.setEnabled(true)
@@ -192,7 +191,7 @@ export default class Pane {
                 }
                 else if (!state.pane.enable) {
                     if (this.paneFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "disabling pane (fading: start)")
+                        this.api.renderer.log("INFO", "disabling pane (fading: start)")
                         this.paneCase.visibility = 1
                         this.paneCase.setEnabled(true)
                         this.paneDisplay.visibility = 1
@@ -219,7 +218,7 @@ export default class Pane {
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
-                            this.log("INFO", "disabling pane (fading: end)")
+                            this.api.renderer.log("INFO", "disabling pane (fading: end)")
                             if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.paneDisplay!.material
                                 material.setFloat("visibility", 0.0)
@@ -237,7 +236,7 @@ export default class Pane {
                         })
                     }
                     else {
-                        this.log("INFO", "disabling pane")
+                        this.api.renderer.log("INFO", "disabling pane")
                         const setOnce = (value: number) => {
                             if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.paneDisplay!.material

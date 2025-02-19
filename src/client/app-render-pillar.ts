@@ -30,8 +30,7 @@ export default class Pillar {
     }
 
     constructor (
-        private api:      API,
-        private log:      (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  establish feature  */
@@ -148,7 +147,7 @@ export default class Pillar {
                 if (state.pillar.enable) {
                     await this.api.material.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
                     if (this.pillarFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "enabling pillar (fading: start)")
+                        this.api.renderer.log("INFO", "enabling pillar (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
@@ -183,11 +182,11 @@ export default class Pillar {
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(() => {
-                            this.log("INFO", "enabling pillar (fading: end)")
+                            this.api.renderer.log("INFO", "enabling pillar (fading: end)")
                         })
                     }
                     else {
-                        this.log("INFO", "enabling pillar")
+                        this.api.renderer.log("INFO", "enabling pillar")
                         this.pillarCase.visibility    = 1
                         this.pillarDisplay.visibility = 1
                         this.pillarCase.setEnabled(true)
@@ -197,7 +196,7 @@ export default class Pillar {
                 }
                 else if (!state.pillar.enable) {
                     if (this.pillarFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "disabling pillar (fading: start)")
+                        this.api.renderer.log("INFO", "disabling pillar (fading: start)")
                         this.pillarCase.material!.alpha = 1
                         this.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
                         this.pillarCase.visibility = 1
@@ -226,7 +225,7 @@ export default class Pillar {
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
-                            this.log("INFO", "disabling pillar (fading: end)")
+                            this.api.renderer.log("INFO", "disabling pillar (fading: end)")
                             if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.pillarDisplay!.material
                                 material.setFloat("visibility", 0.0)
@@ -244,7 +243,7 @@ export default class Pillar {
                         })
                     }
                     else {
-                        this.log("INFO", "disabling pillar")
+                        this.api.renderer.log("INFO", "disabling pillar")
                         const setOnce = (value: number) => {
                             if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.pillarDisplay!.material

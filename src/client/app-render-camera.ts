@@ -32,8 +32,7 @@ export default class Camera {
     /*  object construction  */
     constructor (
         private api:        API,
-        private cameraName: string,
-        private log:        (level: string, msg: string) => void
+        private cameraName: string
     ) {
         /*  determine whether camera is flipped  */
         this.flippedCam = Config.flippedCams.includes(cameraName)

@@ -26,8 +26,7 @@ export default class Avatars {
 
     /*  object construction  */
     constructor (
-        private api:     API,
-        private log:     (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  establish feature  */

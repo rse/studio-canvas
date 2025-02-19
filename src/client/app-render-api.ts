@@ -22,8 +22,14 @@ import Avatars     from "./app-render-avatars"
 import Reference   from "./app-render-reference"
 import Lights      from "./app-render-lights"
 
+type Renderer = {
+    log: (level: string, msg: string) => void
+    fps: (fps: number) => void
+}
+
 /*  export API type  */
 export type API = {
+    renderer:  Renderer
     texture:   Texture
     stream:    Stream
     material:  Material

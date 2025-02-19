@@ -48,8 +48,7 @@ export default class Canvas {
     private wallRotBase: BABYLON.Nullable<BABYLON.Quaternion>  = null
 
     constructor (
-        private api:     API,
-        private log:     (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  establish feature  */
@@ -142,7 +141,7 @@ export default class Canvas {
         /*  sanity check situation  */
         if (this.canvasConfig[this.canvasMode].texture1 === "")
             return
-        this.log("INFO", "canvas reconfigure (begin)")
+        this.api.renderer.log("INFO", "canvas reconfigure (begin)")
 
         /*  determine id of canvas mode  */
         const mode = this.canvasMode === 0 ? "A" : "B"
@@ -154,7 +153,7 @@ export default class Canvas {
         await this.canvasDisposeTextures(this.canvasMode)
 
         /*  load new texture(s)  */
-        this.log("INFO", "canvas reconfigure (load textures)")
+        this.api.renderer.log("INFO", "canvas reconfigure (load textures)")
         const canvas = document.createElement("canvas")
         this.canvasState[this.canvasMode].canvas1 = canvas
         this.canvasState[this.canvasMode].texture1 =
@@ -207,7 +206,7 @@ export default class Canvas {
         /*  re-freeze material  */
         material.markDirty(true)
         material.freeze()
-        this.log("INFO", "canvas reconfigure (end)")
+        this.api.renderer.log("INFO", "canvas reconfigure (end)")
     }
 
     /*  dispose canvas textures  */
@@ -332,7 +331,7 @@ export default class Canvas {
 
     /*  change mode of canvas  */
     async canvasModeChange () {
-        this.log("INFO", "switching canvas (begin)")
+        this.api.renderer.log("INFO", "switching canvas (begin)")
 
         /*  stop the optional fader  */
         await this.canvasFaderStop()
@@ -351,7 +350,7 @@ export default class Canvas {
             /*  dispose old textures  */
             await this.canvasDisposeTextures((this.canvasMode + 1) % 2)
 
-            this.log("INFO", "switching canvas (end)")
+            this.api.renderer.log("INFO", "switching canvas (end)")
         }).catch(async () => {
             /*  switch back to previous mode  */
             this.canvasMode = (this.canvasMode + 1) % 2
@@ -359,7 +358,7 @@ export default class Canvas {
             /*  (re-)start the optional fader  */
             await this.canvasFaderStart()
 
-            this.log("INFO", "switching canvas (end, FAILED)")
+            this.api.renderer.log("INFO", "switching canvas (end, FAILED)")
         })
     }
 

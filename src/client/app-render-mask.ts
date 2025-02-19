@@ -25,8 +25,7 @@ export default class Mask {
     }
 
     constructor (
-        private api:      API,
-        private log:      (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  establish feature  */
@@ -96,7 +95,7 @@ export default class Mask {
                     this.originalCamera = this.api.scene.getScene().activeCamera
                     this.api.scene.getScene().activeCamera = this.maskCamLens
                     await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
-                    this.log("INFO", "enabling mask")
+                    this.api.renderer.log("INFO", "enabling mask")
                     if (this.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.maskDisplay!.material
                         material.setFloat("visibility", 1.0)
@@ -113,7 +112,7 @@ export default class Mask {
                         NOTICE: BabylonJS immediately stops rendering if it thinks there are no more
                         visible meshes, so we have to first render it nearly invisible and then
                         finally disable it  */
-                    this.log("INFO", "disabling mask")
+                    this.api.renderer.log("INFO", "disabling mask")
                     const setOnce = (value: number) => {
                         if (this.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.maskDisplay!.material

@@ -28,8 +28,7 @@ export default class Plate {
     }
 
     constructor (
-        private api:      API,
-        private log:      (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  establish feature  */
@@ -137,7 +136,7 @@ export default class Plate {
                 if (state.plate.enable) {
                     await this.api.material.applyDisplayMaterial("plate", this.plateDisplay, this.plateOpacity, this.plateBorderRad, this.plateBorderCrop, this.plateChromaKey)
                     if (this.plateFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "enabling plate (fading: start)")
+                        this.api.renderer.log("INFO", "enabling plate (fading: start)")
                         if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.plateDisplay.material
                             material.setFloat("visibility", 0.0)
@@ -154,7 +153,7 @@ export default class Plate {
                             else
                                 this.plateDisplay!.visibility = gradient
                         }).then(() => {
-                            this.log("INFO", "enabling plate (fading: end)")
+                            this.api.renderer.log("INFO", "enabling plate (fading: end)")
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", 1.0)
@@ -165,7 +164,7 @@ export default class Plate {
                         })
                     }
                     else {
-                        this.log("INFO", "enabling plate")
+                        this.api.renderer.log("INFO", "enabling plate")
                         if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.plateDisplay!.material
                             material.setFloat("visibility", 1.0)
@@ -178,7 +177,7 @@ export default class Plate {
                 }
                 else if (!state.plate.enable) {
                     if (this.plateFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "disabling plate (fading: start)")
+                        this.api.renderer.log("INFO", "disabling plate (fading: start)")
                         if (this.plateDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.plateDisplay.material
                             material.setFloat("visibility", 1.0)
@@ -195,7 +194,7 @@ export default class Plate {
                             else
                                 this.plateDisplay!.visibility = gradient
                         }).then(async () => {
-                            this.log("INFO", "disabling plate (fading: end)")
+                            this.api.renderer.log("INFO", "disabling plate (fading: end)")
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material
                                 material.setFloat("visibility", 0.0)
@@ -208,7 +207,7 @@ export default class Plate {
                         })
                     }
                     else {
-                        this.log("INFO", "disabling plate")
+                        this.api.renderer.log("INFO", "disabling plate")
                         const setOnce = (value: number) => {
                             if (this.plateDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.plateDisplay!.material

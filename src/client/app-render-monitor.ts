@@ -29,8 +29,7 @@ export default class Monitor {
     }
 
     constructor (
-        private api:      API,
-        private log:      (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  establish feature  */
@@ -150,7 +149,7 @@ export default class Monitor {
                 if (state.monitor.enable) {
                     await this.api.material.applyDisplayMaterial("monitor", this.monitorDisplay!, this.monitorOpacity, 0, 0, this.monitorChromaKey)
                     if (this.monitorFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "enabling monitor (fading: start)")
+                        this.api.renderer.log("INFO", "enabling monitor (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
@@ -178,11 +177,11 @@ export default class Monitor {
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(() => {
-                            this.log("INFO", "enabling monitor (fading: end)")
+                            this.api.renderer.log("INFO", "enabling monitor (fading: end)")
                         })
                     }
                     else {
-                        this.log("INFO", "enabling monitor")
+                        this.api.renderer.log("INFO", "enabling monitor")
                         this.monitorCase.visibility    = 1
                         this.monitorDisplay.visibility = 1
                         this.monitorCase.setEnabled(true)
@@ -192,7 +191,7 @@ export default class Monitor {
                 }
                 else if (!state.monitor.enable) {
                     if (this.monitorFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "disabling monitor (fading: start)")
+                        this.api.renderer.log("INFO", "disabling monitor (fading: start)")
                         this.monitorCase.visibility = 1
                         this.monitorCase.setEnabled(true)
                         this.monitorDisplay.visibility = 1
@@ -219,7 +218,7 @@ export default class Monitor {
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
-                            this.log("INFO", "disabling monitor (fading: end)")
+                            this.api.renderer.log("INFO", "disabling monitor (fading: end)")
                             if (this.monitorDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.monitorDisplay!.material
                                 material.setFloat("visibility", 0.0)
@@ -237,7 +236,7 @@ export default class Monitor {
                         })
                     }
                     else {
-                        this.log("INFO", "disabling monitor")
+                        this.api.renderer.log("INFO", "disabling monitor")
                         if (this.monitorDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.monitorDisplay.material
                             material.setFloat("visibility", 0.0)

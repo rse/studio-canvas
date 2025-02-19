@@ -28,8 +28,7 @@ export default class Material {
     private modifiedMedia           = {} as { [ id: string ]: boolean }
 
     constructor (
-        private api:   API,
-        private log:   (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  load media texture  */
@@ -45,14 +44,14 @@ export default class Material {
             /*  provide new texture  */
             if (url.match(/.+\.(?:png|jpg|gif)$/)) {
                 /*  provide texture based on image media  */
-                this.log("INFO", `loading image media "${url}"`)
+                this.api.renderer.log("INFO", `loading image media "${url}"`)
                 await new Promise((resolve, reject) => {
                     texture = new BABYLON.Texture(
                         url, this.api.scene.getScene(), false, false,
                         BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
                         null,
                         (msg, ex) => {
-                            this.log("ERROR", `failed to load image media "${url}": ${msg}`)
+                            this.api.renderer.log("ERROR", `failed to load image media "${url}": ${msg}`)
                             if (texture)
                                 texture.dispose()
                             reject(ex)
@@ -67,7 +66,7 @@ export default class Material {
             }
             else if (url.match(/.+\.(?:smp4|mp4|swebm|webm)$/)) {
                 /*  provide texture based on video media  */
-                this.log("INFO", `loading video media "${url}"`)
+                this.api.renderer.log("INFO", `loading video media "${url}"`)
                 const loop = (url.match(/.+-loop\.(?:smp4|mp4|swebm|webm)$/) !== null)
                 await new Promise((resolve, reject) => {
                     texture = new BABYLON.VideoTexture(
@@ -75,7 +74,7 @@ export default class Material {
                         BABYLON.VideoTexture.NEAREST_SAMPLINGMODE,
                         { autoPlay: true, muted: true, autoUpdateTexture: true, loop },
                         (msg, ex) => {
-                            this.log("ERROR", `failed to load video media "${url}": ${msg}`)
+                            this.api.renderer.log("ERROR", `failed to load video media "${url}": ${msg}`)
                             if (texture) {
                                 texture.dispose()
                                 const video = (texture as BABYLON.VideoTexture).video
@@ -119,7 +118,7 @@ export default class Material {
         }
 
         /*  unload texture by disposing all resources  */
-        this.log("INFO", `unloading ${info.type} media "${info.url}"`)
+        this.api.renderer.log("INFO", `unloading ${info.type} media "${info.url}"`)
         this.displayTextureInfo.delete(texture)
         this.displayTextureByURL.delete(info.url)
         if (texture instanceof BABYLON.VideoTexture) {
@@ -157,7 +156,7 @@ export default class Material {
 
     /*  apply video stream onto mesh  */
     async applyDisplayMaterial (id: VideoStackId, mesh: BABYLON.Mesh, opacity: number, borderRad: number, borderCrop: number, chromaKey: ChromaKey | null) {
-        this.log("INFO", `apply texture material to display "${id}"`)
+        this.api.renderer.log("INFO", `apply texture material to display "${id}"`)
 
         /*  determine media id  */
         let mediaId = ""
@@ -173,7 +172,7 @@ export default class Material {
 
         /*  short-circuit processing in case texture is not available  */
         if (texture === null) {
-            this.log("WARNING", `failed to gather texture for "${id}" -- setting replacement texture`)
+            this.api.renderer.log("WARNING", `failed to gather texture for "${id}" -- setting replacement texture`)
             const material = mesh.material as BABYLON.PBRMaterial
             material.albedoColor = new BABYLON.Color3(1.0, 0.0, 0.0)
             material.albedoTexture?.dispose()
@@ -238,7 +237,7 @@ export default class Material {
 
     /*  unapply video stream from mesh  */
     async unapplyDisplayMaterial (id: VideoStackId, mesh: BABYLON.Mesh) {
-        this.log("INFO", `unapply texture material from display "${id}"`)
+        this.api.renderer.log("INFO", `unapply texture material from display "${id}"`)
 
         /*  dispose material texture  */
         if (mesh.material) {

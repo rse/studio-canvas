@@ -28,8 +28,7 @@ export default class Hologram {
     }
 
     constructor (
-        private api:      API,
-        private log:      (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  establish feature  */
@@ -137,7 +136,7 @@ export default class Hologram {
                 if (state.hologram.enable) {
                     await this.api.material.applyDisplayMaterial("hologram", this.hologramDisplay, this.hologramOpacity, this.hologramBorderRad, this.hologramBorderCrop, this.hologramChromaKey)
                     if (this.hologramFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "enabling hologram (fading: start)")
+                        this.api.renderer.log("INFO", "enabling hologram (fading: start)")
                         if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.hologramDisplay.material
                             material.setFloat("visibility", 0.0)
@@ -154,7 +153,7 @@ export default class Hologram {
                             else
                                 this.hologramDisplay!.visibility = gradient
                         }).then(() => {
-                            this.log("INFO", "enabling hologram (fading: end)")
+                            this.api.renderer.log("INFO", "enabling hologram (fading: end)")
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", 1.0)
@@ -165,7 +164,7 @@ export default class Hologram {
                         })
                     }
                     else {
-                        this.log("INFO", "enabling hologram")
+                        this.api.renderer.log("INFO", "enabling hologram")
                         if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.hologramDisplay!.material
                             material.setFloat("visibility", 1.0)
@@ -178,7 +177,7 @@ export default class Hologram {
                 }
                 else if (!state.hologram.enable) {
                     if (this.hologramFade > 0 && this.api.scene.currentFPS() > 0) {
-                        this.log("INFO", "disabling hologram (fading: start)")
+                        this.api.renderer.log("INFO", "disabling hologram (fading: start)")
                         if (this.hologramDisplay.material instanceof BABYLON.ShaderMaterial) {
                             const material = this.hologramDisplay.material
                             material.setFloat("visibility", 1.0)
@@ -195,7 +194,7 @@ export default class Hologram {
                             else
                                 this.hologramDisplay!.visibility = gradient
                         }).then(async () => {
-                            this.log("INFO", "disabling hologram (fading: end)")
+                            this.api.renderer.log("INFO", "disabling hologram (fading: end)")
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material
                                 material.setFloat("visibility", 0.0)
@@ -208,7 +207,7 @@ export default class Hologram {
                         })
                     }
                     else {
-                        this.log("INFO", "disabling hologram")
+                        this.api.renderer.log("INFO", "disabling hologram")
                         const setOnce = (value: number) => {
                             if (this.hologramDisplay!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.hologramDisplay!.material

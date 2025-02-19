@@ -20,8 +20,7 @@ export default class Lights {
     private shadowCastingMeshes = [] as BABYLON.Mesh[]
 
     constructor (
-        private api:     API,
-        private log:     (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  establish feature  */

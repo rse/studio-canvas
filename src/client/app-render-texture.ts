@@ -14,8 +14,7 @@ export default class Texture {
     private imageLoader: Worker
 
     constructor (
-        private api:   API,
-        private log:   (level: string, msg: string) => void
+        private api: API
     ) {
         /*  worker for off-loading image loading and decoding  */
         this.imageLoader = new Worker(new URL("./app-render-texture-worker.js", import.meta.url))

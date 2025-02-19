@@ -45,37 +45,35 @@ export default class Renderer extends EventEmitter {
         super()
         this.api = {} as API
 
-        /*  helper functions for passing-through information  */
-        const passThroughLog = (level: string, msg: string) => { this.emit("log", level, msg) }
-        const passThroughFPS = (fps: number) => { this.emit("fps", fps) }
+        /*  utility functions for passing-through information  */
+        this.api.renderer = {
+            log: (level: string, msg: string) => { this.emit("log", level, msg) },
+            fps: (fps: number) => { this.emit("fps", fps) }
+        }
 
         /*  instantiate rendering scene  */
-        this.api.scene = new Scene(this.api,
-            params.layer,
-            passThroughLog, passThroughFPS)
+        this.api.scene     = new Scene(    this.api, params.layer)
 
         /*  instantiate rendering camera  */
-        this.api.viewpoint = new Viewpoint(this.api,
-            params.cameraName, params.ptzFreeD, params.ptzKeys,
-            passThroughLog)
+        this.api.viewpoint = new Viewpoint(this.api, params.cameraName, params.ptzFreeD, params.ptzKeys)
 
         /*  instantiate rendering utilities  */
-        this.api.texture   = new Texture(  this.api, passThroughLog)
-        this.api.stream    = new Stream(   this.api, passThroughLog)
-        this.api.material  = new Material( this.api, passThroughLog)
+        this.api.texture   = new Texture(  this.api)
+        this.api.stream    = new Stream(   this.api)
+        this.api.material  = new Material( this.api)
 
         /*  instantiate rendering features  */
-        this.api.canvas    = new Canvas(   this.api, passThroughLog)
-        this.api.decal     = new Decal(    this.api, passThroughLog)
-        this.api.monitor   = new Monitor(  this.api, passThroughLog)
-        this.api.pane      = new Pane(     this.api, passThroughLog)
-        this.api.plate     = new Plate(    this.api, passThroughLog)
-        this.api.pillar    = new Pillar(   this.api, passThroughLog)
-        this.api.hologram  = new Hologram( this.api, passThroughLog)
-        this.api.mask      = new Mask(     this.api, passThroughLog)
-        this.api.avatars   = new Avatars(  this.api, passThroughLog)
-        this.api.reference = new Reference(this.api, passThroughLog)
-        this.api.lights    = new Lights(   this.api, passThroughLog)
+        this.api.canvas    = new Canvas(   this.api)
+        this.api.decal     = new Decal(    this.api)
+        this.api.monitor   = new Monitor(  this.api)
+        this.api.pane      = new Pane(     this.api)
+        this.api.plate     = new Plate(    this.api)
+        this.api.pillar    = new Pillar(   this.api)
+        this.api.hologram  = new Hologram( this.api)
+        this.api.mask      = new Mask(     this.api)
+        this.api.avatars   = new Avatars(  this.api)
+        this.api.reference = new Reference(this.api)
+        this.api.lights    = new Lights(   this.api)
     }
 
     /*  initially establish rendering engine and scene  */

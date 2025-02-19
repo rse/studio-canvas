@@ -22,8 +22,7 @@ export default class Stream {
     private videoStreamFPS                       = 0
 
     constructor (
-        private api:   API,
-        private log:   (level: string, msg: string) => void
+        private api: API
     ) {}
 
     /*  load video stream  */
@@ -34,7 +33,7 @@ export default class Stream {
 
         /*  ensure video devices can be enumerated by requesting a
             dummy media stream so permissions are granted once  */
-        this.log("INFO", "requesting video device access")
+        this.api.renderer.log("INFO", "requesting video device access")
         const stream0 = await navigator.mediaDevices.getUserMedia({
             audio: true,
             video: true
@@ -43,13 +42,13 @@ export default class Stream {
             stream0.getTracks().forEach((track) => track.stop())
 
         /*  enumerate devices  */
-        this.log("INFO", "enumerating video devices")
+        this.api.renderer.log("INFO", "enumerating video devices")
         const devices = await navigator.mediaDevices.enumerateDevices().catch(() => [])
 
         /*  determine particular device  */
         const label = this.videoStreamDevice
         if (label === "") {
-            this.log("WARNING", "no video stream configured (using replacement content later)")
+            this.api.renderer.log("WARNING", "no video stream configured (using replacement content later)")
             return
         }
         const device = devices.find((device) =>
@@ -57,12 +56,12 @@ export default class Stream {
             && device.label.substring(0, label.length) === label
         )
         if (device === undefined) {
-            this.log("WARNING", `failed to determine video stream (device: "${label}"): no such device (using replacement content later)`)
+            this.api.renderer.log("WARNING", `failed to determine video stream (device: "${label}"): no such device (using replacement content later)`)
             return
         }
 
         /*  load target composite media stream  */
-        this.log("INFO", `loading video stream (device: "${label}")`)
+        this.api.renderer.log("INFO", `loading video stream (device: "${label}")`)
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
@@ -73,7 +72,7 @@ export default class Stream {
                 frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
             }
         }).catch((error: Error) => {
-            this.log("ERROR", `failed to load video (device: "${label}"): ${error})`)
+            this.api.renderer.log("ERROR", `failed to load video (device: "${label}"): ${error})`)
             throw new Error(`failed to load video stream (device: "${label}"): ${error})`)
         })
 
@@ -84,13 +83,13 @@ export default class Stream {
         })
         stream.getVideoTracks().forEach((t) => {
             const c = t.getCapabilities()
-            this.log("INFO", `loaded video stream (track size: ${c.width?.max ?? 0}x${c.height?.max ?? 0})`)
+            this.api.renderer.log("INFO", `loaded video stream (track size: ${c.width?.max ?? 0}x${c.height?.max ?? 0})`)
             const device = devices.find((device) => device.deviceId === c.deviceId)
             if (device)
-                this.log("INFO", `loaded video stream (device: "${device.label}")`)
+                this.api.renderer.log("INFO", `loaded video stream (device: "${device.label}")`)
         })
         const ts = texture.getSize()
-        this.log("INFO", `loaded video stream (texture size: ${ts.width}x${ts.height})`)
+        this.api.renderer.log("INFO", `loaded video stream (texture size: ${ts.width}x${ts.height})`)
 
         /*  provide results  */
         this.videoStream = stream
@@ -99,7 +98,7 @@ export default class Stream {
 
     /*  unload video stream  */
     async unloadVideoStream () {
-        this.log("INFO", "unloading video stream")
+        this.api.renderer.log("INFO", "unloading video stream")
         if (this.videoTexture !== null) {
             this.videoTexture.dispose()
             this.videoTexture = null
