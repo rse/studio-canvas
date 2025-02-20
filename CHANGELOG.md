@@ -2,7 +2,7 @@
 ChangeLog
 =========
 
-3.0.0 (2025-02-18)
+3.0.0 (2025-02-20)
 ------------------
 
 - IMPROVEMENT: allow switching active camera
