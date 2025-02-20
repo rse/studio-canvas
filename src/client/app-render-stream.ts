@@ -18,10 +18,10 @@ export default class Stream {
     /*  internal state  */
     private videoTexture:     BABYLON.Nullable<BABYLON.Texture> = null
     private videoStream:      MediaStream | null = null
-    private videoStreamDevice                    = ""
-    private videoStreamWidth                     = 0
-    private videoStreamHeight                    = 0
-    private videoStreamFPS                       = 0
+    private videoStreamDevice = ""
+    private videoStreamWidth  = 0
+    private videoStreamHeight = 0
+    private videoStreamFPS    = 0
 
     /*  create feature  */
     constructor (private api: API) {}
@@ -63,14 +63,17 @@ export default class Stream {
 
         /*  load target composite media stream  */
         this.api.renderer.log("INFO", `loading video stream (device: "${label}")`)
+        const width  = this.videoStreamWidth
+        const height = this.videoStreamHeight
+        const fps    = this.videoStreamFPS
         const stream = await navigator.mediaDevices.getUserMedia({
             audio: false,
             video: {
                 deviceId: device.deviceId,
                 aspectRatio: 16 / 9,
-                width:     { min: this.videoStreamWidth,  ideal: this.videoStreamWidth,  max: this.videoStreamWidth  },
-                height:    { min: this.videoStreamHeight, ideal: this.videoStreamHeight, max: this.videoStreamHeight },
-                frameRate: { min: this.videoStreamFPS,    ideal: this.videoStreamFPS,    max: this.videoStreamFPS }
+                width:     { min: width,  ideal: width,  max: width  },
+                height:    { min: height, ideal: height, max: height },
+                frameRate: { min: fps,    ideal: fps,    max: fps    }
             }
         }).catch((error: Error) => {
             this.api.renderer.log("ERROR", `failed to load video (device: "${label}"): ${error})`)
