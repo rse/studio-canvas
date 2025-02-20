@@ -19,19 +19,17 @@ export default class Lights {
     private light1: BABYLON.Nullable<BABYLON.PointLight>     = null
     private light2: BABYLON.Nullable<BABYLON.PointLight>     = null
     private light3: BABYLON.Nullable<BABYLON.PointLight>     = null
-    private shadowCastingMeshes = [] as BABYLON.Mesh[]
+    private meshes = [] as BABYLON.Mesh[]
 
     /*  create feature  */
     constructor (private api: API) {}
 
     /*  establish feature  */
     async establish () {
-        this.light1 = this.api.scene.getScene().getLightByName("Light-1") as
-            BABYLON.Nullable<BABYLON.PointLight>
-        this.light2 = this.api.scene.getScene().getLightByName("Light-2") as
-            BABYLON.Nullable<BABYLON.PointLight>
-        this.light3 = this.api.scene.getScene().getLightByName("Light-3") as
-            BABYLON.Nullable<BABYLON.PointLight>
+        const scene = this.api.scene.getScene()
+        this.light1 = scene.getLightByName("Light-1") as BABYLON.Nullable<BABYLON.PointLight>
+        this.light2 = scene.getLightByName("Light-2") as BABYLON.Nullable<BABYLON.PointLight>
+        this.light3 = scene.getLightByName("Light-3") as BABYLON.Nullable<BABYLON.PointLight>
         if (this.light1 === null || this.light2 === null || this.light3 === null)
             throw new Error("cannot find lights nodes")
 
@@ -49,7 +47,7 @@ export default class Lights {
             sg.useCloseExponentialShadowMap     = false
             sg.useBlurCloseExponentialShadowMap = false
             sg.usePercentageCloserFiltering     = true
-            for (const mesh of this.shadowCastingMeshes)
+            for (const mesh of this.meshes)
                 sg.addShadowCaster(mesh)
         }
         setupLight(this.light1)
@@ -59,7 +57,7 @@ export default class Lights {
 
     /*  configure shadow-casting mesh  */
     addShadowCastingMesh (mesh: BABYLON.Mesh) {
-        this.shadowCastingMeshes.push(mesh)
+        this.meshes.push(mesh)
     }
 
     /*  reflect the current scene state  */

@@ -23,7 +23,7 @@ export default class Hologram {
     private opacity    = 1.0
     private borderRad  = 40.0
     private borderCrop = 0.0
-    private chromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } satisfies ChromaKey
+    private chromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
     private base = {
         scaleX: 0, scaleY: 0, scaleZ: 0,
         rotationZ: 0, positionZ: 0, positionX: 0
