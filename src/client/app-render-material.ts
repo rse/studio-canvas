@@ -22,13 +22,13 @@ type VideoStackId = "monitor" | "decal" | "hologram" | "plate" | "pane" | "pilla
 /*  exported rendering feature  */
 export default class Material {
     /*  internal state  */
-    private displayMeshMaterial     = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
-    private displayMediaURL         = new Map<string, string>()
-    private displayMaterial2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
-    private displayTextureByURL     = new Map<string, BABYLON.Texture>()
-    private displayTextureInfo      = new Map<BABYLON.Texture, { type: string, url: string, refs: number }>()
-    private displaySourceMap        = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2", mask: "S2" } as { [ id: string ]: string }
-    private modifiedMedia           = {} as { [ id: string ]: boolean }
+    private meshMaterial     = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
+    private mediaURL         = new Map<string, string>()
+    private material2Texture = new Map<BABYLON.Material, BABYLON.Texture>()
+    private textureByURL     = new Map<string, BABYLON.Texture>()
+    private textureInfo      = new Map<BABYLON.Texture, { type: string, url: string, refs: number }>()
+    private sourceMap        = { decal: "S1", monitor: "S2", plate: "S1", hologram: "S2", pane: "S2", pillar: "S2", mask: "S2" } as { [ id: string ]: string }
+    private modifiedMedia    = {} as { [ id: string ]: boolean }
 
     /*  create feature  */
     constructor (private api: API) {}
@@ -36,10 +36,10 @@ export default class Material {
     /*  load media texture  */
     async loadMediaTexture (url: string): Promise<BABYLON.Nullable<BABYLON.Texture>> {
         let texture: BABYLON.Nullable<BABYLON.Texture> = null
-        if (this.displayTextureByURL.has(url)) {
+        if (this.textureByURL.has(url)) {
             /*  provide existing texture  */
-            texture = this.displayTextureByURL.get(url)!
-            const info = this.displayTextureInfo.get(texture)!
+            texture = this.textureByURL.get(url)!
+            const info = this.textureInfo.get(texture)!
             info.refs++
         }
         else {
@@ -63,8 +63,8 @@ export default class Material {
                         resolve(true)
                     })
                 })
-                this.displayTextureByURL.set(url, texture!)
-                this.displayTextureInfo.set(texture!, { type: "image", url, refs: 1 })
+                this.textureByURL.set(url, texture!)
+                this.textureInfo.set(texture!, { type: "image", url, refs: 1 })
             }
             else if (url.match(/.+\.(?:smp4|mp4|swebm|webm)$/)) {
                 /*  provide texture based on video media  */
@@ -96,8 +96,8 @@ export default class Material {
                         resolve(true)
                     })
                 })
-                this.displayTextureByURL.set(url, texture!)
-                this.displayTextureInfo.set(texture!, { type: "video", url, refs: 1 })
+                this.textureByURL.set(url, texture!)
+                this.textureInfo.set(texture!, { type: "video", url, refs: 1 })
             }
             else
                 throw new Error("invalid media filename (neither PNG, JPG, GIF, MP4 or WebM)")
@@ -108,12 +108,12 @@ export default class Material {
     /*  unload media texture  */
     async unloadMediaTexture (texture: BABYLON.Texture) {
         /*  sanity check: ensure texture is known  */
-        if (!this.displayTextureInfo.has(texture))
+        if (!this.textureInfo.has(texture))
             throw new Error("invalid texture")
 
         /*  decrease reference count and in case texture is
             still used still do not unload anything  */
-        const info = this.displayTextureInfo.get(texture)!
+        const info = this.textureInfo.get(texture)!
         if (info && info.refs > 1) {
             info.refs--
             return
@@ -121,8 +121,8 @@ export default class Material {
 
         /*  unload texture by disposing all resources  */
         this.api.renderer.log("INFO", `unloading ${info.type} media "${info.url}"`)
-        this.displayTextureInfo.delete(texture)
-        this.displayTextureByURL.delete(info.url)
+        this.textureInfo.delete(texture)
+        this.textureByURL.delete(info.url)
         if (texture instanceof BABYLON.VideoTexture) {
             /*  dispose video texture  */
             const video = texture.video
@@ -162,15 +162,15 @@ export default class Material {
 
         /*  determine media id  */
         let mediaId = ""
-        if (this.displaySourceMap[id].match(/^M/))
-            mediaId = this.mapMediaId(this.displaySourceMap[id])
+        if (this.sourceMap[id].match(/^M/))
+            mediaId = this.mapMediaId(this.sourceMap[id])
 
         /*  determine texture  */
         let texture: BABYLON.Nullable<BABYLON.Texture> = null
-        if (this.displaySourceMap[id].match(/^S/) && this.api.stream.getVideoTexture() !== null)
+        if (this.sourceMap[id].match(/^S/) && this.api.stream.getVideoTexture() !== null)
             texture = this.api.stream.getVideoTexture()
-        else if (this.displaySourceMap[id].match(/^M/) && this.displayMediaURL.has(mediaId))
-            texture = await this.loadMediaTexture(this.displayMediaURL.get(mediaId)!).catch(() => null)
+        else if (this.sourceMap[id].match(/^M/) && this.mediaURL.has(mediaId))
+            texture = await this.loadMediaTexture(this.mediaURL.get(mediaId)!).catch(() => null)
 
         /*  short-circuit processing in case texture is not available  */
         if (texture === null) {
@@ -185,8 +185,8 @@ export default class Material {
 
         /*  create new shader material  */
         const material = ShaderMaterial.displayStream(`video-${id}`, this.api.scene.getScene())
-        if (this.displaySourceMap[id].match(/^M/))
-            this.displayMaterial2Texture.set(material, texture)
+        if (this.sourceMap[id].match(/^M/))
+            this.material2Texture.set(material, texture)
         material.setTexture("textureSampler", texture)
         material.setFloat("opacity", opacity)
         material.setFloat("borderRadius", borderRad)
@@ -194,20 +194,20 @@ export default class Material {
         material.setInt("chromaEnable", chromaKey?.enable ? 1 : 0)
         material.setFloat("chromaThreshold", chromaKey?.threshold ?? 0.4)
         material.setFloat("chromaSmoothing", chromaKey?.smoothing ?? 0.1)
-        if (this.displaySourceMap[id].match(/^S/)) {
+        if (this.sourceMap[id].match(/^S/)) {
             let stack = 0
-            if      (this.displaySourceMap[id] === "S1") stack = 0
-            else if (this.displaySourceMap[id] === "S2") stack = 1
+            if      (this.sourceMap[id] === "S1") stack = 0
+            else if (this.sourceMap[id] === "S2") stack = 1
             material.setInt("stack", stack)
             material.setInt("stacks", Config.videoStacks)
             material.setInt("stackAlphaInvert", 0)
         }
-        else if (this.displayMediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.displaySourceMap[id].match(/^M/)) {
+        else if (this.mediaURL.get(mediaId)!.match(/\.(?:smp4|swebm)$/) && this.sourceMap[id].match(/^M/)) {
             material.setInt("stack", 0)
             material.setInt("stacks", 1)
             material.setInt("stackAlphaInvert", 0)
         }
-        else if (this.displaySourceMap[id].match(/^M/))
+        else if (this.sourceMap[id].match(/^M/))
             material.setInt("stacks", 0)
         material.zOffset = -200
         /* material.needAlphaBlending = () => true */
@@ -217,9 +217,9 @@ export default class Material {
         const materialOld = mesh.material as BABYLON.PBRMaterial
 
         /*  store original material once  */
-        const materialOriginal = !this.displayMeshMaterial.has(mesh)
+        const materialOriginal = !this.meshMaterial.has(mesh)
         if (materialOriginal)
-            this.displayMeshMaterial.set(mesh, materialOld)
+            this.meshMaterial.set(mesh, materialOld)
 
         /*  apply new material  */
         mesh.material = material
@@ -227,10 +227,10 @@ export default class Material {
         /*  optionally unload previously loaded material  */
         if (materialOld instanceof BABYLON.ShaderMaterial && !materialOriginal) {
             /*  dispose material texture  */
-            const texture = this.displayMaterial2Texture.get(materialOld)
+            const texture = this.material2Texture.get(materialOld)
             if (texture !== undefined && texture !== null)
                 await this.unloadMediaTexture(texture)
-            this.displayMaterial2Texture.delete(materialOld)
+            this.material2Texture.delete(materialOld)
 
             /*  dispose material  */
             materialOld.dispose(true, false)
@@ -243,17 +243,17 @@ export default class Material {
 
         /*  dispose material texture  */
         if (mesh.material) {
-            const texture = this.displayMaterial2Texture.get(mesh.material)
+            const texture = this.material2Texture.get(mesh.material)
             if (texture !== undefined && texture !== null)
                 await this.unloadMediaTexture(texture)
-            this.displayMaterial2Texture.delete(mesh.material)
+            this.material2Texture.delete(mesh.material)
         }
 
         /*  dispose material (and restore orginal material)  */
-        if (mesh.material instanceof BABYLON.ShaderMaterial && this.displayMeshMaterial.has(mesh)) {
+        if (mesh.material instanceof BABYLON.ShaderMaterial && this.meshMaterial.has(mesh)) {
             mesh.material.dispose(true, false)
-            mesh.material = this.displayMeshMaterial.get(mesh)!
-            this.displayMeshMaterial.delete(mesh)
+            mesh.material = this.meshMaterial.get(mesh)!
+            this.meshMaterial.delete(mesh)
         }
     }
 
@@ -262,34 +262,33 @@ export default class Material {
         this.modifiedMedia = {} as { [ id: string ]: boolean }
         if (state.media !== undefined) {
             /*  adjust medias  */
-            if (this.displayMediaURL.get("media1") !== state.media!.media1) {
-                this.displayMediaURL.set("media1", state.media.media1)
+            if (this.mediaURL.get("media1") !== state.media!.media1) {
+                this.mediaURL.set("media1", state.media.media1)
                 this.modifiedMedia.media1 = true
             }
-            if (this.displayMediaURL.get("media2") !== state.media.media2) {
-                this.displayMediaURL.set("media2", state.media.media2)
+            if (this.mediaURL.get("media2") !== state.media.media2) {
+                this.mediaURL.set("media2", state.media.media2)
                 this.modifiedMedia.media2 = true
             }
-            if (this.displayMediaURL.get("media3") !== state.media.media3) {
-                this.displayMediaURL.set("media3", state.media.media3)
+            if (this.mediaURL.get("media3") !== state.media.media3) {
+                this.mediaURL.set("media3", state.media.media3)
                 this.modifiedMedia.media3 = true
             }
-            if (this.displayMediaURL.get("media4") !== state.media.media4) {
-                this.displayMediaURL.set("media4", state.media.media4)
+            if (this.mediaURL.get("media4") !== state.media.media4) {
+                this.mediaURL.set("media4", state.media.media4)
                 this.modifiedMedia.media4 = true
             }
         }
     }
 
     /*  lookup/register source for display  */
-    /* eslint no-dupe-class-members: off */
     displaySource (display: string): string
     displaySource (display: string, source: string): void
     displaySource (display: string, source?: string): any {
         if (source !== undefined)
-            this.displaySourceMap[display] = source
+            this.sourceMap[display] = source
         else
-            return this.displaySourceMap[display]
+            return this.sourceMap[display]
     }
 }
 
