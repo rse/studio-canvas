@@ -21,7 +21,7 @@ import { StateTypePartial }        from "../common/app-state"
 export default class Viewpoint {
     /*  internal state  */
     private cameras = new Map<CameraName, Camera>()
-    private camera: CameraName
+    private camera:    CameraName
     private viewpoint: CameraName
 
     /*  create feature  */

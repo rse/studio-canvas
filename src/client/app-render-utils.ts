@@ -27,7 +27,13 @@ export default class Utils {
     }
 
     /*  perform a value animation manually  */
-    static manualAnimation (from: number, to: number, duration: number, fps: number, callback: (grad: number) => void) {
+    static manualAnimation (
+        from:     number,
+        to:       number,
+        duration: number,
+        fps:      number,
+        callback: (grad: number) => void
+    ) {
         return new Promise((resolve) => {
             const ease = new BABYLON.SineEase()
             ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
