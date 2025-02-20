@@ -17,13 +17,13 @@ import { StateTypePartial }      from "../common/app-state"
 /*  exported rendering feature  */
 export default class Pane {
     /*  internal state  */
-    public pane:      BABYLON.Nullable<BABYLON.TransformNode>  = null
-    public case:      BABYLON.Nullable<BABYLON.Mesh>           = null
-    public display:   BABYLON.Nullable<BABYLON.Mesh>           = null
-    public fade       = 0
-    public opacity    = 1.0
-    public chromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    public base       = {
+    private pane:      BABYLON.Nullable<BABYLON.TransformNode>  = null
+    private case:      BABYLON.Nullable<BABYLON.Mesh>           = null
+    private display:   BABYLON.Nullable<BABYLON.Mesh>           = null
+    private fade       = 0
+    private opacity    = 1.0
+    private chromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
+    private base       = {
         scaleCaseX:    0, scaleCaseY:       0, scaleCaseZ:    0,
         scaleDisplayX: 0, scaleDisplayY:    0, scaleDisplayZ: 0,
         rotationZ:     0, positionZ:        0,
