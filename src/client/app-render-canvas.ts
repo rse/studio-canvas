@@ -378,8 +378,12 @@ export default class Canvas {
     async reflectSceneState (state: StateTypePartial) {
         if (state.canvas !== undefined && this.api.scene.renderingLayer("back")) {
             let changed = false
+
+            /*  determine current and next configuration  */
             const canvasConfig     = this.canvasConfig[this.canvasMode]
             const canvasConfigNext = this.canvasConfig[(this.canvasMode + 1) % 2]
+
+            /*  update content  */
             if (   (state.canvas.texture1  !== undefined && canvasConfig.texture1  !== state.canvas.texture1)
                 || (state.canvas.texture2  !== undefined && canvasConfig.texture2  !== state.canvas.texture2)
                 || (state.canvas.fadeTrans !== undefined && canvasConfig.fadeTrans !== state.canvas.fadeTrans)
@@ -402,13 +406,19 @@ export default class Canvas {
                         canvasConfig.fadeWait
                 changed = true
             }
+
+            /*  update rotation  */
             if (state.canvas.rotationZ !== undefined) {
                 this.wall!.rotationQuaternion = this.wallRotBase!.clone()
                 this.wall!.rotate(new BABYLON.Vector3(0, 0, 1),
                     Utils.deg2rad(state.canvas.rotationZ), BABYLON.Space.WORLD)
             }
+
+            /*  update fading  */
             if (state.canvas.fadeSwitch !== undefined)
                 this.fadeSwitch = state.canvas.fadeSwitch
+
+            /*  apply changes  */
             if (changed)
                 await this.canvasModeChange()
         }
