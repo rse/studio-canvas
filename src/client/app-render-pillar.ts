@@ -17,17 +17,17 @@ import { StateTypePartial }      from "../common/app-state"
 /*  exported rendering feature  */
 export default class Pillar {
     /*  internal state  */
-    public pillar:          BABYLON.Nullable<BABYLON.TransformNode>  = null
-    public pillarCase:      BABYLON.Nullable<BABYLON.Mesh>           = null
-    public pillarDisplay:   BABYLON.Nullable<BABYLON.Mesh>           = null
-    public pillarFade       = 0
-    public pillarOpacity    = 1.0
-    public pillarBorderRad  = 40.0
-    public pillarBorderCrop = 0.0
-    public pillarChromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    public pillarBase       = {
-        scaleX:        0, scaleY:        0, scaleZ:        0,
-        rotationZ:     0, positionZ:     0,
+    private hull:      BABYLON.Nullable<BABYLON.TransformNode>  = null
+    private case:      BABYLON.Nullable<BABYLON.Mesh>           = null
+    private display:   BABYLON.Nullable<BABYLON.Mesh>           = null
+    private fade       = 0
+    private opacity    = 1.0
+    private borderRad  = 40.0
+    private borderCrop = 0.0
+    private chromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
+    private base       = {
+        scaleX:        0, scaleY:           0, scaleZ:        0,
+        rotationZ:     0, positionZ:        0,
         positionCaseX: 0, positionDisplayX: 0
     }
 
@@ -37,148 +37,177 @@ export default class Pillar {
     /*  establish feature  */
     async establish () {
         /*  gather references to pillar mesh nodes  */
-        this.pillar        = this.api.scene.getScene().getNodeByName("Pillar")        as BABYLON.Nullable<BABYLON.TransformNode>
-        this.pillarCase    = this.api.scene.getScene().getMeshByName("Pillar-Case")   as BABYLON.Nullable<BABYLON.Mesh>
-        this.pillarDisplay = this.api.scene.getScene().getMeshByName("Pillar-Screen") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.pillar === null || this.pillarCase === null || this.pillarDisplay === null)
+        const scene  = this.api.scene.getScene()
+        this.hull    = scene.getNodeByName("Pillar")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.case    = scene.getMeshByName("Pillar-Case")   as BABYLON.Nullable<BABYLON.Mesh>
+        this.display = scene.getMeshByName("Pillar-Screen") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.hull === null || this.case === null || this.display === null)
             throw new Error("cannot find pillar mesh nodes")
         if (this.api.scene.renderingLayer("back"))
-            this.pillar.setEnabled(false)
+            this.hull.setEnabled(false)
 
         /*  initialize pillar base values  */
-        this.pillarBase.scaleX            = this.pillar.scaling.x
-        this.pillarBase.scaleY            = this.pillar.scaling.y
-        this.pillarBase.scaleZ            = this.pillar.scaling.z
-        this.pillarBase.rotationZ         = this.pillar.rotation.z
-        this.pillarBase.positionZ         = this.pillar.position.z
-        this.pillarBase.positionCaseX     = this.pillarCase.position.x
-        this.pillarBase.positionDisplayX  = this.pillarDisplay.position.x
+        this.base.scaleX           = this.hull.scaling.x
+        this.base.scaleY           = this.hull.scaling.y
+        this.base.scaleZ           = this.hull.scaling.z
+        this.base.rotationZ        = this.hull.rotation.z
+        this.base.positionZ        = this.hull.position.z
+        this.base.positionCaseX    = this.case.position.x
+        this.base.positionDisplayX = this.display.position.x
 
         /*  register pillar for shadow casting  */
-        this.api.lights.addShadowCastingMesh(this.pillarCase!)
-        this.api.lights.addShadowCastingMesh(this.pillarDisplay!)
+        this.api.lights.addShadowCastingMesh(this.case)
+        this.api.lights.addShadowCastingMesh(this.display)
     }
 
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
         /*  sanity check situation  */
-        if (!(this.pillar !== null
-            && this.pillarCase !== null
-            && this.pillarDisplay !== null
+        if (!(this.hull !== null
+            && this.case !== null
+            && this.display !== null
             && this.api.scene.renderingLayer("back")))
             return
 
         /*  update already active media receivers  */
         if (this.api.material.isMediaModified(this.api.material.displaySource("pillar"))
-            && this.pillarDisplay.isEnabled())
-            await this.api.material.applyDisplayMaterial("pillar", this.pillarDisplay, this.pillarOpacity, 0, 0, this.pillarChromaKey)
+            && this.display.isEnabled())
+            await this.api.material.applyDisplayMaterial("pillar", this.display,
+                this.opacity, 0, 0, this.chromaKey)
 
         /*  reflect state changes  */
         if (state.pillar !== undefined) {
+            /*  update content  */
             if (state.pillar.source !== undefined
                 && (this.api.material.displaySource("pillar") !== state.pillar.source
                     || this.api.material.isMediaModified(state.pillar.source))) {
                 this.api.material.displaySource("pillar", state.pillar.source)
-                if (this.pillarDisplay.isEnabled())
-                    await this.api.material.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
+                if (this.display.isEnabled())
+                    await this.api.material.applyDisplayMaterial("pillar", this.display,
+                        this.opacity, 0, 0, this.chromaKey)
             }
+
+            /*  update opacity  */
             if (state.pillar.opacity !== undefined) {
-                this.pillarOpacity = state.pillar.opacity
-                if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.pillarDisplay.material
-                    material.setFloat("opacity", this.pillarOpacity)
+                this.opacity = state.pillar.opacity
+                if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.display.material
+                    material.setFloat("opacity", this.opacity)
                 }
             }
+
+            /*  update scaling  */
             if (state.pillar.scale !== undefined) {
-                this.pillar.scaling.x    = this.pillarBase.scaleX * state.pillar.scale
-                this.pillar.scaling.y    = this.pillarBase.scaleY * state.pillar.scale
-                this.pillar.scaling.z    = this.pillarBase.scaleZ * state.pillar.scale
+                this.hull.scaling.x = this.base.scaleX * state.pillar.scale
+                this.hull.scaling.y = this.base.scaleY * state.pillar.scale
+                this.hull.scaling.z = this.base.scaleZ * state.pillar.scale
             }
+
+            /*  update rotation  */
             if (state.pillar.rotate !== undefined) {
-                this.pillar.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.pillar.rotate(new BABYLON.Vector3(0, 0, 1),
+                this.hull.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.hull.rotate(new BABYLON.Vector3(0, 0, 1),
                     Utils.deg2rad(state.pillar.rotate), BABYLON.Space.WORLD)
             }
+
+            /*  update vertical position  */
             if (state.pillar.lift !== undefined)
-                this.pillar.position.z = this.pillarBase.positionZ + (state.pillar.lift / 100)
+                this.hull.position.z = this.base.positionZ + (state.pillar.lift / 100)
+
+            /*  update distance  */
             if (state.pillar.distance !== undefined) {
-                this.pillarCase.position.x    = this.pillarBase.positionCaseX    - state.pillar.distance
-                this.pillarDisplay.position.x = this.pillarBase.positionDisplayX - state.pillar.distance
+                this.case.position.x    = this.base.positionCaseX    - state.pillar.distance
+                this.display.position.x = this.base.positionDisplayX - state.pillar.distance
             }
-            if (state.pillar.fadeTime !== undefined && this.pillarFade !== state.pillar.fadeTime)
-                this.pillarFade = state.pillar.fadeTime
+
+            /*  update fading  */
+            if (state.pillar.fadeTime !== undefined && this.fade !== state.pillar.fadeTime)
+                this.fade = state.pillar.fadeTime
+
+            /*  update border  */
             if (state.pillar.borderRad !== undefined) {
-                this.pillarBorderRad = state.pillar.borderRad
-                if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.pillarDisplay.material
-                    material.setFloat("borderRadius", this.pillarBorderRad)
+                this.borderRad = state.pillar.borderRad
+                if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.display.material
+                    material.setFloat("borderRadius", this.borderRad)
                 }
             }
             if (state.pillar.borderCrop !== undefined) {
-                this.pillarBorderCrop = state.pillar.borderCrop
-                if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.pillarDisplay.material
-                    material.setFloat("borderCrop", this.pillarBorderCrop)
+                this.borderCrop = state.pillar.borderCrop
+                if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.display.material
+                    material.setFloat("borderCrop", this.borderCrop)
                 }
             }
+
+            /*  update chroma-keying  */
             if (state.pillar.chromaKey !== undefined) {
-                if (state.pillar.chromaKey.enable !== undefined && this.pillarChromaKey.enable !== state.pillar.chromaKey.enable) {
-                    this.pillarChromaKey.enable = state.pillar.chromaKey.enable
-                    if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.pillarDisplay.material
-                        material.setInt("chromaEnable", this.pillarChromaKey.enable ? 1 : 0)
+                if (state.pillar.chromaKey.enable !== undefined
+                    && this.chromaKey.enable !== state.pillar.chromaKey.enable) {
+                    this.chromaKey.enable = state.pillar.chromaKey.enable
+                    if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.display.material
+                        material.setInt("chromaEnable", this.chromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.pillar.chromaKey.threshold !== undefined && this.pillarChromaKey.threshold !== state.pillar.chromaKey.threshold) {
-                    this.pillarChromaKey.threshold = state.pillar.chromaKey.threshold
-                    if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.pillarDisplay.material
-                        material.setFloat("chromaThreshold", this.pillarChromaKey.threshold)
+                if (state.pillar.chromaKey.threshold !== undefined
+                    && this.chromaKey.threshold !== state.pillar.chromaKey.threshold) {
+                    this.chromaKey.threshold = state.pillar.chromaKey.threshold
+                    if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.display.material
+                        material.setFloat("chromaThreshold", this.chromaKey.threshold)
                     }
                 }
-                if (state.pillar.chromaKey.smoothing !== undefined && this.pillarChromaKey.smoothing !== state.pillar.chromaKey.smoothing) {
-                    this.pillarChromaKey.smoothing = state.pillar.chromaKey.smoothing
-                    if (this.pillarChromaKey.enable && this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.pillarDisplay.material
-                        material.setFloat("chromaSmoothing", this.pillarChromaKey.smoothing)
+                if (state.pillar.chromaKey.smoothing !== undefined
+                    && this.chromaKey.smoothing !== state.pillar.chromaKey.smoothing) {
+                    this.chromaKey.smoothing = state.pillar.chromaKey.smoothing
+                    if (this.chromaKey.enable && this.display.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.display.material
+                        material.setFloat("chromaSmoothing", this.chromaKey.smoothing)
                     }
                 }
             }
-            if (state.pillar.enable !== undefined && this.pillar.isEnabled() !== state.pillar.enable) {
+
+            /*  update visibility  */
+            if (state.pillar.enable !== undefined
+                && this.hull.isEnabled() !== state.pillar.enable) {
                 if (state.pillar.enable) {
-                    await this.api.material.applyDisplayMaterial("pillar", this.pillarDisplay!, this.pillarOpacity, 0, 0, this.pillarChromaKey)
-                    if (this.pillarFade > 0 && this.api.scene.currentFPS() > 0) {
+                    /*  enable visibility  */
+                    await this.api.material.applyDisplayMaterial("pillar", this.display,
+                        this.opacity, 0, 0, this.chromaKey)
+                    if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
+                        /*  enable visibility with fading  */
                         this.api.renderer.log("INFO", "enabling pillar (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
-                        const framesTotal = this.pillarFade * fps
-                        this.pillarCase.material!.alpha = 0
-                        this.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
-                        this.pillarCase.material!.backFaceCulling = true
-                        this.pillarCase.material!.forceDepthWrite = true
-                        this.pillarCase.receiveShadows = true
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.pillarCase,
+                        const framesTotal = this.fade * fps
+                        this.case.material!.alpha = 0
+                        this.case.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
+                        this.case.material!.backFaceCulling = true
+                        this.case.material!.forceDepthWrite = true
+                        this.case.receiveShadows = true
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.case,
                             "material.alpha", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease, () => {
-                                this.pillarCase!.material!.transparencyMode = BABYLON.Material.MATERIAL_OPAQUE
+                                this.case!.material!.transparencyMode = BABYLON.Material.MATERIAL_OPAQUE
                             })!
-                        if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.pillarDisplay.material
+                        if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.display.material
                             material.setFloat("visibility", 0.0)
                         }
-                        this.pillar.setEnabled(true)
-                        this.pillarCase.visibility = 1
-                        this.pillarCase.setEnabled(true)
-                        this.pillarDisplay.visibility = 1
-                        this.pillarDisplay.setEnabled(true)
-                        const anim2 = Utils.manualAnimation(0, 1, this.pillarFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                        this.hull.setEnabled(true)
+                        this.case.visibility = 1
+                        this.case.setEnabled(true)
+                        this.display.visibility = 1
+                        this.display.setEnabled(true)
+                        const anim2 = Utils.manualAnimation(0, 1, this.fade, fps, (gradient) => {
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", 1.0)
                             }
                         })
@@ -187,83 +216,87 @@ export default class Pillar {
                         })
                     }
                     else {
+                        /*  enable visibility without fading  */
                         this.api.renderer.log("INFO", "enabling pillar")
-                        this.pillarCase.visibility    = 1
-                        this.pillarDisplay.visibility = 1
-                        this.pillarCase.setEnabled(true)
-                        this.pillarDisplay.setEnabled(true)
-                        this.pillar.setEnabled(true)
+                        this.case.visibility    = 1
+                        this.display.visibility = 1
+                        this.case.setEnabled(true)
+                        this.display.setEnabled(true)
+                        this.hull.setEnabled(true)
                     }
                 }
                 else if (!state.pillar.enable) {
-                    if (this.pillarFade > 0 && this.api.scene.currentFPS() > 0) {
+                    /*  disable visibility  */
+                    if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
+                        /*  disable visibility with fading  */
                         this.api.renderer.log("INFO", "disabling pillar (fading: start)")
-                        this.pillarCase.material!.alpha = 1
-                        this.pillarCase.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
-                        this.pillarCase.visibility = 1
-                        this.pillarCase.setEnabled(true)
-                        this.pillarDisplay.visibility = 1
-                        this.pillarDisplay.setEnabled(true)
+                        this.case.material!.alpha = 1
+                        this.case.material!.transparencyMode = BABYLON.Material.MATERIAL_ALPHABLEND
+                        this.case.visibility = 1
+                        this.case.setEnabled(true)
+                        this.display.visibility = 1
+                        this.display.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
-                        const framesTotal = this.pillarFade * fps
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.pillarCase,
+                        const framesTotal = this.fade * fps
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.case,
                             "material.alpha", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
-                        if (this.pillarDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.pillarDisplay.material
+                        if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.display.material
                             material.setFloat("visibility", 1.0)
                         }
-                        const anim2 = Utils.manualAnimation(1, 0, this.pillarFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                        const anim2 = Utils.manualAnimation(1, 0, this.fade, fps, (gradient) => {
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", 0.0)
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
                             this.api.renderer.log("INFO", "disabling pillar (fading: end)")
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", 0.0)
-                                this.pillarDisplay!.visibility = 0.0
-                                this.pillarCase!.visibility = 0.0
+                                this.display!.visibility = 0.0
+                                this.case!.visibility = 0.0
                             }
                             else  {
-                                this.pillarDisplay!.visibility = 0.0
-                                this.pillarCase!.visibility = 0.0
+                                this.display!.visibility = 0.0
+                                this.case!.visibility = 0.0
                             }
-                            this.pillarCase!.setEnabled(false)
-                            this.pillarDisplay!.setEnabled(false)
-                            this.pillar!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
+                            this.case!.setEnabled(false)
+                            this.display!.setEnabled(false)
+                            this.hull!.setEnabled(false)
+                            await this.api.material.unapplyDisplayMaterial("pillar", this.display!)
                         })
                     }
                     else {
+                        /*  disable visibility without fading  */
                         this.api.renderer.log("INFO", "disabling pillar")
                         const setOnce = (value: number) => {
-                            if (this.pillarDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.pillarDisplay!.material
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", value)
-                                this.pillarDisplay!.visibility = value
-                                this.pillarCase!.visibility = value
+                                this.display!.visibility = value
+                                this.case!.visibility = value
                             }
                             else {
-                                this.pillarDisplay!.visibility = value
-                                this.pillarCase!.visibility = value
+                                this.display!.visibility = value
+                                this.case!.visibility = value
                             }
                         }
                         setOnce(0.000000001)
                         this.api.scene.getScene().onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
-                            this.pillarCase!.setEnabled(false)
-                            this.pillarDisplay!.setEnabled(false)
-                            this.pillar!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("pillar", this.pillarDisplay!)
+                            this.case!.setEnabled(false)
+                            this.display!.setEnabled(false)
+                            this.hull!.setEnabled(false)
+                            await this.api.material.unapplyDisplayMaterial("pillar", this.display!)
                         })
                     }
                 }

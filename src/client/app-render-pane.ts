@@ -17,7 +17,7 @@ import { StateTypePartial }      from "../common/app-state"
 /*  exported rendering feature  */
 export default class Pane {
     /*  internal state  */
-    private pane:      BABYLON.Nullable<BABYLON.TransformNode>  = null
+    private hull:      BABYLON.Nullable<BABYLON.TransformNode>  = null
     private case:      BABYLON.Nullable<BABYLON.Mesh>           = null
     private display:   BABYLON.Nullable<BABYLON.Mesh>           = null
     private fade       = 0
@@ -37,36 +37,36 @@ export default class Pane {
     async establish () {
         /*  gather references to pane mesh nodes  */
         const scene  = this.api.scene.getScene()
-        this.pane    = scene.getNodeByName("Pane")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.hull    = scene.getNodeByName("Pane")        as BABYLON.Nullable<BABYLON.TransformNode>
         this.case    = scene.getMeshByName("Pane-Case")   as BABYLON.Nullable<BABYLON.Mesh>
         this.display = scene.getMeshByName("Pane-Screen") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.pane === null || this.case === null || this.display === null)
+        if (this.hull === null || this.case === null || this.display === null)
             throw new Error("cannot find pane mesh nodes")
         if (this.api.scene.renderingLayer("front"))
-            this.pane.setEnabled(false)
+            this.hull.setEnabled(false)
 
         /*  initialize pane base values  */
-        this.base.scaleCaseX          = this.case.scaling.x
-        this.base.scaleCaseY          = this.case.scaling.y
-        this.base.scaleCaseZ          = this.case.scaling.z
-        this.base.scaleDisplayX       = this.display.scaling.x
-        this.base.scaleDisplayY       = this.display.scaling.y
-        this.base.scaleDisplayZ       = this.display.scaling.z
-        this.base.rotationZ           = this.pane.rotation.z
-        this.base.positionZ           = this.pane.position.z
-        this.base.positionCaseX       = this.case.position.x
-        this.base.positionDisplayX    = this.display.position.x
+        this.base.scaleCaseX       = this.case.scaling.x
+        this.base.scaleCaseY       = this.case.scaling.y
+        this.base.scaleCaseZ       = this.case.scaling.z
+        this.base.scaleDisplayX    = this.display.scaling.x
+        this.base.scaleDisplayY    = this.display.scaling.y
+        this.base.scaleDisplayZ    = this.display.scaling.z
+        this.base.rotationZ        = this.hull.rotation.z
+        this.base.positionZ        = this.hull.position.z
+        this.base.positionCaseX    = this.case.position.x
+        this.base.positionDisplayX = this.display.position.x
 
         /*  apply glass material to pane case  */
-        const glass2 = new BABYLON.PBRMaterial("glass2", scene)
-        glass2.indexOfRefraction    = 1.52
-        glass2.alpha                = 0.20
-        glass2.directIntensity      = 1.0
-        glass2.environmentIntensity = 1.0
-        glass2.microSurface         = 1
-        glass2.reflectivityColor    = new BABYLON.Color3(0.1, 0.1, 0.1)
-        glass2.albedoColor          = new BABYLON.Color3(1.0, 1.0, 1.0)
-        this.case.material = glass2
+        const glass = new BABYLON.PBRMaterial("glass", scene)
+        glass.indexOfRefraction    = 1.52
+        glass.alpha                = 0.20
+        glass.directIntensity      = 1.0
+        glass.environmentIntensity = 1.0
+        glass.microSurface         = 1
+        glass.reflectivityColor    = new BABYLON.Color3(0.1, 0.1, 0.1)
+        glass.albedoColor          = new BABYLON.Color3(1.0, 1.0, 1.0)
+        this.case.material = glass
 
         /*  register pane for shadow casting  */
         this.api.lights.addShadowCastingMesh(this.case)
@@ -76,7 +76,7 @@ export default class Pane {
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
         /*  sanity check situation  */
-        if (!(this.pane !== null
+        if (!(this.hull !== null
             && this.case !== null
             && this.display !== null
             && this.api.scene.renderingLayer("front")))
@@ -121,17 +121,16 @@ export default class Pane {
 
             /*  update rotation  */
             if (state.pane.rotate !== undefined) {
-                this.pane.rotationQuaternion = BABYLON.Quaternion.Identity()
-                this.pane.rotate(new BABYLON.Vector3(0, 0, 1),
+                this.hull.rotationQuaternion = BABYLON.Quaternion.Identity()
+                this.hull.rotate(new BABYLON.Vector3(0, 0, 1),
                     Utils.deg2rad(state.pane.rotate), BABYLON.Space.WORLD)
             }
 
             /*  update vertical position  */
             if (state.pane.lift !== undefined)
-                this.pane.position.z = this.base.positionZ + (state.pane.lift / 100)
+                this.hull.position.z = this.base.positionZ + (state.pane.lift / 100)
 
             /*  update distance  */
-            if (state.pane.lift !== undefined)
             if (state.pane.distance !== undefined) {
                 this.case.position.x    = this.base.positionCaseX    - state.pane.distance
                 this.display.position.x = this.base.positionDisplayX - state.pane.distance
@@ -171,7 +170,7 @@ export default class Pane {
 
             /*  update visibility  */
             if (state.pane.enable !== undefined
-                && this.pane.isEnabled() !== state.pane.enable) {
+                && this.hull.isEnabled() !== state.pane.enable) {
                 if (state.pane.enable) {
                     /*  enable visibility  */
                     await this.api.material.applyDisplayMaterial("pane", this.display,
@@ -189,7 +188,7 @@ export default class Pane {
                             const material = this.display.material
                             material.setFloat("visibility", 0.0)
                         }
-                        this.pane.setEnabled(true)
+                        this.hull.setEnabled(true)
                         this.case.visibility = 1
                         this.case.setEnabled(true)
                         this.display.visibility = 1
@@ -216,7 +215,7 @@ export default class Pane {
                         this.display.visibility = 1
                         this.case.setEnabled(true)
                         this.display.setEnabled(true)
-                        this.pane.setEnabled(true)
+                        this.hull.setEnabled(true)
                     }
                 }
                 else if (!state.pane.enable) {
@@ -263,7 +262,7 @@ export default class Pane {
                             }
                             this.case!.setEnabled(false)
                             this.display!.setEnabled(false)
-                            this.pane!.setEnabled(false)
+                            this.hull!.setEnabled(false)
                             await this.api.material.unapplyDisplayMaterial("pane", this.display!)
                         })
                     }
@@ -287,7 +286,7 @@ export default class Pane {
                             setOnce(0)
                             this.case!.setEnabled(false)
                             this.display!.setEnabled(false)
-                            this.pane!.setEnabled(false)
+                            this.hull!.setEnabled(false)
                             await this.api.material.unapplyDisplayMaterial("pane", this.display!)
                         })
                     }

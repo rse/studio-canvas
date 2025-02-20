@@ -58,19 +58,19 @@ export default class Monitor {
         this.base.positionDisplayX = this.display.position.x
 
         /*  apply glass material to monitor case  */
-        const glass1 = new BABYLON.PBRMaterial("glass1", scene)
-        glass1.indexOfRefraction    = 1.52
-        glass1.alpha                = 0.20
-        glass1.directIntensity      = 1.0
-        glass1.environmentIntensity = 1.0
-        glass1.microSurface         = 1
-        glass1.reflectivityColor    = new BABYLON.Color3(0.1, 0.1, 0.1)
-        glass1.albedoColor          = new BABYLON.Color3(1.0, 1.0, 1.0)
-        this.case.material = glass1
+        const glass = new BABYLON.PBRMaterial("glass", scene)
+        glass.indexOfRefraction    = 1.52
+        glass.alpha                = 0.20
+        glass.directIntensity      = 1.0
+        glass.environmentIntensity = 1.0
+        glass.microSurface         = 1
+        glass.reflectivityColor    = new BABYLON.Color3(0.1, 0.1, 0.1)
+        glass.albedoColor          = new BABYLON.Color3(1.0, 1.0, 1.0)
+        this.case.material = glass
 
         /*  register monitor for shadow casting  */
-        this.api.lights.addShadowCastingMesh(this.display)
         this.api.lights.addShadowCastingMesh(this.case)
+        this.api.lights.addShadowCastingMesh(this.display)
     }
 
     /*  reflect the current scene state  */
