@@ -231,11 +231,12 @@ export default class Decal {
                         await Utils.manualAnimation(0, 1, this.decalFade,
                             (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()),
                             (gradient) => {
-                            if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.decal!.material
-                                material.setFloat("visibility", gradient)
+                                if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
+                                    const material = this.decal!.material
+                                    material.setFloat("visibility", gradient)
+                                }
                             }
-                        }).then(() => {
+                        ).then(() => {
                             this.api.renderer.log("INFO", "enabling decal (fading: end)")
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
@@ -261,11 +262,12 @@ export default class Decal {
                         await Utils.manualAnimation(1, 0, this.decalFade,
                             (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()),
                             (gradient) => {
-                            if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.decal!.material
-                                material.setFloat("visibility", gradient)
+                                if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
+                                    const material = this.decal!.material
+                                    material.setFloat("visibility", gradient)
+                                }
                             }
-                        }).then(async () => {
+                        ).then(async () => {
                             this.api.renderer.log("INFO", "disabling decal (fading: end)")
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
