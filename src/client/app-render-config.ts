@@ -73,9 +73,9 @@ export default class Config {
 
     /*  camera type (currently hard-coded)  */
     static camNameToTypeMap = new Map<CameraName, PTZCamType>([
-        [ "CAM1", "birddog" ],
-        [ "CAM2", "sony" ],
-        [ "CAM3", "sony" ],
+        [ "CAM1", "sony"    ],
+        [ "CAM2", "sony"    ],
+        [ "CAM3", "sony"    ],
         [ "CAM4", "birddog" ]
     ])
 
