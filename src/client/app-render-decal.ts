@@ -41,9 +41,14 @@ export default class Decal {
         /*  remember potentially old decal  */
         const oldDecal = this.decal
 
+        /*  determine scene  */
+        const scene = this.api.scene.getScene()
+
         /*  determine position, normal vector and size  */
-        const rayBegin = this.api.scene.getScene().getMeshByName("DecalRay-Begin") as BABYLON.Nullable<BABYLON.Mesh>
-        const rayEnd   = this.api.scene.getScene().getMeshByName("DecalRay-End")   as BABYLON.Nullable<BABYLON.Mesh>
+        const rayBegin = scene.getMeshByName("DecalRay-Begin") as
+            BABYLON.Nullable<BABYLON.Mesh>
+        const rayEnd = scene.getMeshByName("DecalRay-End") as
+            BABYLON.Nullable<BABYLON.Mesh>
         if (rayBegin === null || rayEnd === null)
             throw new Error("cannot find 'DecalRay-Begin' or 'DecalRay-End' nodes")
         rayBegin.setEnabled(false)
@@ -65,13 +70,15 @@ export default class Decal {
         }
 
         /*  determine decal base position on wall  */
-        const rayEndPos   = BABYLON.Vector3.TransformCoordinates(rayEndLifted.position, rayEndLifted.getWorldMatrix())
-        const rayBeginPos = BABYLON.Vector3.TransformCoordinates(rayBegin.position, rayBegin.getWorldMatrix())
+        const rayEndPos   = BABYLON.Vector3.TransformCoordinates(
+            rayEndLifted.position, rayEndLifted.getWorldMatrix())
+        const rayBeginPos = BABYLON.Vector3.TransformCoordinates(
+            rayBegin.position, rayBegin.getWorldMatrix())
         let rayDirection = rayEndPos.subtract(rayBeginPos).normalize()
         rayDirection = rotateVector(rayDirection, 0, 0, Utils.deg2rad(this.decalRotate))
         const ray = new BABYLON.Ray(rayBeginPos, rayDirection, 10 /* meters, enough to be behind wall */)
         const wall = this.api.canvas.getWallMesh()!
-        const decalBase = this.api.scene.getScene().pickWithRay(ray, (mesh) => (mesh === wall))
+        const decalBase = scene.pickWithRay(ray, (mesh) => (mesh === wall))
         if (decalBase === null)
             throw new Error("cannot find decal base position on wall")
 
@@ -99,7 +106,7 @@ export default class Decal {
         /*  take over material or create a fresh one  */
         let material = oldDecal?.material ?? null
         if (material === null) {
-            material = new BABYLON.PBRMaterial("Decal-Material", this.api.scene.getScene())
+            material = new BABYLON.PBRMaterial("Decal-Material", scene)
             material.alpha   = 1.0
             material.zOffset = -200
         }
@@ -123,7 +130,8 @@ export default class Decal {
         /*  update already active media receivers  */
         if (this.api.material.isMediaModified(this.api.material.displaySource("decal"))
             && this.decal.isEnabled())
-            await this.api.material.applyDisplayMaterial("decal", this.decal, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+            await this.api.material.applyDisplayMaterial("decal", this.decal,
+                this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
 
         /*  reflect state changes  */
         if (state.decal !== undefined) {
@@ -134,7 +142,8 @@ export default class Decal {
                     || this.api.material.isMediaModified(state.decal.source))) {
                 this.api.material.displaySource("decal", state.decal.source)
                 if (this.decal.isEnabled())
-                    await this.api.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+                    await this.api.material.applyDisplayMaterial("decal", this.decal,
+                        this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
             }
             if (state.decal.opacity !== undefined) {
                 this.decalOpacity = state.decal.opacity
@@ -158,21 +167,24 @@ export default class Decal {
                 }
             }
             if (state.decal.chromaKey !== undefined) {
-                if (state.decal.chromaKey.enable !== undefined && this.decalChromaKey.enable !== state.decal.chromaKey.enable) {
+                if (state.decal.chromaKey.enable !== undefined
+                    && this.decalChromaKey.enable !== state.decal.chromaKey.enable) {
                     this.decalChromaKey.enable = state.decal.chromaKey.enable
                     if (this.decal.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.decal.material
                         material.setInt("chromaEnable", this.decalChromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.decal.chromaKey.threshold !== undefined && this.decalChromaKey.threshold !== state.decal.chromaKey.threshold) {
+                if (state.decal.chromaKey.threshold !== undefined
+                    && this.decalChromaKey.threshold !== state.decal.chromaKey.threshold) {
                     this.decalChromaKey.threshold = state.decal.chromaKey.threshold
                     if (this.decal.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.decal.material
                         material.setFloat("chromaThreshold", this.decalChromaKey.threshold)
                     }
                 }
-                if (state.decal.chromaKey.smoothing !== undefined && this.decalChromaKey.smoothing !== state.decal.chromaKey.smoothing) {
+                if (state.decal.chromaKey.smoothing !== undefined
+                    && this.decalChromaKey.smoothing !== state.decal.chromaKey.smoothing) {
                     this.decalChromaKey.smoothing = state.decal.chromaKey.smoothing
                     if (this.decalChromaKey.enable && this.decal.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.decal.material
@@ -180,7 +192,9 @@ export default class Decal {
                     }
                 }
             }
-            if (state.decal.rotate !== undefined || state.decal.lift !== undefined || state.decal.scale !== undefined) {
+            if (state.decal.rotate !== undefined
+                || state.decal.lift !== undefined
+                || state.decal.scale !== undefined) {
                 let changed = false
                 if (state.decal.rotate !== undefined && this.decalRotate !== state.decal.rotate) {
                     this.decalRotate = state.decal.rotate
@@ -197,13 +211,15 @@ export default class Decal {
                 if (changed) {
                     await this.api.scene.stop()
                     await this.decalGenerate()
-                    await this.api.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+                    await this.api.material.applyDisplayMaterial("decal", this.decal,
+                        this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
                     await this.api.scene.start()
                 }
             }
             if (state.decal.enable !== undefined && this.decal.isEnabled() !== state.decal.enable) {
                 if (state.decal.enable) {
-                    await this.api.material.applyDisplayMaterial("decal", this.decal!, this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
+                    await this.api.material.applyDisplayMaterial("decal", this.decal,
+                        this.decalOpacity, this.decalBorderRad, this.decalBorderCrop, this.decalChromaKey)
                     if (this.decalFade > 0 && this.api.scene.currentFPS() > 0) {
                         this.api.renderer.log("INFO", "enabling decal (fading: start)")
                         if (this.decal.material instanceof BABYLON.ShaderMaterial) {
@@ -212,7 +228,9 @@ export default class Decal {
                         }
                         this.decal.visibility = 1
                         this.decal.setEnabled(true)
-                        await Utils.manualAnimation(0, 1, this.decalFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
+                        await Utils.manualAnimation(0, 1, this.decalFade,
+                            (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()),
+                            (gradient) => {
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
                                 material.setFloat("visibility", gradient)
@@ -240,7 +258,9 @@ export default class Decal {
                         }
                         this.decal.visibility = 1
                         this.decal.setEnabled(true)
-                        await Utils.manualAnimation(1, 0, this.decalFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
+                        await Utils.manualAnimation(1, 0, this.decalFade,
+                            (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()),
+                            (gradient) => {
                             if (this.decal!.material instanceof BABYLON.ShaderMaterial) {
                                 const material = this.decal!.material
                                 material.setFloat("visibility", gradient)
