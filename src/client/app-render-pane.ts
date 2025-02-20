@@ -17,16 +17,16 @@ import { StateTypePartial }      from "../common/app-state"
 /*  exported rendering feature  */
 export default class Pane {
     /*  internal state  */
-    public pane:            BABYLON.Nullable<BABYLON.TransformNode>  = null
-    public paneCase:        BABYLON.Nullable<BABYLON.Mesh>           = null
-    public paneDisplay:     BABYLON.Nullable<BABYLON.Mesh>           = null
-    public paneFade         = 0
-    public paneOpacity      = 1.0
-    public paneChromaKey    = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
-    public paneBase         = {
-        scaleCaseX:    0, scaleCaseY:    0, scaleCaseZ:    0,
-        scaleDisplayX: 0, scaleDisplayY: 0, scaleDisplayZ: 0,
-        rotationZ:     0, positionZ:     0,
+    public pane:      BABYLON.Nullable<BABYLON.TransformNode>  = null
+    public case:      BABYLON.Nullable<BABYLON.Mesh>           = null
+    public display:   BABYLON.Nullable<BABYLON.Mesh>           = null
+    public fade       = 0
+    public opacity    = 1.0
+    public chromaKey  = { enable: false, threshold: 0.4, smoothing: 0.1 } as ChromaKey
+    public base       = {
+        scaleCaseX:    0, scaleCaseY:       0, scaleCaseZ:    0,
+        scaleDisplayX: 0, scaleDisplayY:    0, scaleDisplayZ: 0,
+        rotationZ:     0, positionZ:        0,
         positionCaseX: 0, positionDisplayX: 0
     }
 
@@ -36,28 +36,29 @@ export default class Pane {
     /*  establish feature  */
     async establish () {
         /*  gather references to pane mesh nodes  */
-        this.pane        = this.api.scene.getScene().getNodeByName("Pane")        as BABYLON.Nullable<BABYLON.TransformNode>
-        this.paneCase    = this.api.scene.getScene().getMeshByName("Pane-Case")   as BABYLON.Nullable<BABYLON.Mesh>
-        this.paneDisplay = this.api.scene.getScene().getMeshByName("Pane-Screen") as BABYLON.Nullable<BABYLON.Mesh>
-        if (this.pane === null || this.paneCase === null || this.paneDisplay === null)
+        const scene  = this.api.scene.getScene()
+        this.pane    = scene.getNodeByName("Pane")        as BABYLON.Nullable<BABYLON.TransformNode>
+        this.case    = scene.getMeshByName("Pane-Case")   as BABYLON.Nullable<BABYLON.Mesh>
+        this.display = scene.getMeshByName("Pane-Screen") as BABYLON.Nullable<BABYLON.Mesh>
+        if (this.pane === null || this.case === null || this.display === null)
             throw new Error("cannot find pane mesh nodes")
         if (this.api.scene.renderingLayer("front"))
             this.pane.setEnabled(false)
 
         /*  initialize pane base values  */
-        this.paneBase.scaleCaseX          = this.paneCase.scaling.x
-        this.paneBase.scaleCaseY          = this.paneCase.scaling.y
-        this.paneBase.scaleCaseZ          = this.paneCase.scaling.z
-        this.paneBase.scaleDisplayX       = this.paneDisplay.scaling.x
-        this.paneBase.scaleDisplayY       = this.paneDisplay.scaling.y
-        this.paneBase.scaleDisplayZ       = this.paneDisplay.scaling.z
-        this.paneBase.rotationZ           = this.pane.rotation.z
-        this.paneBase.positionZ           = this.pane.position.z
-        this.paneBase.positionCaseX       = this.paneCase.position.x
-        this.paneBase.positionDisplayX    = this.paneDisplay.position.x
+        this.base.scaleCaseX          = this.case.scaling.x
+        this.base.scaleCaseY          = this.case.scaling.y
+        this.base.scaleCaseZ          = this.case.scaling.z
+        this.base.scaleDisplayX       = this.display.scaling.x
+        this.base.scaleDisplayY       = this.display.scaling.y
+        this.base.scaleDisplayZ       = this.display.scaling.z
+        this.base.rotationZ           = this.pane.rotation.z
+        this.base.positionZ           = this.pane.position.z
+        this.base.positionCaseX       = this.case.position.x
+        this.base.positionDisplayX    = this.display.position.x
 
         /*  apply glass material to pane case  */
-        const glass2 = new BABYLON.PBRMaterial("glass2", this.api.scene.getScene())
+        const glass2 = new BABYLON.PBRMaterial("glass2", scene)
         glass2.indexOfRefraction    = 1.52
         glass2.alpha                = 0.20
         glass2.directIntensity      = 1.0
@@ -65,115 +66,142 @@ export default class Pane {
         glass2.microSurface         = 1
         glass2.reflectivityColor    = new BABYLON.Color3(0.1, 0.1, 0.1)
         glass2.albedoColor          = new BABYLON.Color3(1.0, 1.0, 1.0)
-        this.paneCase.material = glass2
+        this.case.material = glass2
 
         /*  register pane for shadow casting  */
-        this.api.lights.addShadowCastingMesh(this.paneCase!)
-        this.api.lights.addShadowCastingMesh(this.paneDisplay!)
+        this.api.lights.addShadowCastingMesh(this.case)
+        this.api.lights.addShadowCastingMesh(this.display)
     }
 
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
         /*  sanity check situation  */
         if (!(this.pane !== null
-            && this.paneCase !== null
-            && this.paneDisplay !== null
+            && this.case !== null
+            && this.display !== null
             && this.api.scene.renderingLayer("front")))
             return
 
         /*  update already active media receivers  */
         if (this.api.material.isMediaModified(this.api.material.displaySource("pane"))
-            && this.paneDisplay.isEnabled())
-            await this.api.material.applyDisplayMaterial("pane", this.paneDisplay, this.paneOpacity, 0, 0, this.paneChromaKey)
+            && this.display.isEnabled())
+            await this.api.material.applyDisplayMaterial("pane", this.display,
+                this.opacity, 0, 0, this.chromaKey)
 
         /*  reflect scene changes  */
         if (state.pane !== undefined) {
+            /*  update content  */
             if (state.pane.source !== undefined
                 && (this.api.material.displaySource("pane") !== state.pane.source
                     || this.api.material.isMediaModified(state.pane.source))) {
                 this.api.material.displaySource("pane", state.pane.source)
-                if (this.paneDisplay.isEnabled())
-                    await this.api.material.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
+                if (this.display.isEnabled())
+                    await this.api.material.applyDisplayMaterial("pane", this.display,
+                        this.opacity, 0, 0, this.chromaKey)
             }
+
+            /*  update opacity  */
             if (state.pane.opacity !== undefined) {
-                this.paneOpacity = state.pane.opacity
-                if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                    const material = this.paneDisplay.material
-                    material.setFloat("opacity", this.paneOpacity)
+                this.opacity = state.pane.opacity
+                if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                    const material = this.display.material
+                    material.setFloat("opacity", this.opacity)
                 }
             }
+
+            /*  update scaling  */
             if (state.pane.scale !== undefined) {
-                this.paneCase.scaling.x    = this.paneBase.scaleCaseX    * state.pane.scale
-                this.paneCase.scaling.y    = this.paneBase.scaleCaseY    * state.pane.scale
-                this.paneCase.scaling.z    = this.paneBase.scaleCaseZ    * state.pane.scale
-                this.paneDisplay.scaling.x = this.paneBase.scaleDisplayX * state.pane.scale
-                this.paneDisplay.scaling.y = this.paneBase.scaleDisplayY * state.pane.scale
-                this.paneDisplay.scaling.z = this.paneBase.scaleDisplayZ * state.pane.scale
+                this.case.scaling.x    = this.base.scaleCaseX    * state.pane.scale
+                this.case.scaling.y    = this.base.scaleCaseY    * state.pane.scale
+                this.case.scaling.z    = this.base.scaleCaseZ    * state.pane.scale
+                this.display.scaling.x = this.base.scaleDisplayX * state.pane.scale
+                this.display.scaling.y = this.base.scaleDisplayY * state.pane.scale
+                this.display.scaling.z = this.base.scaleDisplayZ * state.pane.scale
             }
+
+            /*  update rotation  */
             if (state.pane.rotate !== undefined) {
                 this.pane.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.pane.rotate(new BABYLON.Vector3(0, 0, 1),
                     Utils.deg2rad(state.pane.rotate), BABYLON.Space.WORLD)
             }
+
+            /*  update vertical position  */
             if (state.pane.lift !== undefined)
-                this.pane.position.z = this.paneBase.positionZ + (state.pane.lift / 100)
+                this.pane.position.z = this.base.positionZ + (state.pane.lift / 100)
+
+            /*  update distance  */
+            if (state.pane.lift !== undefined)
             if (state.pane.distance !== undefined) {
-                this.paneCase.position.x    = this.paneBase.positionCaseX    - state.pane.distance
-                this.paneDisplay.position.x = this.paneBase.positionDisplayX - state.pane.distance
+                this.case.position.x    = this.base.positionCaseX    - state.pane.distance
+                this.display.position.x = this.base.positionDisplayX - state.pane.distance
             }
-            if (state.pane.fadeTime !== undefined && this.paneFade !== state.pane.fadeTime)
-                this.paneFade = state.pane.fadeTime
+
+            /*  update fading  */
+            if (state.pane.fadeTime !== undefined && this.fade !== state.pane.fadeTime)
+                this.fade = state.pane.fadeTime
+
+            /*  update chroma-keying  */
             if (state.pane.chromaKey !== undefined) {
-                if (state.pane.chromaKey.enable !== undefined && this.paneChromaKey.enable !== state.pane.chromaKey.enable) {
-                    this.paneChromaKey.enable = state.pane.chromaKey.enable
-                    if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.paneDisplay.material
-                        material.setInt("chromaEnable", this.paneChromaKey.enable ? 1 : 0)
+                if (state.pane.chromaKey.enable !== undefined
+                    && this.chromaKey.enable !== state.pane.chromaKey.enable) {
+                    this.chromaKey.enable = state.pane.chromaKey.enable
+                    if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.display.material
+                        material.setInt("chromaEnable", this.chromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.pane.chromaKey.threshold !== undefined && this.paneChromaKey.threshold !== state.pane.chromaKey.threshold) {
-                    this.paneChromaKey.threshold = state.pane.chromaKey.threshold
-                    if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.paneDisplay.material
-                        material.setFloat("chromaThreshold", this.paneChromaKey.threshold)
+                if (state.pane.chromaKey.threshold !== undefined
+                    && this.chromaKey.threshold !== state.pane.chromaKey.threshold) {
+                    this.chromaKey.threshold = state.pane.chromaKey.threshold
+                    if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.display.material
+                        material.setFloat("chromaThreshold", this.chromaKey.threshold)
                     }
                 }
-                if (state.pane.chromaKey.smoothing !== undefined && this.paneChromaKey.smoothing !== state.pane.chromaKey.smoothing) {
-                    this.paneChromaKey.smoothing = state.pane.chromaKey.smoothing
-                    if (this.paneChromaKey.enable && this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.paneDisplay.material
-                        material.setFloat("chromaSmoothing", this.paneChromaKey.smoothing)
+                if (state.pane.chromaKey.smoothing !== undefined
+                    && this.chromaKey.smoothing !== state.pane.chromaKey.smoothing) {
+                    this.chromaKey.smoothing = state.pane.chromaKey.smoothing
+                    if (this.chromaKey.enable && this.display.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.display.material
+                        material.setFloat("chromaSmoothing", this.chromaKey.smoothing)
                     }
                 }
             }
-            if (state.pane.enable !== undefined && this.pane.isEnabled() !== state.pane.enable) {
+
+            /*  update visibility  */
+            if (state.pane.enable !== undefined
+                && this.pane.isEnabled() !== state.pane.enable) {
                 if (state.pane.enable) {
-                    await this.api.material.applyDisplayMaterial("pane", this.paneDisplay!, this.paneOpacity, 0, 0, this.paneChromaKey)
-                    if (this.paneFade > 0 && this.api.scene.currentFPS() > 0) {
+                    /*  enable visibility  */
+                    await this.api.material.applyDisplayMaterial("pane", this.display,
+                        this.opacity, 0, 0, this.chromaKey)
+                    if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
+                        /*  enable visibility with fading  */
                         this.api.renderer.log("INFO", "enabling pane (fading: start)")
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
-                        const framesTotal = this.paneFade * fps
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.paneCase,
+                        const framesTotal = this.fade * fps
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("show", this.case,
                             "visibility", fps, framesTotal, 0, 1, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
-                        if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.paneDisplay.material
+                        if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.display.material
                             material.setFloat("visibility", 0.0)
                         }
                         this.pane.setEnabled(true)
-                        this.paneCase.visibility = 1
-                        this.paneCase.setEnabled(true)
-                        this.paneDisplay.visibility = 1
-                        this.paneDisplay.setEnabled(true)
-                        const anim2 = Utils.manualAnimation(0, 1, this.paneFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                        this.case.visibility = 1
+                        this.case.setEnabled(true)
+                        this.display.visibility = 1
+                        this.display.setEnabled(true)
+                        const anim2 = Utils.manualAnimation(0, 1, this.fade, fps, (gradient) => {
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", 1.0)
                             }
                         })
@@ -182,81 +210,85 @@ export default class Pane {
                         })
                     }
                     else {
+                        /*  enable visibility without fading  */
                         this.api.renderer.log("INFO", "enabling pane")
-                        this.paneCase.visibility    = 1
-                        this.paneDisplay.visibility = 1
-                        this.paneCase.setEnabled(true)
-                        this.paneDisplay.setEnabled(true)
+                        this.case.visibility    = 1
+                        this.display.visibility = 1
+                        this.case.setEnabled(true)
+                        this.display.setEnabled(true)
                         this.pane.setEnabled(true)
                     }
                 }
                 else if (!state.pane.enable) {
-                    if (this.paneFade > 0 && this.api.scene.currentFPS() > 0) {
+                    /*  disable visibility  */
+                    if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
+                        /*  disable visibility with fading  */
                         this.api.renderer.log("INFO", "disabling pane (fading: start)")
-                        this.paneCase.visibility = 1
-                        this.paneCase.setEnabled(true)
-                        this.paneDisplay.visibility = 1
-                        this.paneDisplay.setEnabled(true)
+                        this.case.visibility = 1
+                        this.case.setEnabled(true)
+                        this.display.visibility = 1
+                        this.display.setEnabled(true)
                         const ease = new BABYLON.SineEase()
                         ease.setEasingMode(BABYLON.EasingFunction.EASINGMODE_EASEINOUT)
                         const fps = (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS())
-                        const framesTotal = this.paneFade * fps
-                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.paneCase,
+                        const framesTotal = this.fade * fps
+                        const anim1 = BABYLON.Animation.CreateAndStartAnimation("hide", this.case,
                             "visibility", fps, framesTotal, 1, 0, BABYLON.Animation.ANIMATIONLOOPMODE_CONSTANT, ease)!
-                        if (this.paneDisplay.material instanceof BABYLON.ShaderMaterial) {
-                            const material = this.paneDisplay.material
+                        if (this.display.material instanceof BABYLON.ShaderMaterial) {
+                            const material = this.display.material
                             material.setFloat("visibility", 1.0)
                         }
-                        const anim2 = Utils.manualAnimation(1, 0, this.paneFade, (this.api.scene.currentFPS() === 0 ? 1 : this.api.scene.currentFPS()), (gradient) => {
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                        const anim2 = Utils.manualAnimation(1, 0, this.fade, fps, (gradient) => {
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", gradient)
                             }
                         }).then(() => {
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", 0.0)
                             }
                         })
                         await Promise.all([ anim1.waitAsync(), anim2 ]).then(async () => {
                             this.api.renderer.log("INFO", "disabling pane (fading: end)")
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", 0.0)
-                                this.paneDisplay!.visibility = 0.0
-                                this.paneCase!.visibility = 0.0
+                                this.display!.visibility = 0.0
+                                this.case!.visibility = 0.0
                             }
                             else  {
-                                this.paneDisplay!.visibility = 0.0
-                                this.paneCase!.visibility = 0.0
+                                this.display!.visibility = 0.0
+                                this.case!.visibility = 0.0
                             }
-                            this.paneCase!.setEnabled(false)
-                            this.paneDisplay!.setEnabled(false)
+                            this.case!.setEnabled(false)
+                            this.display!.setEnabled(false)
                             this.pane!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("pane", this.paneDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("pane", this.display!)
                         })
                     }
                     else {
+                        /*  disable visibility without fading  */
                         this.api.renderer.log("INFO", "disabling pane")
                         const setOnce = (value: number) => {
-                            if (this.paneDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                                const material = this.paneDisplay!.material
+                            if (this.display!.material instanceof BABYLON.ShaderMaterial) {
+                                const material = this.display!.material
                                 material.setFloat("visibility", value)
-                                this.paneDisplay!.visibility = value
-                                this.paneCase!.visibility = value
+                                this.display!.visibility = value
+                                this.case!.visibility = value
                             }
                             else {
-                                this.paneDisplay!.visibility = value
-                                this.paneCase!.visibility = value
+                                this.display!.visibility = value
+                                this.case!.visibility = value
                             }
                         }
                         setOnce(0.000000001)
                         this.api.scene.getScene().onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
-                            this.paneCase!.setEnabled(false)
-                            this.paneDisplay!.setEnabled(false)
+                            this.case!.setEnabled(false)
+                            this.display!.setEnabled(false)
                             this.pane!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("pane", this.paneDisplay!)
+                            await this.api.material.unapplyDisplayMaterial("pane", this.display!)
                         })
                     }
                 }
