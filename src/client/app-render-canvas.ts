@@ -220,7 +220,7 @@ export default class Canvas {
     async canvasDisposeTextures (modeNum: number) {
         /*  determine material and canvas state  */
         const material = this.canvasMaterial!
-        const canvasState = this.canvasState[this.canvasMode]
+        const canvasState = this.canvasState[modeNum]
 
         /*  unfreeze material  */
         material.unfreeze()
