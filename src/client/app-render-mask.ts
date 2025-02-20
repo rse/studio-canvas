@@ -32,10 +32,11 @@ export default class Mask {
     /*  establish feature  */
     async establish () {
         /*  gather references to mask mesh nodes  */
-        this.mask           = this.api.scene.getScene().getNodeByName("Mask")            as BABYLON.Nullable<BABYLON.TransformNode>
-        this.maskDisplay    = this.api.scene.getScene().getMeshByName("Mask-Display")    as BABYLON.Nullable<BABYLON.Mesh>
-        this.maskBackground = this.api.scene.getScene().getMeshByName("Mask-Background") as BABYLON.Nullable<BABYLON.Mesh>
-        this.maskCamLens    = this.api.scene.getScene().getNodeByName("Mask-Cam-Lens")   as BABYLON.Nullable<BABYLON.FreeCamera>
+        const scene = this.api.scene.getScene()
+        this.mask           = scene.getNodeByName("Mask")            as BABYLON.Nullable<BABYLON.TransformNode>
+        this.maskDisplay    = scene.getMeshByName("Mask-Display")    as BABYLON.Nullable<BABYLON.Mesh>
+        this.maskBackground = scene.getMeshByName("Mask-Background") as BABYLON.Nullable<BABYLON.Mesh>
+        this.maskCamLens    = scene.getNodeByName("Mask-Cam-Lens")   as BABYLON.Nullable<BABYLON.FreeCamera>
         if (this.mask === null || this.maskDisplay === null || this.maskBackground === null || this.maskCamLens === null)
             throw new Error("cannot find mask mesh nodes")
         if (this.api.scene.renderingLayer("front")) {
@@ -44,9 +45,9 @@ export default class Mask {
         }
 
         /*  initialize mask base values  */
-        this.maskBase.scaleDisplayX = this.maskDisplay!.scaling.x
-        this.maskBase.scaleDisplayY = this.maskDisplay!.scaling.y
-        this.maskBase.scaleDisplayZ = this.maskDisplay!.scaling.z
+        this.maskBase.scaleDisplayX = this.maskDisplay.scaling.x
+        this.maskBase.scaleDisplayY = this.maskDisplay.scaling.y
+        this.maskBase.scaleDisplayZ = this.maskDisplay.scaling.z
 
         /*  force mask background to be entirely black  */
         const material = this.maskBackground.material as BABYLON.PBRMaterial
@@ -62,28 +63,37 @@ export default class Mask {
         /*  sanity check situation  */
         if (!(this.mask !== null
             && this.maskDisplay !== null
+            && this.maskBackground !== null
+            && this.maskCamLens !== null
             && this.api.scene.renderingLayer("front")))
             return
 
         /*  update already active media receivers  */
         if (this.api.material.isMediaModified(this.api.material.displaySource("mask"))
             && this.maskDisplay.isEnabled())
-            await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+            await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0,
+                this.maskBorderRad, 0, null)
 
         /*  reflect scene changes  */
         if (state.mask !== undefined) {
+            /*  update display material  */
             if (state.mask.source !== undefined
                 && (this.api.material.displaySource("mask") !== state.mask.source
                     || this.api.material.isMediaModified(state.mask.source))) {
                 this.api.material.displaySource("mask", state.mask.source)
                 if (this.maskDisplay.isEnabled())
-                    await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+                    await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0,
+                        this.maskBorderRad, 0, null)
             }
+
+            /*  update display scale  */
             if (state.mask.scale !== undefined) {
                 this.maskDisplay.scaling.x = this.maskBase.scaleDisplayX * state.mask.scale
                 this.maskDisplay.scaling.y = this.maskBase.scaleDisplayY * state.mask.scale
                 this.maskDisplay.scaling.z = this.maskBase.scaleDisplayZ * state.mask.scale
             }
+
+            /*  update display border  */
             if (state.mask.borderRad !== undefined) {
                 this.maskBorderRad = state.mask.borderRad
                 if (this.maskDisplay.material instanceof BABYLON.ShaderMaterial) {
@@ -91,25 +101,31 @@ export default class Mask {
                     material.setFloat("borderRadius", this.maskBorderRad)
                 }
             }
-            if (state.mask.enable !== undefined && this.maskDisplay.isEnabled() !== state.mask.enable) {
+
+            /*  update display visibility  */
+            if (state.mask.enable !== undefined
+                && this.maskDisplay.isEnabled() !== state.mask.enable) {
+                const scene = this.api.scene.getScene()
                 if (state.mask.enable) {
-                    this.originalCamera = this.api.scene.getScene().activeCamera
-                    this.api.scene.getScene().activeCamera = this.maskCamLens
-                    await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0, this.maskBorderRad, 0, null)
+                    /*  enable visibility  */
+                    this.originalCamera = scene.activeCamera
+                    scene.activeCamera = this.maskCamLens
+                    await this.api.material.applyDisplayMaterial("mask", this.maskDisplay, 1.0,
+                        this.maskBorderRad, 0, null)
                     this.api.renderer.log("INFO", "enabling mask")
-                    if (this.maskDisplay!.material instanceof BABYLON.ShaderMaterial) {
-                        const material = this.maskDisplay!.material
+                    if (this.maskDisplay.material instanceof BABYLON.ShaderMaterial) {
+                        const material = this.maskDisplay.material
                         material.setFloat("visibility", 1.0)
-                        this.maskDisplay!.visibility = 1.0
+                        this.maskDisplay.visibility = 1.0
                     }
                     else
-                        this.maskDisplay!.visibility = 1.0
-                    this.maskBackground!.visibility = 1.0
-                    this.maskDisplay!.setEnabled(true)
-                    this.maskBackground!.setEnabled(true)
+                        this.maskDisplay.visibility = 1.0
+                    this.maskBackground.visibility = 1.0
+                    this.maskDisplay.setEnabled(true)
+                    this.maskBackground.setEnabled(true)
                 }
                 else if (!state.mask.enable) {
-                    /*  disable mask
+                    /*  disable visibility
                         NOTICE: BabylonJS immediately stops rendering if it thinks there are no more
                         visible meshes, so we have to first render it nearly invisible and then
                         finally disable it  */
@@ -125,12 +141,12 @@ export default class Mask {
                         this.maskBackground!.visibility = value
                     }
                     setOnce(0.000000001)
-                    this.api.scene.getScene().onAfterRenderObservable.addOnce(async (ev, state) => {
+                    scene.onAfterRenderObservable.addOnce(async (ev, state) => {
                         setOnce(0)
                         this.maskDisplay!.setEnabled(false)
                         this.maskBackground!.setEnabled(false)
                         if (this.originalCamera !== null)
-                            this.api.scene.getScene().activeCamera = this.originalCamera
+                            scene.activeCamera = this.originalCamera
                         await this.api.material.unapplyDisplayMaterial("mask", this.maskDisplay!)
                     })
                 }
