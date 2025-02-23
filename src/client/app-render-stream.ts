@@ -114,27 +114,27 @@ export default class Stream {
     }
 
     /*  reflect the current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
-        if (state.streams !== undefined) {
+    async reflectSceneState (state: StateTypePartial["streams"]) {
+        if (state !== undefined) {
             let changed = false
-            if (state.streams.device !== undefined
-                && this.videoStreamDevice !== state.streams.device) {
-                this.videoStreamDevice = state.streams.device
+            if (state.device !== undefined
+                && this.videoStreamDevice !== state.device) {
+                this.videoStreamDevice = state.device
                 changed = true
             }
-            if (state.streams.width !== undefined
-                && this.videoStreamWidth !== state.streams.width) {
-                this.videoStreamWidth = state.streams.width
+            if (state.width !== undefined
+                && this.videoStreamWidth !== state.width) {
+                this.videoStreamWidth = state.width
                 changed = true
             }
-            if (state.streams.height !== undefined
-                && this.videoStreamHeight !== state.streams.height) {
-                this.videoStreamHeight = state.streams.height
+            if (state.height !== undefined
+                && this.videoStreamHeight !== state.height) {
+                this.videoStreamHeight = state.height
                 changed = true
             }
-            if (state.streams.fps !== undefined
-                && this.videoStreamFPS !== state.streams.fps) {
-                this.videoStreamFPS = state.streams.fps
+            if (state.fps !== undefined
+                && this.videoStreamFPS !== state.fps) {
+                this.videoStreamFPS = state.fps
                 changed = true
             }
             if (changed) {

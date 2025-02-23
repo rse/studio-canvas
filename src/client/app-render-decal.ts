@@ -122,7 +122,7 @@ export default class Decal {
     }
 
     /*  reflect the current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
+    async reflectSceneState (state: StateTypePartial["decal"]) {
         /*  sanity check situation  */
         if (!(this.mesh !== null && this.api.scene.renderingLayer("back")))
             return
@@ -134,24 +134,24 @@ export default class Decal {
                 this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
 
         /*  reflect state changes  */
-        if (state.decal !== undefined) {
+        if (state !== undefined) {
             /*  update fading  */
-            if (state.decal.fadeTime !== undefined && this.fade !== state.decal.fadeTime)
-                this.fade = state.decal.fadeTime
+            if (state.fadeTime !== undefined && this.fade !== state.fadeTime)
+                this.fade = state.fadeTime
 
             /*  update content  */
-            if (state.decal.source !== undefined
-                && (this.api.material.displaySource("decal") !== state.decal.source
-                    || this.api.material.isMediaModified(state.decal.source))) {
-                this.api.material.displaySource("decal", state.decal.source)
+            if (state.source !== undefined
+                && (this.api.material.displaySource("decal") !== state.source
+                    || this.api.material.isMediaModified(state.source))) {
+                this.api.material.displaySource("decal", state.source)
                 if (this.mesh.isEnabled())
                     await this.api.material.applyDisplayMaterial("decal", this.mesh,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
             }
 
             /*  update opacity  */
-            if (state.decal.opacity !== undefined) {
-                this.opacity = state.decal.opacity
+            if (state.opacity !== undefined) {
+                this.opacity = state.opacity
                 if (this.mesh.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.mesh.material
                     material.setFloat("opacity", this.opacity)
@@ -159,15 +159,15 @@ export default class Decal {
             }
 
             /*  update border  */
-            if (state.decal.borderRad !== undefined) {
-                this.borderRad = state.decal.borderRad
+            if (state.borderRad !== undefined) {
+                this.borderRad = state.borderRad
                 if (this.mesh.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.mesh.material
                     material.setFloat("borderRadius", this.borderRad)
                 }
             }
-            if (state.decal.borderCrop !== undefined) {
-                this.borderCrop = state.decal.borderCrop
+            if (state.borderCrop !== undefined) {
+                this.borderCrop = state.borderCrop
                 if (this.mesh.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.mesh.material
                     material.setFloat("borderCrop", this.borderCrop)
@@ -175,26 +175,26 @@ export default class Decal {
             }
 
             /*  update chroma-keying  */
-            if (state.decal.chromaKey !== undefined) {
-                if (state.decal.chromaKey.enable !== undefined
-                    && this.chromaKey.enable !== state.decal.chromaKey.enable) {
-                    this.chromaKey.enable = state.decal.chromaKey.enable
+            if (state.chromaKey !== undefined) {
+                if (state.chromaKey.enable !== undefined
+                    && this.chromaKey.enable !== state.chromaKey.enable) {
+                    this.chromaKey.enable = state.chromaKey.enable
                     if (this.mesh.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.mesh.material
                         material.setInt("chromaEnable", this.chromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.decal.chromaKey.threshold !== undefined
-                    && this.chromaKey.threshold !== state.decal.chromaKey.threshold) {
-                    this.chromaKey.threshold = state.decal.chromaKey.threshold
+                if (state.chromaKey.threshold !== undefined
+                    && this.chromaKey.threshold !== state.chromaKey.threshold) {
+                    this.chromaKey.threshold = state.chromaKey.threshold
                     if (this.mesh.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.mesh.material
                         material.setFloat("chromaThreshold", this.chromaKey.threshold)
                     }
                 }
-                if (state.decal.chromaKey.smoothing !== undefined
-                    && this.chromaKey.smoothing !== state.decal.chromaKey.smoothing) {
-                    this.chromaKey.smoothing = state.decal.chromaKey.smoothing
+                if (state.chromaKey.smoothing !== undefined
+                    && this.chromaKey.smoothing !== state.chromaKey.smoothing) {
+                    this.chromaKey.smoothing = state.chromaKey.smoothing
                     if (this.chromaKey.enable && this.mesh.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.mesh.material
                         material.setFloat("chromaSmoothing", this.chromaKey.smoothing)
@@ -203,26 +203,26 @@ export default class Decal {
             }
 
             /*  update position and size  */
-            if (state.decal.rotate !== undefined
-                || state.decal.lift !== undefined
-                || state.decal.scale !== undefined) {
+            if (state.rotate !== undefined
+                || state.lift !== undefined
+                || state.scale !== undefined) {
                 let changed = false
 
                 /*  update rotation  */
-                if (state.decal.rotate !== undefined && this.rotate !== state.decal.rotate) {
-                    this.rotate = state.decal.rotate
+                if (state.rotate !== undefined && this.rotate !== state.rotate) {
+                    this.rotate = state.rotate
                     changed = true
                 }
 
                 /*  update vertical position  */
-                if (state.decal.lift !== undefined && this.lift !== state.decal.lift) {
-                    this.lift = state.decal.lift
+                if (state.lift !== undefined && this.lift !== state.lift) {
+                    this.lift = state.lift
                     changed = true
                 }
 
                 /*  update size  */
-                if (state.decal.scale !== undefined && this.scale !== state.decal.scale) {
-                    this.scale = state.decal.scale
+                if (state.scale !== undefined && this.scale !== state.scale) {
+                    this.scale = state.scale
                     changed = true
                 }
 
@@ -237,9 +237,9 @@ export default class Decal {
             }
 
             /*  update visibility  */
-            if (state.decal.enable !== undefined
-                && this.mesh.isEnabled() !== state.decal.enable) {
-                if (state.decal.enable) {
+            if (state.enable !== undefined
+                && this.mesh.isEnabled() !== state.enable) {
+                if (state.enable) {
                     /*  enable visibility  */
                     await this.api.material.applyDisplayMaterial("decal", this.mesh,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
@@ -275,7 +275,7 @@ export default class Decal {
                         this.mesh.setEnabled(true)
                     }
                 }
-                else if (!state.decal.enable) {
+                else if (!state.enable) {
                     /*  disable visibility  */
                     if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
                         /*  disable visibility with fading  */

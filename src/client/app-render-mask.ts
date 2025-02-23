@@ -57,7 +57,7 @@ export default class Mask {
     }
 
     /*  reflect the current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
+    async reflectSceneState (state: StateTypePartial["mask"]) {
         /*  sanity check situation  */
         if (!(this.mask !== null
             && this.display !== null
@@ -73,27 +73,27 @@ export default class Mask {
                 this.borderRad, 0, null)
 
         /*  reflect scene changes  */
-        if (state.mask !== undefined) {
+        if (state !== undefined) {
             /*  update display material  */
-            if (state.mask.source !== undefined
-                && (this.api.material.displaySource("mask") !== state.mask.source
-                    || this.api.material.isMediaModified(state.mask.source))) {
-                this.api.material.displaySource("mask", state.mask.source)
+            if (state.source !== undefined
+                && (this.api.material.displaySource("mask") !== state.source
+                    || this.api.material.isMediaModified(state.source))) {
+                this.api.material.displaySource("mask", state.source)
                 if (this.display.isEnabled())
                     await this.api.material.applyDisplayMaterial("mask", this.display, 1.0,
                         this.borderRad, 0, null)
             }
 
             /*  update display scale  */
-            if (state.mask.scale !== undefined) {
-                this.display.scaling.x = this.base.scaleDisplayX * state.mask.scale
-                this.display.scaling.y = this.base.scaleDisplayY * state.mask.scale
-                this.display.scaling.z = this.base.scaleDisplayZ * state.mask.scale
+            if (state.scale !== undefined) {
+                this.display.scaling.x = this.base.scaleDisplayX * state.scale
+                this.display.scaling.y = this.base.scaleDisplayY * state.scale
+                this.display.scaling.z = this.base.scaleDisplayZ * state.scale
             }
 
             /*  update display border  */
-            if (state.mask.borderRad !== undefined) {
-                this.borderRad = state.mask.borderRad
+            if (state.borderRad !== undefined) {
+                this.borderRad = state.borderRad
                 if (this.display.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.display.material
                     material.setFloat("borderRadius", this.borderRad)
@@ -101,10 +101,10 @@ export default class Mask {
             }
 
             /*  update display visibility  */
-            if (state.mask.enable !== undefined
-                && this.display.isEnabled() !== state.mask.enable) {
+            if (state.enable !== undefined
+                && this.display.isEnabled() !== state.enable) {
                 const scene = this.api.scene.getScene()
-                if (state.mask.enable) {
+                if (state.enable) {
                     /*  enable visibility  */
                     this.originalCamera = scene.activeCamera
                     scene.activeCamera = this.camera
@@ -122,7 +122,7 @@ export default class Mask {
                     this.display.setEnabled(true)
                     this.background.setEnabled(true)
                 }
-                else if (!state.mask.enable) {
+                else if (!state.enable) {
                     /*  disable visibility
                         NOTICE: BabylonJS immediately stops rendering if it thinks there are no more
                         visible meshes, so we have to first render it nearly invisible and then

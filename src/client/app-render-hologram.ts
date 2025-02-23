@@ -55,7 +55,7 @@ export default class Hologram {
     }
 
     /*  reflect the current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
+    async reflectSceneState (state: StateTypePartial["hologram"]) {
         /*  sanity check situation  */
         if (!(this.hull !== null
             && this.display !== null
@@ -69,44 +69,44 @@ export default class Hologram {
                 this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
 
         /*  reflect scene changes  */
-        if (state.hologram !== undefined) {
+        if (state !== undefined) {
             /*  update content  */
-            if (state.hologram.source !== undefined
-                && (this.api.material.displaySource("hologram") !== state.hologram.source
-                    || this.api.material.isMediaModified(state.hologram.source))) {
-                this.api.material.displaySource("hologram", state.hologram.source)
+            if (state.source !== undefined
+                && (this.api.material.displaySource("hologram") !== state.source
+                    || this.api.material.isMediaModified(state.source))) {
+                this.api.material.displaySource("hologram", state.source)
                 if (this.display.isEnabled())
                     await this.api.material.applyDisplayMaterial("hologram", this.display,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
             }
 
             /*  update size  */
-            if (state.hologram.scale !== undefined) {
-                this.display.scaling.x = this.base.scaleX * state.hologram.scale
-                this.display.scaling.y = this.base.scaleY * state.hologram.scale
-                this.display.scaling.z = this.base.scaleZ * state.hologram.scale
+            if (state.scale !== undefined) {
+                this.display.scaling.x = this.base.scaleX * state.scale
+                this.display.scaling.y = this.base.scaleY * state.scale
+                this.display.scaling.z = this.base.scaleZ * state.scale
             }
 
             /*  update rotation  */
-            if (state.hologram.rotate !== undefined) {
+            if (state.rotate !== undefined) {
                 this.hull.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.hull.rotate(new BABYLON.Vector3(0, 0, 1),
-                    Utils.deg2rad(state.hologram.rotate), BABYLON.Space.WORLD)
+                    Utils.deg2rad(state.rotate), BABYLON.Space.WORLD)
             }
 
             /*  update position  */
-            if (state.hologram.lift !== undefined)
-                this.hull.position.z = this.base.positionZ + state.hologram.lift
-            if (state.hologram.distance !== undefined)
-                this.display.position.x = this.base.positionX - state.hologram.distance
+            if (state.lift !== undefined)
+                this.hull.position.z = this.base.positionZ + state.lift
+            if (state.distance !== undefined)
+                this.display.position.x = this.base.positionX - state.distance
 
             /*  update fading  */
-            if (state.hologram.fadeTime !== undefined && this.fade !== state.hologram.fadeTime)
-                this.fade = state.hologram.fadeTime
+            if (state.fadeTime !== undefined && this.fade !== state.fadeTime)
+                this.fade = state.fadeTime
 
             /*  update opacity  */
-            if (state.hologram.opacity !== undefined) {
-                this.opacity = state.hologram.opacity
+            if (state.opacity !== undefined) {
+                this.opacity = state.opacity
                 if (this.display.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.display.material
                     material.setFloat("opacity", this.opacity)
@@ -114,15 +114,15 @@ export default class Hologram {
             }
 
             /*  update border  */
-            if (state.hologram.borderRad !== undefined) {
-                this.borderRad = state.hologram.borderRad
+            if (state.borderRad !== undefined) {
+                this.borderRad = state.borderRad
                 if (this.display.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.display.material
                     material.setFloat("borderRadius", this.borderRad)
                 }
             }
-            if (state.hologram.borderCrop !== undefined) {
-                this.borderCrop = state.hologram.borderCrop
+            if (state.borderCrop !== undefined) {
+                this.borderCrop = state.borderCrop
                 if (this.display.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.display.material
                     material.setFloat("borderCrop", this.borderCrop)
@@ -130,26 +130,26 @@ export default class Hologram {
             }
 
             /*  update chroma-keying  */
-            if (state.hologram.chromaKey !== undefined) {
-                if (state.hologram.chromaKey.enable !== undefined
-                    && this.chromaKey.enable !== state.hologram.chromaKey.enable) {
-                    this.chromaKey.enable = state.hologram.chromaKey.enable
+            if (state.chromaKey !== undefined) {
+                if (state.chromaKey.enable !== undefined
+                    && this.chromaKey.enable !== state.chromaKey.enable) {
+                    this.chromaKey.enable = state.chromaKey.enable
                     if (this.display.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.display.material
                         material.setInt("chromaEnable", this.chromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.hologram.chromaKey.threshold !== undefined
-                    && this.chromaKey.threshold !== state.hologram.chromaKey.threshold) {
-                    this.chromaKey.threshold = state.hologram.chromaKey.threshold
+                if (state.chromaKey.threshold !== undefined
+                    && this.chromaKey.threshold !== state.chromaKey.threshold) {
+                    this.chromaKey.threshold = state.chromaKey.threshold
                     if (this.display.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.display.material
                         material.setFloat("chromaThreshold", this.chromaKey.threshold)
                     }
                 }
-                if (state.hologram.chromaKey.smoothing !== undefined
-                    && this.chromaKey.smoothing !== state.hologram.chromaKey.smoothing) {
-                    this.chromaKey.smoothing = state.hologram.chromaKey.smoothing
+                if (state.chromaKey.smoothing !== undefined
+                    && this.chromaKey.smoothing !== state.chromaKey.smoothing) {
+                    this.chromaKey.smoothing = state.chromaKey.smoothing
                     if (this.chromaKey.enable
                         && this.display.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.display.material
@@ -159,9 +159,9 @@ export default class Hologram {
             }
 
             /*  update visibility  */
-            if (state.hologram.enable !== undefined
-                && this.display.isEnabled() !== state.hologram.enable) {
-                if (state.hologram.enable) {
+            if (state.enable !== undefined
+                && this.display.isEnabled() !== state.enable) {
+                if (state.enable) {
                     /*  enable visibility  */
                     await this.api.material.applyDisplayMaterial("hologram", this.display,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
@@ -210,7 +210,7 @@ export default class Hologram {
                         this.display!.setEnabled(true)
                     }
                 }
-                else if (!state.hologram.enable) {
+                else if (!state.enable) {
                     /*  disable visibility  */
                     if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
                         /*  disable visibility with fading  */

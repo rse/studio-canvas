@@ -32,12 +32,12 @@ export default class Reference {
     }
 
     /*  reflect the current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
-        if (state.references !== undefined
+    async reflectSceneState (state: StateTypePartial["references"]) {
+        if (state !== undefined
             && this.references !== null
             && this.api.scene.renderingLayer("back")) {
-            if (state.references.enable !== undefined)
-                this.references.setEnabled(state.references.enable)
+            if (state.enable !== undefined)
+                this.references.setEnabled(state.enable)
         }
     }
 }

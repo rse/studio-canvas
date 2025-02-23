@@ -135,27 +135,27 @@ export default class Renderer extends EventEmitter {
             return
 
         /*  pass-through operation to rendering scene  */
-        await this.api.scene.reflectSceneState(state)
+        await this.api.scene.reflectSceneState(state.renderer)
 
-        /*  pass-through operation to rendering camera  */
+        /*  pass-through operation to rendering viewpoint  */
         await this.api.viewpoint.reflectSceneState(state)
 
         /*  pass-through operation to rendering utilities  */
-        await this.api.stream.reflectSceneState(state)
-        await this.api.material.reflectSceneState(state)
+        await this.api.stream.reflectSceneState(state.streams)
+        await this.api.material.reflectSceneState(state.media)
 
         /*  pass-through operation to rendering features  */
-        await this.api.canvas.reflectSceneState(state)
-        await this.api.decal.reflectSceneState(state)
-        await this.api.monitor.reflectSceneState(state)
-        await this.api.pane.reflectSceneState(state)
-        await this.api.plate.reflectSceneState(state)
-        await this.api.pillar.reflectSceneState(state)
-        await this.api.hologram.reflectSceneState(state)
-        await this.api.mask.reflectSceneState(state)
-        await this.api.avatars.reflectSceneState(state)
-        await this.api.reference.reflectSceneState(state)
-        await this.api.lights.reflectSceneState(state)
+        await this.api.canvas.reflectSceneState(state.canvas)
+        await this.api.decal.reflectSceneState(state.decal)
+        await this.api.monitor.reflectSceneState(state.monitor)
+        await this.api.pane.reflectSceneState(state.pane)
+        await this.api.plate.reflectSceneState(state.plate)
+        await this.api.pillar.reflectSceneState(state.pillar)
+        await this.api.hologram.reflectSceneState(state.hologram)
+        await this.api.mask.reflectSceneState(state.mask)
+        await this.api.avatars.reflectSceneState(state.avatars)
+        await this.api.reference.reflectSceneState(state.references)
+        await this.api.lights.reflectSceneState(state.lights)
     }
 
     /*  react on a received mixer record by reflecting the camera mixer state  */

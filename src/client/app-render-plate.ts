@@ -53,7 +53,7 @@ export default class Plate {
     }
 
     /*  reflect the current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
+    async reflectSceneState (state: StateTypePartial["plate"]) {
         /*  sanity check situation  */
         if (!(this.hull !== null
             && this.display !== null
@@ -67,46 +67,46 @@ export default class Plate {
                 this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
 
         /*  reflect scene changes  */
-        if (state.plate !== undefined) {
+        if (state !== undefined) {
             /*  update content  */
-            if (state.plate.source !== undefined
-                && (this.api.material.displaySource("plate") !== state.plate.source
-                    || this.api.material.isMediaModified(state.plate.source))) {
-                this.api.material.displaySource("plate", state.plate.source)
+            if (state.source !== undefined
+                && (this.api.material.displaySource("plate") !== state.source
+                    || this.api.material.isMediaModified(state.source))) {
+                this.api.material.displaySource("plate", state.source)
                 if (this.display.isEnabled())
                     await this.api.material.applyDisplayMaterial("plate", this.display,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
             }
 
             /*  update scaling  */
-            if (state.plate.scale !== undefined) {
-                this.display.scaling.x = this.base.scaleDisplayX * state.plate.scale
-                this.display.scaling.y = this.base.scaleDisplayY * state.plate.scale
-                this.display.scaling.z = this.base.scaleDisplayZ * state.plate.scale
+            if (state.scale !== undefined) {
+                this.display.scaling.x = this.base.scaleDisplayX * state.scale
+                this.display.scaling.y = this.base.scaleDisplayY * state.scale
+                this.display.scaling.z = this.base.scaleDisplayZ * state.scale
             }
 
             /*  update rotation  */
-            if (state.plate.rotate !== undefined) {
+            if (state.rotate !== undefined) {
                 this.hull.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.hull.rotate(new BABYLON.Vector3(0, 0, 1),
-                    Utils.deg2rad(state.plate.rotate), BABYLON.Space.WORLD)
+                    Utils.deg2rad(state.rotate), BABYLON.Space.WORLD)
             }
 
             /*  update vertical position  */
-            if (state.plate.lift !== undefined)
-                this.hull.position.z = this.base.positionZ + state.plate.lift
+            if (state.lift !== undefined)
+                this.hull.position.z = this.base.positionZ + state.lift
 
             /*  update distance  */
-            if (state.plate.distance !== undefined)
-                this.display.position.x = this.base.positionX - state.plate.distance
+            if (state.distance !== undefined)
+                this.display.position.x = this.base.positionX - state.distance
 
             /*  update fading  */
-            if (state.plate.fadeTime !== undefined && this.fade !== state.plate.fadeTime)
-                this.fade = state.plate.fadeTime
+            if (state.fadeTime !== undefined && this.fade !== state.fadeTime)
+                this.fade = state.fadeTime
 
             /*  update opacity  */
-            if (state.plate.opacity !== undefined) {
-                this.opacity = state.plate.opacity
+            if (state.opacity !== undefined) {
+                this.opacity = state.opacity
                 if (this.display.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.display.material
                     material.setFloat("opacity", this.opacity)
@@ -114,15 +114,15 @@ export default class Plate {
             }
 
             /*  update border  */
-            if (state.plate.borderRad !== undefined) {
-                this.borderRad = state.plate.borderRad
+            if (state.borderRad !== undefined) {
+                this.borderRad = state.borderRad
                 if (this.display.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.display.material
                     material.setFloat("borderRadius", this.borderRad)
                 }
             }
-            if (state.plate.borderCrop !== undefined) {
-                this.borderCrop = state.plate.borderCrop
+            if (state.borderCrop !== undefined) {
+                this.borderCrop = state.borderCrop
                 if (this.display.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.display.material
                     material.setFloat("borderCrop", this.borderCrop)
@@ -130,26 +130,26 @@ export default class Plate {
             }
 
             /*  update chroma-keying  */
-            if (state.plate.chromaKey !== undefined) {
-                if (state.plate.chromaKey.enable !== undefined
-                    && this.chromaKey.enable !== state.plate.chromaKey.enable) {
-                    this.chromaKey.enable = state.plate.chromaKey.enable
+            if (state.chromaKey !== undefined) {
+                if (state.chromaKey.enable !== undefined
+                    && this.chromaKey.enable !== state.chromaKey.enable) {
+                    this.chromaKey.enable = state.chromaKey.enable
                     if (this.display.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.display.material
                         material.setInt("chromaEnable", this.chromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.plate.chromaKey.threshold !== undefined
-                    && this.chromaKey.threshold !== state.plate.chromaKey.threshold) {
-                    this.chromaKey.threshold = state.plate.chromaKey.threshold
+                if (state.chromaKey.threshold !== undefined
+                    && this.chromaKey.threshold !== state.chromaKey.threshold) {
+                    this.chromaKey.threshold = state.chromaKey.threshold
                     if (this.display.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.display.material
                         material.setFloat("chromaThreshold", this.chromaKey.threshold)
                     }
                 }
-                if (state.plate.chromaKey.smoothing !== undefined
-                    && this.chromaKey.smoothing !== state.plate.chromaKey.smoothing) {
-                    this.chromaKey.smoothing = state.plate.chromaKey.smoothing
+                if (state.chromaKey.smoothing !== undefined
+                    && this.chromaKey.smoothing !== state.chromaKey.smoothing) {
+                    this.chromaKey.smoothing = state.chromaKey.smoothing
                     if (this.chromaKey.enable && this.display.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.display.material
                         material.setFloat("chromaSmoothing", this.chromaKey.smoothing)
@@ -158,9 +158,9 @@ export default class Plate {
             }
 
             /*  update visibility  */
-            if (state.plate.enable !== undefined
-                && this.display.isEnabled() !== state.plate.enable) {
-                if (state.plate.enable) {
+            if (state.enable !== undefined
+                && this.display.isEnabled() !== state.enable) {
+                if (state.enable) {
                     /*  enable visibility  */
                     await this.api.material.applyDisplayMaterial("plate", this.display,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
@@ -207,7 +207,7 @@ export default class Plate {
                         this.display!.setEnabled(true)
                     }
                 }
-                else if (!state.plate.enable) {
+                else if (!state.enable) {
                     /*  disable visibility  */
                     if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
                         /*  disable visibility with fading  */

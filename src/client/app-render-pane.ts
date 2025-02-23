@@ -74,7 +74,7 @@ export default class Pane {
     }
 
     /*  reflect the current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
+    async reflectSceneState (state: StateTypePartial["pane"]) {
         /*  sanity check situation  */
         if (!(this.hull !== null
             && this.case !== null
@@ -89,20 +89,20 @@ export default class Pane {
                 this.opacity, 0, 0, this.chromaKey)
 
         /*  reflect scene changes  */
-        if (state.pane !== undefined) {
+        if (state !== undefined) {
             /*  update content  */
-            if (state.pane.source !== undefined
-                && (this.api.material.displaySource("pane") !== state.pane.source
-                    || this.api.material.isMediaModified(state.pane.source))) {
-                this.api.material.displaySource("pane", state.pane.source)
+            if (state.source !== undefined
+                && (this.api.material.displaySource("pane") !== state.source
+                    || this.api.material.isMediaModified(state.source))) {
+                this.api.material.displaySource("pane", state.source)
                 if (this.display.isEnabled())
                     await this.api.material.applyDisplayMaterial("pane", this.display,
                         this.opacity, 0, 0, this.chromaKey)
             }
 
             /*  update opacity  */
-            if (state.pane.opacity !== undefined) {
-                this.opacity = state.pane.opacity
+            if (state.opacity !== undefined) {
+                this.opacity = state.opacity
                 if (this.display.material instanceof BABYLON.ShaderMaterial) {
                     const material = this.display.material
                     material.setFloat("opacity", this.opacity)
@@ -110,57 +110,57 @@ export default class Pane {
             }
 
             /*  update scaling  */
-            if (state.pane.scale !== undefined) {
-                this.case.scaling.x    = this.base.scaleCaseX    * state.pane.scale
-                this.case.scaling.y    = this.base.scaleCaseY    * state.pane.scale
-                this.case.scaling.z    = this.base.scaleCaseZ    * state.pane.scale
-                this.display.scaling.x = this.base.scaleDisplayX * state.pane.scale
-                this.display.scaling.y = this.base.scaleDisplayY * state.pane.scale
-                this.display.scaling.z = this.base.scaleDisplayZ * state.pane.scale
+            if (state.scale !== undefined) {
+                this.case.scaling.x    = this.base.scaleCaseX    * state.scale
+                this.case.scaling.y    = this.base.scaleCaseY    * state.scale
+                this.case.scaling.z    = this.base.scaleCaseZ    * state.scale
+                this.display.scaling.x = this.base.scaleDisplayX * state.scale
+                this.display.scaling.y = this.base.scaleDisplayY * state.scale
+                this.display.scaling.z = this.base.scaleDisplayZ * state.scale
             }
 
             /*  update rotation  */
-            if (state.pane.rotate !== undefined) {
+            if (state.rotate !== undefined) {
                 this.hull.rotationQuaternion = BABYLON.Quaternion.Identity()
                 this.hull.rotate(new BABYLON.Vector3(0, 0, 1),
-                    Utils.deg2rad(state.pane.rotate), BABYLON.Space.WORLD)
+                    Utils.deg2rad(state.rotate), BABYLON.Space.WORLD)
             }
 
             /*  update vertical position  */
-            if (state.pane.lift !== undefined)
-                this.hull.position.z = this.base.positionZ + (state.pane.lift / 100)
+            if (state.lift !== undefined)
+                this.hull.position.z = this.base.positionZ + (state.lift / 100)
 
             /*  update distance  */
-            if (state.pane.distance !== undefined) {
-                this.case.position.x    = this.base.positionCaseX    - state.pane.distance
-                this.display.position.x = this.base.positionDisplayX - state.pane.distance
+            if (state.distance !== undefined) {
+                this.case.position.x    = this.base.positionCaseX    - state.distance
+                this.display.position.x = this.base.positionDisplayX - state.distance
             }
 
             /*  update fading  */
-            if (state.pane.fadeTime !== undefined && this.fade !== state.pane.fadeTime)
-                this.fade = state.pane.fadeTime
+            if (state.fadeTime !== undefined && this.fade !== state.fadeTime)
+                this.fade = state.fadeTime
 
             /*  update chroma-keying  */
-            if (state.pane.chromaKey !== undefined) {
-                if (state.pane.chromaKey.enable !== undefined
-                    && this.chromaKey.enable !== state.pane.chromaKey.enable) {
-                    this.chromaKey.enable = state.pane.chromaKey.enable
+            if (state.chromaKey !== undefined) {
+                if (state.chromaKey.enable !== undefined
+                    && this.chromaKey.enable !== state.chromaKey.enable) {
+                    this.chromaKey.enable = state.chromaKey.enable
                     if (this.display.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.display.material
                         material.setInt("chromaEnable", this.chromaKey.enable ? 1 : 0)
                     }
                 }
-                if (state.pane.chromaKey.threshold !== undefined
-                    && this.chromaKey.threshold !== state.pane.chromaKey.threshold) {
-                    this.chromaKey.threshold = state.pane.chromaKey.threshold
+                if (state.chromaKey.threshold !== undefined
+                    && this.chromaKey.threshold !== state.chromaKey.threshold) {
+                    this.chromaKey.threshold = state.chromaKey.threshold
                     if (this.display.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.display.material
                         material.setFloat("chromaThreshold", this.chromaKey.threshold)
                     }
                 }
-                if (state.pane.chromaKey.smoothing !== undefined
-                    && this.chromaKey.smoothing !== state.pane.chromaKey.smoothing) {
-                    this.chromaKey.smoothing = state.pane.chromaKey.smoothing
+                if (state.chromaKey.smoothing !== undefined
+                    && this.chromaKey.smoothing !== state.chromaKey.smoothing) {
+                    this.chromaKey.smoothing = state.chromaKey.smoothing
                     if (this.chromaKey.enable && this.display.material instanceof BABYLON.ShaderMaterial) {
                         const material = this.display.material
                         material.setFloat("chromaSmoothing", this.chromaKey.smoothing)
@@ -169,9 +169,9 @@ export default class Pane {
             }
 
             /*  update visibility  */
-            if (state.pane.enable !== undefined
-                && this.hull.isEnabled() !== state.pane.enable) {
-                if (state.pane.enable) {
+            if (state.enable !== undefined
+                && this.hull.isEnabled() !== state.enable) {
+                if (state.enable) {
                     /*  enable visibility  */
                     await this.api.material.applyDisplayMaterial("pane", this.display,
                         this.opacity, 0, 0, this.chromaKey)
@@ -218,7 +218,7 @@ export default class Pane {
                         this.hull.setEnabled(true)
                     }
                 }
-                else if (!state.pane.enable) {
+                else if (!state.enable) {
                     /*  disable visibility  */
                     if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
                         /*  disable visibility with fading  */

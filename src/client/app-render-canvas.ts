@@ -375,8 +375,8 @@ export default class Canvas {
     }
 
     /*  reflect scene state  */
-    async reflectSceneState (state: StateTypePartial) {
-        if (state.canvas !== undefined && this.api.scene.renderingLayer("back")) {
+    async reflectSceneState (state: StateTypePartial["canvas"]) {
+        if (state !== undefined && this.api.scene.renderingLayer("back")) {
             let changed = false
 
             /*  determine current and next configuration  */
@@ -384,39 +384,31 @@ export default class Canvas {
             const canvasConfigNext = this.canvasConfig[(this.canvasMode + 1) % 2]
 
             /*  update content  */
-            if (   (state.canvas.texture1  !== undefined && canvasConfig.texture1  !== state.canvas.texture1)
-                || (state.canvas.texture2  !== undefined && canvasConfig.texture2  !== state.canvas.texture2)
-                || (state.canvas.fadeTrans !== undefined && canvasConfig.fadeTrans !== state.canvas.fadeTrans)
-                || (state.canvas.fadeWait  !== undefined && canvasConfig.fadeWait  !== state.canvas.fadeWait)) {
-                canvasConfigNext.texture1 =
-                    state.canvas.texture1 !== undefined ?
-                        state.canvas.texture1 :
-                        canvasConfig.texture1
-                canvasConfigNext.texture2 =
-                    state.canvas.texture2 !== undefined ?
-                        state.canvas.texture2 :
-                        canvasConfig.texture2
-                canvasConfigNext.fadeTrans =
-                    state.canvas.fadeTrans !== undefined ?
-                        state.canvas.fadeTrans :
-                        canvasConfig.fadeTrans
-                canvasConfigNext.fadeWait =
-                    state.canvas.fadeWait !== undefined ?
-                        state.canvas.fadeWait :
-                        canvasConfig.fadeWait
+            if (   (state.texture1  !== undefined && canvasConfig.texture1  !== state.texture1)
+                || (state.texture2  !== undefined && canvasConfig.texture2  !== state.texture2)
+                || (state.fadeTrans !== undefined && canvasConfig.fadeTrans !== state.fadeTrans)
+                || (state.fadeWait  !== undefined && canvasConfig.fadeWait  !== state.fadeWait)) {
+                canvasConfigNext.texture1  = state.texture1  !== undefined ?
+                    state.texture1  : canvasConfig.texture1
+                canvasConfigNext.texture2  = state.texture2  !== undefined ?
+                    state.texture2  : canvasConfig.texture2
+                canvasConfigNext.fadeTrans = state.fadeTrans !== undefined ?
+                    state.fadeTrans : canvasConfig.fadeTrans
+                canvasConfigNext.fadeWait  = state.fadeWait  !== undefined ?
+                    state.fadeWait  : canvasConfig.fadeWait
                 changed = true
             }
 
             /*  update rotation  */
-            if (state.canvas.rotationZ !== undefined) {
+            if (state.rotationZ !== undefined) {
                 this.wall!.rotationQuaternion = this.wallRotBase!.clone()
                 this.wall!.rotate(new BABYLON.Vector3(0, 0, 1),
-                    Utils.deg2rad(state.canvas.rotationZ), BABYLON.Space.WORLD)
+                    Utils.deg2rad(state.rotationZ), BABYLON.Space.WORLD)
             }
 
             /*  update fading  */
-            if (state.canvas.fadeSwitch !== undefined)
-                this.fadeSwitch = state.canvas.fadeSwitch
+            if (state.fadeSwitch !== undefined)
+                this.fadeSwitch = state.fadeSwitch
 
             /*  apply changes  */
             if (changed)

@@ -61,17 +61,17 @@ export default class Lights {
     }
 
     /*  reflect the current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
-        if (state.lights !== undefined
+    async reflectSceneState (state: StateTypePartial["lights"]) {
+        if (state !== undefined
             && this.light1 !== null
             && this.light2 !== null
             && this.light3 !== null) {
-            if (state.lights.intensity1 !== undefined)
-                this.light1.intensity = state.lights.intensity1
-            if (state.lights.intensity2 !== undefined)
-                this.light2.intensity = state.lights.intensity2
-            if (state.lights.intensity3 !== undefined)
-                this.light3.intensity = state.lights.intensity3
+            if (state.intensity1 !== undefined)
+                this.light1.intensity = state.intensity1
+            if (state.intensity2 !== undefined)
+                this.light2.intensity = state.intensity2
+            if (state.intensity3 !== undefined)
+                this.light3.intensity = state.intensity3
         }
     }
 }

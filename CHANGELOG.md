@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+3.0.2 (2025-02-23)
+------------------
+
+- REFACTORING: pass only particular state information down to rendering features
+
 3.0.1 (2025-02-23)
 ------------------
 

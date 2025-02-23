@@ -66,8 +66,11 @@ export default class Viewpoint {
 
     /*  reflect the current scene state  */
     async reflectSceneState (state: StateTypePartial) {
-        for (const cam of this.cameras.values())
-            await cam.reflectSceneState(state)
+        for (const cameraName of [ "CAM1", "CAM2", "CAM3", "CAM4" ] as CameraName[]) {
+            const cam = this.cameras.get(cameraName)!
+            const stateOfCamera = (state as any)[cameraName] as StateTypePartial["CAM1"]
+            await cam.reflectSceneState(stateOfCamera)
+        }
     }
 
     /*  react on a received FreeD state record by reflecting its camera PTZ state  */

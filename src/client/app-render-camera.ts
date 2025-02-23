@@ -87,80 +87,77 @@ export default class Camera {
     }
 
     /*  reflect the current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
+    async reflectSceneState (state: StateTypePartial["CAM1"]) {
         /*  sanity check situation  */
-        if (!((state as any)[this.cameraName] !== undefined
+        if (!(state !== undefined
             && this.cameraHull !== null
             && this.cameraCase !== null
             && this.cameraLens !== null))
             return
 
-        /*  provide short-hand to specific sub-state  */
-        const stateOfCam = (state as any)[this.cameraName]
-
         /*  adjust hull X position  */
-        if (stateOfCam.hullPosition?.x !== undefined) {
+        if (state.hullPosition?.x !== undefined) {
             const x = this.ptzHull.posXV2P(this.cameraHull.position.x)
-            this.ptzHull.posXDelta = -(stateOfCam.hullPosition.x / 100)
+            this.ptzHull.posXDelta = -(state.hullPosition.x / 100)
             this.cameraHull.position.x = this.ptzHull.posXP2V(x)
         }
 
         /*  adjust hull Y position  */
-        if (stateOfCam.hullPosition?.y !== undefined) {
+        if (state.hullPosition?.y !== undefined) {
             const y = this.ptzHull.posYV2P(this.cameraHull.position.y)
-            this.ptzHull.posYDelta = stateOfCam.hullPosition.y / 100
+            this.ptzHull.posYDelta = state.hullPosition.y / 100
             this.cameraHull.position.y = this.ptzHull.posYP2V(y)
         }
 
         /*  adjust hull Z position  */
-        if (stateOfCam.hullPosition?.z !== undefined) {
+        if (state.hullPosition?.z !== undefined) {
             const z = this.ptzHull.posZV2P(this.cameraHull.position.z)
-            this.ptzHull.posZDelta = stateOfCam.hullPosition.z / 100
+            this.ptzHull.posZDelta = state.hullPosition.z / 100
             this.cameraHull.position.z = this.ptzHull.posZP2V(z)
         }
 
         /*  adjust case tilt  */
-        if (stateOfCam.caseRotation?.x !== undefined) {
+        if (state.caseRotation?.x !== undefined) {
             const tilt = this.ptzCase.tiltV2P(this.cameraCase.rotation.x)
-            this.ptzCase.tiltDelta = Utils.deg2rad(stateOfCam.caseRotation.x)
+            this.ptzCase.tiltDelta = Utils.deg2rad(state.caseRotation.x)
             this.cameraCase.rotation.x = this.ptzCase.tiltP2V(tilt)
         }
 
         /*  adjust case pan  */
-        if (stateOfCam.caseRotation?.y !== undefined) {
+        if (state.caseRotation?.y !== undefined) {
             const pan = this.ptzCase.panV2P(this.cameraCase.rotation.y)
-            this.ptzCase.panDelta = -(Utils.deg2rad(stateOfCam.caseRotation.y))
+            this.ptzCase.panDelta = -(Utils.deg2rad(state.caseRotation.y))
             this.cameraCase.rotation.y = this.ptzCase.panP2V(pan)
         }
-        if (stateOfCam.caseRotation?.ym !== undefined) {
+        if (state.caseRotation?.ym !== undefined) {
             const pan = this.ptzCase.panV2P(this.cameraCase.rotation.y)
-            this.ptzCase.panMult = stateOfCam.caseRotation.ym
+            this.ptzCase.panMult = state.caseRotation.ym
             this.cameraCase.rotation.y = this.ptzCase.panP2V(pan)
         }
 
         /*  adjust case rotation  */
-        if (stateOfCam.caseRotation?.z !== undefined) {
+        if (state.caseRotation?.z !== undefined) {
             const rotate = this.ptzCase.rotateV2P(this.cameraCase.rotation.z)
-            this.ptzCase.rotateDelta = -(Utils.deg2rad(stateOfCam.caseRotation.z))
+            this.ptzCase.rotateDelta = -(Utils.deg2rad(state.caseRotation.z))
             this.cameraCase.rotation.z = this.ptzCase.rotateP2V(rotate)
         }
 
         /*  adjust lens tilt  */
-        if (stateOfCam.lensRotation?.x !== undefined) {
+        if (state.lensRotation?.x !== undefined) {
             const tilt = this.ptzLens.tiltV2P(this.cameraLens.rotation.x)
-            this.ptzLens.tiltDelta = -(Utils.deg2rad(stateOfCam.lensRotation.x))
+            this.ptzLens.tiltDelta = -(Utils.deg2rad(state.lensRotation.x))
             this.cameraLens.rotation.x = this.ptzLens.tiltP2V(tilt)
         }
-        if (stateOfCam.lensRotation?.xm !== undefined) {
+        if (state.lensRotation?.xm !== undefined) {
             const tilt = this.ptzLens.tiltV2P(this.cameraLens.rotation.x)
-            this.ptzLens.tiltMult = stateOfCam.lensRotation.xm
+            this.ptzLens.tiltMult = state.lensRotation.xm
             this.cameraLens.rotation.x = this.ptzLens.tiltP2V(tilt)
         }
 
         /*  adjust field-of-view  */
-        if (stateOfCam.fov?.m !== undefined) {
+        if (state.fov?.m !== undefined) {
             const zoom = this.ptzLens.zoomV2P(this.cameraLens.fov)
-            this.ptzLens.fovMult = stateOfCam.fov.m
+            this.ptzLens.fovMult = state.fov.m
             this.cameraLens.fov = this.ptzLens.zoomP2V(zoom)
         }
     }

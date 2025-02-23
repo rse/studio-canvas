@@ -166,23 +166,23 @@ export default class Scene {
     }
 
     /*  reflect the current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
+    async reflectSceneState (state: StateTypePartial["renderer"]) {
         /*  control renderer  */
-        if (state.renderer !== undefined) {
+        if (state !== undefined) {
             let fps = this.fps
-            if (state.renderer.other !== undefined) {
-                this.fpsOther = state.renderer.other
+            if (state.other !== undefined) {
+                this.fpsOther = state.other
                 if (!(this.mixerPreview === this.api.viewpoint.currentCamera()
                     || this.mixerProgram === this.api.viewpoint.currentCamera()))
                     fps = this.fpsOther
             }
-            if (state.renderer.preview !== undefined) {
-                this.fpsPreview = state.renderer.preview
+            if (state.preview !== undefined) {
+                this.fpsPreview = state.preview
                 if (this.mixerPreview === this.api.viewpoint.currentCamera())
                     fps = this.fpsPreview
             }
-            if (state.renderer.program !== undefined) {
-                this.fpsProgram = state.renderer.program
+            if (state.program !== undefined) {
+                this.fpsProgram = state.program
                 if (this.mixerProgram === this.api.viewpoint.currentCamera())
                     fps = this.fpsProgram
             }

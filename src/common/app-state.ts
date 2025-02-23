@@ -183,7 +183,11 @@ export type StateType = {
 }
 
 /*  partial state type (all fields optional)  */
-export type StateTypePartial = Partial<StateType>
+type DeepPartial<T> =
+    T extends object ? {
+        [ P in keyof T ]?: DeepPartial<T[P]>
+    } : T
+export type StateTypePartial = DeepPartial<StateType>
 
 /*  complete state schema (all fields required)  */
 export const StateSchema = `{

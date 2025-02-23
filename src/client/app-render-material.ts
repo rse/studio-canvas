@@ -258,24 +258,24 @@ export default class Material {
     }
 
     /*  reflect current scene state  */
-    async reflectSceneState (state: StateTypePartial) {
+    async reflectSceneState (state: StateTypePartial["media"]) {
         this.modifiedMedia = {} as { [ id: string ]: boolean }
-        if (state.media !== undefined) {
+        if (state !== undefined) {
             /*  adjust medias  */
-            if (this.mediaURL.get("media1") !== state.media!.media1) {
-                this.mediaURL.set("media1", state.media.media1)
+            if (state.media1 !== undefined && this.mediaURL.get("media1") !== state.media1) {
+                this.mediaURL.set("media1", state.media1)
                 this.modifiedMedia.media1 = true
             }
-            if (this.mediaURL.get("media2") !== state.media.media2) {
-                this.mediaURL.set("media2", state.media.media2)
+            if (state.media2 !== undefined && this.mediaURL.get("media2") !== state.media2) {
+                this.mediaURL.set("media2", state.media2)
                 this.modifiedMedia.media2 = true
             }
-            if (this.mediaURL.get("media3") !== state.media.media3) {
-                this.mediaURL.set("media3", state.media.media3)
+            if (state.media3 !== undefined && this.mediaURL.get("media3") !== state.media3) {
+                this.mediaURL.set("media3", state.media3)
                 this.modifiedMedia.media3 = true
             }
-            if (this.mediaURL.get("media4") !== state.media.media4) {
-                this.mediaURL.set("media4", state.media.media4)
+            if (state.media4 !== undefined && this.mediaURL.get("media4") !== state.media4) {
+                this.mediaURL.set("media4", state.media4)
                 this.modifiedMedia.media4 = true
             }
         }
