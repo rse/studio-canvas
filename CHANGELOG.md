@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+3.0.1 (2025-02-23)
+------------------
+
+- CLEANUP: add missing files to version control
+
 3.0.0 (2025-02-20)
 ------------------
 
