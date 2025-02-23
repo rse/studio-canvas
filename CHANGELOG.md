@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - CLEANUP: add missing files to version control
+- UPDATE: update dependencies
 
 3.0.0 (2025-02-20)
 ------------------
