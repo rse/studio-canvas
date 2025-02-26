@@ -1,8 +1,8 @@
 {
     "private":         true,
     "name":            "Studio-Canvas",
-    "version":         "3.0.2",
-    "x-date":          "2025-02-23",
+    "version":         "3.0.3",
+    "x-date":          "2025-02-26",
     "homepage":        "https://github.com/rse/studio-canvas",
     "description":     "Real-Time Virtual Studio Canvas Rendering",
     "author": {
@@ -95,7 +95,6 @@
         "htmllint":                         "0.8.0",
         "htmllint-cli":                     "0.0.7",
 
-        "stmux":                            "1.8.10",
         "patch-package":                    "8.0.0",
         "nodemon":                          "3.1.9",
         "rimraf":                           "6.0.1",
