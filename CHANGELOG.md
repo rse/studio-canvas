@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+3.0.3 (2025-02-26)
+------------------
+
+- UPDATE: change CAM4 from Birddog to Sony model
+
 3.0.2 (2025-02-23)
 ------------------
 
