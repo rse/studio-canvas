@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - UPDATE: change CAM4 from Birddog to Sony model
+- UPDATE: update dependencies
 
 3.0.2 (2025-02-23)
 ------------------
