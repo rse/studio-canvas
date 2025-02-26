@@ -73,10 +73,10 @@ export default class Config {
 
     /*  camera type (currently hard-coded)  */
     static camNameToTypeMap = new Map<CameraName, PTZCamType>([
-        [ "CAM1", "sony"    ],
-        [ "CAM2", "sony"    ],
-        [ "CAM3", "sony"    ],
-        [ "CAM4", "birddog" ]
+        [ "CAM1", "sony" ],
+        [ "CAM2", "sony" ],
+        [ "CAM3", "sony" ],
+        [ "CAM4", "sony" ]
     ])
 
     /*  cameras which have a flipped pan/tilt coordination system  */
