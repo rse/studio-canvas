@@ -39,7 +39,7 @@
         "hapi-plugin-websocket":            "2.4.9",
         "hapi-plugin-ducky":                "1.1.9",
 
-        "@types/node":                      "22.13.7",
+        "@types/node":                      "22.13.8",
         "@types/hapi__inert":               "5.2.10",
         "@types/js-yaml":                   "4.0.9",
         "@types/urijs":                     "1.19.25",
