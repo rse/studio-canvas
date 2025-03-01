@@ -115,7 +115,12 @@
     },
     "overrides": {
         "vite-plugin-node-polyfills":       { "vite": "^6.0.0" },
-        "@liuli-util/vite-plugin-node":     { "vite": "^6.0.0" }
+        "@liuli-util/vite-plugin-node":     { "vite": "^6.0.0" },
+        "@typescript-eslint/eslint-plugin": { "typescript": "^5.8.0" },
+        "@typescript-eslint/parser":        { "typescript": "^5.8.0" },
+        "@typescript-eslint/estree":        { "typescript": "^5.8.0" },
+        "@typescript-eslint/utils":         { "typescript": "^5.8.0" },
+        "typescript-eslint":                { "typescript": "^5.8.0" }
     },
     "scripts": {
         "postinstall": "npm start patch-apply",
