@@ -2,9 +2,10 @@
 ChangeLog
 =========
 
-3.0.4 (2025-03-XX)
+3.1.0 (2025-03-04)
 ------------------
 
+- REFACTORING: replace Node Material Editor (NME) based canvas rendering with ProceduralTexture
 - UPDATE: update dependencies
 
 3.0.3 (2025-02-26)
