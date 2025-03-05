@@ -164,6 +164,21 @@ vec4 transition_MORPH (float progress) {
     );
 }
 
+/*  transition effect: RIPPLE (#8)  */
+vec4 transition_RIPPLE (float progress) {
+    /*  calculate the ripple effect  */
+    float amplitude = 100.0;
+    float speed = 50.0;
+    vec2 dir = vUV - vec2(0.5);
+    float dist = length(dir);
+    vec2 offset = dir * (sin(progress * dist * amplitude - progress * speed) + 0.5) / 30.0;
+    return mix(
+        textureSampleOld(vUV + offset),
+        textureSampleNew(vUV),
+        smoothstep(0.2, 1.0, progress)
+    );
+}
+
 /*  transition effect: GRID (#7)  */
 float gridGetDelta (vec2 p, ivec2 size) {
     vec2 rectanglePos  = floor(vec2(size) * p);
@@ -231,21 +246,6 @@ vec4 transition_GRID (float progress) {
     }
 }
 
-/*  transition effect: RIPPLE (#8)  */
-vec4 transition_RIPPLE (float progress) {
-    /*  calculate the ripple effect  */
-    float amplitude = 100.0;
-    float speed = 50.0;
-    vec2 dir = vUV - vec2(0.5);
-    float dist = length(dir);
-    vec2 offset = dir * (sin(progress * dist * amplitude - progress * speed) + 0.5) / 30.0;
-    return mix(
-        textureSampleOld(vUV + offset),
-        textureSampleNew(vUV),
-        smoothstep(0.2, 1.0, progress)
-    );
-}
-
 /*  transition effect: SQUARE (#9)  */
 vec4 transition_SQUARE (float progress) {
     /*  sample textures  */
@@ -273,8 +273,8 @@ void main (void) {
     else if (type == 4) result = transition_SLICE(progress);
     else if (type == 5) result = transition_PERLIN(progress);
     else if (type == 6) result = transition_MORPH(progress);
-    else if (type == 7) result = transition_GRID(progress);
-    else if (type == 8) result = transition_RIPPLE(progress);
+    else if (type == 7) result = transition_RIPPLE(progress);
+    else if (type == 8) result = transition_GRID(progress);
     else if (type == 9) result = transition_SQUARE(progress);
     else                result = vec4(1.0, 0.0, 0.0, 1.0);
 
