@@ -35,20 +35,20 @@
             ></slider>
         </div>
 
-        <div class="label1">fade-switch</div>
+        <div class="label1">transition</div>
         <div class="label2">(duration)</div>
         <div class="label3">[sec]:</div>
         <div class="value">
-            <input tabindex="5" v-bind:value="fieldExport(state.canvas.fadeSwitch)"
-                v-on:change="(ev) => state.canvas.fadeSwitch = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
+            <input tabindex="5" v-bind:value="fieldExport(state.canvas.transition)"
+                v-on:change="(ev) => state.canvas.transition = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
         </div>
         <div class="button reset"
-            v-on:click="state.canvas.fadeSwitch = 2.0"
-            v-bind:class="{ default: state.canvas.fadeSwitch === 2.0 }">
+            v-on:click="state.canvas.transition = 2.0"
+            v-bind:class="{ default: state.canvas.transition === 2.0 }">
             RESET
         </div>
         <div class="slider">
-            <slider class="slider" v-model="state.canvas.fadeSwitch"
+            <slider class="slider" v-model="state.canvas.transition"
                 v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
                 show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
             ></slider>

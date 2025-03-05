@@ -25,32 +25,33 @@ type CanvasConfig = {
 
 /*  utility type for canvas state  */
 type CanvasState = {
-    canvas1:  HTMLCanvasElement | null
-    canvas2:  HTMLCanvasElement | null
-    texture1: BABYLON.Nullable<BABYLON.Texture>
-    texture2: BABYLON.Nullable<BABYLON.Texture>
+    canvas1:    HTMLCanvasElement | null
+    canvas2:    HTMLCanvasElement | null
+    texture1:   BABYLON.Nullable<BABYLON.Texture>
+    texture2:   BABYLON.Nullable<BABYLON.Texture>
+    texture:    BABYLON.Nullable<BABYLON.ProceduralTexture>
+    fadeTimer:  ReturnType<typeof setTimeout> | null
 }
 
 /*  exported rendering feature  */
 export default class Canvas {
     /*  internal state  */
     private canvasMode = 0
-    private canvasTexture: BABYLON.Nullable<BABYLON.ProceduralTexture> = null
-    private dummyTexture:  BABYLON.Nullable<BABYLON.DynamicTexture> = null
     private canvasConfig = [
         { texture1: "", texture2: "", fadeTrans: 2 * 1000, fadeWait: 10 * 1000 },
         { texture1: "", texture2: "", fadeTrans: 2 * 1000, fadeWait: 10 * 1000 }
     ] as CanvasConfig[]
     private canvasState = [
-        { texture1: null, texture2: null },
-        { texture1: null, texture2: null }
+        { canvas1: null, canvas2: null, texture1: null, texture2: null, texture: null, fadeTimer: null },
+        { canvas1: null, canvas2: null, texture1: null, texture2: null, texture: null, fadeTimer: null }
     ] as CanvasState[]
-    private fadeTimer: ReturnType<typeof setTimeout> | null = null
-    private modeTimer: ReturnType<typeof setTimeout> | null = null
-    private fadeSwitch = 2.0
     private wall:        BABYLON.Nullable<BABYLON.Mesh>        = null
     private wallRotBase: BABYLON.Nullable<BABYLON.Quaternion>  = null
-    private modeTextureFade = 0.0
+    private dummyTexture: BABYLON.Nullable<BABYLON.DynamicTexture> = null
+    private transitionTexture: BABYLON.Nullable<BABYLON.ProceduralTexture> = null
+    private transitionDuration = 2.0
+    private transitionProgress = 0.0
+    private transitionTimer: ReturnType<typeof setTimeout> | null = null
 
     /*  create feature  */
     constructor (private api: API) {}
@@ -104,7 +105,7 @@ export default class Canvas {
     }
 
     /*  make canvas texture from shader  */
-    canvasTextureMakeShader (width: number, height: number, scene: BABYLON.Scene) {
+    canvasTextureMakeCanvas (width: number, height: number, scene: BABYLON.Scene) {
         /*  create procedural texture from a fragment shader  */
         const texture = new BABYLON.ProceduralTexture("canvas", { width, height }, {
             fragmentSource: `
@@ -112,52 +113,75 @@ export default class Canvas {
 
                 varying vec2 vUV;
 
-                uniform sampler2D ModeATexture1;
-                uniform sampler2D ModeATexture2;
-                uniform float     ModeATextureFade;
-
-                uniform sampler2D ModeBTexture1;
-                uniform sampler2D ModeBTexture2;
-                uniform float     ModeBTextureFade;
-
-                uniform float     ModeTextureFade;
+                uniform sampler2D texture1;
+                uniform sampler2D texture2;
+                uniform float     fade;
 
                 void main (void) {
-                    vec4 mAT1 = texture2D(ModeATexture1, vUV);
-                    vec4 mAT2 = texture2D(ModeATexture2, vUV);
-                    vec3 mAT  = mix(mAT1.rgb, mAT2.rgb, ModeATextureFade);
+                    vec4 t1 = texture2D(texture1, vUV);
+                    vec4 t2 = texture2D(texture2, vUV);
 
-                    vec4 mBT1 = texture2D(ModeBTexture1, vUV);
-                    vec4 mBT2 = texture2D(ModeBTexture2, vUV);
-                    vec3 mBT  = mix(mBT1.rgb, mBT2.rgb, ModeBTextureFade);
+                    vec3 t  = mix(t1.rgb, t2.rgb, fade);
 
-                    vec3 tex = mix(mAT, mBT, ModeTextureFade);
-
-                    gl_FragColor = vec4(tex, 1.0);
+                    gl_FragColor = vec4(t, 1.0);
                 }
             `
         }, scene, null, false, false)
 
         /*  initialize uniforms (external variables)  */
-        texture.setTexture("ModeATexture1", this.dummyTexture!)
-        texture.setTexture("ModeATexture2", this.dummyTexture!)
-        texture.setFloat("ModeATextureFade", 0.0)
-        texture.setTexture("ModeBTexture1", this.dummyTexture!)
-        texture.setTexture("ModeBTexture2", this.dummyTexture!)
-        texture.setFloat("ModeBTextureFade", 0.0)
-        texture.setFloat("ModeTextureFade",  0.0)
+        texture.setTexture("texture1", this.dummyTexture!)
+        texture.setTexture("texture2", this.dummyTexture!)
+        texture.setFloat("textureFade", 0.0)
+
+        return texture
+    }
+
+    /*  make FADE transition texture from shader  */
+    canvasTextureMakeTransFade (width: number, height: number, scene: BABYLON.Scene) {
+        /*  create procedural texture from a fragment shader  */
+        const texture = new BABYLON.ProceduralTexture("trans-fade", { width, height }, {
+            fragmentSource: `
+                precision highp float;
+
+                varying vec2 vUV;
+
+                uniform sampler2D texture1;
+                uniform sampler2D texture2;
+                uniform float     progress;
+
+                void main (void) {
+                    vec4 t1 = texture2D(texture1, vUV);
+                    vec4 t2 = texture2D(texture2, vUV);
+
+                    vec3 t  = mix(t1.rgb, t2.rgb, progress);
+
+                    gl_FragColor = vec4(t, 1.0);
+                }
+            `
+        }, scene, null, false, false)
+
+        /*  initialize uniforms (external variables)  */
+        texture.setTexture("texture1", this.dummyTexture!)
+        texture.setTexture("texture2", this.dummyTexture!)
+        texture.setFloat("progress", 0.0)
 
         return texture
     }
 
     /*  load canvas/wall  */
     async canvasLoad () {
-        /*  create regular texture  */
-        this.canvasTexture = this.canvasTextureMakeShader(
-            Config.wall.width, Config.wall.height, this.api.scene.getScene())
-
         /*  create replacement texture  */
         this.dummyTexture = this.canvasTextureMakeDummy(
+            Config.wall.width, Config.wall.height, this.api.scene.getScene())
+
+        /*  create canvas textures  */
+        this.canvasState[0].texture = this.canvasTextureMakeCanvas(
+            Config.wall.width, Config.wall.height, this.api.scene.getScene())
+        this.canvasState[1].texture = this.canvasTextureMakeCanvas(
+            Config.wall.width, Config.wall.height, this.api.scene.getScene())
+
+        /*  create transition texture  */
+        this.transitionTexture = this.canvasTextureMakeTransFade(
             Config.wall.width, Config.wall.height, this.api.scene.getScene())
 
         /*  initialize canvas mode  */
@@ -167,16 +191,18 @@ export default class Canvas {
         await this.canvasDisposeTextures(0)
         await this.canvasDisposeTextures(1)
 
-        /*  reset the mode switching fader  */
-        this.modeTextureFade = 0.0
-        this.canvasTexture.setFloat("ModeTextureFade", this.modeTextureFade)
+        /*  reset the mode switching transition  */
+        this.transitionProgress = 0.0
+        this.transitionTexture.setTexture("texture1", this.canvasState[0].texture)
+        this.transitionTexture.setTexture("texture2", this.canvasState[1].texture)
+        this.transitionTexture.setFloat("progress", this.transitionProgress)
 
         /*  apply texture onto wall  */
         const wall = this.api.scene.getScene().getMaterialByName("Wall") as
             BABYLON.Nullable<BABYLON.PBRMaterial>
         if (wall === null)
             throw new Error("cannot find Wall object")
-        wall.albedoTexture = this.canvasTexture
+        wall.albedoTexture = this.transitionTexture
 
         /*  start optional texture fader  */
         await this.canvasFaderStart()
@@ -199,8 +225,8 @@ export default class Canvas {
         await this.canvasDisposeTextures(1)
 
         /*  dispose procedural texture  */
-        this.canvasTexture?.dispose()
-        this.canvasTexture = null
+        this.transitionTexture?.dispose()
+        this.transitionTexture = null
     }
 
     /*  reconfigure canvas/wall texture(s)  */
@@ -213,12 +239,6 @@ export default class Canvas {
         if (canvasConfig.texture1 === "")
             return
         this.api.renderer.log("INFO", "canvas reconfigure (begin)")
-
-        /*  determine id of canvas mode  */
-        const mode = this.canvasMode === 0 ? "A" : "B"
-
-        /*  determine texture  */
-        const texture = this.canvasTexture!
 
         /*  reset textures  */
         await this.canvasDisposeTextures(this.canvasMode)
@@ -251,34 +271,29 @@ export default class Canvas {
         })
 
         /*  apply new textures  */
-        texture.setTexture(`Mode${mode}Texture1`,
+        canvasState.texture!.setTexture("texture1",
             canvasState.texture1 !== null ? canvasState.texture1 : this.dummyTexture!)
-        texture.setTexture(`Mode${mode}Texture2`,
+        canvasState.texture!.setTexture("texture2",
             canvasState.texture2 !== null ? canvasState.texture2 : this.dummyTexture!)
 
         /*  apply texture fading duration  */
-        texture.setFloat(`Mode${mode}TextureFade`, canvasConfig.fadeTrans)
+        canvasState.texture!.setFloat("fade", canvasConfig.fadeTrans)
 
-        /*  re-freeze material  */
         this.api.renderer.log("INFO", "canvas reconfigure (end)")
     }
 
     /*  dispose canvas textures  */
     async canvasDisposeTextures (modeNum: number) {
         /*  determine material and canvas state  */
-        const canvasTexture = this.canvasTexture!
-        const canvasState   = this.canvasState[modeNum]
-
-        /*  determine mode  */
-        const mode = modeNum === 0 ? "A" : "B"
+        const canvasState = this.canvasState[modeNum]
 
         /*  dispose texture 1  */
-        canvasTexture.setTexture(`Mode${mode}Texture1`, this.dummyTexture!)
+        canvasState.texture!.setTexture("texture1", this.dummyTexture!)
         canvasState.texture1 = null
         canvasState.canvas1 = null
 
         /*  dispose texture 2  */
-        canvasTexture.setTexture(`Mode${mode}Texture2`, this.dummyTexture!)
+        canvasState.texture!.setTexture("texture2", this.dummyTexture!)
         canvasState.texture2 = null
         canvasState.canvas2 = null
     }
@@ -290,9 +305,7 @@ export default class Canvas {
         const canvasState  = this.canvasState[this.canvasMode]
 
         /*  activate optional cross-fading between textures  */
-        const mode = this.canvasMode === 0 ? "A" : "B"
-        const texture = this.canvasTexture!
-        texture.setFloat(`Mode${mode}TextureFade`, 0.0)
+        canvasState.texture!.setFloat("fade", 0.0)
 
         /*  stop processing immediately if no fading is necessary  */
         if (canvasState.texture2 === null)
@@ -305,7 +318,7 @@ export default class Canvas {
         const fadeWait  = canvasConfig.fadeWait
         const fader = () => {
             /*  reset timer (to not confuse stopping below)  */
-            this.fadeTimer = null
+            canvasState.fadeTimer = null
 
             /*  apply next fading step  */
             const fadeInterval = this.api.scene.currentMillisecondsPerFrame()
@@ -314,68 +327,71 @@ export default class Canvas {
             let wait = fadeInterval
             if      (fade > 1.0) { fade = 1.0; fadeSign = -1; wait = fadeWait }
             else if (fade < 0.0) { fade = 0.0; fadeSign = +1; wait = fadeWait }
-            texture.setFloat(`Mode${mode}TextureFade`, fade)
+            canvasState.texture!.setFloat("fade", fade)
 
             /*  wait for next iteration  */
-            this.fadeTimer = setTimeout(fader, wait)
+            canvasState.fadeTimer = setTimeout(fader, wait)
         }
-        if (this.fadeTimer !== null)
-            clearTimeout(this.fadeTimer)
-        this.fadeTimer = setTimeout(fader, 0)
+        if (canvasState.fadeTimer !== null)
+            clearTimeout(canvasState.fadeTimer)
+        canvasState.fadeTimer = setTimeout(fader, 0)
     }
 
     /*  stop canvas/wall fader  */
     async canvasFaderStop () {
-        if (this.fadeTimer !== null) {
-            clearTimeout(this.fadeTimer)
+        /*  determine canvas state  */
+        const canvasState  = this.canvasState[this.canvasMode]
+
+        /*  stop still pending timer  */
+        if (canvasState.fadeTimer !== null) {
+            clearTimeout(canvasState.fadeTimer)
             await new Promise((resolve, reject) => {
                 setTimeout(() => resolve(true), 2 * (this.api.scene.currentMillisecondsPerFrame()))
             })
-            this.fadeTimer = null
+            canvasState.fadeTimer = null
         }
     }
 
-    /*  fade mode of canvas  */
-    async canvasModeFade () {
-        const texture = this.canvasTexture!
+    /*  transition canvas  */
+    async canvasTransition () {
         await new Promise((resolve, reject) => {
-            let fade = this.modeTextureFade
-            const fadeSign  = fade === 0.0 ? +1 : -1
-            const fadeTrans = this.fadeSwitch * 1000
-            const fader = () => {
+            let progress = this.transitionProgress
+            const progressSign  = progress === 0.0 ? +1 : -1
+            const progressTrans = this.transitionDuration * 1000
+            const progression = () => {
                 /*  reset timer (to not confuse stopping below)  */
-                this.modeTimer = null
+                this.transitionTimer = null
 
                 /*  apply next fading step  */
-                const fadeInterval = this.api.scene.currentMillisecondsPerFrame()
-                const fadeStep = 1.0 / (fadeTrans / fadeInterval)
-                fade = fade + (fadeSign * fadeStep)
-                let wait = fadeInterval
-                if (fade > 1.0) {
-                    fade = 1.0
+                const progressInterval = this.api.scene.currentMillisecondsPerFrame()
+                const progressStep = 1.0 / (progressTrans / progressInterval)
+                progress = progress + (progressSign * progressStep)
+                let wait = progressInterval
+                if (progress > 1.0) {
+                    progress = 1.0
                     wait = 0
                 }
-                if (fade < 0.0) {
-                    fade = 0.0
+                if (progress < 0.0) {
+                    progress = 0.0
                     wait = 0
                 }
-                this.modeTextureFade = fade
-                texture.setFloat("ModeTextureFade", fade)
+                this.transitionProgress = progress
+                this.transitionTexture!.setFloat("progress", progress)
 
                 /*  wait for next iteration or stop processing  */
                 if (wait > 0)
-                    this.modeTimer = setTimeout(fader, wait)
+                    this.transitionTimer = setTimeout(progression, wait)
                 else
                     resolve(true)
             }
-            if (this.modeTimer !== null)
-                clearTimeout(this.modeTimer)
-            this.modeTimer = setTimeout(fader, 0)
+            if (this.transitionTimer !== null)
+                clearTimeout(this.transitionTimer)
+            this.transitionTimer = setTimeout(progression, 0)
         })
     }
 
-    /*  change mode of canvas  */
-    async canvasModeChange () {
+    /*  switch canvas  */
+    async canvasSwitch () {
         this.api.renderer.log("INFO", "switching canvas (begin)")
 
         /*  stop the optional fader  */
@@ -389,8 +405,8 @@ export default class Canvas {
             /*  (re-)start the optional fader  */
             await this.canvasFaderStart()
 
-            /*  fade to new mode  */
-            await this.canvasModeFade()
+            /*  transition canvas  */
+            await this.canvasTransition()
 
             /*  dispose old textures  */
             await this.canvasDisposeTextures((this.canvasMode + 1) % 2)
@@ -439,13 +455,13 @@ export default class Canvas {
                     Utils.deg2rad(state.rotationZ), BABYLON.Space.WORLD)
             }
 
-            /*  update fading  */
-            if (state.fadeSwitch !== undefined)
-                this.fadeSwitch = state.fadeSwitch
+            /*  update transition duration  */
+            if (state.transition !== undefined)
+                this.transitionDuration = state.transition
 
             /*  apply changes  */
             if (changed)
-                await this.canvasModeChange()
+                await this.canvasSwitch()
         }
     }
 
