@@ -14,23 +14,23 @@ uniform int       type;     /* the type of transition effect */
 uniform sampler2D texture1; /* the texture #1 for the transition effect */
 uniform sampler2D texture2; /* the texture #2 for the transition effect */
 uniform float     slider;   /* the transition slider (0 = 100% texture #1, 1 = 100% texture #2) */
-uniform int       reverse;  /* the indicator whether the sliders goes 1..0 instead of 0..1 */
+uniform bool      reverse;  /* the indicator whether the sliders goes 1..0 instead of 0..1 */
 
 /*  utility function: determine logical transition progress  */
 float slider2progress (float s) {
-    if (reverse == 0) return s;
+    if (!reverse)     return s;
     else              return 1.0 - s;
 }
 
 /*  utility function: determine old texture sample  */
 vec4 textureSampleOld (vec2 uv) {
-    if (reverse == 0) return texture2D(texture1, uv);
+    if (!reverse)     return texture2D(texture1, uv);
     else              return texture2D(texture2, uv);
 }
 
 /*  utility function: determine new texture sample  */
 vec4 textureSampleNew (vec2 uv) {
-    if (reverse == 0) return texture2D(texture2, uv);
+    if (!reverse)     return texture2D(texture2, uv);
     else              return texture2D(texture1, uv);
 }
 
