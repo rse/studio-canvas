@@ -6,3 +6,8 @@
 
 declare module "vue3-tabs-component"
 
+declare module "*.fs?raw" {
+    const content: string
+    export default content
+}
+
