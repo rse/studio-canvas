@@ -10,7 +10,7 @@ precision highp float;
 varying vec2 vUV;
 
 /*  the parameters provides by us  */
-uniform int       type;      /* the type of transition effect */
+uniform int       type;     /* the type of transition effect */
 uniform sampler2D texture1; /* the texture #1 for the transition effect */
 uniform sampler2D texture2; /* the texture #2 for the transition effect */
 uniform float     slider;   /* the transition slider (0 = 100% texture #1, 1 = 100% texture #2) */
