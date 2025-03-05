@@ -9,6 +9,7 @@ import VuePlugin         from "@vitejs/plugin-vue"
 import YAMLPlugin        from "@rollup/plugin-yaml"
 import { nodePolyfills } from "vite-plugin-node-polyfills"
 import SvgLoader         from "vite-svg-loader"
+import GLSL              from "vite-plugin-glsl"
 
 export default Vite.defineConfig(({ command, mode }) => ({
     logLevel: "info",
@@ -19,6 +20,7 @@ export default Vite.defineConfig(({ command, mode }) => ({
         VuePlugin(),
         YAMLPlugin(),
         SvgLoader(),
+        GLSL(),
         nodePolyfills({
             include: [ "events", "stream", "path", "fs" ],
             globals: { Buffer: true }

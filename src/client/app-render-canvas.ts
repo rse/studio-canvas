@@ -11,8 +11,8 @@ import * as BABYLON           from "@babylonjs/core"
 import Config                 from "./app-render-config"
 import { type API }           from "./app-render-api"
 import Utils                  from "./app-render-utils"
-import ShaderImage            from "./app-render-canvas-image.fs?raw"
-import ShaderTransition       from "./app-render-canvas-transition.fs?raw"
+import ShaderImage            from "./app-render-canvas-image.fs"
+import ShaderTransition       from "./app-render-canvas-transition.fs"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"

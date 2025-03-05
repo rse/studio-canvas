@@ -10,8 +10,8 @@ import * as BABYLON              from "@babylonjs/core"
 /*  import internal dependencies (client-side)  */
 import Config                    from "./app-render-config"
 import { type API }              from "./app-render-api"
-import ShaderVertex              from "./app-render-display-stream.vs?raw"
-import ShaderFragment            from "./app-render-display-stream.fs?raw"
+import ShaderVertex              from "./app-render-display-stream.vs"
+import ShaderFragment            from "./app-render-display-stream.fs"
 import { type ChromaKey }        from "./app-render-utils"
 
 /*  import internal dependencies (shared)  */
