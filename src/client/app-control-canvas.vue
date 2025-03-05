@@ -33,6 +33,7 @@
             <div class="button" v-bind:class="{ selected: state.canvas.transType === 'slide-r' }" v-on:click="state.canvas.transType = 'slide-r'">SLIDE-R</div>
             <div class="button" v-bind:class="{ selected: state.canvas.transType === 'slice' }" v-on:click="state.canvas.transType = 'slice'">SLICE</div>
             <div class="button" v-bind:class="{ selected: state.canvas.transType === 'perlin' }" v-on:click="state.canvas.transType = 'perlin'">PERLIN</div>
+            <div class="button" v-bind:class="{ selected: state.canvas.transType === 'morph' }" v-on:click="state.canvas.transType = 'morph'">MORPH</div>
         </div>
 
         <div class="label1">transition</div>

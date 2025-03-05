@@ -56,7 +56,8 @@ export default class Canvas {
         "slide-l": 2,
         "slide-r": 3,
         "slice":   4,
-        "perlin":  5
+        "perlin":  5,
+        "morph":   6
     } as { [ id: string ]: number }
     private transitionTexture: BABYLON.Nullable<BABYLON.ProceduralTexture> = null
     private transitionDuration = 2.0

@@ -140,9 +140,28 @@ vec4 transition_PERLIN (float progress) {
     float p = mix(-smoothness, 1.0 + smoothness, progress);
     float lower = p - smoothness;
     float higher = p + smoothness;
-
     float q = smoothstep(lower, higher, n);
     return mix(texOld, texNew, 1.0 - q);
+}
+
+/*  transition effect: MORPH (#6)  */
+vec4 transition_MORPH (float progress) {
+    /*  sample textures  */
+    vec4 texOld = textureSampleOld(vUV);
+    vec4 texNew = textureSampleNew(vUV);
+
+    /*  calculate the morphing effect  */
+    float strength = 0.1;
+    vec2 oa = (((texOld.rg + texOld.b) * 0.5) * 2.0 - 1.0);
+    vec2 ob = (((texNew.rg + texNew.b) * 0.5) * 2.0 - 1.0);
+    vec2 oc = mix(oa, ob, 0.5) * strength;
+    float w0 = progress;
+    float w1 = 1.0 - w0;
+    return mix(
+        textureSampleOld(vUV + oc * w0),
+        textureSampleNew(vUV - oc * w1),
+        progress
+    );
 }
 
 /*  fragment shader main function  */
@@ -157,6 +176,7 @@ void main (void) {
     else if (type == 3) result = transition_SLIDE_R(progress);
     else if (type == 4) result = transition_SLICE(progress);
     else if (type == 5) result = transition_PERLIN(progress);
+    else if (type == 6) result = transition_MORPH(progress);
     else                result = vec4(1.0, 0.0, 0.0, 1.0);
 
     /*  provide fragment shader result  */
