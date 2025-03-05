@@ -91,6 +91,7 @@ export default [
             "vue/attributes-order":                               "off",
             "vue/component-definition-name-casing":               "off",
             "vue/no-mutating-props":                              [ "error", { "shallowOnly": true } ],
+            "vue/block-order":                                    "off",
 
             "@typescript-eslint/no-empty-function":               "off",
             "@typescript-eslint/no-explicit-any":                 "off",
