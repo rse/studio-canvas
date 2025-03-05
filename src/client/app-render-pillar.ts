@@ -70,20 +70,20 @@ export default class Pillar {
             return
 
         /*  update already active media receivers  */
-        if (this.api.material.isMediaModified(this.api.material.displaySource("pillar"))
+        if (this.api.display.isMediaModified(this.api.display.displaySource("pillar"))
             && this.display.isEnabled())
-            await this.api.material.applyDisplayMaterial("pillar", this.display,
+            await this.api.display.applyDisplayMaterial("pillar", this.display,
                 this.opacity, 0, 0, this.chromaKey)
 
         /*  reflect state changes  */
         if (state !== undefined) {
             /*  update content  */
             if (state.source !== undefined
-                && (this.api.material.displaySource("pillar") !== state.source
-                    || this.api.material.isMediaModified(state.source))) {
-                this.api.material.displaySource("pillar", state.source)
+                && (this.api.display.displaySource("pillar") !== state.source
+                    || this.api.display.isMediaModified(state.source))) {
+                this.api.display.displaySource("pillar", state.source)
                 if (this.display.isEnabled())
-                    await this.api.material.applyDisplayMaterial("pillar", this.display,
+                    await this.api.display.applyDisplayMaterial("pillar", this.display,
                         this.opacity, 0, 0, this.chromaKey)
             }
 
@@ -173,7 +173,7 @@ export default class Pillar {
                 && this.hull.isEnabled() !== state.enable) {
                 if (state.enable) {
                     /*  enable visibility  */
-                    await this.api.material.applyDisplayMaterial("pillar", this.display,
+                    await this.api.display.applyDisplayMaterial("pillar", this.display,
                         this.opacity, 0, 0, this.chromaKey)
                     if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
                         /*  enable visibility with fading  */
@@ -272,7 +272,7 @@ export default class Pillar {
                             this.case!.setEnabled(false)
                             this.display!.setEnabled(false)
                             this.hull!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("pillar", this.display!)
+                            await this.api.display.unapplyDisplayMaterial("pillar", this.display!)
                         })
                     }
                     else {
@@ -296,7 +296,7 @@ export default class Pillar {
                             this.case!.setEnabled(false)
                             this.display!.setEnabled(false)
                             this.hull!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("pillar", this.display!)
+                            await this.api.display.unapplyDisplayMaterial("pillar", this.display!)
                         })
                     }
                 }

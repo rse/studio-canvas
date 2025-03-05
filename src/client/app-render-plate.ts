@@ -61,20 +61,20 @@ export default class Plate {
             return
 
         /*  update already active media receivers  */
-        if (this.api.material.isMediaModified(this.api.material.displaySource("plate"))
+        if (this.api.display.isMediaModified(this.api.display.displaySource("plate"))
             && this.display.isEnabled())
-            await this.api.material.applyDisplayMaterial("plate", this.display,
+            await this.api.display.applyDisplayMaterial("plate", this.display,
                 this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
 
         /*  reflect scene changes  */
         if (state !== undefined) {
             /*  update content  */
             if (state.source !== undefined
-                && (this.api.material.displaySource("plate") !== state.source
-                    || this.api.material.isMediaModified(state.source))) {
-                this.api.material.displaySource("plate", state.source)
+                && (this.api.display.displaySource("plate") !== state.source
+                    || this.api.display.isMediaModified(state.source))) {
+                this.api.display.displaySource("plate", state.source)
                 if (this.display.isEnabled())
-                    await this.api.material.applyDisplayMaterial("plate", this.display,
+                    await this.api.display.applyDisplayMaterial("plate", this.display,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
             }
 
@@ -162,7 +162,7 @@ export default class Plate {
                 && this.display.isEnabled() !== state.enable) {
                 if (state.enable) {
                     /*  enable visibility  */
-                    await this.api.material.applyDisplayMaterial("plate", this.display,
+                    await this.api.display.applyDisplayMaterial("plate", this.display,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
                     if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
                         /*  enable visibility with fading  */
@@ -238,7 +238,7 @@ export default class Plate {
                             else
                                 this.display!.visibility = 0.0
                             this.display!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("plate", this.display!)
+                            await this.api.display.unapplyDisplayMaterial("plate", this.display!)
                         })
                     }
                     else {
@@ -257,7 +257,7 @@ export default class Plate {
                         this.api.scene.getScene().onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
                             this.display!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("plate", this.display!)
+                            await this.api.display.unapplyDisplayMaterial("plate", this.display!)
                         })
                     }
                 }

@@ -7,7 +7,7 @@
 /*  import internal dependencies (client-side)  */
 import Texture     from "./app-render-texture"
 import Stream      from "./app-render-stream"
-import Material    from "./app-render-material"
+import Display     from "./app-render-display"
 import Scene       from "./app-render-scene"
 import Viewpoint   from "./app-render-viewpoint"
 import Canvas      from "./app-render-canvas"
@@ -33,7 +33,7 @@ export type API = {
     renderer:  Renderer
     texture:   Texture
     stream:    Stream
-    material:  Material
+    display:   Display
     scene:     Scene
     viewpoint: Viewpoint
     canvas:    Canvas

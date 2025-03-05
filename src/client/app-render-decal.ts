@@ -128,9 +128,9 @@ export default class Decal {
             return
 
         /*  update already active media receivers  */
-        if (this.api.material.isMediaModified(this.api.material.displaySource("decal"))
+        if (this.api.display.isMediaModified(this.api.display.displaySource("decal"))
             && this.mesh.isEnabled())
-            await this.api.material.applyDisplayMaterial("decal", this.mesh,
+            await this.api.display.applyDisplayMaterial("decal", this.mesh,
                 this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
 
         /*  reflect state changes  */
@@ -141,11 +141,11 @@ export default class Decal {
 
             /*  update content  */
             if (state.source !== undefined
-                && (this.api.material.displaySource("decal") !== state.source
-                    || this.api.material.isMediaModified(state.source))) {
-                this.api.material.displaySource("decal", state.source)
+                && (this.api.display.displaySource("decal") !== state.source
+                    || this.api.display.isMediaModified(state.source))) {
+                this.api.display.displaySource("decal", state.source)
                 if (this.mesh.isEnabled())
-                    await this.api.material.applyDisplayMaterial("decal", this.mesh,
+                    await this.api.display.applyDisplayMaterial("decal", this.mesh,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
             }
 
@@ -230,7 +230,7 @@ export default class Decal {
                 if (changed) {
                     await this.api.scene.stop()
                     await this.decalGenerate()
-                    await this.api.material.applyDisplayMaterial("decal", this.mesh,
+                    await this.api.display.applyDisplayMaterial("decal", this.mesh,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
                     await this.api.scene.start()
                 }
@@ -241,7 +241,7 @@ export default class Decal {
                 && this.mesh.isEnabled() !== state.enable) {
                 if (state.enable) {
                     /*  enable visibility  */
-                    await this.api.material.applyDisplayMaterial("decal", this.mesh,
+                    await this.api.display.applyDisplayMaterial("decal", this.mesh,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
                     if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
                         /*  enable visibility with fading  */
@@ -304,7 +304,7 @@ export default class Decal {
                             else
                                 this.mesh!.visibility = 0
                             this.mesh!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("decal", this.mesh!)
+                            await this.api.display.unapplyDisplayMaterial("decal", this.mesh!)
                         })
                     }
                     else {
@@ -312,7 +312,7 @@ export default class Decal {
                         this.api.renderer.log("INFO", "disabling decal")
                         this.mesh.visibility = 0
                         this.mesh.setEnabled(false)
-                        await this.api.material.unapplyDisplayMaterial("decal", this.mesh!)
+                        await this.api.display.unapplyDisplayMaterial("decal", this.mesh!)
                     }
                 }
             }

@@ -63,20 +63,20 @@ export default class Hologram {
             return
 
         /*  update already active media receivers  */
-        if (this.api.material.isMediaModified(this.api.material.displaySource("hologram"))
+        if (this.api.display.isMediaModified(this.api.display.displaySource("hologram"))
             && this.display.isEnabled())
-            await this.api.material.applyDisplayMaterial("hologram", this.display,
+            await this.api.display.applyDisplayMaterial("hologram", this.display,
                 this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
 
         /*  reflect scene changes  */
         if (state !== undefined) {
             /*  update content  */
             if (state.source !== undefined
-                && (this.api.material.displaySource("hologram") !== state.source
-                    || this.api.material.isMediaModified(state.source))) {
-                this.api.material.displaySource("hologram", state.source)
+                && (this.api.display.displaySource("hologram") !== state.source
+                    || this.api.display.isMediaModified(state.source))) {
+                this.api.display.displaySource("hologram", state.source)
                 if (this.display.isEnabled())
-                    await this.api.material.applyDisplayMaterial("hologram", this.display,
+                    await this.api.display.applyDisplayMaterial("hologram", this.display,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
             }
 
@@ -163,7 +163,7 @@ export default class Hologram {
                 && this.display.isEnabled() !== state.enable) {
                 if (state.enable) {
                     /*  enable visibility  */
-                    await this.api.material.applyDisplayMaterial("hologram", this.display,
+                    await this.api.display.applyDisplayMaterial("hologram", this.display,
                         this.opacity, this.borderRad, this.borderCrop, this.chromaKey)
                     if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
                         /*  enable visibility with fading  */
@@ -243,7 +243,7 @@ export default class Hologram {
                             else
                                 this.display!.visibility = 0.0
                             this.display!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("hologram", this.display!)
+                            await this.api.display.unapplyDisplayMaterial("hologram", this.display!)
                         })
                     }
                     else {
@@ -262,7 +262,7 @@ export default class Hologram {
                         this.api.scene.getScene().onAfterRenderObservable.addOnce(async (ev, state) => {
                             setOnce(0)
                             this.display!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("hologram", this.display!)
+                            await this.api.display.unapplyDisplayMaterial("hologram", this.display!)
                         })
                     }
                 }

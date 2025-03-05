@@ -83,20 +83,20 @@ export default class Pane {
             return
 
         /*  update already active media receivers  */
-        if (this.api.material.isMediaModified(this.api.material.displaySource("pane"))
+        if (this.api.display.isMediaModified(this.api.display.displaySource("pane"))
             && this.display.isEnabled())
-            await this.api.material.applyDisplayMaterial("pane", this.display,
+            await this.api.display.applyDisplayMaterial("pane", this.display,
                 this.opacity, 0, 0, this.chromaKey)
 
         /*  reflect scene changes  */
         if (state !== undefined) {
             /*  update content  */
             if (state.source !== undefined
-                && (this.api.material.displaySource("pane") !== state.source
-                    || this.api.material.isMediaModified(state.source))) {
-                this.api.material.displaySource("pane", state.source)
+                && (this.api.display.displaySource("pane") !== state.source
+                    || this.api.display.isMediaModified(state.source))) {
+                this.api.display.displaySource("pane", state.source)
                 if (this.display.isEnabled())
-                    await this.api.material.applyDisplayMaterial("pane", this.display,
+                    await this.api.display.applyDisplayMaterial("pane", this.display,
                         this.opacity, 0, 0, this.chromaKey)
             }
 
@@ -173,7 +173,7 @@ export default class Pane {
                 && this.hull.isEnabled() !== state.enable) {
                 if (state.enable) {
                     /*  enable visibility  */
-                    await this.api.material.applyDisplayMaterial("pane", this.display,
+                    await this.api.display.applyDisplayMaterial("pane", this.display,
                         this.opacity, 0, 0, this.chromaKey)
                     if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
                         /*  enable visibility with fading  */
@@ -263,7 +263,7 @@ export default class Pane {
                             this.case!.setEnabled(false)
                             this.display!.setEnabled(false)
                             this.hull!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("pane", this.display!)
+                            await this.api.display.unapplyDisplayMaterial("pane", this.display!)
                         })
                     }
                     else {
@@ -287,7 +287,7 @@ export default class Pane {
                             this.case!.setEnabled(false)
                             this.display!.setEnabled(false)
                             this.hull!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("pane", this.display!)
+                            await this.api.display.unapplyDisplayMaterial("pane", this.display!)
                         })
                     }
                 }

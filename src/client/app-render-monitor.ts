@@ -83,20 +83,20 @@ export default class Monitor {
             return
 
         /*  update already active media receivers  */
-        if (this.api.material.isMediaModified(this.api.material.displaySource("monitor"))
+        if (this.api.display.isMediaModified(this.api.display.displaySource("monitor"))
             && this.display.isEnabled())
-            await this.api.material.applyDisplayMaterial("monitor", this.display,
+            await this.api.display.applyDisplayMaterial("monitor", this.display,
                 this.opacity, 0, 0, this.chromaKey)
 
         /*  reflect state changes  */
         if (state !== undefined) {
             /*  update content  */
             if (state.source !== undefined
-                && (this.api.material.displaySource("monitor") !== state.source
-                    || this.api.material.isMediaModified(state.source))) {
-                this.api.material.displaySource("monitor", state.source)
+                && (this.api.display.displaySource("monitor") !== state.source
+                    || this.api.display.isMediaModified(state.source))) {
+                this.api.display.displaySource("monitor", state.source)
                 if (this.display.isEnabled())
-                    await this.api.material.applyDisplayMaterial("monitor", this.display,
+                    await this.api.display.applyDisplayMaterial("monitor", this.display,
                         this.opacity, 0, 0, this.chromaKey)
             }
 
@@ -173,7 +173,7 @@ export default class Monitor {
                 && this.display.isEnabled() !== state.enable) {
                 if (state.enable) {
                     /*  enable visibility  */
-                    await this.api.material.applyDisplayMaterial("monitor", this.display,
+                    await this.api.display.applyDisplayMaterial("monitor", this.display,
                         this.opacity, 0, 0, this.chromaKey)
                     if (this.fade > 0 && this.api.scene.currentFPS() > 0) {
                         /*  enable visibility with fading  */
@@ -263,7 +263,7 @@ export default class Monitor {
                             this.case!.setEnabled(false)
                             this.display!.setEnabled(false)
                             this.hull!.setEnabled(false)
-                            await this.api.material.unapplyDisplayMaterial("monitor", this.display!)
+                            await this.api.display.unapplyDisplayMaterial("monitor", this.display!)
                         })
                     }
                     else {
@@ -282,7 +282,7 @@ export default class Monitor {
                         this.case.setEnabled(false)
                         this.display.setEnabled(false)
                         this.hull.setEnabled(false)
-                        await this.api.material.unapplyDisplayMaterial("monitor", this.display!)
+                        await this.api.display.unapplyDisplayMaterial("monitor", this.display!)
                     }
                 }
             }

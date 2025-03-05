@@ -13,7 +13,7 @@ import { type API }                from "./app-render-api"
 /*  import internal dependencies (client-side)  */
 import Texture                     from "./app-render-texture"
 import Stream                      from "./app-render-stream"
-import Material                    from "./app-render-material"
+import Display                     from "./app-render-display"
 import Scene                       from "./app-render-scene"
 import Viewpoint                   from "./app-render-viewpoint"
 import Canvas                      from "./app-render-canvas"
@@ -65,7 +65,7 @@ export default class Renderer extends EventEmitter {
         /*  instantiate rendering utilities  */
         this.api.texture   = new Texture(  this.api)
         this.api.stream    = new Stream(   this.api)
-        this.api.material  = new Material( this.api)
+        this.api.display   = new Display(  this.api)
 
         /*  instantiate rendering features  */
         this.api.canvas    = new Canvas(   this.api)
@@ -142,7 +142,7 @@ export default class Renderer extends EventEmitter {
 
         /*  pass-through operation to rendering utilities  */
         await this.api.stream.reflectSceneState(state.streams)
-        await this.api.material.reflectSceneState(state.media)
+        await this.api.display.reflectSceneState(state.media)
 
         /*  pass-through operation to rendering features  */
         await this.api.canvas.reflectSceneState(state.canvas)

@@ -67,20 +67,20 @@ export default class Mask {
             return
 
         /*  update already active media receivers  */
-        if (this.api.material.isMediaModified(this.api.material.displaySource("mask"))
+        if (this.api.display.isMediaModified(this.api.display.displaySource("mask"))
             && this.display.isEnabled())
-            await this.api.material.applyDisplayMaterial("mask", this.display, 1.0,
+            await this.api.display.applyDisplayMaterial("mask", this.display, 1.0,
                 this.borderRad, 0, null)
 
         /*  reflect scene changes  */
         if (state !== undefined) {
             /*  update display material  */
             if (state.source !== undefined
-                && (this.api.material.displaySource("mask") !== state.source
-                    || this.api.material.isMediaModified(state.source))) {
-                this.api.material.displaySource("mask", state.source)
+                && (this.api.display.displaySource("mask") !== state.source
+                    || this.api.display.isMediaModified(state.source))) {
+                this.api.display.displaySource("mask", state.source)
                 if (this.display.isEnabled())
-                    await this.api.material.applyDisplayMaterial("mask", this.display, 1.0,
+                    await this.api.display.applyDisplayMaterial("mask", this.display, 1.0,
                         this.borderRad, 0, null)
             }
 
@@ -108,7 +108,7 @@ export default class Mask {
                     /*  enable visibility  */
                     this.originalCamera = scene.activeCamera
                     scene.activeCamera = this.camera
-                    await this.api.material.applyDisplayMaterial("mask", this.display, 1.0,
+                    await this.api.display.applyDisplayMaterial("mask", this.display, 1.0,
                         this.borderRad, 0, null)
                     this.api.renderer.log("INFO", "enabling mask")
                     if (this.display.material instanceof BABYLON.ShaderMaterial) {
@@ -145,7 +145,7 @@ export default class Mask {
                         this.background!.setEnabled(false)
                         if (this.originalCamera !== null)
                             scene.activeCamera = this.originalCamera
-                        await this.api.material.unapplyDisplayMaterial("mask", this.display!)
+                        await this.api.display.unapplyDisplayMaterial("mask", this.display!)
                     })
                 }
             }

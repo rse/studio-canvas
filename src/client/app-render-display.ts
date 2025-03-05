@@ -10,8 +10,8 @@ import * as BABYLON              from "@babylonjs/core"
 /*  import internal dependencies (client-side)  */
 import Config                    from "./app-render-config"
 import { type API }              from "./app-render-api"
-import ShaderVertex              from "./app-render-material-stream.vs?raw"
-import ShaderFragment            from "./app-render-material-stream.fs?raw"
+import ShaderVertex              from "./app-render-display-stream.vs?raw"
+import ShaderFragment            from "./app-render-display-stream.fs?raw"
 import { type ChromaKey }        from "./app-render-utils"
 
 /*  import internal dependencies (shared)  */
@@ -21,7 +21,7 @@ import { StateTypePartial }      from "../common/app-state"
 type VideoStackId = "monitor" | "decal" | "hologram" | "plate" | "pane" | "pillar" | "mask"
 
 /*  exported rendering feature  */
-export default class Material {
+export default class Display {
     /*  internal state  */
     private meshMaterial     = new Map<BABYLON.Mesh, BABYLON.Nullable<BABYLON.Material>>()
     private mediaURL         = new Map<string, string>()
@@ -154,7 +154,7 @@ export default class Material {
 
     /*  check whether material was modified  */
     isMediaModified (id: string) {
-        return this.modifiedMedia[this.api.material.mapMediaId(id)]
+        return this.modifiedMedia[this.api.display.mapMediaId(id)]
     }
 
     /*  create a shader material from vertex and fragment shaders  */
