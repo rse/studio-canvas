@@ -1,3 +1,3 @@
 {
-    "extends": "../.../etc/tsc-server.json"
+    "extends": "../../etc/tsc-server.json"
 }
