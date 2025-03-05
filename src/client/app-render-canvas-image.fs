@@ -1,3 +1,4 @@
+#version 300 es
 /*
 **  Studio-Canvas - Real-Time Virtual Studio Canvas Rendering
 **  Copyright (c) 2023-2024 Dr. Ralf S. Engelschall <rse@engelschall.com>
@@ -6,18 +7,20 @@
 
 precision highp float;
 
-varying vec2 vUV;
+in vec2 vUV;
 
 uniform sampler2D texture1;
 uniform sampler2D texture2;
 uniform float     fade;
 
+out vec4 FragColor;
+
 void main (void) {
     /*  sample textures  */
-    vec4 t1 = texture2D(texture1, vUV);
-    vec4 t2 = texture2D(texture2, vUV);
+    vec4 t1 = texture(texture1, vUV);
+    vec4 t2 = texture(texture2, vUV);
 
     /*  fade between textures  */
     vec3 t  = mix(t1.rgb, t2.rgb, fade);
-    gl_FragColor = vec4(t, 1.0);
+    FragColor = vec4(t, 1.0);
 }

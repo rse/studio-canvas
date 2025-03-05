@@ -10,7 +10,8 @@ import * as BABYLON              from "@babylonjs/core"
 /*  import internal dependencies (client-side)  */
 import Config                    from "./app-render-config"
 import { type API }              from "./app-render-api"
-import ShaderMaterial            from "./app-render-shader"
+import ShaderVertex              from "./app-render-material-stream.vs?raw"
+import ShaderFragment            from "./app-render-material-stream.fs?raw"
 import { type ChromaKey }        from "./app-render-utils"
 
 /*  import internal dependencies (shared)  */
@@ -156,6 +157,68 @@ export default class Material {
         return this.modifiedMedia[this.api.material.mapMediaId(id)]
     }
 
+    /*  create a shader material from vertex and fragment shaders  */
+    async createStreamShaderMaterial (id: string) {
+        /*  create shader material  */
+        const scene = this.api.scene.getScene()
+        const material = new BABYLON.ShaderMaterial(`stream-${id}`, scene, {
+            vertexSource:   ShaderVertex,
+            fragmentSource: ShaderFragment
+        }, {
+            needAlphaBlending: true,
+            needAlphaTesting:  false,
+            attributes: [ "position", "uv" ],
+            uniforms: [
+                /*  standard BabylonJS uniforms  */
+                "worldViewProjection",
+
+                /*  custom application uniforms  */
+                "visibility",
+                "textureSampler",
+                "opacity",
+                "borderRadius",
+                "borderRadiusSoftness",
+                "borderCrop",
+                "chromaEnable",
+                "chromaThreshold",
+                "chromaSmoothing",
+                "stack",
+                "stacks",
+                "stackAlphaInvert",
+
+                /*  custom application uniforms (hard-coded)  */
+                "chromaCol"
+            ],
+            samplers: [ "textureSampler" ]
+        })
+
+        /*  set default values for parameters  */
+        material.setFloat("visibility", 1.0)
+        material.setFloat("opacity", 1.0)
+        material.setFloat("borderRadius", 40)
+        material.setFloat("bordersRadiusSoftness", 1.0)
+        material.setFloat("borderCrop", 0.0)
+        material.setInt("chromaEnable", 0)
+        material.setFloat("chromaThreshold", 0.4)
+        material.setFloat("chromaSmoothing", 0.1)
+        material.setVector3("chromaCol", new BABYLON.Vector3(0.0, 1.0, 0.0))
+        material.setInt("stack", 0)
+        material.setInt("stacks", 1)
+        material.setInt("stackAlphaInvert", 1)
+
+        /*  wait for shader compilation  */
+        await new Promise<void>((resolve, reject) => {
+            const interval = setInterval(() => {
+                if (material.isReady()) {
+                    clearInterval(interval)
+                    resolve()
+                }
+            }, 10)
+        })
+
+        return material
+    }
+
     /*  apply video stream onto mesh  */
     async applyDisplayMaterial (id: VideoStackId, mesh: BABYLON.Mesh, opacity: number, borderRad: number, borderCrop: number, chromaKey: ChromaKey | null) {
         this.api.renderer.log("INFO", `apply texture material to display "${id}"`)
@@ -184,7 +247,7 @@ export default class Material {
         }
 
         /*  create new shader material  */
-        const material = ShaderMaterial.displayStream(`video-${id}`, this.api.scene.getScene())
+        const material = await this.createStreamShaderMaterial(id)
         if (this.sourceMap[id].match(/^M/))
             this.material2Texture.set(material, texture)
         material.setTexture("textureSampler", texture)

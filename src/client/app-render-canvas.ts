@@ -123,7 +123,7 @@ export default class Canvas {
     }
 
     /*  make image texture from shader  */
-    canvasTextureMakeImage () {
+    async canvasTextureMakeImage () {
         /*  create procedural texture from a fragment shader  */
         const width  = Config.wall.width
         const height = Config.wall.height
@@ -137,11 +137,21 @@ export default class Canvas {
         texture.setTexture("texture2", this.dummyTexture!)
         texture.setFloat("textureFade", 0.0)
 
+        /*  wait for shader compilation  */
+        await new Promise<void>((resolve, reject) => {
+            const interval = setInterval(() => {
+                if (texture.isReady()) {
+                    clearInterval(interval)
+                    resolve()
+                }
+            }, 10)
+        })
+
         return texture
     }
 
     /*  make transition texture from fragment shader  */
-    canvasTextureMakeTransition () {
+    async canvasTextureMakeTransition () {
         /*  create procedural texture from a fragment shader  */
         const width  = Config.wall.width
         const height = Config.wall.height
@@ -157,6 +167,16 @@ export default class Canvas {
         texture.setFloat("slider", 0.0)
         texture.setInt("reverse", 0)
 
+        /*  wait for shader compilation  */
+        await new Promise<void>((resolve, reject) => {
+            const interval = setInterval(() => {
+                if (texture.isReady()) {
+                    clearInterval(interval)
+                    resolve()
+                }
+            }, 10)
+        })
+
         return texture
     }
 
@@ -166,11 +186,11 @@ export default class Canvas {
         this.dummyTexture = this.canvasTextureMakeDummy()
 
         /*  create canvas textures  */
-        this.canvasState[0].texture = this.canvasTextureMakeImage()
-        this.canvasState[1].texture = this.canvasTextureMakeImage()
+        this.canvasState[0].texture = await this.canvasTextureMakeImage()
+        this.canvasState[1].texture = await this.canvasTextureMakeImage()
 
         /*  create transition textures  */
-        this.transitionTexture = this.canvasTextureMakeTransition()
+        this.transitionTexture = await this.canvasTextureMakeTransition()
 
         /*  initialize canvas mode  */
         this.canvasMode = 0

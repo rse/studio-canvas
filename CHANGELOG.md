@@ -6,6 +6,9 @@ ChangeLog
 ------------------
 
 - IMPROVEMENT: provide also SLIDE-L, SLIDE-R, SLICE, PERLIN, MORPH, RIPPE, GRID and SQUARE transitions for canvas switching
+- IMPROVEMENT: make shader handling more robust by waiting for their readyness
+- REFACTORING: convert all shaders to GLSL version 300
+- REFACTORING: move shaders of stream material into separate files
 - REFACTORING: move ProceduralTexture shaders into separate files
 - REFACTORING: split canvas' single ProceduralTexture into three instances (2 for each canvas, 1 for the transition)
 - REFACTORING: replace Node Material Editor (NME) based canvas rendering with ProceduralTexture
