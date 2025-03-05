@@ -1,0 +1,3 @@
+{
+    "extends": "../.../etc/tsc-client.json"
+}
