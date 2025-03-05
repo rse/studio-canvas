@@ -364,6 +364,8 @@ export default class Canvas {
 
     /*  transition canvas  */
     async canvasTransition () {
+        const easeInOutSine = (x: number) =>
+            -(Math.cos(Math.PI * x) - 1) / 2
         await new Promise((resolve, reject) => {
             let slider = this.transitionSlider
             const sliderSign = slider === 0.0 ? +1 : -1
@@ -390,7 +392,7 @@ export default class Canvas {
                     wait = 0
                 }
                 this.transitionSlider = slider
-                this.transitionTexture!.setFloat("slider", slider)
+                this.transitionTexture!.setFloat("slider", easeInOutSine(slider))
 
                 /*  wait for next iteration or stop processing  */
                 if (wait > 0)

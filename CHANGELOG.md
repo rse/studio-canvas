@@ -2,7 +2,12 @@
 ChangeLog
 =========
 
-3.1.0 (2025-03-04)
+3.1.1 (2025-03-06)
+------------------
+
+- IMPROVEMENT: use a sinus in/out easing function for the canvas transitions
+
+3.1.0 (2025-03-05)
 ------------------
 
 - IMPROVEMENT: provide also SLIDE-L, SLIDE-R, SLICE, PERLIN, MORPH, RIPPE, GRID and SQUARE transitions for canvas switching
