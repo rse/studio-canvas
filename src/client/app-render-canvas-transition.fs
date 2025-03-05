@@ -34,6 +34,36 @@ vec4 textureSampleNew (vec2 uv) {
     else              return texture2D(texture1, uv);
 }
 
+/*  utility function: random value generation  */
+float random (vec2 co) {
+    highp float a = 12.9898;
+    highp float b = 78.233;
+    highp float c = 43758.5453;
+    highp float dt= dot(co.xy ,vec2(a,b));
+    highp float sn= mod(dt,3.14);
+    return fract(sin(sn) * c);
+}
+
+/*  utility function: noise (Morgan McGuire)  */
+float noise (vec2 st) {
+    vec2 i = floor(st);
+    vec2 f = fract(st);
+
+    /*  four corners in 2D of a tile  */
+    float a = random(i);
+    float b = random(i + vec2(1.0, 0.0));
+    float c = random(i + vec2(0.0, 1.0));
+    float d = random(i + vec2(1.0, 1.0));
+
+    /*  smooth interpolation  */
+    vec2 u = f * f * (3.0 - 2.0 * f);
+
+    /*  mix 4 corners porcentages  */
+    return mix(a, b, u.x) +
+        (c - a) * u.y * (1.0 - u.x) +
+        (d - b) * u.x * u.y;
+}
+
 /*  transition effect: FADE (#1)  */
 vec4 transition_FADE (float progress) {
     /*  sample textures  */
@@ -83,7 +113,7 @@ vec4 transition_SLIDE_R (float progress) {
 
 /*  transition effect: SLICE (#4)  */
 vec4 transition_SLICE (float progress) {
-    /*  sample both textures with the adjusted coordinates  */
+    /*  sample textures  */
     vec4 texOld = textureSampleOld(vUV);
     vec4 texNew = textureSampleNew(vUV);
 
@@ -97,6 +127,24 @@ vec4 transition_SLICE (float progress) {
     return mix(texOld, texNew, blend);
 }
 
+/*  transition effect: PERLIN (#5)  */
+vec4 transition_PERLIN (float progress) {
+    /*  sample textures  */
+    vec4 texOld = textureSampleOld(vUV);
+    vec4 texNew = textureSampleNew(vUV);
+
+    /*  calculate the perlin effect  */
+    float scale = 10.0;
+    float smoothness = 0.05;
+    float n = noise(vUV * scale);
+    float p = mix(-smoothness, 1.0 + smoothness, progress);
+    float lower = p - smoothness;
+    float higher = p + smoothness;
+
+    float q = smoothstep(lower, higher, n);
+    return mix(texOld, texNew, 1.0 - q);
+}
+
 /*  fragment shader main function  */
 void main (void) {
     /*  determine logical progress from slider  */
@@ -108,6 +156,7 @@ void main (void) {
     else if (type == 2) result = transition_SLIDE_L(progress);
     else if (type == 3) result = transition_SLIDE_R(progress);
     else if (type == 4) result = transition_SLICE(progress);
+    else if (type == 5) result = transition_PERLIN(progress);
     else                result = vec4(1.0, 0.0, 0.0, 1.0);
 
     /*  provide fragment shader result  */
