@@ -57,8 +57,7 @@ vec4 transition_SLIDE_L (float progress) {
 
     /*  define a moving cutoff with a smooth blend margin  */
     float cutoff = 1.0 - progress;
-    float margin = 0.00;
-    float blend  = smoothstep(cutoff - margin, cutoff + margin, vUV.x);
+    float blend  = step(cutoff, vUV.x);
 
     /*  provide blending  */
     return mix(texOld, texNew, blend);
@@ -76,8 +75,7 @@ vec4 transition_SLIDE_R (float progress) {
 
     /*  define a moving cutoff with a smooth blend margin  */
     float cutoff = progress;
-    float margin = 0.00;
-    float blend  = smoothstep(cutoff - margin, cutoff + margin, vUV.x);
+    float blend  = step(cutoff, vUV.x);
 
     /*  provide blending  */
     return mix(texNew, texOld, blend);
