@@ -39,7 +39,7 @@ float random (vec2 co) {
     highp float a = 12.9898;
     highp float b = 78.233;
     highp float c = 43758.5453;
-    highp float dt= dot(co.xy ,vec2(a,b));
+    highp float dt= dot(co.xy, vec2(a,b));
     highp float sn= mod(dt,3.14);
     return fract(sin(sn) * c);
 }
@@ -164,6 +164,73 @@ vec4 transition_MORPH (float progress) {
     );
 }
 
+/*  transition effect: GRID (#7)  */
+float gridGetDelta (vec2 p, ivec2 size) {
+    vec2 rectanglePos  = floor(vec2(size) * p);
+    vec2 rectangleSize = vec2(1.0 / vec2(size).x, 1.0 / vec2(size).y);
+
+    float top    = rectangleSize.y * (rectanglePos.y + 1.0);
+    float bottom = rectangleSize.y *  rectanglePos.y;
+    float left   = rectangleSize.x *  rectanglePos.x;
+    float right  = rectangleSize.x * (rectanglePos.x + 1.0);
+
+    float minX   = min(abs(p.x - left), abs(p.x - right));
+    float minY   = min(abs(p.y - top),  abs(p.y - bottom));
+    return min(minX, minY);
+}
+float gridGetDividerSize (ivec2 size, float dividerWidth) {
+    vec2 rectangleSize = vec2(1.0 / vec2(size).x, 1.0 / vec2(size).y);
+    return min(rectangleSize.x, rectangleSize.y) * dividerWidth;
+}
+vec4 transition_GRID (float progress) {
+    /*  transition effect configuration constants */
+    ivec2 size         = ivec2(60, 6);
+    float pause        = 0.1;
+    float dividerWidth = 0.01;
+    vec4  bgcolor      = vec4(0.0, 0.0, 0.0, 1.0);
+    float randomness   = 0.1;
+
+    bool inGrid = gridGetDelta(vUV, size) < gridGetDividerSize(size, dividerWidth);
+    if (progress < pause) {
+        /*  effect before pause  */
+        float currentProg = progress / pause;
+        float a = 1.0;
+        if (inGrid)
+            a = 1.0 - currentProg;
+        return mix(bgcolor, textureSampleOld(vUV), a);
+    }
+    else if (progress < 1.0 - pause) {
+        /*  main transition effect  */
+        if (inGrid)
+            return bgcolor;
+        else {
+            float currentProg = (progress - pause) / (1.0 - pause * 2.0);
+            vec2 rectanglePos = floor(vec2(size) * vUV);
+            float r = random(rectanglePos) - randomness;
+            float cp = smoothstep(0.0, 1.0 - r, currentProg);
+            float rectangleSize = 1.0 / vec2(size).x;
+            float delta = rectanglePos.x * rectangleSize;
+            float offset = rectangleSize / 2.0 + delta;
+
+            vec2 uv = vUV;
+            uv.x = (uv.x - offset) / abs(cp - 0.5) * 0.5 + offset;
+            vec4 a = textureSampleOld(uv);
+            vec4 b = textureSampleNew(uv);
+
+            float s = step(abs(vec2(size).x * (vUV.x - delta) - 0.5), abs(cp - 0.5));
+            return mix(bgcolor, mix(b, a, step(cp, 0.5)), s);
+        }
+    }
+    else {
+        /*  effect after pause  */
+        float currentProg = (progress - 1.0 + pause) / pause;
+        float a = 1.0;
+        if (inGrid)
+            a = currentProg;
+        return mix(bgcolor, textureSampleNew(vUV), a);
+    }
+}
+
 /*  fragment shader main function  */
 void main (void) {
     /*  determine logical progress from slider  */
@@ -177,6 +244,7 @@ void main (void) {
     else if (type == 4) result = transition_SLICE(progress);
     else if (type == 5) result = transition_PERLIN(progress);
     else if (type == 6) result = transition_MORPH(progress);
+    else if (type == 7) result = transition_GRID(progress);
     else                result = vec4(1.0, 0.0, 0.0, 1.0);
 
     /*  provide fragment shader result  */
