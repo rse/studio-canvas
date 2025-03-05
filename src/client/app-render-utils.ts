@@ -16,6 +16,11 @@ export type ChromaKey = {
 
 /*  exported utility functions  */
 export default class Utils {
+    /*  sinus in/out easing  */
+    static easeInOutSine (x: number) {
+        return -(Math.cos(Math.PI * x) - 1) / 2
+    }
+
     /*  convert from degree to radians  */
     static deg2rad (deg: number) {
         return (deg * (Math.PI / 180))

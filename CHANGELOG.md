@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+3.1.2 (2025-03-06)
+------------------
+
+- CLEANUP: cleanup code by moving easing function to the utils module
+
 3.1.1 (2025-03-06)
 ------------------
 
