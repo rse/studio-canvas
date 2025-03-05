@@ -273,8 +273,6 @@ export default class Material {
         else if (this.sourceMap[id].match(/^M/))
             material.setInt("stacks", 0)
         material.zOffset = -200
-        /* material.needAlphaBlending = () => true */
-        /* material.transparencyMode = BABYLON.Material.MATERIAL_ALPHATEST */
 
         /*  remember old material  */
         const materialOld = mesh.material as BABYLON.PBRMaterial
