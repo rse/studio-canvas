@@ -557,7 +557,7 @@
     .radios
         display: flex
         flex-direction: row
-        justify-content: center
+        justify-content: flex-start
         align-items: center
         .button
             margin-right: 4px
