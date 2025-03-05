@@ -231,6 +231,35 @@ vec4 transition_GRID (float progress) {
     }
 }
 
+/*  transition effect: RIPPLE (#8)  */
+vec4 transition_RIPPLE (float progress) {
+    /*  calculate the ripple effect  */
+    float amplitude = 100.0;
+    float speed = 50.0;
+    vec2 dir = vUV - vec2(0.5);
+    float dist = length(dir);
+    vec2 offset = dir * (sin(progress * dist * amplitude - progress * speed) + 0.5) / 30.0;
+    return mix(
+        textureSampleOld(vUV + offset),
+        textureSampleNew(vUV),
+        smoothstep(0.2, 1.0, progress)
+    );
+}
+
+/*  transition effect: SQUARE (#9)  */
+vec4 transition_SQUARE (float progress) {
+    /*  sample textures  */
+    vec4 texOld = textureSampleOld(vUV);
+    vec4 texNew = textureSampleNew(vUV);
+
+    /*  calculate the square effect  */
+    ivec2 size = ivec2(60, 11);
+    float smoothness = 0.5;
+    float r = random(floor(vec2(size) * vUV));
+    float m = smoothstep(0.0, -smoothness, r - (progress * (1.0 + smoothness)));
+    return mix(texOld, texNew, m);
+}
+
 /*  fragment shader main function  */
 void main (void) {
     /*  determine logical progress from slider  */
@@ -245,6 +274,8 @@ void main (void) {
     else if (type == 5) result = transition_PERLIN(progress);
     else if (type == 6) result = transition_MORPH(progress);
     else if (type == 7) result = transition_GRID(progress);
+    else if (type == 8) result = transition_RIPPLE(progress);
+    else if (type == 9) result = transition_SQUARE(progress);
     else                result = vec4(1.0, 0.0, 0.0, 1.0);
 
     /*  provide fragment shader result  */

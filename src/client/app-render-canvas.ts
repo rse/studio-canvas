@@ -58,7 +58,9 @@ export default class Canvas {
         "slice":   4,
         "perlin":  5,
         "morph":   6,
-        "grid":    7
+        "grid":    7,
+        "ripple":  8,
+        "square":  9
     } as { [ id: string ]: number }
     private transitionTexture: BABYLON.Nullable<BABYLON.ProceduralTexture> = null
     private transitionDuration = 2.0
