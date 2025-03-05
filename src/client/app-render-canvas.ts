@@ -11,6 +11,8 @@ import * as BABYLON           from "@babylonjs/core"
 import Config                 from "./app-render-config"
 import { type API }           from "./app-render-api"
 import Utils                  from "./app-render-utils"
+import ShaderImage            from "./app-render-canvas-image.fs?raw"
+import ShaderTransition       from "./app-render-canvas-transition.fs?raw"
 
 /*  import internal dependencies (shared)  */
 import { StateTypePartial }   from "../common/app-state"
@@ -48,9 +50,15 @@ export default class Canvas {
     private wall:        BABYLON.Nullable<BABYLON.Mesh>        = null
     private wallRotBase: BABYLON.Nullable<BABYLON.Quaternion>  = null
     private dummyTexture: BABYLON.Nullable<BABYLON.DynamicTexture> = null
+    private transitionType = "fade"
+    private transitionTypes = {
+        "fade":    1,
+        "slide-l": 2,
+        "slide-r": 3
+    } as { [ id: string ]: number }
     private transitionTexture: BABYLON.Nullable<BABYLON.ProceduralTexture> = null
     private transitionDuration = 2.0
-    private transitionProgress = 0.0
+    private transitionSlider = 0.0
     private transitionTimer: ReturnType<typeof setTimeout> | null = null
 
     /*  create feature  */
@@ -76,7 +84,11 @@ export default class Canvas {
     }
 
     /*  make canvas dummy texture  */
-    canvasTextureMakeDummy (width: number, height: number, scene: BABYLON.Scene) {
+    canvasTextureMakeDummy () {
+        /*  determine size  */
+        const width  = Config.wall.width
+        const height = Config.wall.height
+
         /*  create canvas element  */
         const canvas = document.createElement("canvas")
         canvas.width  = width
@@ -104,29 +116,15 @@ export default class Canvas {
         return texture
     }
 
-    /*  make canvas texture from shader  */
-    canvasTextureMakeCanvas (width: number, height: number, scene: BABYLON.Scene) {
+    /*  make image texture from shader  */
+    canvasTextureMakeImage () {
         /*  create procedural texture from a fragment shader  */
-        const texture = new BABYLON.ProceduralTexture("canvas", { width, height }, {
-            fragmentSource: `
-                precision highp float;
-
-                varying vec2 vUV;
-
-                uniform sampler2D texture1;
-                uniform sampler2D texture2;
-                uniform float     fade;
-
-                void main (void) {
-                    vec4 t1 = texture2D(texture1, vUV);
-                    vec4 t2 = texture2D(texture2, vUV);
-
-                    vec3 t  = mix(t1.rgb, t2.rgb, fade);
-
-                    gl_FragColor = vec4(t, 1.0);
-                }
-            `
-        }, scene, null, false, false)
+        const width  = Config.wall.width
+        const height = Config.wall.height
+        const scene  = this.api.scene.getScene()
+        const texture = new BABYLON.ProceduralTexture("image",
+            { width, height }, { fragmentSource: ShaderImage },
+            scene, null, false, false)
 
         /*  initialize uniforms (external variables)  */
         texture.setTexture("texture1", this.dummyTexture!)
@@ -136,34 +134,22 @@ export default class Canvas {
         return texture
     }
 
-    /*  make FADE transition texture from shader  */
-    canvasTextureMakeTransFade (width: number, height: number, scene: BABYLON.Scene) {
+    /*  make transition texture from fragment shader  */
+    canvasTextureMakeTransition () {
         /*  create procedural texture from a fragment shader  */
-        const texture = new BABYLON.ProceduralTexture("trans-fade", { width, height }, {
-            fragmentSource: `
-                precision highp float;
-
-                varying vec2 vUV;
-
-                uniform sampler2D texture1;
-                uniform sampler2D texture2;
-                uniform float     progress;
-
-                void main (void) {
-                    vec4 t1 = texture2D(texture1, vUV);
-                    vec4 t2 = texture2D(texture2, vUV);
-
-                    vec3 t  = mix(t1.rgb, t2.rgb, progress);
-
-                    gl_FragColor = vec4(t, 1.0);
-                }
-            `
-        }, scene, null, false, false)
+        const width  = Config.wall.width
+        const height = Config.wall.height
+        const scene  = this.api.scene.getScene()
+        const texture = new BABYLON.ProceduralTexture("transition",
+            { width, height }, { fragmentSource: ShaderTransition },
+            scene, null, false, false)
 
         /*  initialize uniforms (external variables)  */
+        texture.setInt("type", 0)
         texture.setTexture("texture1", this.dummyTexture!)
         texture.setTexture("texture2", this.dummyTexture!)
-        texture.setFloat("progress", 0.0)
+        texture.setFloat("slider", 0.0)
+        texture.setInt("reverse", 0)
 
         return texture
     }
@@ -171,18 +157,14 @@ export default class Canvas {
     /*  load canvas/wall  */
     async canvasLoad () {
         /*  create replacement texture  */
-        this.dummyTexture = this.canvasTextureMakeDummy(
-            Config.wall.width, Config.wall.height, this.api.scene.getScene())
+        this.dummyTexture = this.canvasTextureMakeDummy()
 
         /*  create canvas textures  */
-        this.canvasState[0].texture = this.canvasTextureMakeCanvas(
-            Config.wall.width, Config.wall.height, this.api.scene.getScene())
-        this.canvasState[1].texture = this.canvasTextureMakeCanvas(
-            Config.wall.width, Config.wall.height, this.api.scene.getScene())
+        this.canvasState[0].texture = this.canvasTextureMakeImage()
+        this.canvasState[1].texture = this.canvasTextureMakeImage()
 
-        /*  create transition texture  */
-        this.transitionTexture = this.canvasTextureMakeTransFade(
-            Config.wall.width, Config.wall.height, this.api.scene.getScene())
+        /*  create transition textures  */
+        this.transitionTexture = this.canvasTextureMakeTransition()
 
         /*  initialize canvas mode  */
         this.canvasMode = 0
@@ -191,13 +173,15 @@ export default class Canvas {
         await this.canvasDisposeTextures(0)
         await this.canvasDisposeTextures(1)
 
-        /*  reset the mode switching transition  */
-        this.transitionProgress = 0.0
-        this.transitionTexture.setTexture("texture1", this.canvasState[0].texture)
-        this.transitionTexture.setTexture("texture2", this.canvasState[1].texture)
-        this.transitionTexture.setFloat("progress", this.transitionProgress)
+        /*  configure the canvas switching transition  */
+        this.transitionType = "fade"
+        this.transitionSlider = 0.0
+        this.transitionTexture!.setInt("type", this.transitionTypes[this.transitionType])
+        this.transitionTexture!.setFloat("slider", this.transitionSlider)
+        this.transitionTexture!.setTexture("texture1", this.canvasState[0].texture!)
+        this.transitionTexture!.setTexture("texture2", this.canvasState[1].texture!)
 
-        /*  apply texture onto wall  */
+        /*  apply transition texture onto wall  */
         const wall = this.api.scene.getScene().getMaterialByName("Wall") as
             BABYLON.Nullable<BABYLON.PBRMaterial>
         if (wall === null)
@@ -224,7 +208,7 @@ export default class Canvas {
         await this.canvasDisposeTextures(0)
         await this.canvasDisposeTextures(1)
 
-        /*  dispose procedural texture  */
+        /*  dispose transition texture  */
         this.transitionTexture?.dispose()
         this.transitionTexture = null
     }
@@ -355,38 +339,42 @@ export default class Canvas {
     /*  transition canvas  */
     async canvasTransition () {
         await new Promise((resolve, reject) => {
-            let progress = this.transitionProgress
-            const progressSign  = progress === 0.0 ? +1 : -1
-            const progressTrans = this.transitionDuration * 1000
-            const progression = () => {
+            let slider = this.transitionSlider
+            const sliderSign = slider === 0.0 ? +1 : -1
+            if (sliderSign === +1)
+                this.transitionTexture!.setInt("reverse", 0)
+            else
+                this.transitionTexture!.setInt("reverse", 1)
+            const transitionDuration = this.transitionDuration * 1000
+            const transitionInterval = this.api.scene.currentMillisecondsPerFrame()
+            const transition = () => {
                 /*  reset timer (to not confuse stopping below)  */
                 this.transitionTimer = null
 
                 /*  apply next fading step  */
-                const progressInterval = this.api.scene.currentMillisecondsPerFrame()
-                const progressStep = 1.0 / (progressTrans / progressInterval)
-                progress = progress + (progressSign * progressStep)
-                let wait = progressInterval
-                if (progress > 1.0) {
-                    progress = 1.0
+                const sliderStep = 1.0 / (transitionDuration / transitionInterval)
+                slider = slider + (sliderSign * sliderStep)
+                let wait = transitionInterval
+                if (slider > 1.0) {
+                    slider = 1.0
                     wait = 0
                 }
-                if (progress < 0.0) {
-                    progress = 0.0
+                if (slider < 0.0) {
+                    slider = 0.0
                     wait = 0
                 }
-                this.transitionProgress = progress
-                this.transitionTexture!.setFloat("progress", progress)
+                this.transitionSlider = slider
+                this.transitionTexture!.setFloat("slider", slider)
 
                 /*  wait for next iteration or stop processing  */
                 if (wait > 0)
-                    this.transitionTimer = setTimeout(progression, wait)
+                    this.transitionTimer = setTimeout(transition, wait)
                 else
                     resolve(true)
             }
             if (this.transitionTimer !== null)
                 clearTimeout(this.transitionTimer)
-            this.transitionTimer = setTimeout(progression, 0)
+            this.transitionTimer = setTimeout(transition, 0)
         })
     }
 
@@ -455,9 +443,15 @@ export default class Canvas {
                     Utils.deg2rad(state.rotationZ), BABYLON.Space.WORLD)
             }
 
+            /*  update transition type  */
+            if (state.transType !== undefined && this.transitionTypes[state.transType] !== undefined) {
+                this.transitionType = state.transType
+                this.transitionTexture!.setInt("type", this.transitionTypes[this.transitionType])
+            }
+
             /*  update transition duration  */
-            if (state.transition !== undefined)
-                this.transitionDuration = state.transition
+            if (state.transTime !== undefined)
+                this.transitionDuration = state.transTime
 
             /*  apply changes  */
             if (changed)

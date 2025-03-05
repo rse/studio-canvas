@@ -5,6 +5,8 @@ ChangeLog
 3.1.0 (2025-03-04)
 ------------------
 
+- IMPROVEMENT: provide also SLIDE-L and SLIDE-R transitions for canvas switching
+- REFACTORING: move ProceduralTexture shaders into separate files
 - REFACTORING: split canvas' single ProceduralTexture into three instances (2 for each canvas, 1 for the transition)
 - REFACTORING: replace Node Material Editor (NME) based canvas rendering with ProceduralTexture
 - UPDATE: update dependencies

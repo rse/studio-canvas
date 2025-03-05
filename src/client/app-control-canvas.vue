@@ -16,6 +16,42 @@
         All canvas images have to be exactly 10540x2250 pixels in size.
     </div>
     <div class="control">
+        <div class="label1">transition</div>
+        <div class="label2">(type)</div>
+        <div class="label3">[id]:</div>
+        <div class="value">
+            <div class="fixed">{{ state.canvas.transType.toUpperCase() }}</div>
+        </div>
+        <div class="button reset"
+            v-on:click="state.canvas.transType = 'fade'"
+            v-bind:class="{ default: state.canvas.transType === 'fade' }">
+            RESET
+        </div>
+        <div class="radios">
+            <div class="button" v-bind:class="{ selected: state.canvas.transType === 'fade' }" v-on:click="state.canvas.transType = 'fade'">FADE</div>
+            <div class="button" v-bind:class="{ selected: state.canvas.transType === 'slide-l' }" v-on:click="state.canvas.transType = 'slide-l'">SLIDE-L</div>
+            <div class="button" v-bind:class="{ selected: state.canvas.transType === 'slide-r' }" v-on:click="state.canvas.transType = 'slide-r'">SLIDE-R</div>
+        </div>
+
+        <div class="label1">transition</div>
+        <div class="label2">(duration)</div>
+        <div class="label3">[sec]:</div>
+        <div class="value">
+            <input tabindex="5" v-bind:value="fieldExport(state.canvas.transTime)"
+                v-on:change="(ev) => state.canvas.transTime = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 8.0)"/>
+        </div>
+        <div class="button reset"
+            v-on:click="state.canvas.transTime = 2.0"
+            v-bind:class="{ default: state.canvas.transTime === 2.0 }">
+            RESET
+        </div>
+        <div class="slider">
+            <slider class="slider" v-model="state.canvas.transTime"
+                v-bind:min="0.2" v-bind:max="8.0" v-bind:step="0.10"
+                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
+            ></slider>
+        </div>
+
         <div class="label1">Z-rotate</div>
         <div class="label2">(rotate right/left)</div>
         <div class="label3">[deg]:</div>
@@ -31,25 +67,6 @@
         <div class="slider">
             <slider class="slider" v-model="state.canvas.rotationZ"
                 v-bind:min="-10" v-bind:max="+10" v-bind:step="0.01"
-                show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
-            ></slider>
-        </div>
-
-        <div class="label1">transition</div>
-        <div class="label2">(duration)</div>
-        <div class="label3">[sec]:</div>
-        <div class="value">
-            <input tabindex="5" v-bind:value="fieldExport(state.canvas.transition)"
-                v-on:change="(ev) => state.canvas.transition = fieldImport((ev.target! as HTMLInputElement).value, 0.2, 4.0)"/>
-        </div>
-        <div class="button reset"
-            v-on:click="state.canvas.transition = 2.0"
-            v-bind:class="{ default: state.canvas.transition === 2.0 }">
-            RESET
-        </div>
-        <div class="slider">
-            <slider class="slider" v-model="state.canvas.transition"
-                v-bind:min="0.2" v-bind:max="4.0" v-bind:step="0.10"
                 show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
             ></slider>
         </div>
