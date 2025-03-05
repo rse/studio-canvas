@@ -81,6 +81,22 @@ vec4 transition_SLIDE_R (float progress) {
     return mix(texNew, texOld, blend);
 }
 
+/*  transition effect: SLICE (#4)  */
+vec4 transition_SLICE (float progress) {
+    /*  sample both textures with the adjusted coordinates  */
+    vec4 texOld = textureSampleOld(vUV);
+    vec4 texNew = textureSampleNew(vUV);
+
+    /*  calculate the slicing  */
+    float chunks = 80.0;
+    float smoothness = 0.5;
+    float pr = smoothstep(-smoothness, 0.0, vUV.x - progress * (1.0 + smoothness));
+    float blend = step(pr, fract(chunks * vUV.x));
+
+    /*  provide blending  */
+    return mix(texOld, texNew, blend);
+}
+
 /*  fragment shader main function  */
 void main (void) {
     /*  determine logical progress from slider  */
@@ -91,6 +107,7 @@ void main (void) {
     if      (type == 1) result = transition_FADE(progress);
     else if (type == 2) result = transition_SLIDE_L(progress);
     else if (type == 3) result = transition_SLIDE_R(progress);
+    else if (type == 4) result = transition_SLICE(progress);
     else                result = vec4(1.0, 0.0, 0.0, 1.0);
 
     /*  provide fragment shader result  */
