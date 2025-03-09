@@ -2,6 +2,12 @@
 ChangeLog
 =========
 
+3.1.3 (2025-03-09)
+------------------
+
+- CLEANUP: cleanup package.json overrides
+- UPDATE: update dependencies
+
 3.1.2 (2025-03-06)
 ------------------
 
