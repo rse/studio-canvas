@@ -2,9 +2,10 @@
 ChangeLog
 =========
 
-3.1.4 (2025-03-12)
+3.1.4 (2025-03-13)
 ------------------
 
+- BUGFIX: fix transition of canvas images
 - UPDATE: update dependencies
 
 3.1.3 (2025-03-09)

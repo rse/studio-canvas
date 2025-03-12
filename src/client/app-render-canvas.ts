@@ -123,19 +123,19 @@ export default class Canvas {
     }
 
     /*  make image texture from shader  */
-    async canvasTextureMakeImage () {
+    async canvasTextureMakeImage (id: number) {
         /*  create procedural texture from a fragment shader  */
         const width  = Config.wall.width
         const height = Config.wall.height
         const scene  = this.api.scene.getScene()
-        const texture = new BABYLON.ProceduralTexture("image",
+        const texture = new BABYLON.ProceduralTexture(`image-${id}`,
             { width, height }, { fragmentSource: ShaderImage },
             scene, null, false, false)
 
         /*  initialize uniforms (external variables)  */
         texture.setTexture("texture1", this.dummyTexture!)
         texture.setTexture("texture2", this.dummyTexture!)
-        texture.setFloat("textureFade", 0.0)
+        texture.setFloat("fade", 0.0)
 
         /*  wait for shader compilation  */
         await new Promise<void>((resolve, reject) => {
@@ -186,8 +186,8 @@ export default class Canvas {
         this.dummyTexture = this.canvasTextureMakeDummy()
 
         /*  create canvas textures  */
-        this.canvasState[0].texture = await this.canvasTextureMakeImage()
-        this.canvasState[1].texture = await this.canvasTextureMakeImage()
+        this.canvasState[0].texture = await this.canvasTextureMakeImage(0)
+        this.canvasState[1].texture = await this.canvasTextureMakeImage(1)
 
         /*  create transition textures  */
         this.transitionTexture = await this.canvasTextureMakeTransition()
@@ -254,12 +254,13 @@ export default class Canvas {
         await this.canvasDisposeTextures(this.canvasMode)
 
         /*  load new texture(s)  */
-        this.api.renderer.log("INFO", "canvas reconfigure (load textures)")
+        this.api.renderer.log("INFO", `canvas reconfigure (load texture #1: ${canvasConfig.texture1})`)
         const canvas = document.createElement("canvas")
         canvasState.canvas1 = canvas
         canvasState.texture1 =
             await this.api.texture.createTexture(canvasConfig.texture1, canvas)
         if (canvasConfig.texture2 !== "") {
+            this.api.renderer.log("INFO", `canvas reconfigure (load texture #2: ${canvasConfig.texture2})`)
             const canvas = document.createElement("canvas")
             canvasState.canvas2 = canvas
             canvasState.texture2 =
@@ -413,6 +414,7 @@ export default class Canvas {
 
         /*  switch to next mode  */
         this.canvasMode = (this.canvasMode + 1) % 2
+        this.api.renderer.log("INFO", `switching canvas to mode ${this.canvasMode}`)
 
         /*  reconfigure the new textures  */
         await this.canvasReconfigure().then(async () => {
@@ -427,6 +429,9 @@ export default class Canvas {
 
             this.api.renderer.log("INFO", "switching canvas (end)")
         }).catch(async () => {
+            /*  stop the optional fader  */
+            await this.canvasFaderStop()
+
             /*  switch back to previous mode  */
             this.canvasMode = (this.canvasMode + 1) % 2
 
