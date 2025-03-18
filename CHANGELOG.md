@@ -5,6 +5,7 @@ ChangeLog
 3.1.5 (2025-03-17)
 ------------------
 
+- IMPROVEMENT: added oxlint to the list of used linters
 - UPDATE: update dependencies
 
 3.1.4 (2025-03-13)

@@ -22,10 +22,11 @@ scripts:
 
     #   static code analysis (linting)
     lint-watch:             nodemon --exec "npm start lint" --watch src --ext html,styl,js,ts,vue
-    lint:                   npm start lint-tsc lint-vue-tsc lint-eslint lint-stylelint lint-htmllint
+    lint:                   npm start lint-tsc lint-vue-tsc lint-oxlint lint-eslint lint-stylelint lint-htmllint
     lint-tsc:               tsc --project etc/tsc-server.json --noEmit
     lint-vue-tsc:           vue-tsc --project etc/tsc-client.json --noEmit
     lint-eslint:            eslint --config etc/eslint.mjs src/**/*.vue src/**/*.ts
+    lint-oxlint:            oxlint --silent --config etc/oxlint.json src/**/*.vue src/**/*.ts
     lint-stylelint:         stylelint --config etc/stylelint.yaml src/**/*.styl src/**/*.vue
     lint-htmllint:          htmllint --rc etc/htmllint.json src/**/*.html
 

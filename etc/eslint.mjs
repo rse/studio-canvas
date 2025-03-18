@@ -14,6 +14,7 @@ import pluginTS      from "typescript-eslint"
 import globals       from "globals"
 import parserTS      from "@typescript-eslint/parser"
 import parserVue     from "vue-eslint-parser"
+import oxlint        from "eslint-plugin-oxlint"
 
 export default [
     pluginJs.configs.recommended,
@@ -23,6 +24,7 @@ export default [
         ignores: pluginStd.resolveIgnoresFromGitignore()
     }),
     ...pluginVue.configs["flat/recommended"],
+    ...oxlint.buildFromOxlintConfigFile("etc/oxlint.json"),
     {
         plugins: {
             "n":       pluginN,
@@ -65,7 +67,6 @@ export default [
             "@stylistic/brace-style":                             [ "error", "stroustrup", { allowSingleLine: true } ],
             "@stylistic/quotes":                                  [ "error", "double" ],
 
-            "@stylistic/no-multi-spaces":                         "off",
             "@stylistic/no-multi-spaces":                         "off",
             "@stylistic/no-multiple-empty-lines":                 "off",
             "@stylistic/key-spacing":                             "off",
