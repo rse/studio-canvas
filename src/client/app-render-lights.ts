@@ -16,9 +16,9 @@ import { StateTypePartial }   from "../common/app-state"
 /*  exported rendering feature  */
 export default class Lights {
     /*  internal state  */
-    private light1: BABYLON.Nullable<BABYLON.PointLight>     = null
-    private light2: BABYLON.Nullable<BABYLON.PointLight>     = null
-    private light3: BABYLON.Nullable<BABYLON.PointLight>     = null
+    private light1: BABYLON.Nullable<BABYLON.PointLight> = null
+    private light2: BABYLON.Nullable<BABYLON.PointLight> = null
+    private light3: BABYLON.Nullable<BABYLON.PointLight> = null
     private meshes = [] as BABYLON.Mesh[]
 
     /*  create feature  */
