@@ -8,6 +8,9 @@
     "formatter": {
         "enabled": false
     },
+    "organizeImports": {
+        "enabled": false
+    },
     "linter": {
         "enabled": true,
         "rules": {
@@ -28,9 +31,6 @@
                 "noAssignInExpressions": "off"
             }
         }
-    },
-    "organizeImports": {
-        "enabled": false
     },
     "overrides": [
         {
