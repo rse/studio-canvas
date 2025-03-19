@@ -6,9 +6,15 @@
 
 {
      "plugins": [
-         "typescript", "unicorn", "nextjs", "import", "promise", "oxc"
+         "typescript",
+         "unicorn",
+         "nextjs",
+         "import",
+         "promise",
+         "oxc"
      ],
      "rules": {
          "no-unused-vars": "off"
      }
 }
+

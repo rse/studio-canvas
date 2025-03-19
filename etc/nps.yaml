@@ -25,7 +25,7 @@ scripts:
     lint:                   npm start lint-tsc lint-vue-tsc lint-oxlint lint-biome lint-eslint lint-stylelint lint-htmllint
     lint-tsc:               tsc --project etc/tsc-server.json --noEmit
     lint-vue-tsc:           vue-tsc --project etc/tsc-client.json --noEmit
-    lint-oxlint:            oxlint --silent --config etc/oxlint.jsonc src/**/*.vue src/**/*.ts src/**/*.json
+    lint-oxlint:            oxlint --config etc/oxlint.jsonc src/**/*.vue src/**/*.ts src/**/*.json
     lint-biome:             biome lint --diagnostic-level=warn --config-path=etc/biome.jsonc src/**/*.vue src/**/*.ts src/**/*.json
     lint-eslint:            eslint --config etc/eslint.mjs src/**/*.vue src/**/*.ts
     lint-stylelint:         stylelint --config etc/stylelint.yaml src/**/*.styl src/**/*.vue
