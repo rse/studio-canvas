@@ -7,6 +7,7 @@ ChangeLog
 
 - IMPROVEMENT: added biome to the list of used linters
 - IMPROVEMENT: added oxlint to the list of used linters
+- CLEANUP: cleanup imports
 - UPDATE: update dependencies
 
 3.1.4 (2025-03-13)
