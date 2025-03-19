@@ -15,6 +15,7 @@ import globals       from "globals"
 import parserTS      from "@typescript-eslint/parser"
 import parserVue     from "vue-eslint-parser"
 import oxlint        from "eslint-plugin-oxlint"
+import biome         from "eslint-config-biome"
 
 export default [
     pluginJs.configs.recommended,
@@ -24,7 +25,6 @@ export default [
         ignores: pluginStd.resolveIgnoresFromGitignore()
     }),
     ...pluginVue.configs["flat/recommended"],
-    ...oxlint.buildFromOxlintConfigFile("etc/oxlint.jsonc"),
     {
         plugins: {
             "n":       pluginN,
@@ -106,6 +106,8 @@ export default [
             "@typescript-eslint/consistent-indexed-object-style": "off",
             "@typescript-eslint/adjacent-overload-signatures":    "off"
         }
-    }
+    },
+    ...oxlint.buildFromOxlintConfigFile("etc/oxlint.jsonc"),
+    biome
 ]
 
