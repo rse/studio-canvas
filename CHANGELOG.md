@@ -2,7 +2,7 @@
 ChangeLog
 =========
 
-3.1.5 (2025-03-17)
+3.1.5 (2025-03-19)
 ------------------
 
 - IMPROVEMENT: added biome to the list of used linters
