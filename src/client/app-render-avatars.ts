@@ -5,14 +5,14 @@
 */
 
 /*  import external dependencies  */
-import * as BABYLON           from "@babylonjs/core"
+import * as BABYLON              from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
-import { type API }           from "./app-render-api"
-import Utils                  from "./app-render-utils"
+import { type API }              from "./app-render-api"
+import Utils                     from "./app-render-utils"
 
 /*  import internal dependencies (shared)  */
-import { StateTypePartial }   from "../common/app-state"
+import { type StateTypePartial } from "../common/app-state"
 
 /*  exported rendering feature  */
 export default class Avatars {

@@ -142,7 +142,7 @@ import { MixerState }             from "../common/app-mixer"
 import { ViewpointState }         from "../common/app-viewpoint"
 import { FreeDState }             from "../common/app-freed"
 import {
-    StateType, StateTypePartial,
+    type StateType, type StateTypePartial,
     StateSchema, StateSchemaPartial
 } from "../common/app-state"
 </script>

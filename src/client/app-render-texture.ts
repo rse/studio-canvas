@@ -5,10 +5,10 @@
 */
 
 /*  import external dependencies  */
-import * as BABYLON           from "@babylonjs/core"
+import * as BABYLON  from "@babylonjs/core"
 
 /*  import internal dependencies (client-side)  */
-import { type API }           from "./app-render-api"
+import { type API }  from "./app-render-api"
 
 /*  exported rendering feature  */
 export default class Texture {

@@ -12,7 +12,7 @@ import { type API }              from "./app-render-api"
 import Utils, { type ChromaKey } from "./app-render-utils"
 
 /*  import internal dependencies (shared)  */
-import { StateTypePartial }      from "../common/app-state"
+import { type StateTypePartial } from "../common/app-state"
 
 /*  exported rendering feature  */
 export default class Monitor {

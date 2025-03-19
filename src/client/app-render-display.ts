@@ -15,7 +15,7 @@ import ShaderFragment            from "./app-render-display-stream.fs"
 import { type ChromaKey }        from "./app-render-utils"
 
 /*  import internal dependencies (shared)  */
-import { StateTypePartial }      from "../common/app-state"
+import { type StateTypePartial } from "../common/app-state"
 
 /*  utility type of display video stacks  */
 type VideoStackId = "monitor" | "decal" | "hologram" | "plate" | "pane" | "pillar" | "mask"

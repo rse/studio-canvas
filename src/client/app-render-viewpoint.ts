@@ -13,9 +13,9 @@ import { type API }                from "./app-render-api"
 import Camera                      from "./app-render-camera"
 
 /*  import internal dependencies (shared)  */
-import { FreeDState }              from "../common/app-freed"
-import { ViewpointState }          from "../common/app-viewpoint"
-import { StateTypePartial }        from "../common/app-state"
+import { type FreeDState }         from "../common/app-freed"
+import { type ViewpointState }     from "../common/app-viewpoint"
+import { type StateTypePartial }   from "../common/app-state"
 
 /*  exported rendering feature  */
 export default class Viewpoint {

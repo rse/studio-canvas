@@ -14,8 +14,8 @@ import Utils                       from "./app-render-utils"
 import PTZ                         from "./app-render-ptz"
 
 /*  import internal dependencies (shared)  */
-import { FreeDState }              from "../common/app-freed"
-import { StateTypePartial }        from "../common/app-state"
+import { type FreeDState }         from "../common/app-freed"
+import { type StateTypePartial }   from "../common/app-state"
 
 /*  exported renderer feature  */
 export default class Camera {

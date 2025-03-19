@@ -5,22 +5,22 @@
 */
 
 /*  import internal dependencies (client-side)  */
-import Texture     from "./app-render-texture"
-import Stream      from "./app-render-stream"
-import Display     from "./app-render-display"
-import Scene       from "./app-render-scene"
-import Viewpoint   from "./app-render-viewpoint"
-import Canvas      from "./app-render-canvas"
-import Decal       from "./app-render-decal"
-import Monitor     from "./app-render-monitor"
-import Pane        from "./app-render-pane"
-import Plate       from "./app-render-plate"
-import Pillar      from "./app-render-pillar"
-import Hologram    from "./app-render-hologram"
-import Mask        from "./app-render-mask"
-import Avatars     from "./app-render-avatars"
-import Reference   from "./app-render-reference"
-import Lights      from "./app-render-lights"
+import type Texture     from "./app-render-texture"
+import type Stream      from "./app-render-stream"
+import type Display     from "./app-render-display"
+import type Scene       from "./app-render-scene"
+import type Viewpoint   from "./app-render-viewpoint"
+import type Canvas      from "./app-render-canvas"
+import type Decal       from "./app-render-decal"
+import type Monitor     from "./app-render-monitor"
+import type Pane        from "./app-render-pane"
+import type Plate       from "./app-render-plate"
+import type Pillar      from "./app-render-pillar"
+import type Hologram    from "./app-render-hologram"
+import type Mask        from "./app-render-mask"
+import type Avatars     from "./app-render-avatars"
+import type Reference   from "./app-render-reference"
+import type Lights      from "./app-render-lights"
 
 /*  special renderer API  */
 type Renderer = {

@@ -15,7 +15,7 @@ import ShaderImage            from "./app-render-canvas-image.fs"
 import ShaderTransition       from "./app-render-canvas-transition.fs"
 
 /*  import internal dependencies (shared)  */
-import { StateTypePartial }   from "../common/app-state"
+import { type StateTypePartial }   from "../common/app-state"
 
 /*  utility type for canvas configuration  */
 type CanvasConfig = {
@@ -47,8 +47,8 @@ export default class Canvas {
         { canvas1: null, canvas2: null, texture1: null, texture2: null, texture: null, fadeTimer: null },
         { canvas1: null, canvas2: null, texture1: null, texture2: null, texture: null, fadeTimer: null }
     ] as CanvasState[]
-    private wall:        BABYLON.Nullable<BABYLON.Mesh>        = null
-    private wallRotBase: BABYLON.Nullable<BABYLON.Quaternion>  = null
+    private wall:         BABYLON.Nullable<BABYLON.Mesh>           = null
+    private wallRotBase:  BABYLON.Nullable<BABYLON.Quaternion>     = null
     private dummyTexture: BABYLON.Nullable<BABYLON.DynamicTexture> = null
     private transitionType = "fade"
     private transitionTypes = {

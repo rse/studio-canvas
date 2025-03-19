@@ -29,10 +29,10 @@ import Reference                   from "./app-render-reference"
 import Lights                      from "./app-render-lights"
 
 /*  import internal dependencies (shared)  */
-import { FreeDState }              from "../common/app-freed"
-import { MixerState }              from "../common/app-mixer"
-import { ViewpointState }          from "../common/app-viewpoint"
-import { StateTypePartial }        from "../common/app-state"
+import { type FreeDState }         from "../common/app-freed"
+import { type MixerState }         from "../common/app-mixer"
+import { type ViewpointState }     from "../common/app-viewpoint"
+import { type StateTypePartial }   from "../common/app-state"
 
 /*  exported rendering class  */
 export default class Renderer extends EventEmitter {

@@ -5,16 +5,16 @@
 */
 
 /*  import external dependencies  */
-import * as BABYLON           from "@babylonjs/core"
-import                             "@babylonjs/loaders/glTF"
+import * as BABYLON              from "@babylonjs/core"
+import                                "@babylonjs/loaders/glTF"
 
 /*  import internal dependencies (client-side)  */
-import Config                 from "./app-render-config"
-import { type API }           from "./app-render-api"
+import Config                    from "./app-render-config"
+import { type API }              from "./app-render-api"
 
 /*  import internal dependencies (shared)  */
-import { MixerState }         from "../common/app-mixer"
-import { StateTypePartial }   from "../common/app-state"
+import { MixerState }            from "../common/app-mixer"
+import { type StateTypePartial } from "../common/app-state"
 
 /*  exported rendering feature  */
 export default class Scene {
