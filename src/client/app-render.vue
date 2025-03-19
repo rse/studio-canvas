@@ -138,9 +138,9 @@ import Ducky                      from "ducky"
 import moment                     from "moment"
 import axios                      from "axios"
 import Renderer                   from "./app-render"
-import { MixerState }             from "../common/app-mixer"
-import { ViewpointState }         from "../common/app-viewpoint"
-import { FreeDState }             from "../common/app-freed"
+import { type MixerState }        from "../common/app-mixer"
+import { type ViewpointState }    from "../common/app-viewpoint"
+import { type FreeDState }        from "../common/app-freed"
 import {
     type StateType, type StateTypePartial,
     StateSchema, StateSchemaPartial

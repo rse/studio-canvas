@@ -13,7 +13,7 @@ import Config                    from "./app-render-config"
 import { type API }              from "./app-render-api"
 
 /*  import internal dependencies (shared)  */
-import { MixerState }            from "../common/app-mixer"
+import { type MixerState }       from "../common/app-mixer"
 import { type StateTypePartial } from "../common/app-state"
 
 /*  exported rendering feature  */
