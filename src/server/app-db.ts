@@ -10,7 +10,7 @@ import locks           from "locks"
 import writeFileAtomic from "write-file-atomic"
 
 /* eslint no-unused-vars: off */
-export enum Transaction { READ, WRITE }
+export enum Transaction { READ = 1, WRITE = 2 }
 
 export default class DB {
     private lock: locks.ReadWriteLock
@@ -22,7 +22,7 @@ export default class DB {
     }
 
     /*  establish database read/write locked access  */
-    transaction (type = Transaction.READ, timeout = 4000, transaction: () => any) {
+    transaction (type: Transaction, timeout: number, transaction: () => any) {
         return new Promise((resolve, reject) => {
             const cb = async (error: Error) => {
                 if (error)

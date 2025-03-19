@@ -138,7 +138,7 @@ export default class PTZ {
         from  VIRTUAL  Babylon y-rotation (offset from center in radians)
         to    PHYSICAL BirdDog pan        (-180/left...0/center...+180/right degree)  */
     panV2P (rad: number) {
-        let deg
+        let deg: number
         rad = (rad % this.panTotal)
         if (rad <= (this.panOrigin + this.panDelta))
             deg = +Utils.rad2deg(Math.abs((this.panOrigin + this.panDelta) - rad)) / this.panMult
@@ -211,7 +211,7 @@ export default class PTZ {
         from  VIRTUAL  Babylon x-rotation (offset from center in radians)
         to    PHYSICAL BirdDog pan        (-30/down...0/center...+90/up degree)  */
     tiltV2P (rad: number) {
-        let deg
+        let deg: number
         rad = (rad % this.tiltTotal)
         if (rad <= (this.tiltOrigin + this.tiltDelta))
             deg = +Utils.rad2deg(Math.abs((this.tiltOrigin + this.tiltDelta) - rad)) / this.tiltMult
@@ -279,7 +279,7 @@ export default class PTZ {
         from  VIRTUAL  Babylon z-rotation (offset from center in radians)
         to    PHYSICAL BirdDog rotation   (FICTIVE -30/left...0/center...+30/right degree)  */
     rotateV2P (rad: number) {
-        let deg
+        let deg: number
         rad = (rad % this.rotateTotal)
         if (rad <= (this.rotateOrigin + this.rotateDelta))
             deg = +Utils.rad2deg(Math.abs((this.rotateOrigin + this.rotateDelta) - rad))

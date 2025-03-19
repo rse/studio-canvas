@@ -24,7 +24,7 @@ export default [
         ignores: pluginStd.resolveIgnoresFromGitignore()
     }),
     ...pluginVue.configs["flat/recommended"],
-    ...oxlint.buildFromOxlintConfigFile("etc/oxlint.json"),
+    ...oxlint.buildFromOxlintConfigFile("etc/oxlint.jsonc"),
     {
         plugins: {
             "n":       pluginN,

@@ -93,6 +93,7 @@
         "eslint-plugin-vue":                "10.0.0",
         "oxlint":                           "0.16.0",
         "eslint-plugin-oxlint":             "0.16.0",
+        "@biomejs/biome":                   "1.9.4",
 
         "htmllint":                         "0.8.0",
         "htmllint-cli":                     "0.0.7",

@@ -1,8 +1,0 @@
-{
-     "plugins": [
-         "typescript", "unicorn", "nextjs", "import", "promise", "oxc"
-     ],
-     "rules": {
-         "no-unused-vars": "off"
-     }
-}

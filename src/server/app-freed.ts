@@ -36,7 +36,7 @@ export default class FreeD {
     async init () {
         /*  determine IP to name mapping  */
         const freedCams = new Map<string, string>()
-        if (!(typeof this.argv.freedCam === "object" && this.argv.freedCam instanceof Array))
+        if (!(typeof this.argv.freedCam === "object" && Array.isArray(this.argv.freedCam)))
             this.argv.freedCam = [ this.argv.freedCam ]
         for (const arg of this.argv.freedCam) {
             const m = arg.match(/^(.+?):(.+)$/)
