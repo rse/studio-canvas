@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - CLEANUP: skip ESLint rules which Biome already contains
+- UPDATE: update dependencies
 
 3.1.5 (2025-03-19)
 ------------------
