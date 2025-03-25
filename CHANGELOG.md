@@ -2,7 +2,7 @@
 ChangeLog
 =========
 
-3.1.6 (2025-03-xx)
+3.1.6 (2025-03-25)
 ------------------
 
 - CLEANUP: skip ESLint rules which Biome already contains
