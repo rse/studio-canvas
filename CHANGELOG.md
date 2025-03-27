@@ -2,7 +2,7 @@
 ChangeLog
 =========
 
-3.1.7 (2025-03-27)
+3.2.0 (2025-03-27)
 ------------------
 
 - UPDATE: update dependencies (BabylonJS 8.0)
