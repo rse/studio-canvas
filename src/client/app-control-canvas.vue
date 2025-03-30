@@ -76,6 +76,21 @@
                 show-tooltip="drag" v-bind:format="formatSliderValue" v-bind:lazy="false"
             ></slider>
         </div>
+
+        <div class="label1">texture</div>
+        <div class="label2">(lit)</div>
+        <div class="label3">[boolean]:</div>
+        <div class="value">
+            <div class="fixed">{{ state.canvas.textureLit ? "YES" : "NO" }}</div>
+        </div>
+        <div class="button reset"
+            v-on:click="state.canvas.textureLit = false"
+            v-bind:class="{ default: state.canvas.textureLit === false }">
+            RESET
+        </div>
+        <div class="slider">
+            <toggle class="toggle" v-model="state.canvas.textureLit"></toggle>
+        </div>
     </div>
     <div class="list" ref="list">
         <div
@@ -138,6 +153,7 @@
 import { defineComponent, type PropType } from "vue"
 import axios                              from "axios"
 import Slider                             from "@vueform/slider"
+import Toggle                             from "@vueform/toggle"
 import PerfectScrollbar                   from "perfect-scrollbar"
 import { type StateType }                 from "../common/app-state"
 import { type ImageEntry }                from "../common/app-canvas"
@@ -154,7 +170,8 @@ type PatchState        = (paths: Readonly<string[]>) => Promise<void>
 export default defineComponent({
     name: "app-control-streams",
     components: {
-        "slider": Slider
+        "slider": Slider,
+        "toggle": Toggle
     },
     props: {
         serviceUrl:        { type: String,                                  required: true },

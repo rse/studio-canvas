@@ -2,6 +2,11 @@
 ChangeLog
 =========
 
+3.2.1 (2025-03-31)
+------------------
+
+- IMPROVEMENT: allow canvas texture lit to be controlled (for scenes which have their own lightning)
+
 3.2.0 (2025-03-27)
 ------------------
 

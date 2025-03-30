@@ -30,7 +30,8 @@ export type StateType = {
         fadeWait?:  number,
         transType:  string,
         transTime:  number,
-        rotationZ:  number
+        rotationZ:  number,
+        textureLit: boolean
     },
     monitor: {
         enable:     boolean,
@@ -212,7 +213,8 @@ export const StateSchema = `{
         fadeWait:   number,
         transType:  string,
         transTime:  number,
-        rotationZ:  number
+        rotationZ:  number,
+        textureLit: boolean
     },
     monitor: {
         enable:     boolean,
@@ -390,7 +392,8 @@ export const StateDefault: StateType = {
         fadeWait:   10000,
         transType:  "fade",
         transTime:  2.0,
-        rotationZ:  0
+        rotationZ:  0,
+        textureLit: false
     },
     monitor: {
         enable:     false,

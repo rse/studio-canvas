@@ -48,6 +48,7 @@ export default class Canvas {
         { canvas1: null, canvas2: null, texture1: null, texture2: null, texture: null, fadeTimer: null }
     ] as CanvasState[]
     private wall:         BABYLON.Nullable<BABYLON.Mesh>           = null
+    private wallMaterial: BABYLON.Nullable<BABYLON.PBRMaterial>    = null
     private wallRotBase:  BABYLON.Nullable<BABYLON.Quaternion>     = null
     private dummyTexture: BABYLON.Nullable<BABYLON.DynamicTexture> = null
     private transitionType = "fade"
@@ -76,7 +77,13 @@ export default class Canvas {
         this.wall = this.api.scene.getScene().getMeshByName("Wall") as
             BABYLON.Nullable<BABYLON.Mesh>
         if (this.wall === null)
-            throw new Error("cannot find wall node")
+            throw new Error("cannot find Wall node")
+
+        /*  gather reference to wall material  */
+        this.wallMaterial = this.api.scene.getScene().getMaterialByName("Wall") as
+            BABYLON.Nullable<BABYLON.PBRMaterial>
+        if (this.wallMaterial === null)
+            throw new Error("cannot find Wall material object")
 
         /*  configure wall mesh  */
         this.wall.receiveShadows = true
@@ -208,11 +215,8 @@ export default class Canvas {
         this.transitionTexture!.setTexture("texture2", this.canvasState[1].texture!)
 
         /*  apply transition texture onto wall  */
-        const wall = this.api.scene.getScene().getMaterialByName("Wall") as
-            BABYLON.Nullable<BABYLON.PBRMaterial>
-        if (wall === null)
-            throw new Error("cannot find Wall object")
-        wall.albedoTexture = this.transitionTexture
+        this.wallMaterial!.albedoTexture = this.transitionTexture
+        this.wallMaterial!.unlit = false
 
         /*  start optional texture fader  */
         await this.canvasFaderStart()
@@ -224,11 +228,7 @@ export default class Canvas {
         await this.canvasFaderStop()
 
         /*  dispose wall texture  */
-        const wall = this.api.scene.getScene().getMaterialByName("Wall") as
-            BABYLON.Nullable<BABYLON.PBRMaterial>
-        if (wall === null)
-            throw new Error("cannot find Wall object")
-        wall.albedoTexture = null
+        this.wallMaterial!.albedoTexture = null
 
         /*  dispose all regular textures  */
         await this.canvasDisposeTextures(0)
@@ -483,6 +483,10 @@ export default class Canvas {
             /*  update transition duration  */
             if (state.transTime !== undefined)
                 this.transitionDuration = state.transTime
+
+            /*  update texture lightning  */
+            if (state.textureLit !== undefined)
+                this.wallMaterial!.unlit = !state.textureLit
 
             /*  apply changes  */
             if (changed)
