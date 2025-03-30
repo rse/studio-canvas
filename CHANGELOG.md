@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - IMPROVEMENT: allow canvas texture lit to be controlled (for scenes which have their own lightning)
+- BUGFIX: do not reset the canvas on reload of control UI
 
 3.2.0 (2025-03-27)
 ------------------
