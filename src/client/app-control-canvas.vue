@@ -190,7 +190,7 @@ export default defineComponent({
     }),
     async mounted () {
         await this.imageListFetch()
-        this.state.canvas.id = this.imageList[0]?.id ?? ""
+        this.state.canvas.id ??= this.imageList[0]?.id ?? ""
         this.openGroup = this.imageList.find((e) => e.id === this.state.canvas.id)?.group ?? ""
         this.$watch("state.canvas.id", (id: string) => {
             this.openGroup = this.imageList.find((e) => e.id === id)?.group ?? ""
