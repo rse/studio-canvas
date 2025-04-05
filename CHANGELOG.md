@@ -5,6 +5,7 @@ ChangeLog
 3.2.2 (2025-04-05)
 ------------------
 
+- BUGFIX: switch to "nodemon" from "vite --watch" to circumvent restart problems
 - UPDATE: update dependencies
 
 3.2.1 (2025-03-31)
