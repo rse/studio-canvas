@@ -38,10 +38,13 @@ scripts:
     build-client-dev:       vite --config etc/vite-client.mts build --mode development
     build-client-dev-watch: >
                             cross-env NODE_OPTIONS="--max-old-space-size=8192"
-                            vite --config etc/vite-client.mts build --mode development --watch
+                            nodemon --exec "vite --config etc/vite-client.mts build --mode development"
+                            --watch src/client --watch src/common --ext html,styl,json,yaml,js,ts,vue
     build-server:           vite --config etc/vite-server.mts build --mode production
     build-server-dev:       vite --config etc/vite-server.mts build --mode development
-    build-server-dev-watch: vite --config etc/vite-server.mts build --mode development --watch
+    build-server-dev-watch: >
+                            nodemon --exec "vite --config etc/vite-server.mts build --mode development"
+                            --watch src/server --watch src/common --ext html,styl,json,yaml,js,ts,vue
 
     #   start server run-time
     server-delay:           delay 2.0
