@@ -2,12 +2,7 @@
 ChangeLog
 =========
 
-3.2.3 (2025-04-09)
-------------------
-
-- UPDATE: update dependencies
-
-3.2.2 (2025-04-05)
+3.2.2 (2025-04-09)
 ------------------
 
 - BUGFIX: switch to "nodemon" from "vite --watch" to circumvent restart problems
