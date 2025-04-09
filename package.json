@@ -73,6 +73,7 @@
         "awilix":                           "12.0.5"
     },
     "devDependencies": {
+        "check-dependencies":               "2.0.0",
         "vite":                             "6.2.5",
         "@typescript-eslint/eslint-plugin": "8.29.1",
         "@typescript-eslint/parser":        "8.29.1",
