@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - IMPROVEMENT: use "rolldown-vite" instead of "vite" for 2x faster build
+- UPDATE: update dependencies
 
 3.2.5 (2025-05-18)
 ------------------
