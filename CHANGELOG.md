@@ -2,6 +2,12 @@
 ChangeLog
 =========
 
+3.2.8 (2025-06-xx)
+------------------
+
+- UPDATE: update to Biome 2.0 configuration
+- UPDATE: update dependencies
+
 3.2.7 (2025-06-12)
 ------------------
 
