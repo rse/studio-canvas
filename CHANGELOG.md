@@ -2,7 +2,7 @@
 ChangeLog
 =========
 
-3.2.8 (2025-06-xx)
+3.2.8 (2025-06-25)
 ------------------
 
 - UPDATE: update to Biome 2.0 configuration
