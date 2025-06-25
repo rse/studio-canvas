@@ -5,6 +5,7 @@
 */
 
 {
+    "root": false,
     "formatter": {
         "enabled": false
     },
