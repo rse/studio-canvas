@@ -6,6 +6,7 @@ ChangeLog
 ------------------
 
 - UPDATE: update dependencies
+- IMPROVEMENT: replace "nps" with "stx" for NPM scripting
 
 3.2.8 (2025-06-25)
 ------------------
