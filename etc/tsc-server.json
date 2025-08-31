@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-		"outDir":                  "../dst",
+        "outDir":                  "../dst",
         "target":                  "ESNext",
         "module":                  "ESNext",
         "moduleResolution":        "Bundler",
@@ -16,11 +16,11 @@
         "types":                   [],
         "rootDir":                 "../src"
     },
-	"include": [
+    "include": [
         "../src/server/**/*.d.ts",
-		"../src/server/**/*.ts",
-		"../src/common/**/*.d.ts",
-		"../src/common/**/*.ts",
-		"../package.json"
+        "../src/server/**/*.ts",
+        "../src/common/**/*.d.ts",
+        "../src/common/**/*.ts",
+        "../package.json"
     ]
 }
